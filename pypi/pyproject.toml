@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "nami"
+name = "open-nami"
 version = "1.0.2"
 description = "Fast terminal social media profile downloader and TUI for Instagram, TikTok, Facebook, and X."
 readme = "README.md"
