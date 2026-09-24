@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.0.0",
+      version: "1.0.2",
       description: "Open Nami \u2014 terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -26510,7 +26510,7 @@ var require_package = __commonJS({
       scripts: {
         build: "tsup",
         dev: "tsup --watch",
-        test: "tsx --test src/**/*.test.ts",
+        test: "node scripts/run-tests.js",
         typecheck: "tsc --noEmit",
         start: "node dist/cli.js",
         "build:pypi": "node scripts/build-pypi-bundle.js && python -m build pypi",
@@ -38512,7 +38512,8 @@ function openBrowser(url) {
   }
 }
 function getRevealCommand(targetPath, platform2 = process.platform, isDirectory) {
-  const resolved = path10.resolve(targetPath);
+  const pathModule = platform2 === "win32" ? path10.win32 : platform2 === "darwin" ? path10.posix : path10;
+  const resolved = pathModule.resolve(targetPath);
   const isDir = isDirectory !== void 0 ? isDirectory : (() => {
     try {
       if (fs12.existsSync(resolved)) {
@@ -38520,7 +38521,7 @@ function getRevealCommand(targetPath, platform2 = process.platform, isDirectory)
       }
     } catch {
     }
-    return !path10.extname(resolved);
+    return !pathModule.extname(resolved);
   })();
   if (platform2 === "darwin") {
     return isDir ? { command: "open", args: [resolved] } : { command: "open", args: ["-R", resolved] };
@@ -38531,7 +38532,7 @@ function getRevealCommand(targetPath, platform2 = process.platform, isDirectory)
     }
     return { command: "explorer.exe", args: [`/select,${resolved}`] };
   }
-  return { command: "xdg-open", args: [isDir ? resolved : path10.dirname(resolved)] };
+  return { command: "xdg-open", args: [isDir ? resolved : pathModule.dirname(resolved)] };
 }
 function revealInFileManager(targetPath) {
   try {

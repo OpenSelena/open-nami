@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "open-nami"
-version = "1.0.0"
+name = "nami"
+version = "1.0.2"
 description = "Fast terminal social media profile downloader and TUI for Instagram, TikTok, Facebook, and X."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -47,9 +47,9 @@ Repository = "https://github.com/OpenSelena/open-nami.git"
 Issues = "https://github.com/OpenSelena/open-nami/issues"
 
 [project.scripts]
+nami = "open_nami.cli:main"
 open-nami = "open_nami.cli:main"
 opennami = "open_nami.cli:main"
-nami = "open_nami.cli:main"
 on = "open_nami.cli:main"
 
 [tool.hatch.build.targets.wheel]
