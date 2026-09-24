@@ -1,0 +1,62 @@
+{
+  "name": "open-nami",
+  "version": "1.0.0",
+  "description": "Open Nami — terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
+  "type": "module",
+  "bin": {
+    "open-nami": "dist/cli.js",
+    "opennami": "dist/cli.js",
+    "nami": "dist/cli.js",
+    "on": "dist/cli.js"
+  },
+  "files": [
+    "dist/cli.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "node scripts/run-tests.js",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js",
+    "build:pypi": "node scripts/build-pypi-bundle.js && python -m build pypi",
+    "prepublishOnly": "npm test && npm run typecheck && npm run build"
+  },
+  "keywords": [
+    "profile",
+    "downloader",
+    "gallery-dl",
+    "yt-dlp",
+    "instagram",
+    "tiktok",
+    "facebook",
+    "twitter",
+    "cli",
+    "tui",
+    "ink"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Igect",
+    "url": "https://igect.link/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenSelena/open-nami.git"
+  },
+  "dependencies": {
+    "ink": "^7.1.1",
+    "ink-select-input": "^6.2.0",
+    "ink-spinner": "^5.0.0",
+    "react": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}

@@ -1,0 +1,16 @@
+node_modules/
+dist/
+**/dist/
+*.egg-info/
+cookies/
+*.cookies.txt
+*cookie*.txt
+downloads/
+*.log
+.DS_Store
+.env
+.env.*
+.gemini/
+.claude/
+.agents/
+.scratch/

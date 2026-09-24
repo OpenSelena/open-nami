@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "open-nami"
+version = "1.0.0"
+description = "Fast terminal social media profile downloader and TUI for Instagram, TikTok, Facebook, and X."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [
+    { name = "OpenSelena", email = "igect@vk.com" }
+]
+keywords = [
+    "downloader",
+    "instagram",
+    "tiktok",
+    "facebook",
+    "twitter",
+    "social-media",
+    "terminal",
+    "tui",
+    "cli"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Utilities",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/OpenSelena/open-nami"
+Repository = "https://github.com/OpenSelena/open-nami.git"
+Issues = "https://github.com/OpenSelena/open-nami/issues"
+
+[project.scripts]
+open-nami = "open_nami.cli:main"
+opennami = "open_nami.cli:main"
+nami = "open_nami.cli:main"
+on = "open_nami.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/open_nami"]
+ignore-vcs = true
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/open_nami", "README.md", "LICENSE"]
+ignore-vcs = true
