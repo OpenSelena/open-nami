@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.0.2",
+      version: "1.0.3",
       description: "Open Nami \u2014 terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -37237,9 +37237,9 @@ import fsPromises from "fs/promises";
 import path2 from "path";
 import os6 from "os";
 var CANDIDATE_DIRS = [
-  path2.join(process.cwd(), "cookies"),
   path2.join(os6.homedir(), ".open-nami", "cookies"),
-  path2.join(os6.homedir(), ".nami", "cookies")
+  path2.join(os6.homedir(), ".nami", "cookies"),
+  path2.join(process.cwd(), "cookies")
 ];
 function getCandidateDirs(customDir) {
   const dirs = [];
@@ -37823,6 +37823,7 @@ async function sleep(minMs, maxMs, signal) {
 var HttpClient = class {
   defaultCookies = {};
   defaultHeaders;
+  cookieCache = /* @__PURE__ */ new Map();
   constructor(headers, cookies) {
     this.defaultHeaders = { ...DEFAULT_CHROME_HEADERS, ...headers };
     if (cookies) {
@@ -37835,8 +37836,21 @@ var HttpClient = class {
   setHeader(name, value) {
     this.defaultHeaders[name] = value;
   }
-  async loadCookies(filePath, domain) {
+  clearCookieCache() {
+    this.cookieCache.clear();
+  }
+  async getCachedCookies(filePath, domain) {
+    const cacheKey = `${filePath}::${domain || ""}`;
+    const cached = this.cookieCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
     const loaded = await loadCookiesFromPath(filePath, domain);
+    this.cookieCache.set(cacheKey, loaded);
+    return loaded;
+  }
+  async loadCookies(filePath, domain) {
+    const loaded = await this.getCachedCookies(filePath, domain);
     Object.assign(this.defaultCookies, loaded);
   }
   async request(url, options = {}) {
@@ -37844,7 +37858,7 @@ var HttpClient = class {
     const retryDelay = options.retryDelayMs ?? 1500;
     let cookieHeader = "";
     if (options.cookiePath) {
-      const fromPath = await loadCookiesFromPath(options.cookiePath, options.cookieDomain);
+      const fromPath = await this.getCachedCookies(options.cookiePath, options.cookieDomain);
       const merged = { ...this.defaultCookies, ...fromPath };
       cookieHeader = formatCookieHeader(merged);
     } else if (typeof options.cookies === "string") {
@@ -37874,11 +37888,19 @@ var HttpClient = class {
         });
         if (response.status === 429) {
           if (attempt < retries) {
+            try {
+              await response.body?.cancel();
+            } catch {
+            }
             await sleep(retryDelay * (attempt + 1) * 2, void 0, options.signal || void 0);
             continue;
           }
         }
         if (response.status >= 500 && attempt < retries) {
+          try {
+            await response.body?.cancel();
+          } catch {
+          }
           await sleep(retryDelay * (attempt + 1), void 0, options.signal || void 0);
           continue;
         }
@@ -38751,6 +38773,18 @@ async function saveArchive(destDir, archive) {
   } catch {
   }
 }
+function sanitizeFilename(rawFilename, fallbackId, ext) {
+  const cleanExt = ext.replace(/^\./, "");
+  const baseOnly = path5.basename(rawFilename);
+  let sanitizedBase = baseOnly.replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").replace(/[. ]+$/, "").trim();
+  if (!sanitizedBase || /^_+$/.test(sanitizedBase)) {
+    sanitizedBase = `item_${fallbackId}`;
+  }
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i.test(sanitizedBase)) {
+    sanitizedBase = `_${sanitizedBase}`;
+  }
+  return sanitizedBase.includes(".") ? sanitizedBase : `${sanitizedBase}.${cleanExt}`;
+}
 async function downloadMediaStream(items, options) {
   const { jobName, destDir, signal, onProgress } = options;
   const httpClient = options.httpClient ?? new HttpClient();
@@ -38759,15 +38793,12 @@ async function downloadMediaStream(items, options) {
   let downloaded = 0;
   let skipped = 0;
   const errors = [];
-  let isFirst = true;
   for await (const item of items) {
     if (signal?.aborted) {
       break;
     }
     const ext = item.extension.replace(/^\./, "") || (item.type === "video" ? "mp4" : "jpg");
-    const rawFilename = path5.basename(item.filename);
-    const sanitizedBase = rawFilename.replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").trim() || `item_${item.id}`;
-    const finalFilename = sanitizedBase.includes(".") ? sanitizedBase : `${sanitizedBase}.${ext}`;
+    const finalFilename = sanitizeFilename(item.filename, item.id, ext);
     const finalPath = path5.join(destDir, finalFilename);
     if (archive.has(item.id) && fs8.existsSync(finalPath)) {
       skipped++;
@@ -38927,13 +38958,25 @@ async function downloadBinary(url, targetFile, signal) {
     throw new Error(`Failed to download binary from ${url} (HTTP ${response.status}). Check your connection and try again.`);
   }
   const tmp = `${targetFile}.download`;
-  await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
   try {
-    await fs9.chmod(tmp, 493);
-  } catch {
+    await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
+    try {
+      await fs9.chmod(tmp, 493);
+    } catch {
+    }
+    const stats = await fs9.stat(tmp);
+    if (stats.size < 100 * 1024) {
+      throw new Error(`Downloaded binary from ${url} is unexpectedly small (${stats.size} bytes). File may be incomplete or corrupted.`);
+    }
+    await fs9.rename(tmp, targetFile);
+    return targetFile;
+  } catch (err) {
+    try {
+      await fs9.unlink(tmp);
+    } catch {
+    }
+    throw err;
   }
-  await fs9.rename(tmp, targetFile);
-  return targetFile;
 }
 async function downloadLatestYtDlp(targetDir, signal, onStatus) {
   const dir = targetDir || getOpenNamiBinDir();
@@ -39529,7 +39572,7 @@ async function dispatchDownload(options) {
           success: res.errors.length === 0,
           downloaded: res.downloaded,
           skipped: res.skipped,
-          error: res.errors.length > 0 ? res.errors.join("; ") : void 0
+          ...res.errors.length > 0 ? { error: res.errors.join("; ") } : {}
         };
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
