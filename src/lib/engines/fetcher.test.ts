@@ -68,3 +68,35 @@ test('resolveVersion dynamically returns version from package.json', () => {
   const ver = resolveVersion()
   assert.match(ver, /^\d+\.\d+\.\d+/)
 })
+
+test('downloadBinary rejects truncated downloads and cleans up tmp file', async () => {
+  const {downloadBinary} = await import('./fetcher.js')
+  const fs = await import('node:fs/promises')
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-fetch-test-'))
+  const target = path.join(tmpDir, 'test-bin.exe')
+  const tmp = `${target}.download`
+
+  const prevFetch = globalThis.fetch
+  try {
+    globalThis.fetch = (async () => ({
+      ok: true,
+      body: new ReadableStream({
+        start(controller) {
+          controller.enqueue(Buffer.from('too small content'))
+          controller.close()
+        },
+      }),
+    })) as any
+
+    await assert.rejects(
+      downloadBinary('https://example.com/fake-bin.exe', target),
+      /unexpectedly small/,
+    )
+
+    const tmpExists = await fs.stat(tmp).then(() => true).catch(() => false)
+    assert.equal(tmpExists, false, 'Incomplete tmp file must be cleaned up on failure')
+  } finally {
+    globalThis.fetch = prevFetch
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})

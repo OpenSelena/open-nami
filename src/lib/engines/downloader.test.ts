@@ -7,6 +7,7 @@ import {
   loadArchive,
   saveArchive,
   downloadMediaStream,
+  sanitizeFilename,
   ARCHIVE_FILENAME,
 } from './downloader.js'
 import type {MediaItem} from './extractors/types.js'
@@ -153,5 +154,23 @@ test('downloadMediaStream sanitizes filenames and blocks path traversal attempts
   } finally {
     await fs.rm(tmpDir, {recursive: true, force: true})
   }
+})
+
+test('sanitizeFilename prefixes Windows reserved device names and strips illegal characters', () => {
+  assert.equal(sanitizeFilename('CON', '123', 'jpg'), '_CON.jpg')
+  assert.equal(sanitizeFilename('aux.png', '123', 'png'), '_aux.png')
+  assert.equal(sanitizeFilename('NUL.mp4', '123', 'mp4'), '_NUL.mp4')
+  assert.equal(sanitizeFilename('com1.jpg', '123', 'jpg'), '_com1.jpg')
+  assert.equal(sanitizeFilename('lpt5', '123', 'mp4'), '_lpt5.mp4')
+
+  // Illegal chars stripped
+  assert.equal(sanitizeFilename('foo:bar?baz*qux.jpg', '123', 'jpg'), 'foo_bar_baz_qux.jpg')
+
+  // Trailing dots and spaces stripped
+  assert.equal(sanitizeFilename('trail...  ', '123', 'jpg'), 'trail.jpg')
+
+  // Empty or all-stripped fallback
+  assert.equal(sanitizeFilename('', '999', 'jpg'), 'item_999.jpg')
+  assert.equal(sanitizeFilename(':::???', '888', 'jpg'), 'item_888.jpg')
 })
 

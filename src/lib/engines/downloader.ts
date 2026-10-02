@@ -46,6 +46,26 @@ export interface StreamDownloadResult {
   errors: string[]
 }
 
+export function sanitizeFilename(rawFilename: string, fallbackId: string, ext: string): string {
+  const cleanExt = ext.replace(/^\./, '')
+  const baseOnly = path.basename(rawFilename)
+  let sanitizedBase = baseOnly
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+    .replace(/[. ]+$/, '')
+    .trim()
+
+  if (!sanitizedBase || /^_+$/.test(sanitizedBase)) {
+    sanitizedBase = `item_${fallbackId}`
+  }
+
+  // Guard against Windows reserved device names (CON, PRN, AUX, NUL, COM1-9, LPT1-9)
+  if (/^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i.test(sanitizedBase)) {
+    sanitizedBase = `_${sanitizedBase}`
+  }
+
+  return sanitizedBase.includes('.') ? sanitizedBase : `${sanitizedBase}.${cleanExt}`
+}
+
 export async function downloadMediaStream(
   items: AsyncIterable<MediaItem>,
   options: StreamDownloadOptions,
@@ -66,9 +86,7 @@ export async function downloadMediaStream(
     }
 
     const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
-    const rawFilename = path.basename(item.filename)
-    const sanitizedBase = rawFilename.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || `item_${item.id}`
-    const finalFilename = sanitizedBase.includes('.') ? sanitizedBase : `${sanitizedBase}.${ext}`
+    const finalFilename = sanitizeFilename(item.filename, item.id, ext)
     const finalPath = path.join(destDir, finalFilename)
 
     // Check archive and filesystem existence

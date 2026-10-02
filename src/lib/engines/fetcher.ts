@@ -81,12 +81,25 @@ export async function downloadBinary(
     throw new Error(`Failed to download binary from ${url} (HTTP ${response.status}). Check your connection and try again.`)
   }
   const tmp = `${targetFile}.download`
-  await pipeline(Readable.fromWeb(response.body as never), createWriteStream(tmp), {signal})
   try {
-    await fs.chmod(tmp, 0o755)
-  } catch {}
-  await fs.rename(tmp, targetFile)
-  return targetFile
+    await pipeline(Readable.fromWeb(response.body as never), createWriteStream(tmp), {signal})
+    try {
+      await fs.chmod(tmp, 0o755)
+    } catch {}
+
+    const stats = await fs.stat(tmp)
+    if (stats.size < 100 * 1024) {
+      throw new Error(`Downloaded binary from ${url} is unexpectedly small (${stats.size} bytes). File may be incomplete or corrupted.`)
+    }
+
+    await fs.rename(tmp, targetFile)
+    return targetFile
+  } catch (err) {
+    try {
+      await fs.unlink(tmp)
+    } catch {}
+    throw err
+  }
 }
 
 export async function downloadLatestYtDlp(
