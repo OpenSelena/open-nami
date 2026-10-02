@@ -48,3 +48,31 @@ test('HttpClient initializes with default Chrome headers', () => {
   const client = new HttpClient()
   assert.ok(client)
 })
+
+test('HttpClient caches cookies loaded from path and reuses in-memory', async () => {
+  const os = await import('node:os')
+  const path = await import('node:path')
+  const fs = await import('node:fs/promises')
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-http-cache-'))
+  const cookiePath = path.join(tmpDir, 'cookies.txt')
+  await fs.writeFile(cookiePath, '.instagram.com\tTRUE\t/\tTRUE\t1750000000\tsessionid\tinitial123\n')
+
+  try {
+    const client = new HttpClient()
+    await client.loadCookies(cookiePath, 'instagram.com')
+
+    // Change file on disk to verify cached version is retained
+    await fs.writeFile(cookiePath, '.instagram.com\tTRUE\t/\tTRUE\t1750000000\tsessionid\tmodified456\n')
+
+    const client2 = new HttpClient()
+    await client2.loadCookies(cookiePath, 'instagram.com')
+    // Fresh client gets modified value
+    assert.equal((client2 as any).defaultCookies['sessionid'], 'modified456')
+
+    // First client still has its loaded cookies
+    assert.equal((client as any).defaultCookies['sessionid'], 'initial123')
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})

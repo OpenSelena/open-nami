@@ -12,9 +12,9 @@ export interface ResolvedCookie {
 }
 
 export const CANDIDATE_DIRS: string[] = [
-  path.join(process.cwd(), 'cookies'),
   path.join(os.homedir(), '.open-nami', 'cookies'),
   path.join(os.homedir(), '.nami', 'cookies'),
+  path.join(process.cwd(), 'cookies'),
 ]
 
 export function getCandidateDirs(customDir?: string): string[] {

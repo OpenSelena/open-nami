@@ -18,6 +18,13 @@ test('CANDIDATE_DIRS does not contain machine-specific hardcoded paths', () => {
   }
 })
 
+test('CANDIDATE_DIRS prioritizes user home directories over cwd', () => {
+  const cwdIndex = CANDIDATE_DIRS.findIndex(d => d === path.join(process.cwd(), 'cookies'))
+  const homeIndex = CANDIDATE_DIRS.findIndex(d => d === path.join(os.homedir(), '.open-nami', 'cookies'))
+  assert.ok(homeIndex !== -1 && cwdIndex !== -1, 'Both home and cwd cookies dirs should be present')
+  assert.ok(homeIndex < cwdIndex, 'User home cookies dir must take priority over cwd cookies dir')
+})
+
 test('findCookieFile respects OPEN_NAMI_COOKIES_DIR environment variable', async () => {
   const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-cookie-test-'))
   const cookieFile = path.join(tmpDir, 'instagram.com_cookies.txt')

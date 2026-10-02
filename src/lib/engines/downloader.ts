@@ -60,8 +60,6 @@ export async function downloadMediaStream(
   let skipped = 0
   const errors: string[] = []
 
-  let isFirst = true
-
   for await (const item of items) {
     if (signal?.aborted) {
       break

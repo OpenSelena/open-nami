@@ -96,6 +96,7 @@ export interface RequestOptions extends RequestInit {
 export class HttpClient {
   private defaultCookies: Record<string, string> = {}
   private defaultHeaders: Record<string, string>
+  private cookieCache: Map<string, Record<string, string>> = new Map()
 
   constructor(headers?: Record<string, string>, cookies?: Record<string, string>) {
     this.defaultHeaders = {...DEFAULT_CHROME_HEADERS, ...headers}
@@ -112,8 +113,23 @@ export class HttpClient {
     this.defaultHeaders[name] = value
   }
 
-  async loadCookies(filePath: string, domain?: string): Promise<void> {
+  clearCookieCache(): void {
+    this.cookieCache.clear()
+  }
+
+  private async getCachedCookies(filePath: string, domain?: string): Promise<Record<string, string>> {
+    const cacheKey = `${filePath}::${domain || ''}`
+    const cached = this.cookieCache.get(cacheKey)
+    if (cached) {
+      return cached
+    }
     const loaded = await loadCookiesFromPath(filePath, domain)
+    this.cookieCache.set(cacheKey, loaded)
+    return loaded
+  }
+
+  async loadCookies(filePath: string, domain?: string): Promise<void> {
+    const loaded = await this.getCachedCookies(filePath, domain)
     Object.assign(this.defaultCookies, loaded)
   }
 
@@ -123,7 +139,7 @@ export class HttpClient {
 
     let cookieHeader = ''
     if (options.cookiePath) {
-      const fromPath = await loadCookiesFromPath(options.cookiePath, options.cookieDomain)
+      const fromPath = await this.getCachedCookies(options.cookiePath, options.cookieDomain)
       const merged = {...this.defaultCookies, ...fromPath}
       cookieHeader = formatCookieHeader(merged)
     } else if (typeof options.cookies === 'string') {
@@ -159,12 +175,18 @@ export class HttpClient {
         if (response.status === 429) {
           // Rate limited, back off
           if (attempt < retries) {
+            try {
+              await response.body?.cancel()
+            } catch {}
             await sleep(retryDelay * (attempt + 1) * 2, undefined, options.signal || undefined)
             continue
           }
         }
 
         if (response.status >= 500 && attempt < retries) {
+          try {
+            await response.body?.cancel()
+          } catch {}
           await sleep(retryDelay * (attempt + 1), undefined, options.signal || undefined)
           continue
         }
