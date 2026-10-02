@@ -11,6 +11,13 @@ import {runYtDlp} from './yt-dlp.js'
 import type {SupportedPlatform} from '../parser.js'
 import type {DispatchOptions, EngineResult} from './types.js'
 
+interface JobRunResult {
+  success: boolean
+  downloaded: number
+  skipped: number
+  error?: string
+}
+
 export const REFERER_MAP: Record<SupportedPlatform, string> = {
   tiktok: 'https://www.tiktok.com/',
   instagram: 'https://www.instagram.com/',
@@ -87,7 +94,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       }
     }
 
-    const runNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => {
+    const runNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights'): Promise<JobRunResult> => {
       const dest = path.join(targetDir, subDir)
       try {
         const extractor = getExtractor(profile.platform as SupportedPlatform)
@@ -108,7 +115,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           success: res.errors.length === 0,
           downloaded: res.downloaded,
           skipped: res.skipped,
-          error: res.errors.length > 0 ? res.errors.join('; ') : undefined,
+          ...(res.errors.length > 0 ? { error: res.errors.join('; ') } : {}),
         }
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err)
