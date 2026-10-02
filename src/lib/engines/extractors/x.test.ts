@@ -69,3 +69,20 @@ test('parseTweetMediaEntities selects highest bitrate video variant', () => {
   assert.equal(items[0].extension, 'mp4')
   assert.equal(items[0].url, 'https://video.twimg.com/high.mp4')
 })
+
+test('XExtractor ensureGuestToken throws descriptive error when activation fails', async () => {
+  const {XExtractor} = await import('./x.js')
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error('HTTP 429 Too Many Requests')
+    },
+    setHeader: () => {},
+  }
+
+  const extractor = new XExtractor(mockHttpClient)
+  await assert.rejects(
+    () => extractor.ensureGuestToken({subDir: 'Photos'}),
+    {message: /Failed to activate X\/Twitter guest session/},
+  )
+})
+

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import {setTimeout as setTimeoutPromise} from 'node:timers/promises'
 
 export const DEFAULT_USER_AGENT =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
@@ -71,21 +72,17 @@ export function formatCookieHeader(cookies: Record<string, string>): string {
 export async function sleep(minMs: number, maxMs?: number, signal?: AbortSignal): Promise<void> {
   const ms = maxMs !== undefined ? Math.floor(minMs + Math.random() * (maxMs - minMs)) : minMs
   if (ms <= 0) return
-
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      return reject(signal.reason ?? new Error('Aborted'))
+  if (signal?.aborted) {
+    throw signal.reason ?? new Error('Aborted')
+  }
+  try {
+    await setTimeoutPromise(ms, undefined, {signal})
+  } catch (err: any) {
+    if (signal?.aborted && signal.reason) {
+      throw signal.reason
     }
-    const timer = setTimeout(resolve, ms)
-    signal?.addEventListener(
-      'abort',
-      () => {
-        clearTimeout(timer)
-        reject(signal.reason ?? new Error('Aborted'))
-      },
-      {once: true},
-    )
-  })
+    throw err
+  }
 }
 
 export interface RequestOptions extends RequestInit {

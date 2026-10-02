@@ -3,6 +3,8 @@ import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
 export const IG_APP_ID = '936619743392459'
+export const IG_TIMELINE_QUERY_HASH = '69cba40317214236af40e7efa697781d'
+export const IG_POLARIS_DOC_ID = '28975909992013618'
 
 export interface IgUser {
   id: string
@@ -230,9 +232,8 @@ export class InstagramExtractor implements Extractor {
     options: ExtractOptions,
   ): Promise<{edges: Array<{node: IgMediaNode}>; hasNextPage: boolean; nextCursor?: string}> {
     // 1. Try GraphQL query endpoint with query_hash
-    const queryHash = '69cba40317214236af40e7efa697781d'
     const variables = JSON.stringify({id: userId, first: 12, after: cursor})
-    const url = `https://www.instagram.com/graphql/query/?query_hash=${queryHash}&variables=${encodeURIComponent(variables)}`
+    const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`
 
     try {
       const res = await this.httpClient.fetchJson<any>(url, {
@@ -265,7 +266,7 @@ export class InstagramExtractor implements Extractor {
       })
       const postUrl = 'https://www.instagram.com/graphql/query'
       const body = new URLSearchParams({
-        doc_id: '28975909992013618',
+        doc_id: IG_POLARIS_DOC_ID,
         variables: postVariables,
       }).toString()
 

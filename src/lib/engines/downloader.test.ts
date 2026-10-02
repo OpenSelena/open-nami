@@ -114,3 +114,44 @@ test('downloadMediaStream passes referer header to request', async () => {
     await fs.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('downloadMediaStream sanitizes filenames and blocks path traversal attempts', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+  try {
+    const mockHttpClient: any = {
+      request: async () => ({
+        ok: true,
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(Buffer.from('dummy data'))
+            controller.close()
+          },
+        }),
+      }),
+    }
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+      yield {
+        id: 'traversal_item',
+        url: 'https://example.com/evil.jpg',
+        filename: '../../../../escaped_file.jpg',
+        extension: 'jpg',
+        type: 'photo',
+      }
+    }
+
+    const result = await downloadMediaStream(mockItems(), {
+      jobName: 'TraversalJob',
+      destDir: tmpDir,
+      httpClient: mockHttpClient,
+    })
+
+    assert.equal(result.downloaded, 1)
+    // Verify file was saved safely inside tmpDir, not escaped
+    const expectedFile = path.join(tmpDir, 'escaped_file.jpg')
+    assert.ok(await fs.stat(expectedFile).then(() => true).catch(() => false))
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+

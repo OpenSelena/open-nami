@@ -140,9 +140,13 @@ export class XExtractor implements Extractor {
         this.httpClient.setHeader('x-guest-token', res.guest_token)
         return res.guest_token
       }
-    } catch {}
+    } catch (err: unknown) {
+      if (options.signal?.aborted) throw err
+      const msg = err instanceof Error ? err.message : String(err)
+      throw new Error(`Failed to activate X/Twitter guest session: ${msg}`)
+    }
 
-    return ''
+    throw new Error('Failed to activate X/Twitter guest session: no guest token returned')
   }
 
   async fetchUserRestId(username: string, options: ExtractOptions): Promise<string> {

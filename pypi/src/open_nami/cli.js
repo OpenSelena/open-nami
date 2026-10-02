@@ -37754,6 +37754,7 @@ function resolvePlatformDownloadsDir(options = {}) {
 
 // src/lib/engines/extractors/http.ts
 import fs7 from "fs/promises";
+import { setTimeout as setTimeoutPromise } from "timers/promises";
 var DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 var DEFAULT_CHROME_HEADERS = {
   "User-Agent": DEFAULT_USER_AGENT,
@@ -37807,20 +37808,17 @@ function formatCookieHeader(cookies) {
 async function sleep(minMs, maxMs, signal) {
   const ms = maxMs !== void 0 ? Math.floor(minMs + Math.random() * (maxMs - minMs)) : minMs;
   if (ms <= 0) return;
-  return new Promise((resolve, reject) => {
-    if (signal?.aborted) {
-      return reject(signal.reason ?? new Error("Aborted"));
+  if (signal?.aborted) {
+    throw signal.reason ?? new Error("Aborted");
+  }
+  try {
+    await setTimeoutPromise(ms, void 0, { signal });
+  } catch (err) {
+    if (signal?.aborted && signal.reason) {
+      throw signal.reason;
     }
-    const timer = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timer);
-        reject(signal.reason ?? new Error("Aborted"));
-      },
-      { once: true }
-    );
-  });
+    throw err;
+  }
 }
 var HttpClient = class {
   defaultCookies = {};
@@ -37919,6 +37917,8 @@ var HttpClient = class {
 
 // src/lib/engines/extractors/instagram.ts
 var IG_APP_ID = "936619743392459";
+var IG_TIMELINE_QUERY_HASH = "69cba40317214236af40e7efa697781d";
+var IG_POLARIS_DOC_ID = "28975909992013618";
 function parseIgNodeToMediaItems(node, username) {
   const items = [];
   const anyNode = node;
@@ -38070,9 +38070,8 @@ var InstagramExtractor = class {
     }
   }
   async fetchNextPostsPage(userId, username, cursor, options) {
-    const queryHash = "69cba40317214236af40e7efa697781d";
     const variables = JSON.stringify({ id: userId, first: 12, after: cursor });
-    const url = `https://www.instagram.com/graphql/query/?query_hash=${queryHash}&variables=${encodeURIComponent(variables)}`;
+    const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`;
     try {
       const res = await this.httpClient.fetchJson(url, {
         cookiePath: options.cookiePath,
@@ -38102,7 +38101,7 @@ var InstagramExtractor = class {
       });
       const postUrl = "https://www.instagram.com/graphql/query";
       const body = new URLSearchParams({
-        doc_id: "28975909992013618",
+        doc_id: IG_POLARIS_DOC_ID,
         variables: postVariables
       }).toString();
       const res = await this.httpClient.fetchJson(postUrl, {
@@ -38357,9 +38356,12 @@ var XExtractor = class {
         this.httpClient.setHeader("x-guest-token", res.guest_token);
         return res.guest_token;
       }
-    } catch {
+    } catch (err) {
+      if (options.signal?.aborted) throw err;
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new Error(`Failed to activate X/Twitter guest session: ${msg}`);
     }
-    return "";
+    throw new Error("Failed to activate X/Twitter guest session: no guest token returned");
   }
   async fetchUserRestId(username, options) {
     await this.ensureGuestToken(options);
@@ -38763,7 +38765,9 @@ async function downloadMediaStream(items, options) {
       break;
     }
     const ext = item.extension.replace(/^\./, "") || (item.type === "video" ? "mp4" : "jpg");
-    const finalFilename = item.filename.includes(".") ? item.filename : `${item.filename}.${ext}`;
+    const rawFilename = path5.basename(item.filename);
+    const sanitizedBase = rawFilename.replace(/[<>:"/\\|?*\x00-\x1f]/g, "_").trim() || `item_${item.id}`;
+    const finalFilename = sanitizedBase.includes(".") ? sanitizedBase : `${sanitizedBase}.${ext}`;
     const finalPath = path5.join(destDir, finalFilename);
     if (archive.has(item.id) && fs8.existsSync(finalPath)) {
       skipped++;
@@ -39443,6 +39447,12 @@ async function runYtDlp(options) {
 }
 
 // src/lib/engines/dispatcher.ts
+var REFERER_MAP = {
+  tiktok: "https://www.tiktok.com/",
+  instagram: "https://www.instagram.com/",
+  x: "https://x.com/",
+  facebook: "https://www.facebook.com/"
+};
 function expandPath(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
     return path10.join(os10.homedir(), dir.slice(1));
@@ -39507,17 +39517,11 @@ async function dispatchDownload(options) {
           cookiePath: cookieCopy?.filePath,
           signal: options.signal
         });
-        const refererMap = {
-          tiktok: "https://www.tiktok.com/",
-          instagram: "https://www.instagram.com/",
-          x: "https://x.com/",
-          facebook: "https://www.facebook.com/"
-        };
         const res = await downloadMediaStream(items, {
           jobName: `${profile.username} ${subDir}`,
           destDir: dest,
           cookiePath: cookieCopy?.filePath,
-          referer: refererMap[profile.platform],
+          referer: REFERER_MAP[profile.platform],
           signal: options.signal,
           onProgress
         });

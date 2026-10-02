@@ -11,6 +11,13 @@ import {runYtDlp} from './yt-dlp.js'
 import type {SupportedPlatform} from '../parser.js'
 import type {DispatchOptions, EngineResult} from './types.js'
 
+export const REFERER_MAP: Record<SupportedPlatform, string> = {
+  tiktok: 'https://www.tiktok.com/',
+  instagram: 'https://www.instagram.com/',
+  x: 'https://x.com/',
+  facebook: 'https://www.facebook.com/',
+}
+
 function expandPath(dir: string): string {
   if (dir.startsWith('~/') || dir.startsWith('~\\') || dir === '~') {
     return path.join(os.homedir(), dir.slice(1))
@@ -89,18 +96,11 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           cookiePath: cookieCopy?.filePath,
           signal: options.signal,
         })
-        const refererMap: Record<string, string> = {
-          tiktok: 'https://www.tiktok.com/',
-          instagram: 'https://www.instagram.com/',
-          x: 'https://x.com/',
-          facebook: 'https://www.facebook.com/',
-        }
-
         const res = await downloadMediaStream(items, {
           jobName: `${profile.username} ${subDir}`,
           destDir: dest,
           cookiePath: cookieCopy?.filePath,
-          referer: refererMap[profile.platform],
+          referer: REFERER_MAP[profile.platform as SupportedPlatform],
           signal: options.signal,
           onProgress,
         })

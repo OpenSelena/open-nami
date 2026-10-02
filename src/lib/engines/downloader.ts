@@ -68,7 +68,9 @@ export async function downloadMediaStream(
     }
 
     const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
-    const finalFilename = item.filename.includes('.') ? item.filename : `${item.filename}.${ext}`
+    const rawFilename = path.basename(item.filename)
+    const sanitizedBase = rawFilename.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim() || `item_${item.id}`
+    const finalFilename = sanitizedBase.includes('.') ? sanitizedBase : `${sanitizedBase}.${ext}`
     const finalPath = path.join(destDir, finalFilename)
 
     // Check archive and filesystem existence
