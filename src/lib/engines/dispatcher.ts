@@ -4,8 +4,11 @@ import fs from 'node:fs/promises'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
 import {resolvePlatformDownloadsDir} from '../known-folders.js'
 import {loadConfig} from '../config.js'
+import {getExtractor} from './extractors/index.js'
+import {downloadMediaStream} from './downloader.js'
 import {runGalleryDl} from './gallery-dl.js'
 import {runYtDlp} from './yt-dlp.js'
+import type {SupportedPlatform} from '../parser.js'
 import type {DispatchOptions, EngineResult} from './types.js'
 
 function expandPath(dir: string): string {
@@ -77,6 +80,47 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       }
     }
 
+    const runNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => {
+      const dest = path.join(targetDir, subDir)
+      try {
+        const extractor = getExtractor(profile.platform as SupportedPlatform)
+        const items = extractor.extract(profile, {
+          subDir,
+          cookiePath: cookieCopy?.filePath,
+          signal: options.signal,
+        })
+        const refererMap: Record<string, string> = {
+          tiktok: 'https://www.tiktok.com/',
+          instagram: 'https://www.instagram.com/',
+          x: 'https://x.com/',
+          facebook: 'https://www.facebook.com/',
+        }
+
+        const res = await downloadMediaStream(items, {
+          jobName: `${profile.username} ${subDir}`,
+          destDir: dest,
+          cookiePath: cookieCopy?.filePath,
+          referer: refererMap[profile.platform],
+          signal: options.signal,
+          onProgress,
+        })
+        return {
+          success: res.errors.length === 0,
+          downloaded: res.downloaded,
+          skipped: res.skipped,
+          error: res.errors.length > 0 ? res.errors.join('; ') : undefined,
+        }
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err)
+        return {
+          success: false,
+          downloaded: 0,
+          skipped: 0,
+          error: errMsg,
+        }
+      }
+    }
+
     const runGdl = (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') =>
       runGalleryDl({
         profile,
@@ -101,24 +145,38 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
 
       if (job.type === 'photos' || job.type === 'stories' || job.type === 'highlights') {
         const subDir = job.type === 'photos' ? 'Photos' : job.type === 'stories' ? 'Stories' : 'Highlights'
-        const res = await runGdl(subDir)
+        let res = await runNative(subDir)
+
+        // Fallback to gallery-dl if native extractor failed or found 0 items
+        if ((!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
+          const gdlRes = await runGdl(subDir)
+          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success) {
+            res = gdlRes
+          }
+        }
+
         totalDownloaded += res.downloaded
         totalSkipped += res.skipped
         if (!res.success && res.error) errors.push(`[${subDir}] ${res.error}`)
       } else if (job.type === 'videos') {
-        const prefersGdl = profile.platform === 'instagram' || profile.platform === 'tiktok' || profile.platform === 'x'
-        const primary = prefersGdl ? () => runGdl('Videos') : runYt
-        const fallback = prefersGdl ? runYt : () => runGdl('Videos')
-
-        let res = await primary()
+        let res = await runNative('Videos')
         if (res.downloaded > 0 || res.skipped > 0) {
           totalDownloaded += res.downloaded
           totalSkipped += res.skipped
         } else if (!options.signal?.aborted) {
-          const fbRes = await fallback()
-          totalDownloaded += fbRes.downloaded
-          totalSkipped += fbRes.skipped
-          if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`)
+          // Fallback to yt-dlp first for videos
+          const fbRes = await runYt()
+          if (fbRes.downloaded > 0 || fbRes.skipped > 0 || fbRes.success) {
+            totalDownloaded += fbRes.downloaded
+            totalSkipped += fbRes.skipped
+            if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`)
+          } else if (!options.signal?.aborted) {
+            // Further fallback to gallery-dl if yt-dlp also yielded nothing
+            const gdlRes = await runGdl('Videos')
+            totalDownloaded += gdlRes.downloaded
+            totalSkipped += gdlRes.skipped
+            if (!gdlRes.success && gdlRes.error) errors.push(`[Videos] ${gdlRes.error}`)
+          }
         }
       }
     }

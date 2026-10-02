@@ -10434,10 +10434,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path11, index, value) {
-        if (index >= path11.length) return value;
-        var key = path11[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path11, index + 1, value);
+      function copyWithSetImpl(obj, path12, index, value) {
+        if (index >= path12.length) return value;
+        var key = path12[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path12, index + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10464,11 +10464,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path11, index) {
-        var key = path11[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index + 1 === path11.length)
+      function copyWithDeleteImpl(obj, path12, index) {
+        var key = path12[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index + 1 === path12.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path11, index + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path12, index + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23745,29 +23745,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path11, value) {
+      overrideHookState = function(fiber, id, path12, value) {
         id = findHook(fiber, id);
-        null !== id && (path11 = copyWithSetImpl(id.memoizedState, path11, 0, value), id.memoizedState = path11, id.baseState = path11, fiber.memoizedProps = assign({}, fiber.memoizedProps), path11 = enqueueConcurrentRenderForLane(fiber, 2), null !== path11 && scheduleUpdateOnFiber(path11, fiber, 2));
+        null !== id && (path12 = copyWithSetImpl(id.memoizedState, path12, 0, value), id.memoizedState = path12, id.baseState = path12, fiber.memoizedProps = assign({}, fiber.memoizedProps), path12 = enqueueConcurrentRenderForLane(fiber, 2), null !== path12 && scheduleUpdateOnFiber(path12, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path11) {
+      overrideHookStateDeletePath = function(fiber, id, path12) {
         id = findHook(fiber, id);
-        null !== id && (path11 = copyWithDeleteImpl(id.memoizedState, path11, 0), id.memoizedState = path11, id.baseState = path11, fiber.memoizedProps = assign({}, fiber.memoizedProps), path11 = enqueueConcurrentRenderForLane(fiber, 2), null !== path11 && scheduleUpdateOnFiber(path11, fiber, 2));
+        null !== id && (path12 = copyWithDeleteImpl(id.memoizedState, path12, 0), id.memoizedState = path12, id.baseState = path12, fiber.memoizedProps = assign({}, fiber.memoizedProps), path12 = enqueueConcurrentRenderForLane(fiber, 2), null !== path12 && scheduleUpdateOnFiber(path12, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path11, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path11, 0, value);
+      overrideProps = function(fiber, path12, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path12, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path11 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path11 && scheduleUpdateOnFiber(path11, fiber, 2);
+        path12 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path12 && scheduleUpdateOnFiber(path12, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path11) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path11, 0);
+      overridePropsDeletePath = function(fiber, path12) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path12, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path11 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path11 && scheduleUpdateOnFiber(path11, fiber, 2);
+        path12 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path12 && scheduleUpdateOnFiber(path12, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs13 = await import("fs");
-  const content = fs13.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs15 = await import("fs");
+  const content = fs15.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -33772,8 +33772,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path11) => {
-  return path11?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path12) => {
+  return path12?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -37613,9 +37613,9 @@ function parseProfileInput(input) {
 }
 
 // src/lib/engines/dispatcher.ts
-import path9 from "path";
+import path10 from "path";
 import os10 from "os";
-import fs11 from "fs/promises";
+import fs13 from "fs/promises";
 
 // src/lib/known-folders.ts
 import { execFileSync as execFileSync2 } from "child_process";
@@ -37752,29 +37752,1118 @@ function resolvePlatformDownloadsDir(options = {}) {
   return defaultFallback;
 }
 
+// src/lib/engines/extractors/http.ts
+import fs7 from "fs/promises";
+var DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+var DEFAULT_CHROME_HEADERS = {
+  "User-Agent": DEFAULT_USER_AGENT,
+  "sec-ch-ua": '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
+  "sec-ch-ua-mobile": "?0",
+  "sec-ch-ua-platform": '"Windows"',
+  "Accept": "*/*",
+  "Accept-Language": "en-US,en;q=0.9"
+};
+function parseNetscapeCookies(content, filterDomain) {
+  const cookies = {};
+  const lines = content.split(/\r?\n/);
+  for (const rawLine of lines) {
+    let line = rawLine.trim();
+    if (!line) continue;
+    if (line.startsWith("#HttpOnly_")) {
+      line = line.slice("#HttpOnly_".length);
+    } else if (line.startsWith("#")) {
+      continue;
+    }
+    const parts = line.split("	");
+    if (parts.length >= 7) {
+      const domain = parts[0].toLowerCase();
+      const name = parts[5];
+      const value = parts[6];
+      if (filterDomain) {
+        const cleanDomain = filterDomain.toLowerCase().replace(/^\./, "");
+        const lineDomain = domain.replace(/^\./, "");
+        if (!lineDomain.endsWith(cleanDomain) && !cleanDomain.endsWith(lineDomain)) {
+          continue;
+        }
+      }
+      if (name) {
+        cookies[name] = value;
+      }
+    }
+  }
+  return cookies;
+}
+async function loadCookiesFromPath(filePath, filterDomain) {
+  try {
+    const content = await fs7.readFile(filePath, "utf-8");
+    return parseNetscapeCookies(content, filterDomain);
+  } catch {
+    return {};
+  }
+}
+function formatCookieHeader(cookies) {
+  return Object.entries(cookies).map(([k, v]) => `${k}=${v}`).join("; ");
+}
+async function sleep(minMs, maxMs, signal) {
+  const ms = maxMs !== void 0 ? Math.floor(minMs + Math.random() * (maxMs - minMs)) : minMs;
+  if (ms <= 0) return;
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      return reject(signal.reason ?? new Error("Aborted"));
+    }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason ?? new Error("Aborted"));
+      },
+      { once: true }
+    );
+  });
+}
+var HttpClient = class {
+  defaultCookies = {};
+  defaultHeaders;
+  constructor(headers, cookies) {
+    this.defaultHeaders = { ...DEFAULT_CHROME_HEADERS, ...headers };
+    if (cookies) {
+      this.defaultCookies = { ...cookies };
+    }
+  }
+  setCookie(name, value) {
+    this.defaultCookies[name] = value;
+  }
+  setHeader(name, value) {
+    this.defaultHeaders[name] = value;
+  }
+  async loadCookies(filePath, domain) {
+    const loaded = await loadCookiesFromPath(filePath, domain);
+    Object.assign(this.defaultCookies, loaded);
+  }
+  async request(url, options = {}) {
+    const retries = options.retries ?? 3;
+    const retryDelay = options.retryDelayMs ?? 1500;
+    let cookieHeader = "";
+    if (options.cookiePath) {
+      const fromPath = await loadCookiesFromPath(options.cookiePath, options.cookieDomain);
+      const merged = { ...this.defaultCookies, ...fromPath };
+      cookieHeader = formatCookieHeader(merged);
+    } else if (typeof options.cookies === "string") {
+      cookieHeader = options.cookies;
+    } else if (options.cookies) {
+      const merged = { ...this.defaultCookies, ...options.cookies };
+      cookieHeader = formatCookieHeader(merged);
+    } else if (Object.keys(this.defaultCookies).length > 0) {
+      cookieHeader = formatCookieHeader(this.defaultCookies);
+    }
+    const headers = {
+      ...this.defaultHeaders,
+      ...options.headers
+    };
+    if (cookieHeader) {
+      headers["Cookie"] = cookieHeader;
+    }
+    let lastError;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      if (options.signal?.aborted) {
+        throw options.signal.reason ?? new Error("Aborted");
+      }
+      try {
+        const response = await fetch(url, {
+          ...options,
+          headers
+        });
+        if (response.status === 429) {
+          if (attempt < retries) {
+            await sleep(retryDelay * (attempt + 1) * 2, void 0, options.signal || void 0);
+            continue;
+          }
+        }
+        if (response.status >= 500 && attempt < retries) {
+          await sleep(retryDelay * (attempt + 1), void 0, options.signal || void 0);
+          continue;
+        }
+        return response;
+      } catch (err) {
+        lastError = err;
+        if (options.signal?.aborted) throw err;
+        if (attempt < retries) {
+          await sleep(retryDelay * (attempt + 1), void 0, options.signal || void 0);
+        }
+      }
+    }
+    throw lastError ?? new Error(`Request failed after ${retries} attempts: ${url}`);
+  }
+  async fetchJson(url, options = {}) {
+    const res = await this.request(url, {
+      ...options,
+      headers: {
+        "Accept": "application/json, text/plain, */*",
+        ...options.headers
+      }
+    });
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`);
+    }
+    return await res.json();
+  }
+  async fetchText(url, options = {}) {
+    const res = await this.request(url, options);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`);
+    }
+    return await res.text();
+  }
+};
+
+// src/lib/engines/extractors/instagram.ts
+var IG_APP_ID = "936619743392459";
+function parseIgNodeToMediaItems(node, username) {
+  const items = [];
+  const anyNode = node;
+  const baseId = node.shortcode || node.id || anyNode.pk;
+  const date = node.taken_at_timestamp || anyNode.taken_at;
+  const childrenEdges = node.edge_sidecar_to_children?.edges;
+  const carouselMedia = anyNode.carousel_media;
+  const childrenList = childrenEdges ? childrenEdges.map((e) => e.node) : Array.isArray(carouselMedia) ? carouselMedia : [];
+  if (childrenList.length > 0) {
+    childrenList.forEach((childNode, index) => {
+      const subItems = parseIgNodeToMediaItems(childNode, username);
+      for (const item of subItems) {
+        item.id = `${baseId}_${index + 1}`;
+        item.filename = `${username}_${date || baseId}_${index + 1}`;
+        items.push(item);
+      }
+    });
+    return items;
+  }
+  const isVideo = Boolean(node.is_video || node.video_url || node.video_versions && node.video_versions.length > 0);
+  if (isVideo) {
+    const video = node.video_versions?.[0];
+    const videoUrl = node.video_url || video?.url;
+    if (videoUrl) {
+      items.push({
+        id: baseId,
+        url: videoUrl,
+        filename: `${username}_${date || baseId}`,
+        extension: "mp4",
+        type: "video",
+        date,
+        width: video?.width ?? node.dimensions?.width,
+        height: video?.height ?? node.dimensions?.height,
+        thumbnailUrl: node.display_url
+      });
+    }
+  } else {
+    const candidate = node.image_versions2?.candidates?.[0];
+    const photoUrl = candidate?.url || node.display_url;
+    if (photoUrl) {
+      items.push({
+        id: baseId,
+        url: photoUrl,
+        filename: `${username}_${date || baseId}`,
+        extension: "jpg",
+        type: "photo",
+        date,
+        width: candidate?.width ?? node.dimensions?.width,
+        height: candidate?.height ?? node.dimensions?.height
+      });
+    }
+  }
+  return items;
+}
+function parseReelItemToMediaItem(item, username) {
+  const id = item.id || item.pk || String(Date.now());
+  const date = item.taken_at || item.created_at;
+  const isVideo = item.media_type === 2 || Boolean(item.video_versions && item.video_versions.length > 0);
+  if (isVideo) {
+    const video = item.video_versions?.[0];
+    const videoUrl = video?.url;
+    if (!videoUrl) return null;
+    return {
+      id,
+      url: videoUrl,
+      filename: `${username}_${date || id}`,
+      extension: "mp4",
+      type: "video",
+      date,
+      width: video?.width ?? item.original_width,
+      height: video?.height ?? item.original_height,
+      thumbnailUrl: item.image_versions2?.candidates?.[0]?.url
+    };
+  } else {
+    const candidate = item.image_versions2?.candidates?.[0];
+    const photoUrl = candidate?.url;
+    if (!photoUrl) return null;
+    return {
+      id,
+      url: photoUrl,
+      filename: `${username}_${date || id}`,
+      extension: "jpg",
+      type: "photo",
+      date,
+      width: candidate?.width ?? item.original_width,
+      height: candidate?.height ?? item.original_height
+    };
+  }
+}
+var InstagramExtractor = class {
+  platform = "instagram";
+  httpClient;
+  constructor(httpClient) {
+    this.httpClient = httpClient ?? new HttpClient({
+      "X-IG-App-ID": IG_APP_ID,
+      "Referer": "https://www.instagram.com/"
+    });
+  }
+  async fetchUserProfile(username, options) {
+    const url = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodeURIComponent(username)}`;
+    const res = await this.httpClient.fetchJson(url, {
+      cookiePath: options.cookiePath,
+      cookieDomain: "instagram.com",
+      signal: options.signal,
+      headers: {
+        "X-IG-App-ID": IG_APP_ID,
+        "Referer": `https://www.instagram.com/${username}/`
+      }
+    });
+    if (!res.data?.user) {
+      throw new Error(`Instagram user not found or private profile: ${username}`);
+    }
+    return res.data.user;
+  }
+  async fetchHighlightsTray(userId, options) {
+    const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`;
+    try {
+      const res = await this.httpClient.fetchJson(url, {
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "X-IG-App-ID": IG_APP_ID
+        }
+      });
+      return res.tray ?? [];
+    } catch {
+      return [];
+    }
+  }
+  async fetchReelsMedia(reelIds, options) {
+    if (reelIds.length === 0) return [];
+    const idsParam = reelIds.join(",");
+    const url = `https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=${encodeURIComponent(idsParam)}`;
+    try {
+      const res = await this.httpClient.fetchJson(url, {
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "X-IG-App-ID": IG_APP_ID
+        }
+      });
+      if (res.reels_media) return res.reels_media;
+      if (res.reels) return Object.values(res.reels);
+      return [];
+    } catch {
+      return [];
+    }
+  }
+  async fetchNextPostsPage(userId, username, cursor, options) {
+    const queryHash = "69cba40317214236af40e7efa697781d";
+    const variables = JSON.stringify({ id: userId, first: 12, after: cursor });
+    const url = `https://www.instagram.com/graphql/query/?query_hash=${queryHash}&variables=${encodeURIComponent(variables)}`;
+    try {
+      const res = await this.httpClient.fetchJson(url, {
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": `https://www.instagram.com/${username}/`
+        }
+      });
+      const data = res?.data?.user?.edge_owner_to_timeline_media;
+      if (data?.edges && data.edges.length > 0) {
+        return {
+          edges: data.edges,
+          hasNextPage: Boolean(data.page_info?.has_next_page),
+          nextCursor: data.page_info?.end_cursor
+        };
+      }
+    } catch {
+    }
+    try {
+      const postVariables = JSON.stringify({
+        after: cursor,
+        first: 12,
+        username,
+        data: { count: 12 }
+      });
+      const postUrl = "https://www.instagram.com/graphql/query";
+      const body = new URLSearchParams({
+        doc_id: "28975909992013618",
+        variables: postVariables
+      }).toString();
+      const res = await this.httpClient.fetchJson(postUrl, {
+        method: "POST",
+        body,
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-IG-App-ID": IG_APP_ID,
+          "X-FB-Friendly-Name": "PolarisProfilePostsTabContentQuery_connection",
+          "Referer": `https://www.instagram.com/${username}/`
+        }
+      });
+      const connection = res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection || res?.data?.user?.edge_owner_to_timeline_media;
+      if (connection?.edges && connection.edges.length > 0) {
+        return {
+          edges: connection.edges,
+          hasNextPage: Boolean(connection.page_info?.has_next_page),
+          nextCursor: connection.page_info?.end_cursor
+        };
+      }
+    } catch {
+    }
+    try {
+      const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`;
+      const res = await this.httpClient.fetchJson(restUrl, {
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": `https://www.instagram.com/${username}/`
+        }
+      });
+      if (Array.isArray(res?.items) && res.items.length > 0) {
+        const edges = res.items.map((item) => ({ node: item }));
+        return {
+          edges,
+          hasNextPage: Boolean(res.more_available),
+          nextCursor: res.next_max_id ? String(res.next_max_id) : void 0
+        };
+      }
+    } catch {
+    }
+    return { edges: [], hasNextPage: false };
+  }
+  async *extract(profile, options) {
+    const username = profile.username;
+    const subDir = options.subDir;
+    options.onProgress?.({
+      stage: "Profile",
+      found: 0,
+      message: `Fetching Instagram profile @${username}...`
+    });
+    const user = await this.fetchUserProfile(username, options);
+    const userId = user.id;
+    if (subDir === "Stories") {
+      options.onProgress?.({
+        stage: "Stories",
+        found: 0,
+        message: `Fetching stories for @${username}...`
+      });
+      const reels = await this.fetchReelsMedia([userId], options);
+      for (const reel of reels) {
+        for (const rawItem of reel.items || []) {
+          const item = parseReelItemToMediaItem(rawItem, username);
+          if (item) yield item;
+        }
+      }
+      return;
+    }
+    if (subDir === "Highlights") {
+      options.onProgress?.({
+        stage: "Highlights",
+        found: 0,
+        message: `Fetching highlights tray for @${username}...`
+      });
+      const tray = await this.fetchHighlightsTray(userId, options);
+      const highlightIds = tray.map((t) => t.id).filter(Boolean);
+      if (highlightIds.length > 0) {
+        const chunkSize = 5;
+        for (let i = 0; i < highlightIds.length; i += chunkSize) {
+          if (options.signal?.aborted) break;
+          const chunk = highlightIds.slice(i, i + chunkSize);
+          const reels = await this.fetchReelsMedia(chunk, options);
+          for (const reel of reels) {
+            for (const rawItem of reel.items || []) {
+              const item = parseReelItemToMediaItem(rawItem, username);
+              if (item) yield item;
+            }
+          }
+          await sleep(1e3, 1500, options.signal);
+        }
+      }
+      return;
+    }
+    let found = 0;
+    let currentEdges = user.edge_owner_to_timeline_media?.edges ?? [];
+    let hasNextPage = Boolean(user.edge_owner_to_timeline_media?.page_info?.has_next_page);
+    let endCursor = user.edge_owner_to_timeline_media?.page_info?.end_cursor;
+    while (true) {
+      for (const edge of currentEdges) {
+        const items = parseIgNodeToMediaItems(edge.node, username);
+        for (const item of items) {
+          if (subDir === "Photos" && item.type !== "photo") continue;
+          if (subDir === "Videos" && item.type !== "video") continue;
+          found++;
+          options.onProgress?.({
+            stage: subDir,
+            found,
+            message: `Found item: ${item.filename}`
+          });
+          yield item;
+        }
+      }
+      if (!hasNextPage || !endCursor || options.signal?.aborted) {
+        break;
+      }
+      await sleep(1500, 2500, options.signal);
+      try {
+        const nextPage = await this.fetchNextPostsPage(userId, username, endCursor, options);
+        currentEdges = nextPage.edges;
+        hasNextPage = nextPage.hasNextPage;
+        endCursor = nextPage.nextCursor;
+        if (currentEdges.length === 0) {
+          break;
+        }
+      } catch {
+        break;
+      }
+    }
+    if (subDir === "Videos") {
+      const videoEdges = user.edge_felix_video_timeline?.edges ?? [];
+      for (const edge of videoEdges) {
+        const items = parseIgNodeToMediaItems(edge.node, username);
+        for (const item of items) {
+          if (item.type !== "video") continue;
+          found++;
+          options.onProgress?.({
+            stage: "Videos",
+            found,
+            message: `Found reel: ${item.filename}`
+          });
+          yield item;
+        }
+      }
+    }
+  }
+};
+
+// src/lib/engines/extractors/x.ts
+var TWITTER_BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+var TWITTER_FEATURES = {
+  responsive_web_graphql_exclude_directive_enabled: true,
+  verified_phone_label_enabled: false,
+  responsive_web_graphql_timeline_navigation_enabled: true,
+  responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+  tweetypie_unmention_optimization_enabled: true,
+  vibe_api_enabled: true,
+  responsive_web_edit_tweet_api_enabled: true,
+  graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+  view_counts_everywhere_api_enabled: true,
+  longform_notetweets_consumption_enabled: true,
+  tweet_awards_web_tipping_enabled: false,
+  freedom_of_speech_not_reach_fetch_enabled: true,
+  standardized_nudges_misinfo: true,
+  tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+  interactive_text_enabled: true,
+  responsive_web_text_conversations_enabled: false,
+  longform_notetweets_rich_text_read_enabled: true,
+  longform_notetweets_inline_media_enabled: true,
+  responsive_web_enhance_cards_enabled: false
+};
+function parseTweetMediaEntities(tweet, username) {
+  const items = [];
+  const tweetResult = tweet.tweet || tweet;
+  const legacy = tweetResult.legacy || tweetResult;
+  const entities = legacy.extended_entities?.media || legacy.entities?.media || [];
+  const tweetId = tweetResult.rest_id || legacy.id_str || String(Date.now());
+  const rawDate = legacy.created_at ? new Date(legacy.created_at).getTime() / 1e3 : void 0;
+  for (let idx = 0; idx < entities.length; idx++) {
+    const media = entities[idx];
+    const subIndex = idx + 1;
+    const baseFilename = `${username}_${tweetId}_${subIndex}`;
+    if (media.type === "video" || media.type === "animated_gif") {
+      const variants = (media.video_info?.variants || []).filter((v) => v.content_type === "video/mp4").sort((a, b) => (b.bitrate ?? 0) - (a.bitrate ?? 0));
+      const bestVariant = variants[0];
+      if (bestVariant?.url) {
+        items.push({
+          id: `${tweetId}_${media.id_str}`,
+          url: bestVariant.url,
+          filename: baseFilename,
+          extension: "mp4",
+          type: "video",
+          date: rawDate,
+          thumbnailUrl: media.media_url_https
+        });
+      }
+    } else {
+      let photoUrl = media.media_url_https;
+      if (photoUrl) {
+        const cleanUrl = photoUrl.replace(/:[a-zA-Z]+$/, "");
+        const urlWithOrig = cleanUrl.includes("?") ? `${cleanUrl}&name=orig` : `${cleanUrl}?name=orig`;
+        const extMatch = photoUrl.match(/\.([a-zA-Z0-9]+)(?:$|\?)/);
+        const ext = extMatch ? extMatch[1] : "jpg";
+        items.push({
+          id: `${tweetId}_${media.id_str}`,
+          url: urlWithOrig,
+          filename: baseFilename,
+          extension: ext,
+          type: "photo",
+          date: rawDate,
+          width: media.original_info?.width,
+          height: media.original_info?.height
+        });
+      }
+    }
+  }
+  return items;
+}
+var XExtractor = class {
+  platform = "x";
+  httpClient;
+  guestToken;
+  constructor(httpClient) {
+    this.httpClient = httpClient ?? new HttpClient({
+      "Authorization": `Bearer ${TWITTER_BEARER_TOKEN}`,
+      "Referer": "https://x.com/",
+      "x-twitter-active-user": "yes",
+      "x-twitter-client-language": "en"
+    });
+  }
+  async ensureGuestToken(options) {
+    if (this.guestToken) return this.guestToken;
+    try {
+      const res = await this.httpClient.fetchJson(
+        "https://api.twitter.com/1.1/guest/activate.json",
+        {
+          method: "POST",
+          cookiePath: options.cookiePath,
+          cookieDomain: "x.com",
+          signal: options.signal,
+          headers: {
+            "Authorization": `Bearer ${TWITTER_BEARER_TOKEN}`
+          }
+        }
+      );
+      if (res.guest_token) {
+        this.guestToken = res.guest_token;
+        this.httpClient.setHeader("x-guest-token", res.guest_token);
+        return res.guest_token;
+      }
+    } catch {
+    }
+    return "";
+  }
+  async fetchUserRestId(username, options) {
+    await this.ensureGuestToken(options);
+    const variables = JSON.stringify({
+      screen_name: username,
+      withSafetyModeUserFields: true
+    });
+    const features = JSON.stringify(TWITTER_FEATURES);
+    const url = `https://x.com/i/api/graphql/ck5KkZ8t5cOmoLssopN99Q/UserByScreenName?variables=${encodeURIComponent(variables)}&features=${encodeURIComponent(features)}`;
+    try {
+      const res = await this.httpClient.fetchJson(url, {
+        cookiePath: options.cookiePath,
+        cookieDomain: "x.com",
+        signal: options.signal
+      });
+      const restId = res.data?.user?.result?.rest_id;
+      if (restId) return restId;
+    } catch {
+    }
+    const syndiUrl = `https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(username)}`;
+    try {
+      const res = await this.httpClient.fetchJson(syndiUrl, { signal: options.signal });
+      if (res[0]?.id) return String(res[0].id);
+    } catch {
+    }
+    throw new Error(`Failed to resolve X/Twitter user ID for @${username}`);
+  }
+  async *extract(profile, options) {
+    const username = profile.username;
+    const subDir = options.subDir;
+    options.onProgress?.({
+      stage: "Profile",
+      found: 0,
+      message: `Fetching X profile @${username}...`
+    });
+    const userId = await this.fetchUserRestId(username, options);
+    const endpoint = "https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia";
+    let cursor;
+    let hasMore = true;
+    let found = 0;
+    while (hasMore) {
+      if (options.signal?.aborted) break;
+      const variables = {
+        userId,
+        count: 50,
+        includePromotedContent: false,
+        withClientEventToken: false,
+        withBirdwatchNotes: false,
+        withVoice: true
+      };
+      if (cursor) {
+        variables.cursor = cursor;
+      }
+      const features = JSON.stringify(TWITTER_FEATURES);
+      const url = `${endpoint}?variables=${encodeURIComponent(JSON.stringify(variables))}&features=${encodeURIComponent(features)}`;
+      let res;
+      try {
+        res = await this.httpClient.fetchJson(url, {
+          cookiePath: options.cookiePath,
+          cookieDomain: "x.com",
+          signal: options.signal
+        });
+      } catch (err) {
+        break;
+      }
+      const instructions = res?.data?.user?.result?.timeline_v2?.timeline?.instructions || [];
+      let newCursor;
+      let pageItemCount = 0;
+      for (const inst of instructions) {
+        const entries = inst.entries || (inst.entry ? [inst.entry] : []);
+        for (const entry of entries) {
+          if (entry.entryId?.startsWith("cursor-bottom-")) {
+            newCursor = entry.content?.value;
+            continue;
+          }
+          const tweetContent = entry.content?.itemContent?.tweet_results?.result;
+          if (tweetContent) {
+            const mediaItems = parseTweetMediaEntities(tweetContent, username);
+            for (const item of mediaItems) {
+              if (subDir === "Photos" && item.type !== "photo") continue;
+              if (subDir === "Videos" && item.type !== "video") continue;
+              found++;
+              pageItemCount++;
+              options.onProgress?.({
+                stage: subDir,
+                found,
+                message: `Found item: ${item.filename}`
+              });
+              yield item;
+            }
+          }
+        }
+      }
+      if (!newCursor || newCursor === cursor || pageItemCount === 0) {
+        hasMore = false;
+      } else {
+        cursor = newCursor;
+        await sleep(1500, 2500, options.signal);
+      }
+    }
+  }
+};
+
+// src/lib/engines/extractors/tiktok.ts
+function parseTikTokRehydrationJson(html) {
+  const match = html.match(
+    /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/
+  );
+  if (!match) return null;
+  try {
+    const raw = JSON.parse(match[1]);
+    return raw?.["__DEFAULT_SCOPE__"];
+  } catch {
+    return null;
+  }
+}
+function parseTikTokItem(item, username) {
+  const items = [];
+  const id = item.id || item.itemId || String(Date.now());
+  const date = Number(item.createTime) || void 0;
+  const caption = item.desc;
+  const imageList = item.imagePost?.images;
+  if (Array.isArray(imageList) && imageList.length > 0) {
+    imageList.forEach((img, idx) => {
+      const imgUrl = img.imageURL?.urlList?.[0] || img.displayImage?.urlList?.[0];
+      if (imgUrl) {
+        items.push({
+          id: `${id}_${idx + 1}`,
+          url: imgUrl,
+          filename: `${username}_${id}_${idx + 1}`,
+          extension: "jpg",
+          type: "photo",
+          caption,
+          date
+        });
+      }
+    });
+    return items;
+  }
+  const video = item.video;
+  const videoUrl = video?.playAddr || video?.downloadAddr;
+  if (videoUrl) {
+    items.push({
+      id,
+      url: videoUrl,
+      filename: `${username}_${id}`,
+      extension: "mp4",
+      type: "video",
+      caption,
+      date,
+      width: video?.width,
+      height: video?.height,
+      thumbnailUrl: video?.cover || video?.originCover
+    });
+  }
+  return items;
+}
+var TikTokExtractor = class {
+  platform = "tiktok";
+  httpClient;
+  constructor(httpClient) {
+    this.httpClient = httpClient ?? new HttpClient({
+      "Referer": "https://www.tiktok.com/"
+    });
+  }
+  async *extract(profile, options) {
+    const cleanUsername = profile.username.replace(/^@/, "");
+    const subDir = options.subDir;
+    options.onProgress?.({
+      stage: "Profile",
+      found: 0,
+      message: `Fetching TikTok profile @${cleanUsername}...`
+    });
+    const profileUrl = `https://www.tiktok.com/@${cleanUsername}`;
+    const html = await this.httpClient.fetchText(profileUrl, {
+      cookiePath: options.cookiePath,
+      cookieDomain: "tiktok.com",
+      signal: options.signal
+    });
+    const scope = parseTikTokRehydrationJson(html);
+    const userDetail = scope?.["webapp.user-detail"];
+    const userInfo = userDetail?.userInfo?.user;
+    const secUid = userInfo?.secUid;
+    let found = 0;
+    const initialItems = userDetail?.itemList || [];
+    for (const rawItem of initialItems) {
+      const mediaList = parseTikTokItem(rawItem, cleanUsername);
+      for (const item of mediaList) {
+        if (subDir === "Photos" && item.type !== "photo") continue;
+        if (subDir === "Videos" && item.type !== "video") continue;
+        found++;
+        options.onProgress?.({
+          stage: subDir,
+          found,
+          message: `Found item: ${item.filename}`
+        });
+        yield item;
+      }
+    }
+    if (!secUid) {
+      return;
+    }
+    let cursor = "0";
+    let hasMore = true;
+    const visitedCursors = /* @__PURE__ */ new Set();
+    while (hasMore) {
+      if (options.signal?.aborted) break;
+      if (visitedCursors.has(cursor)) break;
+      visitedCursors.add(cursor);
+      const apiUrl = `https://www.tiktok.com/api/post/item_list/?secUid=${encodeURIComponent(secUid)}&count=30&cursor=${cursor}&post_item_list_request_type=0`;
+      let res;
+      try {
+        res = await this.httpClient.fetchJson(apiUrl, {
+          cookiePath: options.cookiePath,
+          cookieDomain: "tiktok.com",
+          signal: options.signal
+        });
+      } catch {
+        break;
+      }
+      const items = res?.itemList || [];
+      if (items.length === 0) break;
+      for (const rawItem of items) {
+        const mediaList = parseTikTokItem(rawItem, cleanUsername);
+        for (const item of mediaList) {
+          if (subDir === "Photos" && item.type !== "photo") continue;
+          if (subDir === "Videos" && item.type !== "video") continue;
+          found++;
+          options.onProgress?.({
+            stage: subDir,
+            found,
+            message: `Found item: ${item.filename}`
+          });
+          yield item;
+        }
+      }
+      hasMore = Boolean(res?.hasMore);
+      cursor = String(res?.cursor ?? "0");
+      await sleep(1e3, 2e3, options.signal);
+    }
+  }
+};
+
+// src/lib/engines/extractors/facebook.ts
+function extractFacebookMediaFromHtml(html, username) {
+  const items = [];
+  const seenUrls = /* @__PURE__ */ new Set();
+  const hdMatch = html.match(/"browser_native_hd_url":"([^"]+)"/);
+  const sdMatch = html.match(/"browser_native_sd_url":"([^"]+)"/);
+  const rawVideoUrl = hdMatch?.[1] || sdMatch?.[1];
+  if (rawVideoUrl) {
+    try {
+      const videoUrl = JSON.parse(`"${rawVideoUrl}"`);
+      if (!seenUrls.has(videoUrl)) {
+        seenUrls.add(videoUrl);
+        items.push({
+          id: `fb_video_${Date.now()}`,
+          url: videoUrl,
+          filename: `${username}_video_${Date.now()}`,
+          extension: "mp4",
+          type: "video"
+        });
+      }
+    } catch {
+    }
+  }
+  const photoRegex = /,"image":\{"uri":"([^"]+)"/g;
+  let match;
+  let photoIndex = 1;
+  while ((match = photoRegex.exec(html)) !== null) {
+    try {
+      const rawUrl = match[1];
+      const photoUrl = JSON.parse(`"${rawUrl}"`);
+      if (!seenUrls.has(photoUrl)) {
+        seenUrls.add(photoUrl);
+        items.push({
+          id: `fb_photo_${photoIndex}`,
+          url: photoUrl,
+          filename: `${username}_photo_${photoIndex}`,
+          extension: "jpg",
+          type: "photo"
+        });
+        photoIndex++;
+      }
+    } catch {
+    }
+  }
+  if (items.length === 0) {
+    const scontentRegex = /https:\/\/[^"'\s]*scontent[^"'\s]*\.(?:jpg|png|webp)[^"'\s]*/gi;
+    let sMatch;
+    while ((sMatch = scontentRegex.exec(html)) !== null) {
+      const cleanUrl = sMatch[0].replace(/\\/g, "");
+      if (!seenUrls.has(cleanUrl)) {
+        seenUrls.add(cleanUrl);
+        items.push({
+          id: `fb_photo_${photoIndex}`,
+          url: cleanUrl,
+          filename: `${username}_photo_${photoIndex}`,
+          extension: "jpg",
+          type: "photo"
+        });
+        photoIndex++;
+      }
+    }
+  }
+  return items;
+}
+var FacebookExtractor = class {
+  platform = "facebook";
+  httpClient;
+  constructor(httpClient) {
+    this.httpClient = httpClient ?? new HttpClient({
+      "Referer": "https://www.facebook.com/"
+    });
+  }
+  async *extract(profile, options) {
+    const username = profile.username;
+    const subDir = options.subDir;
+    options.onProgress?.({
+      stage: "Profile",
+      found: 0,
+      message: `Fetching Facebook profile @${username}...`
+    });
+    const targetUrl = subDir === "Photos" ? `https://www.facebook.com/${encodeURIComponent(username)}/photos` : `https://www.facebook.com/${encodeURIComponent(username)}/videos`;
+    const html = await this.httpClient.fetchText(targetUrl, {
+      cookiePath: options.cookiePath,
+      cookieDomain: "facebook.com",
+      signal: options.signal
+    });
+    const items = extractFacebookMediaFromHtml(html, username);
+    let found = 0;
+    for (const item of items) {
+      if (subDir === "Photos" && item.type !== "photo") continue;
+      if (subDir === "Videos" && item.type !== "video") continue;
+      found++;
+      options.onProgress?.({
+        stage: subDir,
+        found,
+        message: `Found item: ${item.filename}`
+      });
+      yield item;
+    }
+  }
+};
+
+// src/lib/engines/extractors/index.ts
+function getExtractor(platform2) {
+  switch (platform2) {
+    case "instagram":
+      return new InstagramExtractor();
+    case "x":
+      return new XExtractor();
+    case "tiktok":
+      return new TikTokExtractor();
+    case "facebook":
+      return new FacebookExtractor();
+    default:
+      throw new Error(`Unsupported extractor platform: ${platform2}`);
+  }
+}
+
+// src/lib/engines/downloader.ts
+import fs8 from "fs";
+import fsPromises2 from "fs/promises";
+import path5 from "path";
+import { Readable } from "stream";
+import { pipeline } from "stream/promises";
+var ARCHIVE_FILENAME = ".open-nami-archive.json";
+async function loadArchive(destDir) {
+  const archivePath = path5.join(destDir, ARCHIVE_FILENAME);
+  try {
+    const raw = await fsPromises2.readFile(archivePath, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return new Set(parsed);
+    }
+  } catch {
+  }
+  return /* @__PURE__ */ new Set();
+}
+async function saveArchive(destDir, archive) {
+  const archivePath = path5.join(destDir, ARCHIVE_FILENAME);
+  const tmpPath = `${archivePath}.tmp`;
+  try {
+    await fsPromises2.writeFile(tmpPath, JSON.stringify([...archive]), "utf-8");
+    await fsPromises2.rename(tmpPath, archivePath);
+  } catch {
+  }
+}
+async function downloadMediaStream(items, options) {
+  const { jobName, destDir, signal, onProgress } = options;
+  const httpClient = options.httpClient ?? new HttpClient();
+  await fsPromises2.mkdir(destDir, { recursive: true });
+  const archive = await loadArchive(destDir);
+  let downloaded = 0;
+  let skipped = 0;
+  const errors = [];
+  let isFirst = true;
+  for await (const item of items) {
+    if (signal?.aborted) {
+      break;
+    }
+    const ext = item.extension.replace(/^\./, "") || (item.type === "video" ? "mp4" : "jpg");
+    const finalFilename = item.filename.includes(".") ? item.filename : `${item.filename}.${ext}`;
+    const finalPath = path5.join(destDir, finalFilename);
+    if (archive.has(item.id) && fs8.existsSync(finalPath)) {
+      skipped++;
+      onProgress?.({
+        job: jobName,
+        downloadedCount: downloaded,
+        skippedCount: skipped,
+        currentFile: finalFilename,
+        statusText: `Skipping already downloaded: ${finalFilename}`
+      });
+      continue;
+    }
+    onProgress?.({
+      job: jobName,
+      downloadedCount: downloaded,
+      skippedCount: skipped,
+      currentFile: finalFilename,
+      statusText: `Downloading: ${finalFilename}`
+    });
+    const tmpPath = `${finalPath}.download`;
+    try {
+      const reqHeaders = {};
+      if (options.referer) {
+        reqHeaders["Referer"] = options.referer;
+      }
+      const response = await httpClient.request(item.url, {
+        signal,
+        cookiePath: options.cookiePath,
+        headers: reqHeaders
+      });
+      if (!response.ok || !response.body) {
+        throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`);
+      }
+      const fileStream = fs8.createWriteStream(tmpPath);
+      await pipeline(Readable.fromWeb(response.body), fileStream, { signal });
+      if (item.date) {
+        try {
+          const mtime = new Date(item.date * 1e3);
+          await fsPromises2.utimes(tmpPath, mtime, mtime);
+        } catch {
+        }
+      }
+      await fsPromises2.rename(tmpPath, finalPath);
+      archive.add(item.id);
+      downloaded++;
+      onProgress?.({
+        job: jobName,
+        downloadedCount: downloaded,
+        skippedCount: skipped,
+        currentFile: finalFilename,
+        statusText: `Saved: ${finalFilename}`
+      });
+    } catch (err) {
+      try {
+        if (fs8.existsSync(tmpPath)) {
+          await fsPromises2.unlink(tmpPath);
+        }
+      } catch {
+      }
+      if (signal?.aborted) {
+        break;
+      }
+      const errMsg = err instanceof Error ? err.message : String(err);
+      errors.push(`${finalFilename}: ${errMsg}`);
+      onProgress?.({
+        job: jobName,
+        downloadedCount: downloaded,
+        skippedCount: skipped,
+        currentFile: finalFilename,
+        statusText: `Failed: ${finalFilename} (${errMsg})`
+      });
+    }
+  }
+  await saveArchive(destDir, archive);
+  return { downloaded, skipped, errors };
+}
+
 // src/lib/engines/gallery-dl.ts
 import { spawn as spawn2 } from "child_process";
-import path7 from "path";
-import fs9 from "fs/promises";
+import path8 from "path";
+import fs11 from "fs/promises";
 
 // src/lib/engines/exec.ts
-import fs8 from "fs";
-import path6 from "path";
+import fs10 from "fs";
+import path7 from "path";
 
 // src/lib/engines/fetcher.ts
 import { spawn } from "child_process";
 import { createWriteStream } from "fs";
-import fs7 from "fs/promises";
+import fs9 from "fs/promises";
 import os9 from "os";
-import path5 from "path";
-import { Readable } from "stream";
-import { pipeline } from "stream/promises";
+import path6 from "path";
+import { Readable as Readable2 } from "stream";
+import { pipeline as pipeline2 } from "stream/promises";
 function getOpenNamiBinDir(env3 = process.env) {
   if (env3.OPEN_NAMI_BIN_DIR && env3.OPEN_NAMI_BIN_DIR.trim()) {
-    return path5.resolve(env3.OPEN_NAMI_BIN_DIR.trim());
+    return path6.resolve(env3.OPEN_NAMI_BIN_DIR.trim());
   }
   const base = env3.OPEN_NAMI_DIR && env3.OPEN_NAMI_DIR.trim() ? env3.OPEN_NAMI_DIR.trim() : os9.homedir();
-  return path5.join(base, ".open-nami", "bin");
+  return path6.join(base, ".open-nami", "bin");
 }
 var YTDLP_RELEASE_BASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 var GALLERYDL_CODEBERG_API = "https://codeberg.org/api/v1/repos/mikf/gallery-dl/releases/latest";
@@ -37825,7 +38914,7 @@ function getBinaryVersion(executablePath) {
   });
 }
 async function downloadBinary(url, targetFile, signal) {
-  await fs7.mkdir(path5.dirname(targetFile), { recursive: true });
+  await fs9.mkdir(path6.dirname(targetFile), { recursive: true });
   const response = await fetch(url, {
     signal,
     headers: { "User-Agent": "open-nami" }
@@ -37834,18 +38923,18 @@ async function downloadBinary(url, targetFile, signal) {
     throw new Error(`Failed to download binary from ${url} (HTTP ${response.status}). Check your connection and try again.`);
   }
   const tmp = `${targetFile}.download`;
-  await pipeline(Readable.fromWeb(response.body), createWriteStream(tmp), { signal });
+  await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
   try {
-    await fs7.chmod(tmp, 493);
+    await fs9.chmod(tmp, 493);
   } catch {
   }
-  await fs7.rename(tmp, targetFile);
+  await fs9.rename(tmp, targetFile);
   return targetFile;
 }
 async function downloadLatestYtDlp(targetDir, signal, onStatus) {
   const dir = targetDir || getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path5.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   const asset = ytDlpAssetName();
   const url = `${YTDLP_RELEASE_BASE}/${asset}`;
   onStatus?.(`fetching latest yt-dlp (${asset})\u2026`);
@@ -37881,7 +38970,7 @@ async function downloadLatestGalleryDl(targetDir, signal, onStatus) {
   }
   const dir = targetDir || getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path5.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   const asset = galleryDlAssetName();
   const candidateUrls = await getGalleryDlDownloadUrls(asset, fetch, signal);
   let lastError;
@@ -37899,7 +38988,7 @@ async function downloadLatestGalleryDl(targetDir, signal, onStatus) {
 async function ensureYtDlp(onStatus, signal) {
   if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path5.join(getOpenNamiBinDir(), binaryName);
+  const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
   if (await commandWorks("python", ["-m", "yt_dlp", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "yt_dlp", "--version"])) return "python3";
@@ -37909,7 +38998,7 @@ async function ensureYtDlp(onStatus, signal) {
 async function ensureGalleryDl(onStatus, signal) {
   if (await commandWorks("gallery-dl", ["--version"])) return "gallery-dl";
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path5.join(getOpenNamiBinDir(), binaryName);
+  const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
   if (await commandWorks("python", ["-m", "gallery_dl", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "gallery_dl", "--version"])) return "python3";
@@ -37922,7 +39011,7 @@ async function updateYtDlp(options) {
   const signal = options?.signal;
   const dir = getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path5.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   let previousVersion;
   if (await commandWorks(local, ["--version"])) {
     previousVersion = await getBinaryVersion(local);
@@ -37945,7 +39034,7 @@ async function updateGalleryDl(options) {
   const signal = options?.signal;
   const dir = getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path5.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   let previousVersion;
   if (await commandWorks(local, ["--version"])) {
     previousVersion = await getBinaryVersion(local);
@@ -37966,16 +39055,16 @@ async function updateGalleryDl(options) {
 // src/lib/engines/exec.ts
 function findExecutable(binName, pathEnv = process.env.PATH || "") {
   if (!pathEnv) return null;
-  const delimiter = path6.delimiter;
+  const delimiter = path7.delimiter;
   const dirs = pathEnv.split(delimiter).filter(Boolean);
   const isWin = process.platform === "win32";
   const extensions = isWin ? [".exe", ".cmd", ".bat", ""] : [""];
   for (const dir of dirs) {
     for (const ext of extensions) {
-      const fullPath = path6.join(dir, `${binName}${ext}`);
+      const fullPath = path7.join(dir, `${binName}${ext}`);
       try {
-        if (fs8.existsSync(fullPath)) {
-          const stat = fs8.statSync(fullPath);
+        if (fs10.existsSync(fullPath)) {
+          const stat = fs10.statSync(fullPath);
           if (stat.isFile()) {
             return fullPath;
           }
@@ -38005,10 +39094,10 @@ function resolveEngineCommand(engine, options = {}) {
   }
   const binDir = getOpenNamiBinDir(env3);
   const isWin = process.platform === "win32";
-  const localBin = path6.join(binDir, `${engine}${isWin ? ".exe" : ""}`);
+  const localBin = path7.join(binDir, `${engine}${isWin ? ".exe" : ""}`);
   try {
-    if (fs8.existsSync(localBin)) {
-      const stat = fs8.statSync(localBin);
+    if (fs10.existsSync(localBin)) {
+      const stat = fs10.statSync(localBin);
       if (stat.isFile()) {
         return {
           command: localBin,
@@ -38065,7 +39154,7 @@ function buildGalleryDlArgs(options) {
     "-o",
     'headers.sec-ch-ua-platform="Windows"',
     "--download-archive",
-    path7.join(destDir, GDL_ARCHIVE),
+    path8.join(destDir, GDL_ARCHIVE),
     "--retries",
     "3",
     "--sleep-429",
@@ -38103,8 +39192,8 @@ function buildGalleryDlArgs(options) {
 }
 async function runGalleryDl(options) {
   const { profile, targetDir, subDir, cookiePath, onProgress } = options;
-  const destDir = path7.join(targetDir, subDir);
-  await fs9.mkdir(destDir, { recursive: true });
+  const destDir = path8.join(targetDir, subDir);
+  await fs11.mkdir(destDir, { recursive: true });
   const args = buildGalleryDlArgs({
     destDir,
     subDir,
@@ -38146,7 +39235,7 @@ async function runGalleryDl(options) {
       if (!trimmed) return;
       if (trimmed.startsWith("#")) {
         skippedCount++;
-        const filename = path7.basename(trimmed.slice(1).trim());
+        const filename = path8.basename(trimmed.slice(1).trim());
         onProgress?.({
           job: subDir,
           downloadedCount,
@@ -38154,9 +39243,9 @@ async function runGalleryDl(options) {
           currentFile: filename,
           statusText: `Skipped: ${filename}`
         });
-      } else if (trimmed.match(/\.(jpe?g|png|gif|webp|bmp|jfif|heic|avif|tiff|svg|mp4|mov|webm|mkv|avi|flv|m4v)$/i) || trimmed.includes(path7.sep)) {
+      } else if (trimmed.match(/\.(jpe?g|png|gif|webp|bmp|jfif|heic|avif|tiff|svg|mp4|mov|webm|mkv|avi|flv|m4v)$/i) || trimmed.includes(path8.sep)) {
         downloadedCount++;
-        const filename = path7.basename(trimmed);
+        const filename = path8.basename(trimmed);
         onProgress?.({
           job: subDir,
           downloadedCount,
@@ -38207,15 +39296,15 @@ async function runGalleryDl(options) {
 
 // src/lib/engines/yt-dlp.ts
 import { spawn as spawn3 } from "child_process";
-import path8 from "path";
-import fs10 from "fs/promises";
+import path9 from "path";
+import fs12 from "fs/promises";
 var YTDLP_ARCHIVE = "archive_yt-dlp.txt";
 var UA2 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 function buildYtDlpArgs(options) {
   const { destDir, platform: platform2, cleanUrl, cookiePath } = options;
   const args = [
     "-o",
-    path8.join(destDir, "%(title).150B [%(id)s].%(ext)s"),
+    path9.join(destDir, "%(title).150B [%(id)s].%(ext)s"),
     "--windows-filenames",
     "--newline",
     "--ignore-errors",
@@ -38223,7 +39312,7 @@ function buildYtDlpArgs(options) {
     "--user-agent",
     UA2,
     "--download-archive",
-    path8.join(destDir, YTDLP_ARCHIVE),
+    path9.join(destDir, YTDLP_ARCHIVE),
     "--concurrent-fragments",
     "4",
     "--retries",
@@ -38248,8 +39337,8 @@ function buildYtDlpArgs(options) {
 }
 async function runYtDlp(options) {
   const { profile, targetDir, cookiePath, onProgress } = options;
-  const destDir = path8.join(targetDir, "Videos");
-  await fs10.mkdir(destDir, { recursive: true });
+  const destDir = path9.join(targetDir, "Videos");
+  await fs12.mkdir(destDir, { recursive: true });
   const args = buildYtDlpArgs({
     destDir,
     platform: profile.platform,
@@ -38297,7 +39386,7 @@ async function runYtDlp(options) {
         });
       } else if (trimmed.includes("[download] Destination:")) {
         const dest = trimmed.replace("[download] Destination:", "").trim();
-        const filename = path8.basename(dest);
+        const filename = path9.basename(dest);
         onProgress?.({
           job: "Videos",
           downloadedCount,
@@ -38356,36 +39445,36 @@ async function runYtDlp(options) {
 // src/lib/engines/dispatcher.ts
 function expandPath(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path9.join(os10.homedir(), dir.slice(1));
+    return path10.join(os10.homedir(), dir.slice(1));
   }
   return dir;
 }
 function resolveDownloadBaseDir(customBaseDir) {
   if (customBaseDir && customBaseDir.trim()) {
-    return path9.resolve(expandPath(customBaseDir.trim()));
+    return path10.resolve(expandPath(customBaseDir.trim()));
   }
   const configDir = loadConfig().downloadDir;
   if (configDir && configDir.trim()) {
-    return path9.resolve(expandPath(configDir.trim()));
+    return path10.resolve(expandPath(configDir.trim()));
   }
   const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
   if (envDir && envDir.trim()) {
-    return path9.resolve(expandPath(envDir.trim()));
+    return path10.resolve(expandPath(envDir.trim()));
   }
   if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
     const raw = process.env.NAMI_BASE_DIR.trim();
-    return path9.resolve(expandPath(raw.endsWith("downloads") ? raw : path9.join(raw, "downloads")));
+    return path10.resolve(expandPath(raw.endsWith("downloads") ? raw : path10.join(raw, "downloads")));
   }
-  return path9.join(resolvePlatformDownloadsDir(), "Open Nami");
+  return path10.join(resolvePlatformDownloadsDir(), "Open Nami");
 }
 function resolveDefaultDownloadDir(platform2, username, baseDir) {
   const root = resolveDownloadBaseDir(baseDir);
-  return path9.join(root, platform2, username);
+  return path10.join(root, platform2, username);
 }
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
-  await fs11.mkdir(targetDir, { recursive: true });
+  await fs13.mkdir(targetDir, { recursive: true });
   const masterCookie = findCookieFile(profile.platform);
   const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
   let totalDownloaded = 0;
@@ -38409,6 +39498,45 @@ async function dispatchDownload(options) {
         jobs.push({ type: "highlights" });
       }
     }
+    const runNative = async (subDir) => {
+      const dest = path10.join(targetDir, subDir);
+      try {
+        const extractor = getExtractor(profile.platform);
+        const items = extractor.extract(profile, {
+          subDir,
+          cookiePath: cookieCopy?.filePath,
+          signal: options.signal
+        });
+        const refererMap = {
+          tiktok: "https://www.tiktok.com/",
+          instagram: "https://www.instagram.com/",
+          x: "https://x.com/",
+          facebook: "https://www.facebook.com/"
+        };
+        const res = await downloadMediaStream(items, {
+          jobName: `${profile.username} ${subDir}`,
+          destDir: dest,
+          cookiePath: cookieCopy?.filePath,
+          referer: refererMap[profile.platform],
+          signal: options.signal,
+          onProgress
+        });
+        return {
+          success: res.errors.length === 0,
+          downloaded: res.downloaded,
+          skipped: res.skipped,
+          error: res.errors.length > 0 ? res.errors.join("; ") : void 0
+        };
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        return {
+          success: false,
+          downloaded: 0,
+          skipped: 0,
+          error: errMsg
+        };
+      }
+    };
     const runGdl = (subDir) => runGalleryDl({
       profile,
       targetDir,
@@ -38428,23 +39556,33 @@ async function dispatchDownload(options) {
       if (options.signal?.aborted) break;
       if (job.type === "photos" || job.type === "stories" || job.type === "highlights") {
         const subDir = job.type === "photos" ? "Photos" : job.type === "stories" ? "Stories" : "Highlights";
-        const res = await runGdl(subDir);
+        let res = await runNative(subDir);
+        if ((!res.success || res.downloaded === 0 && res.skipped === 0) && !options.signal?.aborted) {
+          const gdlRes = await runGdl(subDir);
+          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success) {
+            res = gdlRes;
+          }
+        }
         totalDownloaded += res.downloaded;
         totalSkipped += res.skipped;
         if (!res.success && res.error) errors.push(`[${subDir}] ${res.error}`);
       } else if (job.type === "videos") {
-        const prefersGdl = profile.platform === "instagram" || profile.platform === "tiktok" || profile.platform === "x";
-        const primary = prefersGdl ? () => runGdl("Videos") : runYt;
-        const fallback = prefersGdl ? runYt : () => runGdl("Videos");
-        let res = await primary();
+        let res = await runNative("Videos");
         if (res.downloaded > 0 || res.skipped > 0) {
           totalDownloaded += res.downloaded;
           totalSkipped += res.skipped;
         } else if (!options.signal?.aborted) {
-          const fbRes = await fallback();
-          totalDownloaded += fbRes.downloaded;
-          totalSkipped += fbRes.skipped;
-          if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`);
+          const fbRes = await runYt();
+          if (fbRes.downloaded > 0 || fbRes.skipped > 0 || fbRes.success) {
+            totalDownloaded += fbRes.downloaded;
+            totalSkipped += fbRes.skipped;
+            if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`);
+          } else if (!options.signal?.aborted) {
+            const gdlRes = await runGdl("Videos");
+            totalDownloaded += gdlRes.downloaded;
+            totalSkipped += gdlRes.skipped;
+            if (!gdlRes.success && gdlRes.error) errors.push(`[Videos] ${gdlRes.error}`);
+          }
         }
       }
     }
@@ -38483,9 +39621,9 @@ function readClipboard(execFn = execFileSync3) {
 }
 
 // src/lib/reveal.ts
-import fs12 from "fs";
+import fs14 from "fs";
 import { spawn as spawn4 } from "child_process";
-import path10 from "path";
+import path11 from "path";
 function buildOpenBrowserCommand(url, platform2 = process.platform) {
   try {
     const parsed = new URL(url.trim());
@@ -38512,12 +39650,12 @@ function openBrowser(url) {
   }
 }
 function getRevealCommand(targetPath, platform2 = process.platform, isDirectory) {
-  const pathModule = platform2 === "win32" ? path10.win32 : platform2 === "darwin" ? path10.posix : path10;
+  const pathModule = platform2 === "win32" ? path11.win32 : platform2 === "darwin" ? path11.posix : path11;
   const resolved = pathModule.resolve(targetPath);
   const isDir = isDirectory !== void 0 ? isDirectory : (() => {
     try {
-      if (fs12.existsSync(resolved)) {
-        return fs12.statSync(resolved).isDirectory();
+      if (fs14.existsSync(resolved)) {
+        return fs14.statSync(resolved).isDirectory();
       }
     } catch {
     }
