@@ -91,6 +91,43 @@ export interface RequestOptions extends RequestInit {
   cookieDomain?: string
   retries?: number
   retryDelayMs?: number
+  timeoutMs?: number
+}
+
+function bindTimeoutSignal(
+  signal?: AbortSignal,
+  timeoutMs?: number,
+): {signal?: AbortSignal; cleanup: () => void} {
+  if (!timeoutMs || timeoutMs <= 0) {
+    return {signal, cleanup: () => {}}
+  }
+
+  const controller = new AbortController()
+  const timer = setTimeout(() => {
+    controller.abort(new Error(`Request timed out after ${timeoutMs}ms`))
+  }, timeoutMs)
+
+  const onAbort = () => {
+    controller.abort(signal?.reason)
+  }
+
+  if (signal) {
+    if (signal.aborted) {
+      controller.abort(signal.reason)
+    } else {
+      signal.addEventListener('abort', onAbort, {once: true})
+    }
+  }
+
+  return {
+    signal: controller.signal,
+    cleanup: () => {
+      clearTimeout(timer)
+      if (signal) {
+        signal.removeEventListener('abort', onAbort)
+      }
+    },
+  }
 }
 
 export class HttpClient {
@@ -134,8 +171,8 @@ export class HttpClient {
   }
 
   async request(url: string, options: RequestOptions = {}): Promise<Response> {
-    const retries = options.retries ?? 3
-    const retryDelay = options.retryDelayMs ?? 1500
+    const retries = options.retries ?? 1
+    const retryDelay = options.retryDelayMs ?? 1000
 
     let cookieHeader = ''
     if (options.cookiePath) {
@@ -166,19 +203,22 @@ export class HttpClient {
         throw options.signal.reason ?? new Error('Aborted')
       }
 
+      const bound = bindTimeoutSignal(options.signal || undefined, options.timeoutMs)
+
       try {
         const response = await fetch(url, {
           ...options,
+          signal: bound.signal,
           headers,
         })
 
         if (response.status === 429) {
-          // Rate limited, back off
           if (attempt < retries) {
             try {
               await response.body?.cancel()
             } catch {}
-            await sleep(retryDelay * (attempt + 1) * 2, undefined, options.signal || undefined)
+            const backoffMs = Math.min(retryDelay * (attempt + 1), 2500)
+            await sleep(backoffMs, undefined, options.signal || undefined)
             continue
           }
         }
@@ -187,7 +227,8 @@ export class HttpClient {
           try {
             await response.body?.cancel()
           } catch {}
-          await sleep(retryDelay * (attempt + 1), undefined, options.signal || undefined)
+          const backoffMs = Math.min(retryDelay * (attempt + 1), 2000)
+          await sleep(backoffMs, undefined, options.signal || undefined)
           continue
         }
 
@@ -198,6 +239,8 @@ export class HttpClient {
         if (attempt < retries) {
           await sleep(retryDelay * (attempt + 1), undefined, options.signal || undefined)
         }
+      } finally {
+        bound.cleanup()
       }
     }
 
@@ -213,6 +256,9 @@ export class HttpClient {
       },
     })
     if (!res.ok) {
+      try {
+        await res.body?.cancel()
+      } catch {}
       throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`)
     }
     return (await res.json()) as T
@@ -221,6 +267,9 @@ export class HttpClient {
   async fetchText(url: string, options: RequestOptions = {}): Promise<string> {
     const res = await this.request(url, options)
     if (!res.ok) {
+      try {
+        await res.body?.cancel()
+      } catch {}
       throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`)
     }
     return await res.text()

@@ -40,7 +40,6 @@ export function resolveEngineCommand(
   const env = options.env ?? process.env
   const finder = options.findExe ?? (name => findExecutable(name, env.PATH))
 
-  // 1. Check custom environment variable override
   const customOverride =
     engine === 'gallery-dl'
       ? env.GALLERY_DL_PATH || env.GALLERY_DL_BINARY
@@ -53,7 +52,6 @@ export function resolveEngineCommand(
     }
   }
 
-  // 2. Check standalone executable in PATH (e.g. installed via Scoop, Winget, Homebrew)
   const standalone = finder(engine)
   if (standalone) {
     return {
@@ -62,7 +60,6 @@ export function resolveEngineCommand(
     }
   }
 
-  // 3. Check standalone binary in ~/.open-nami/bin/
   const binDir = getOpenNamiBinDir(env)
   const isWin = process.platform === 'win32'
   const localBin = path.join(binDir, `${engine}${isWin ? '.exe' : ''}`)
@@ -80,7 +77,6 @@ export function resolveEngineCommand(
 
   const moduleName = engine === 'gallery-dl' ? 'gallery_dl' : 'yt_dlp'
 
-  // 4. Check python in PATH
   const pythonExe = finder('python')
   if (pythonExe) {
     return {
@@ -89,7 +85,6 @@ export function resolveEngineCommand(
     }
   }
 
-  // 4. Check python3 in PATH (macOS / Linux)
   const python3Exe = finder('python3')
   if (python3Exe) {
     return {
@@ -98,7 +93,6 @@ export function resolveEngineCommand(
     }
   }
 
-  // 5. Default fallback to python invocation
   return {
     command: 'python',
     baseArgs: ['-m', moduleName],

@@ -22,7 +22,6 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
   const date = Number(item.createTime) || undefined
   const caption = item.desc
 
-  // 1. Photo posts / carousels
   const imageList = item.imagePost?.images
   if (Array.isArray(imageList) && imageList.length > 0) {
     imageList.forEach((img: any, idx: number) => {
@@ -42,7 +41,6 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
     return items
   }
 
-  // 2. Video post
   const video = item.video
   const videoUrl = video?.playAddr || video?.downloadAddr
   if (videoUrl) {
@@ -88,6 +86,8 @@ export class TikTokExtractor implements Extractor {
       cookiePath: options.cookiePath,
       cookieDomain: 'tiktok.com',
       signal: options.signal,
+      retries: 0,
+      timeoutMs: 4000,
     })
 
     const scope = parseTikTokRehydrationJson(html)
@@ -97,7 +97,7 @@ export class TikTokExtractor implements Extractor {
 
     let found = 0
 
-    // 1. Yield items present directly in initial SSR hydration
+    // Initial SSR hydration items
     const initialItems = userDetail?.itemList || []
     for (const rawItem of initialItems) {
       const mediaList = parseTikTokItem(rawItem, cleanUsername)
@@ -119,7 +119,7 @@ export class TikTokExtractor implements Extractor {
       return
     }
 
-    // 2. Fetch paginated posts using item_list API
+    // Paginated posts via item_list API
     let cursor = '0'
     let hasMore = true
     const visitedCursors = new Set<string>()

@@ -12,8 +12,8 @@ const GDL_ARCHIVE = 'archive_gallery-dl.sqlite3'
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
 const PLATFORM_SLEEP: Record<string, string> = {
   tiktok: '0.6-1.2',
-  instagram: '2.0-2.8',
-  facebook: '1.5-2.5',
+  instagram: '1.0-1.8',
+  facebook: '1.0-1.8',
 }
 
 export interface GalleryDlOptions {
@@ -63,12 +63,12 @@ export function buildGalleryDlArgs(options: {
   } else if (subDir === 'Stories') {
     if (platform === 'instagram') {
       targetUrl = `https://www.instagram.com/stories/${encodeURIComponent(username)}/`
-      args.push('--sleep-request', '2.0-3.0')
+      args.push('--sleep-request', '1.0-1.8')
     }
   } else if (subDir === 'Highlights') {
     if (platform === 'instagram') {
       targetUrl = `https://www.instagram.com/${encodeURIComponent(username)}/highlights/`
-      args.push('--sleep-request', '2.0-3.0')
+      args.push('--sleep-request', '1.0-1.8')
     }
   }
 

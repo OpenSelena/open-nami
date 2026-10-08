@@ -2,53 +2,54 @@ import {HttpClient, sleep} from './http.js'
 import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
+function decodeEscapedUrl(raw: string): string {
+  try {
+    return JSON.parse(`"${raw.replace(/"/g, '\\"')}"`)
+  } catch {
+    return raw.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))).replace(/\\\//g, '/')
+  }
+}
+
 export function extractFacebookMediaFromHtml(html: string, username: string): MediaItem[] {
   const items: MediaItem[] = []
   const seenUrls = new Set<string>()
 
-  // 1. HD or SD Video URLs
   const hdMatch = html.match(/"browser_native_hd_url":"([^"]+)"/)
   const sdMatch = html.match(/"browser_native_sd_url":"([^"]+)"/)
   const rawVideoUrl = hdMatch?.[1] || sdMatch?.[1]
 
   if (rawVideoUrl) {
-    try {
-      const videoUrl = JSON.parse(`"${rawVideoUrl}"`)
-      if (!seenUrls.has(videoUrl)) {
-        seenUrls.add(videoUrl)
-        items.push({
-          id: `fb_video_${Date.now()}`,
-          url: videoUrl,
-          filename: `${username}_video_${Date.now()}`,
-          extension: 'mp4',
-          type: 'video',
-        })
-      }
-    } catch {}
+    const videoUrl = decodeEscapedUrl(rawVideoUrl)
+    if (!seenUrls.has(videoUrl)) {
+      seenUrls.add(videoUrl)
+      items.push({
+        id: `fb_video_${Date.now()}`,
+        url: videoUrl,
+        filename: `${username}_video_${Date.now()}`,
+        extension: 'mp4',
+        type: 'video',
+      })
+    }
   }
 
-  // 2. High-res Photo URLs
-  // Pattern: ,"image":{"uri":"https:\/\/scontent...
   const photoRegex = /,"image":\{"uri":"([^"]+)"/g
   let match: RegExpExecArray | null
   let photoIndex = 1
 
   while ((match = photoRegex.exec(html)) !== null) {
-    try {
-      const rawUrl = match[1]
-      const photoUrl = JSON.parse(`"${rawUrl}"`)
-      if (!seenUrls.has(photoUrl)) {
-        seenUrls.add(photoUrl)
-        items.push({
-          id: `fb_photo_${photoIndex}`,
-          url: photoUrl,
-          filename: `${username}_photo_${photoIndex}`,
-          extension: 'jpg',
-          type: 'photo',
-        })
-        photoIndex++
-      }
-    } catch {}
+    const rawUrl = match[1]
+    const photoUrl = decodeEscapedUrl(rawUrl)
+    if (!seenUrls.has(photoUrl)) {
+      seenUrls.add(photoUrl)
+      items.push({
+        id: `fb_photo_${photoIndex}`,
+        url: photoUrl,
+        filename: `${username}_photo_${photoIndex}`,
+        extension: 'jpg',
+        type: 'photo',
+      })
+      photoIndex++
+    }
   }
 
   // Fallback: scontent photo links in HTML
@@ -102,6 +103,8 @@ export class FacebookExtractor implements Extractor {
       cookiePath: options.cookiePath,
       cookieDomain: 'facebook.com',
       signal: options.signal,
+      retries: 0,
+      timeoutMs: 4000,
     })
 
     const items = extractFacebookMediaFromHtml(html, username)

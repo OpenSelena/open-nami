@@ -76,7 +76,6 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
     return items
   }
 
-  // Check if video
   const isVideo = Boolean(node.is_video || node.video_url || (node.video_versions && node.video_versions.length > 0))
 
   if (isVideo) {
@@ -96,7 +95,6 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
       })
     }
   } else {
-    // Photo
     const candidate = node.image_versions2?.candidates?.[0]
     const photoUrl = candidate?.url || node.display_url
     if (photoUrl) {
@@ -172,6 +170,8 @@ export class InstagramExtractor implements Extractor {
       cookiePath: options.cookiePath,
       cookieDomain: 'instagram.com',
       signal: options.signal,
+      retries: 0,
+      timeoutMs: 4000,
       headers: {
         'X-IG-App-ID': IG_APP_ID,
         'Referer': `https://www.instagram.com/${username}/`,
@@ -256,7 +256,7 @@ export class InstagramExtractor implements Extractor {
       }
     } catch {}
 
-    // 2. Try POST with doc_id PolarisProfilePostsTabContentQuery_connection
+    // PolarisProfilePostsTabContentQuery GraphQL connection
     try {
       const postVariables = JSON.stringify({
         after: cursor,
@@ -296,7 +296,7 @@ export class InstagramExtractor implements Extractor {
       }
     } catch {}
 
-    // 3. Try v1 user feed REST endpoint
+    // v1 user feed REST endpoint
     try {
       const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`
       const res = await this.httpClient.fetchJson<any>(restUrl, {
@@ -335,7 +335,6 @@ export class InstagramExtractor implements Extractor {
     const user = await this.fetchUserProfile(username, options)
     const userId = user.id
 
-    // 1. Stories
     if (subDir === 'Stories') {
       options.onProgress?.({
         stage: 'Stories',
@@ -352,7 +351,6 @@ export class InstagramExtractor implements Extractor {
       return
     }
 
-    // 2. Highlights
     if (subDir === 'Highlights') {
       options.onProgress?.({
         stage: 'Highlights',
@@ -381,7 +379,6 @@ export class InstagramExtractor implements Extractor {
       return
     }
 
-    // 3. Posts & Videos (Timeline and Reels with pagination loop)
     let found = 0
 
     // Timeline Media with pagination

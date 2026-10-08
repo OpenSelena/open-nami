@@ -37,6 +37,7 @@ export interface StreamDownloadOptions {
   cookiePath?: string | null
   referer?: string
   signal?: AbortSignal
+  concurrency?: number
   onProgress?: (progress: EngineProgress) => void
 }
 
@@ -72,6 +73,7 @@ export async function downloadMediaStream(
 ): Promise<StreamDownloadResult> {
   const {jobName, destDir, signal, onProgress} = options
   const httpClient = options.httpClient ?? new HttpClient()
+  const concurrency = Math.max(1, options.concurrency ?? 3)
 
   await fsPromises.mkdir(destDir, {recursive: true})
   const archive = await loadArchive(destDir)
@@ -80,102 +82,128 @@ export async function downloadMediaStream(
   let skipped = 0
   const errors: string[] = []
 
-  for await (const item of items) {
-    if (signal?.aborted) {
-      break
-    }
+  const iterator = items[Symbol.asyncIterator]()
+  let queueLock = Promise.resolve()
+  let isDone = false
 
-    const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
-    const finalFilename = sanitizeFilename(item.filename, item.id, ext)
-    const finalPath = path.join(destDir, finalFilename)
+  function getNextItem(): Promise<IteratorResult<MediaItem>> {
+    const nextItem = queueLock.then(() => iterator.next())
+    queueLock = nextItem.then(
+      () => {},
+      () => {},
+    )
+    return nextItem
+  }
 
-    // Check archive and filesystem existence
-    if (archive.has(item.id) && fs.existsSync(finalPath)) {
-      skipped++
-      onProgress?.({
-        job: jobName,
-        downloadedCount: downloaded,
-        skippedCount: skipped,
-        currentFile: finalFilename,
-        statusText: `Skipping already downloaded: ${finalFilename}`,
-      })
-      continue
-    }
-
-    onProgress?.({
-      job: jobName,
-      downloadedCount: downloaded,
-      skippedCount: skipped,
-      currentFile: finalFilename,
-      statusText: `Downloading: ${finalFilename}`,
-    })
-
-    const tmpPath = `${finalPath}.download`
-    try {
-      const reqHeaders: Record<string, string> = {}
-      if (options.referer) {
-        reqHeaders['Referer'] = options.referer
-      }
-
-      const response = await httpClient.request(item.url, {
-        signal,
-        cookiePath: options.cookiePath,
-        headers: reqHeaders,
-      })
-
-      if (!response.ok || !response.body) {
-        throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`)
-      }
-
-      const fileStream = fs.createWriteStream(tmpPath)
-      await pipeline(Readable.fromWeb(response.body as never), fileStream, {signal})
-
-      // Set modification time if timestamp present
-      if (item.date) {
-        try {
-          const mtime = new Date(item.date * 1000)
-          await fsPromises.utimes(tmpPath, mtime, mtime)
-        } catch {}
-      }
-
-      await fsPromises.rename(tmpPath, finalPath)
-
-      archive.add(item.id)
-      downloaded++
-
-      onProgress?.({
-        job: jobName,
-        downloadedCount: downloaded,
-        skippedCount: skipped,
-        currentFile: finalFilename,
-        statusText: `Saved: ${finalFilename}`,
-      })
-    } catch (err: unknown) {
-      // Clean up tmp file
+  async function downloadWorker(): Promise<void> {
+    while (!isDone && !signal?.aborted) {
+      let item: MediaItem
       try {
-        if (fs.existsSync(tmpPath)) {
-          await fsPromises.unlink(tmpPath)
+        const next = await getNextItem()
+        if (next.done) {
+          isDone = true
+          break
         }
-      } catch {}
-
-      if (signal?.aborted) {
+        item = next.value
+      } catch {
+        isDone = true
         break
       }
 
-      const errMsg = err instanceof Error ? err.message : String(err)
-      errors.push(`${finalFilename}: ${errMsg}`)
+      const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
+      const finalFilename = sanitizeFilename(item.filename, item.id, ext)
+      const finalPath = path.join(destDir, finalFilename)
+
+      if (archive.has(item.id) && fs.existsSync(finalPath)) {
+        skipped++
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Skipping already downloaded: ${finalFilename}`,
+        })
+        continue
+      }
 
       onProgress?.({
         job: jobName,
         downloadedCount: downloaded,
         skippedCount: skipped,
         currentFile: finalFilename,
-        statusText: `Failed: ${finalFilename} (${errMsg})`,
+        statusText: `Downloading: ${finalFilename}`,
       })
+
+      const tmpPath = `${finalPath}.download`
+      try {
+        const reqHeaders: Record<string, string> = {}
+        if (options.referer) {
+          reqHeaders['Referer'] = options.referer
+        }
+
+        const response = await httpClient.request(item.url, {
+          signal,
+          cookiePath: options.cookiePath,
+          headers: reqHeaders,
+        })
+
+        if (!response.ok || !response.body) {
+          try {
+            await response.body?.cancel()
+          } catch {}
+          throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`)
+        }
+
+        const fileStream = fs.createWriteStream(tmpPath)
+        await pipeline(Readable.fromWeb(response.body as any), fileStream, {signal})
+
+        if (item.date) {
+          try {
+            const mtime = new Date(item.date * 1000)
+            await fsPromises.utimes(tmpPath, mtime, mtime)
+          } catch {}
+        }
+
+        await fsPromises.rename(tmpPath, finalPath)
+
+        archive.add(item.id)
+        downloaded++
+
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Saved: ${finalFilename}`,
+        })
+      } catch (err: unknown) {
+        try {
+          if (fs.existsSync(tmpPath)) {
+            await fsPromises.unlink(tmpPath)
+          }
+        } catch {}
+
+        if (signal?.aborted) {
+          break
+        }
+
+        const errMsg = err instanceof Error ? err.message : String(err)
+        errors.push(`${finalFilename}: ${errMsg}`)
+
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Failed: ${finalFilename} (${errMsg})`,
+        })
+      }
     }
   }
 
-  // Persist updated archive
+  const workers = Array.from({length: concurrency}, () => downloadWorker())
+  await Promise.all(workers)
+
   await saveArchive(destDir, archive)
 
   return {downloaded, skipped, errors}

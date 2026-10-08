@@ -79,7 +79,6 @@ export function parseTweetMediaEntities(
         })
       }
     } else {
-      // Photo
       let photoUrl = media.media_url_https
       if (photoUrl) {
         // Strip query params and request original quality
@@ -130,6 +129,8 @@ export class XExtractor implements Extractor {
           cookiePath: options.cookiePath,
           cookieDomain: 'x.com',
           signal: options.signal,
+          retries: 0,
+          timeoutMs: 3000,
           headers: {
             'Authorization': `Bearer ${TWITTER_BEARER_TOKEN}`,
           },
@@ -164,16 +165,22 @@ export class XExtractor implements Extractor {
         cookiePath: options.cookiePath,
         cookieDomain: 'x.com',
         signal: options.signal,
+        retries: 0,
+        timeoutMs: 4000,
       })
 
       const restId = res.data?.user?.result?.rest_id
       if (restId) return restId
     } catch {}
 
-    // Fallback: search profile HTML or syndication
+    // Fallback: syndication widget
     const syndiUrl = `https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(username)}`
     try {
-      const res = await this.httpClient.fetchJson<any[]>(syndiUrl, {signal: options.signal})
+      const res = await this.httpClient.fetchJson<any[]>(syndiUrl, {
+        signal: options.signal,
+        retries: 0,
+        timeoutMs: 3000,
+      })
       if (res[0]?.id) return String(res[0].id)
     } catch {}
 
