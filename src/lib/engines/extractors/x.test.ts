@@ -125,3 +125,29 @@ test('XExtractor fetchUserRestId throws when missing twid cookie for i_history_l
   )
 })
 
+test('XExtractor fetchUserRestId extracts alphanumeric or quoted twid cookie values', async () => {
+  const fs = await import('node:fs/promises')
+  const path = await import('node:path')
+  const os = await import('node:os')
+  const {XExtractor} = await import('./x.js')
+
+  const tmpCookiePath = path.join(os.tmpdir(), `test-twid-quoted-${Date.now()}.txt`)
+  const cookieContent = `.x.com\tTRUE\t/\tTRUE\t2147483647\ttwid\t"u=snowflake_9876"\n`
+  await fs.writeFile(tmpCookiePath, cookieContent)
+
+  try {
+    const mockHttpClient: any = {
+      fetchJson: async () => ({}),
+      setHeader: () => {},
+    }
+    const extractor = new XExtractor(mockHttpClient)
+    const userId = await extractor.fetchUserRestId('i_history_likes', {
+      subDir: 'Photos',
+      cookiePath: tmpCookiePath,
+    })
+    assert.equal(userId, 'snowflake_9876')
+  } finally {
+    await fs.rm(tmpCookiePath, {force: true})
+  }
+})
+

@@ -160,8 +160,9 @@ export class XExtractor implements Extractor {
         const cookies = await loadCookiesFromPath(options.cookiePath, 'x.com')
         const twid = cookies['twid']
         if (twid) {
-          const rawId = twid.includes('%3D') ? twid.split('%3D').pop() : twid.replace(/^u=/, '')
-          if (rawId && /^\d+$/.test(rawId)) {
+          const decoded = decodeURIComponent(twid).replace(/^"|"$/g, '').trim()
+          const rawId = decoded.startsWith('u=') ? decoded.slice(2) : decoded
+          if (rawId && /^[a-zA-Z0-9_-]+$/.test(rawId)) {
             return rawId
           }
         }

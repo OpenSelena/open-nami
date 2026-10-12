@@ -237,3 +237,33 @@ test('InstagramExtractor fetchNextReelsPage queries PolarisProfileReelsTabConten
   assert.equal(result.edges[0].node.id, 'reel_video_1')
 })
 
+test('InstagramExtractor fetchHighlightsTray emits debug warning on failed query when OPEN_NAMI_DEBUG is enabled', async () => {
+  const origDebug = process.env.OPEN_NAMI_DEBUG
+  process.env.OPEN_NAMI_DEBUG = '1'
+
+  const debugLogs: string[] = []
+  const origConsoleDebug = console.debug
+  console.debug = (...args: any[]) => {
+    debugLogs.push(args.join(' '))
+  }
+
+  try {
+    const mockHttpClient: any = {
+      fetchJson: async () => {
+        throw new Error('Doc ID 26970053832668570 deprecated by Meta')
+      },
+    }
+    const extractor = new InstagramExtractor(mockHttpClient)
+    const result = await extractor.fetchHighlightsTray('12345', {subDir: 'Highlights'})
+    assert.deepEqual(result, [])
+    assert.ok(debugLogs.some(log => log.includes('PolarisProfileStoryHighlightsTrayContentQuery')))
+  } finally {
+    console.debug = origConsoleDebug
+    if (origDebug !== undefined) {
+      process.env.OPEN_NAMI_DEBUG = origDebug
+    } else {
+      delete process.env.OPEN_NAMI_DEBUG
+    }
+  }
+})
+

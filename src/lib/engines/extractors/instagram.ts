@@ -17,6 +17,13 @@ export const IG_QUERIES = {
 
 export const IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection
 
+function logExtractorDebug(endpoint: string, err: unknown): void {
+  if (process.env.DEBUG || process.env.OPEN_NAMI_DEBUG) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.debug(`[open-nami:instagram] ${endpoint} query fallback: ${message}`)
+  }
+}
+
 export interface IgUser {
   id: string
   username: string
@@ -223,9 +230,11 @@ export class InstagramExtractor implements Extractor {
       if (Array.isArray(edges) && edges.length > 0) {
         return edges.map((e: any) => e.node)
       }
-    } catch {}
+    } catch (err) {
+      logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery', err)
+    }
 
-    // 2. Fallback to legacy REST endpoint
+    // Fallback to legacy REST endpoint
     const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`
     try {
       const res = await this.httpClient.fetchJson<{tray?: any[]}>(url, {
@@ -237,7 +246,8 @@ export class InstagramExtractor implements Extractor {
         },
       })
       return res.tray ?? []
-    } catch {
+    } catch (err) {
+      logExtractorDebug('Highlights legacy REST', err)
       return []
     }
   }
@@ -294,7 +304,9 @@ export class InstagramExtractor implements Extractor {
           nextCursor: data.page_info?.end_cursor,
         }
       }
-    } catch {}
+    } catch (err) {
+      logExtractorDebug('edge_owner_to_timeline_media', err)
+    }
 
     // PolarisProfilePostsTabContentQuery GraphQL connection
     try {
@@ -334,7 +346,9 @@ export class InstagramExtractor implements Extractor {
           nextCursor: connection.page_info?.end_cursor,
         }
       }
-    } catch {}
+    } catch (err) {
+      logExtractorDebug('PolarisProfilePostsTabContentQuery_connection', err)
+    }
 
     // v1 user feed REST endpoint
     try {
@@ -357,7 +371,9 @@ export class InstagramExtractor implements Extractor {
           nextCursor: res.next_max_id ? String(res.next_max_id) : undefined,
         }
       }
-    } catch {}
+    } catch (err) {
+      logExtractorDebug('v1 user feed REST', err)
+    }
 
     return {edges: [], hasNextPage: false}
   }
@@ -416,7 +432,9 @@ export class InstagramExtractor implements Extractor {
           nextCursor: connection.page_info?.end_cursor,
         }
       }
-    } catch {}
+    } catch (err) {
+      logExtractorDebug('PolarisProfileReelsTabContentQuery_connection', err)
+    }
 
     return {edges: [], hasNextPage: false}
   }

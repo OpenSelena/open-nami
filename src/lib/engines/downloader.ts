@@ -85,6 +85,8 @@ export async function downloadMediaStream(
   const iterator = items[Symbol.asyncIterator]()
   let queueLock = Promise.resolve()
   let isDone = false
+  let consecutiveErrors = 0
+  const MAX_CONSECUTIVE_ERRORS = 5
 
   function getNextItem(): Promise<IteratorResult<MediaItem>> {
     const nextItem = queueLock.then(() => iterator.next())
@@ -104,10 +106,24 @@ export async function downloadMediaStream(
           isDone = true
           break
         }
+        consecutiveErrors = 0
         item = next.value
-      } catch {
-        isDone = true
-        break
+      } catch (err: unknown) {
+        consecutiveErrors++
+        const errMsg = err instanceof Error ? err.message : String(err)
+        errors.push(`Extraction stream error: ${errMsg}`)
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: '',
+          statusText: `Extractor glitch: ${errMsg}`,
+        })
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS || signal?.aborted) {
+          isDone = true
+          break
+        }
+        continue
       }
 
       const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')

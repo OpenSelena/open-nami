@@ -94,40 +94,10 @@ export interface RequestOptions extends RequestInit {
   timeoutMs?: number
 }
 
-function bindTimeoutSignal(
-  signal?: AbortSignal,
-  timeoutMs?: number,
-): {signal?: AbortSignal; cleanup: () => void} {
-  if (!timeoutMs || timeoutMs <= 0) {
-    return {signal, cleanup: () => {}}
-  }
-
-  const controller = new AbortController()
-  const timer = setTimeout(() => {
-    controller.abort(new Error(`Request timed out after ${timeoutMs}ms`))
-  }, timeoutMs)
-
-  const onAbort = () => {
-    controller.abort(signal?.reason)
-  }
-
-  if (signal) {
-    if (signal.aborted) {
-      controller.abort(signal.reason)
-    } else {
-      signal.addEventListener('abort', onAbort, {once: true})
-    }
-  }
-
-  return {
-    signal: controller.signal,
-    cleanup: () => {
-      clearTimeout(timer)
-      if (signal) {
-        signal.removeEventListener('abort', onAbort)
-      }
-    },
-  }
+function combineTimeoutSignal(signal?: AbortSignal, timeoutMs?: number): AbortSignal | undefined {
+  if (!timeoutMs || timeoutMs <= 0) return signal
+  const timeoutSignal = AbortSignal.timeout(timeoutMs)
+  return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal
 }
 
 export class HttpClient {
@@ -203,12 +173,12 @@ export class HttpClient {
         throw options.signal.reason ?? new Error('Aborted')
       }
 
-      const bound = bindTimeoutSignal(options.signal || undefined, options.timeoutMs)
+      const requestSignal = combineTimeoutSignal(options.signal || undefined, options.timeoutMs)
 
       try {
         const response = await fetch(url, {
           ...options,
-          signal: bound.signal,
+          signal: requestSignal,
           headers,
         })
 
@@ -239,8 +209,6 @@ export class HttpClient {
         if (attempt < retries) {
           await sleep(retryDelay * (attempt + 1), undefined, options.signal || undefined)
         }
-      } finally {
-        bound.cleanup()
       }
     }
 

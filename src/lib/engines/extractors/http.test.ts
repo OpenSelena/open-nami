@@ -76,3 +76,24 @@ test('HttpClient caches cookies loaded from path and reuses in-memory', async ()
     await fs.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('HttpClient request aborts on timeoutMs using native AbortSignal.timeout', async () => {
+  const client = new HttpClient()
+  const origFetch = globalThis.fetch
+  globalThis.fetch = async (_url: any, opts: any) => {
+    return new Promise((_resolve, reject) => {
+      opts?.signal?.addEventListener('abort', () => {
+        reject(opts.signal.reason)
+      })
+    })
+  }
+
+  try {
+    await assert.rejects(
+      () => client.request('https://example.com/timeout', {timeoutMs: 30, retries: 0}),
+      {name: 'TimeoutError'},
+    )
+  } finally {
+    globalThis.fetch = origFetch
+  }
+})

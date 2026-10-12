@@ -174,3 +174,54 @@ test('sanitizeFilename prefixes Windows reserved device names and strips illegal
   assert.equal(sanitizeFilename(':::???', '888', 'jpg'), 'item_888.jpg')
 })
 
+test('downloadMediaStream continues processing remaining items when transient extractor error occurs', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-resilience-'))
+  try {
+    const mockHttpClient: any = {
+      request: async () => ({
+        ok: true,
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(Buffer.from('dummy data'))
+            controller.close()
+          },
+        }),
+      }),
+    }
+
+    let callCount = 0
+    const resilientIterable: AsyncIterable<MediaItem> = {
+      [Symbol.asyncIterator]() {
+        return {
+          async next() {
+            callCount++
+            if (callCount === 1) {
+              return {done: false, value: {id: 'item_1', url: 'https://ex.com/1.jpg', filename: '1.jpg', extension: 'jpg', type: 'photo'}}
+            }
+            if (callCount === 2) {
+              throw new Error('Transient network glitch')
+            }
+            if (callCount === 3) {
+              return {done: false, value: {id: 'item_2', url: 'https://ex.com/2.jpg', filename: '2.jpg', extension: 'jpg', type: 'photo'}}
+            }
+            return {done: true, value: undefined as any}
+          },
+        }
+      },
+    }
+
+    const result = await downloadMediaStream(resilientIterable, {
+      jobName: 'ResilienceJob',
+      destDir: tmpDir,
+      httpClient: mockHttpClient,
+      concurrency: 1,
+    })
+
+    assert.equal(result.downloaded, 2)
+    assert.equal(result.errors.length, 1)
+    assert.ok(result.errors[0].includes('Transient network glitch'))
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+

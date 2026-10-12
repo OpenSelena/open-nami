@@ -2,11 +2,26 @@ import {HttpClient, sleep} from './http.js'
 import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
-function decodeEscapedUrl(raw: string): string {
+export function decodeEscapedUrl(raw: string): string {
+  const sanitized = raw.replace(/[\r\n\t]/g, '').trim()
   try {
-    return JSON.parse(`"${raw.replace(/"/g, '\\"')}"`)
+    return JSON.parse(`"${sanitized.replace(/"/g, '\\"')}"`)
   } catch {
-    return raw.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))).replace(/\\\//g, '/')
+    return sanitized
+      .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+      .replace(/\\(["\\\/bfnrt])/g, (_, ch) => {
+        const escapes: Record<string, string> = {
+          '"': '"',
+          '\\': '\\',
+          '/': '/',
+          b: '\b',
+          f: '\f',
+          n: '\n',
+          r: '\r',
+          t: '\t',
+        }
+        return escapes[ch] || ch
+      })
   }
 }
 

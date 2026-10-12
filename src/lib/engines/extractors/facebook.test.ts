@@ -34,3 +34,10 @@ test('extractFacebookMediaFromHtml extracts photo nodes', () => {
   assert.equal(items[0].url, 'https://scontent.xx.fbcdn.net/v/t39/photo1.jpg?stp=dst-jpg')
   assert.equal(items[1].url, 'https://scontent.xx.fbcdn.net/v/t39/photo2.jpg?stp=dst-jpg')
 })
+
+test('decodeEscapedUrl parses URLs containing newlines and escaped unicode without throwing', async () => {
+  const {decodeEscapedUrl} = await import('./facebook.js')
+  const dirtyUrl = 'https:\\/\\/scontent.xx.fbcdn.net\\/v\\/t39\\/photo.jpg\r\n?_nc_cat=101\\u0026oh=abc123'
+  const decoded = decodeEscapedUrl(dirtyUrl)
+  assert.equal(decoded, 'https://scontent.xx.fbcdn.net/v/t39/photo.jpg?_nc_cat=101&oh=abc123')
+})

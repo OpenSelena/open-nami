@@ -4,6 +4,23 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-10-13
+
+### Added & Improved
+- **Extractors & Upstream Sync**:
+  - Synced Instagram GraphQL doc IDs with upstream `gallery-dl` v1.32.16+, adding support for Highlights tray discovery and Reels tab connection pagination.
+  - Added X (Twitter) personal likes (`https://x.com/i/history/likes`) and bookmarks (`https://x.com/i/bookmarks`) resolution and GraphQL extraction.
+  - Added diagnostic debug logging hooks for Instagram GraphQL fallback cascades under `OPEN_NAMI_DEBUG` / `DEBUG`.
+- **Downloader Concurrency & Resilience**:
+  - Boosted throughput with concurrent worker pool (default 3 workers).
+  - Added retry budget resilience for transient iterator glitches so single extraction errors do not abort active download queues.
+  - Hardened Facebook CDN URL unescaping against embedded line breaks and unescaped characters.
+  - Alphanumeric and quoted `twid` cookie parsing support for X authentication.
+- **Complexity Reduction**:
+  - Replaced 34-line custom `bindTimeoutSignal` helper with native Node 20 `AbortSignal.timeout` and `AbortSignal.any`.
+- **Tests**:
+  - Expanded automated test suite from 108 to 118 unit tests.
+
 ## [1.0.3] - 2026-10-03
 
 ### Fixed & Hardened

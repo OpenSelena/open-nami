@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.0.3",
+      version: "1.0.4",
       description: "Open Nami \u2014 terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -37580,6 +37580,22 @@ function parseProfileInput(input) {
       }
     }
     if (host.includes("x.com") || host.includes("twitter.com")) {
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {
+        return {
+          platform: "x",
+          username: "i_history_likes",
+          cleanUrl: "https://x.com/i/history/likes",
+          rawInput: input
+        };
+      }
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "bookmarks") {
+        return {
+          platform: "x",
+          username: "i_bookmarks",
+          cleanUrl: "https://x.com/i/bookmarks",
+          rawInput: input
+        };
+      }
       const firstPart = pathParts[0] || "";
       const reserved = ["home", "explore", "notifications", "messages", "i", "settings"];
       if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
@@ -37820,6 +37836,11 @@ async function sleep(minMs, maxMs, signal) {
     throw err;
   }
 }
+function combineTimeoutSignal(signal, timeoutMs) {
+  if (!timeoutMs || timeoutMs <= 0) return signal;
+  const timeoutSignal = AbortSignal.timeout(timeoutMs);
+  return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+}
 var HttpClient = class {
   defaultCookies = {};
   defaultHeaders;
@@ -37854,8 +37875,8 @@ var HttpClient = class {
     Object.assign(this.defaultCookies, loaded);
   }
   async request(url, options = {}) {
-    const retries = options.retries ?? 3;
-    const retryDelay = options.retryDelayMs ?? 1500;
+    const retries = options.retries ?? 1;
+    const retryDelay = options.retryDelayMs ?? 1e3;
     let cookieHeader = "";
     if (options.cookiePath) {
       const fromPath = await this.getCachedCookies(options.cookiePath, options.cookieDomain);
@@ -37881,9 +37902,11 @@ var HttpClient = class {
       if (options.signal?.aborted) {
         throw options.signal.reason ?? new Error("Aborted");
       }
+      const requestSignal = combineTimeoutSignal(options.signal || void 0, options.timeoutMs);
       try {
         const response = await fetch(url, {
           ...options,
+          signal: requestSignal,
           headers
         });
         if (response.status === 429) {
@@ -37892,7 +37915,8 @@ var HttpClient = class {
               await response.body?.cancel();
             } catch {
             }
-            await sleep(retryDelay * (attempt + 1) * 2, void 0, options.signal || void 0);
+            const backoffMs = Math.min(retryDelay * (attempt + 1), 2500);
+            await sleep(backoffMs, void 0, options.signal || void 0);
             continue;
           }
         }
@@ -37901,7 +37925,8 @@ var HttpClient = class {
             await response.body?.cancel();
           } catch {
           }
-          await sleep(retryDelay * (attempt + 1), void 0, options.signal || void 0);
+          const backoffMs = Math.min(retryDelay * (attempt + 1), 2e3);
+          await sleep(backoffMs, void 0, options.signal || void 0);
           continue;
         }
         return response;
@@ -37924,6 +37949,10 @@ var HttpClient = class {
       }
     });
     if (!res.ok) {
+      try {
+        await res.body?.cancel();
+      } catch {
+      }
       throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`);
     }
     return await res.json();
@@ -37931,6 +37960,10 @@ var HttpClient = class {
   async fetchText(url, options = {}) {
     const res = await this.request(url, options);
     if (!res.ok) {
+      try {
+        await res.body?.cancel();
+      } catch {
+      }
       throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`);
     }
     return await res.text();
@@ -37940,7 +37973,22 @@ var HttpClient = class {
 // src/lib/engines/extractors/instagram.ts
 var IG_APP_ID = "936619743392459";
 var IG_TIMELINE_QUERY_HASH = "69cba40317214236af40e7efa697781d";
-var IG_POLARIS_DOC_ID = "28975909992013618";
+var IG_QUERIES = {
+  PolarisProfilePostsTabContentQuery_connection: "28142289515441884",
+  PolarisProfileReelsTabContentQuery_connection: "28989741540630190",
+  PolarisProfileTaggedTabContentQuery_connection: "28794602806842110",
+  PolarisProfileStoryHighlightsTrayContentQuery: "26970053832668570",
+  PolarisStoriesV3ReelPageGalleryQuery: "28262315486766731",
+  PolarisStoriesV3TrayContainerQuery: "27703822975903310",
+  PolarisProfilePageContentQuery: "28036671149327607"
+};
+var IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection;
+function logExtractorDebug(endpoint, err) {
+  if (process.env.DEBUG || process.env.OPEN_NAMI_DEBUG) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.debug(`[open-nami:instagram] ${endpoint} query fallback: ${message}`);
+  }
+}
 function parseIgNodeToMediaItems(node, username) {
   const items = [];
   const anyNode = node;
@@ -38045,6 +38093,8 @@ var InstagramExtractor = class {
       cookiePath: options.cookiePath,
       cookieDomain: "instagram.com",
       signal: options.signal,
+      retries: 0,
+      timeoutMs: 4e3,
       headers: {
         "X-IG-App-ID": IG_APP_ID,
         "Referer": `https://www.instagram.com/${username}/`
@@ -38056,6 +38106,32 @@ var InstagramExtractor = class {
     return res.data.user;
   }
   async fetchHighlightsTray(userId, options) {
+    try {
+      const variables = JSON.stringify({ user_id: userId });
+      const body = new URLSearchParams({
+        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
+        variables
+      }).toString();
+      const res = await this.httpClient.fetchJson("https://www.instagram.com/graphql/query", {
+        method: "POST",
+        body,
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-IG-App-ID": IG_APP_ID,
+          "X-FB-Friendly-Name": "PolarisProfileStoryHighlightsTrayContentQuery",
+          "Referer": "https://www.instagram.com/"
+        }
+      });
+      const edges = res?.data?.highlights?.edges;
+      if (Array.isArray(edges) && edges.length > 0) {
+        return edges.map((e) => e.node);
+      }
+    } catch (err) {
+      logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery", err);
+    }
     const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`;
     try {
       const res = await this.httpClient.fetchJson(url, {
@@ -38067,7 +38143,8 @@ var InstagramExtractor = class {
         }
       });
       return res.tray ?? [];
-    } catch {
+    } catch (err) {
+      logExtractorDebug("Highlights legacy REST", err);
       return [];
     }
   }
@@ -38112,7 +38189,8 @@ var InstagramExtractor = class {
           nextCursor: data.page_info?.end_cursor
         };
       }
-    } catch {
+    } catch (err) {
+      logExtractorDebug("edge_owner_to_timeline_media", err);
     }
     try {
       const postVariables = JSON.stringify({
@@ -38147,7 +38225,8 @@ var InstagramExtractor = class {
           nextCursor: connection.page_info?.end_cursor
         };
       }
-    } catch {
+    } catch (err) {
+      logExtractorDebug("PolarisProfilePostsTabContentQuery_connection", err);
     }
     try {
       const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`;
@@ -38168,7 +38247,60 @@ var InstagramExtractor = class {
           nextCursor: res.next_max_id ? String(res.next_max_id) : void 0
         };
       }
-    } catch {
+    } catch (err) {
+      logExtractorDebug("v1 user feed REST", err);
+    }
+    return { edges: [], hasNextPage: false };
+  }
+  async fetchNextReelsPage(userId, cursor, options) {
+    try {
+      const variables = JSON.stringify({
+        after: cursor,
+        first: 12,
+        id: userId,
+        data: {
+          include_feed_video: true,
+          page_size: 12,
+          target_user_id: userId
+        }
+      });
+      const postUrl = "https://www.instagram.com/graphql/query";
+      const body = new URLSearchParams({
+        doc_id: IG_QUERIES.PolarisProfileReelsTabContentQuery_connection,
+        variables
+      }).toString();
+      const res = await this.httpClient.fetchJson(postUrl, {
+        method: "POST",
+        body,
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-IG-App-ID": IG_APP_ID,
+          "X-FB-Friendly-Name": "PolarisProfileReelsTabContentQuery_connection",
+          "Referer": "https://www.instagram.com/"
+        }
+      });
+      const reelsData = res?.data?.fetch__XDTUserDict;
+      let connection = reelsData?.reels;
+      if (!connection && reelsData) {
+        for (const val of Object.values(reelsData)) {
+          if (val && typeof val === "object" && "edges" in val) {
+            connection = val;
+            break;
+          }
+        }
+      }
+      if (connection?.edges && Array.isArray(connection.edges)) {
+        return {
+          edges: connection.edges,
+          hasNextPage: Boolean(connection.page_info?.has_next_page),
+          nextCursor: connection.page_info?.end_cursor
+        };
+      }
+    } catch (err) {
+      logExtractorDebug("PolarisProfileReelsTabContentQuery_connection", err);
     }
     return { edges: [], hasNextPage: false };
   }
@@ -38223,6 +38355,7 @@ var InstagramExtractor = class {
       return;
     }
     let found = 0;
+    const emittedItemIds = /* @__PURE__ */ new Set();
     let currentEdges = user.edge_owner_to_timeline_media?.edges ?? [];
     let hasNextPage = Boolean(user.edge_owner_to_timeline_media?.page_info?.has_next_page);
     let endCursor = user.edge_owner_to_timeline_media?.page_info?.end_cursor;
@@ -38232,6 +38365,8 @@ var InstagramExtractor = class {
         for (const item of items) {
           if (subDir === "Photos" && item.type !== "photo") continue;
           if (subDir === "Videos" && item.type !== "video") continue;
+          if (emittedItemIds.has(item.id)) continue;
+          emittedItemIds.add(item.id);
           found++;
           options.onProgress?.({
             stage: subDir,
@@ -38263,6 +38398,8 @@ var InstagramExtractor = class {
         const items = parseIgNodeToMediaItems(edge.node, username);
         for (const item of items) {
           if (item.type !== "video") continue;
+          if (emittedItemIds.has(item.id)) continue;
+          emittedItemIds.add(item.id);
           found++;
           options.onProgress?.({
             stage: "Videos",
@@ -38270,6 +38407,37 @@ var InstagramExtractor = class {
             message: `Found reel: ${item.filename}`
           });
           yield item;
+        }
+      }
+      let reelsCursor = "";
+      let hasMoreReels = true;
+      while (hasMoreReels && !options.signal?.aborted) {
+        try {
+          const reelsPage = await this.fetchNextReelsPage(userId, reelsCursor, options);
+          if (!reelsPage.edges || reelsPage.edges.length === 0) break;
+          for (const edge of reelsPage.edges) {
+            const items = parseIgNodeToMediaItems(edge.node, username);
+            for (const item of items) {
+              if (item.type !== "video") continue;
+              if (emittedItemIds.has(item.id)) continue;
+              emittedItemIds.add(item.id);
+              found++;
+              options.onProgress?.({
+                stage: "Videos",
+                found,
+                message: `Found reel: ${item.filename}`
+              });
+              yield item;
+            }
+          }
+          if (reelsPage.hasNextPage && reelsPage.nextCursor && reelsPage.nextCursor !== reelsCursor) {
+            reelsCursor = reelsPage.nextCursor;
+            await sleep(1500, 2500, options.signal);
+          } else {
+            hasMoreReels = false;
+          }
+        } catch {
+          break;
         }
       }
     }
@@ -38368,6 +38536,8 @@ var XExtractor = class {
           cookiePath: options.cookiePath,
           cookieDomain: "x.com",
           signal: options.signal,
+          retries: 0,
+          timeoutMs: 3e3,
           headers: {
             "Authorization": `Bearer ${TWITTER_BEARER_TOKEN}`
           }
@@ -38386,6 +38556,23 @@ var XExtractor = class {
     throw new Error("Failed to activate X/Twitter guest session: no guest token returned");
   }
   async fetchUserRestId(username, options) {
+    if (username.startsWith("id:")) {
+      return username.slice(3);
+    }
+    if (username === "i_history_likes") {
+      if (options.cookiePath) {
+        const cookies = await loadCookiesFromPath(options.cookiePath, "x.com");
+        const twid = cookies["twid"];
+        if (twid) {
+          const decoded = decodeURIComponent(twid).replace(/^"|"$/g, "").trim();
+          const rawId = decoded.startsWith("u=") ? decoded.slice(2) : decoded;
+          if (rawId && /^[a-zA-Z0-9_-]+$/.test(rawId)) {
+            return rawId;
+          }
+        }
+      }
+      throw new Error("Authentication required for X/Twitter likes history: missing 'twid' cookie");
+    }
     await this.ensureGuestToken(options);
     const variables = JSON.stringify({
       screen_name: username,
@@ -38397,7 +38584,9 @@ var XExtractor = class {
       const res = await this.httpClient.fetchJson(url, {
         cookiePath: options.cookiePath,
         cookieDomain: "x.com",
-        signal: options.signal
+        signal: options.signal,
+        retries: 0,
+        timeoutMs: 4e3
       });
       const restId = res.data?.user?.result?.rest_id;
       if (restId) return restId;
@@ -38405,7 +38594,11 @@ var XExtractor = class {
     }
     const syndiUrl = `https://cdn.syndication.twimg.com/widgets/followbutton/info.json?screen_names=${encodeURIComponent(username)}`;
     try {
-      const res = await this.httpClient.fetchJson(syndiUrl, { signal: options.signal });
+      const res = await this.httpClient.fetchJson(syndiUrl, {
+        signal: options.signal,
+        retries: 0,
+        timeoutMs: 3e3
+      });
       if (res[0]?.id) return String(res[0].id);
     } catch {
     }
@@ -38414,13 +38607,14 @@ var XExtractor = class {
   async *extract(profile, options) {
     const username = profile.username;
     const subDir = options.subDir;
+    const isLikes = username === "i_history_likes";
     options.onProgress?.({
-      stage: "Profile",
+      stage: isLikes ? "Likes" : "Profile",
       found: 0,
-      message: `Fetching X profile @${username}...`
+      message: isLikes ? "Fetching liked posts from X..." : `Fetching X profile @${username}...`
     });
     const userId = await this.fetchUserRestId(username, options);
-    const endpoint = "https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia";
+    const endpoint = isLikes ? "https://x.com/i/api/graphql/TGEKkJG_meudeaFcqaxM-Q/Likes" : "https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia";
     let cursor;
     let hasMore = true;
     let found = 0;
@@ -38561,7 +38755,9 @@ var TikTokExtractor = class {
     const html = await this.httpClient.fetchText(profileUrl, {
       cookiePath: options.cookiePath,
       cookieDomain: "tiktok.com",
-      signal: options.signal
+      signal: options.signal,
+      retries: 0,
+      timeoutMs: 4e3
     });
     const scope = parseTikTokRehydrationJson(html);
     const userDetail = scope?.["webapp.user-detail"];
@@ -38628,6 +38824,26 @@ var TikTokExtractor = class {
 };
 
 // src/lib/engines/extractors/facebook.ts
+function decodeEscapedUrl(raw) {
+  const sanitized = raw.replace(/[\r\n\t]/g, "").trim();
+  try {
+    return JSON.parse(`"${sanitized.replace(/"/g, '\\"')}"`);
+  } catch {
+    return sanitized.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16))).replace(/\\(["\\\/bfnrt])/g, (_, ch) => {
+      const escapes = {
+        '"': '"',
+        "\\": "\\",
+        "/": "/",
+        b: "\b",
+        f: "\f",
+        n: "\n",
+        r: "\r",
+        t: "	"
+      };
+      return escapes[ch] || ch;
+    });
+  }
+}
 function extractFacebookMediaFromHtml(html, username) {
   const items = [];
   const seenUrls = /* @__PURE__ */ new Set();
@@ -38635,40 +38851,34 @@ function extractFacebookMediaFromHtml(html, username) {
   const sdMatch = html.match(/"browser_native_sd_url":"([^"]+)"/);
   const rawVideoUrl = hdMatch?.[1] || sdMatch?.[1];
   if (rawVideoUrl) {
-    try {
-      const videoUrl = JSON.parse(`"${rawVideoUrl}"`);
-      if (!seenUrls.has(videoUrl)) {
-        seenUrls.add(videoUrl);
-        items.push({
-          id: `fb_video_${Date.now()}`,
-          url: videoUrl,
-          filename: `${username}_video_${Date.now()}`,
-          extension: "mp4",
-          type: "video"
-        });
-      }
-    } catch {
+    const videoUrl = decodeEscapedUrl(rawVideoUrl);
+    if (!seenUrls.has(videoUrl)) {
+      seenUrls.add(videoUrl);
+      items.push({
+        id: `fb_video_${Date.now()}`,
+        url: videoUrl,
+        filename: `${username}_video_${Date.now()}`,
+        extension: "mp4",
+        type: "video"
+      });
     }
   }
   const photoRegex = /,"image":\{"uri":"([^"]+)"/g;
   let match;
   let photoIndex = 1;
   while ((match = photoRegex.exec(html)) !== null) {
-    try {
-      const rawUrl = match[1];
-      const photoUrl = JSON.parse(`"${rawUrl}"`);
-      if (!seenUrls.has(photoUrl)) {
-        seenUrls.add(photoUrl);
-        items.push({
-          id: `fb_photo_${photoIndex}`,
-          url: photoUrl,
-          filename: `${username}_photo_${photoIndex}`,
-          extension: "jpg",
-          type: "photo"
-        });
-        photoIndex++;
-      }
-    } catch {
+    const rawUrl = match[1];
+    const photoUrl = decodeEscapedUrl(rawUrl);
+    if (!seenUrls.has(photoUrl)) {
+      seenUrls.add(photoUrl);
+      items.push({
+        id: `fb_photo_${photoIndex}`,
+        url: photoUrl,
+        filename: `${username}_photo_${photoIndex}`,
+        extension: "jpg",
+        type: "photo"
+      });
+      photoIndex++;
     }
   }
   if (items.length === 0) {
@@ -38711,7 +38921,9 @@ var FacebookExtractor = class {
     const html = await this.httpClient.fetchText(targetUrl, {
       cookiePath: options.cookiePath,
       cookieDomain: "facebook.com",
-      signal: options.signal
+      signal: options.signal,
+      retries: 0,
+      timeoutMs: 4e3
     });
     const items = extractFacebookMediaFromHtml(html, username);
     let found = 0;
@@ -38788,90 +39000,137 @@ function sanitizeFilename(rawFilename, fallbackId, ext) {
 async function downloadMediaStream(items, options) {
   const { jobName, destDir, signal, onProgress } = options;
   const httpClient = options.httpClient ?? new HttpClient();
+  const concurrency = Math.max(1, options.concurrency ?? 3);
   await fsPromises2.mkdir(destDir, { recursive: true });
   const archive = await loadArchive(destDir);
   let downloaded = 0;
   let skipped = 0;
   const errors = [];
-  for await (const item of items) {
-    if (signal?.aborted) {
-      break;
-    }
-    const ext = item.extension.replace(/^\./, "") || (item.type === "video" ? "mp4" : "jpg");
-    const finalFilename = sanitizeFilename(item.filename, item.id, ext);
-    const finalPath = path5.join(destDir, finalFilename);
-    if (archive.has(item.id) && fs8.existsSync(finalPath)) {
-      skipped++;
+  const iterator = items[Symbol.asyncIterator]();
+  let queueLock = Promise.resolve();
+  let isDone = false;
+  let consecutiveErrors = 0;
+  const MAX_CONSECUTIVE_ERRORS = 5;
+  function getNextItem() {
+    const nextItem = queueLock.then(() => iterator.next());
+    queueLock = nextItem.then(
+      () => {
+      },
+      () => {
+      }
+    );
+    return nextItem;
+  }
+  async function downloadWorker() {
+    while (!isDone && !signal?.aborted) {
+      let item;
+      try {
+        const next = await getNextItem();
+        if (next.done) {
+          isDone = true;
+          break;
+        }
+        consecutiveErrors = 0;
+        item = next.value;
+      } catch (err) {
+        consecutiveErrors++;
+        const errMsg = err instanceof Error ? err.message : String(err);
+        errors.push(`Extraction stream error: ${errMsg}`);
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: "",
+          statusText: `Extractor glitch: ${errMsg}`
+        });
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS || signal?.aborted) {
+          isDone = true;
+          break;
+        }
+        continue;
+      }
+      const ext = item.extension.replace(/^\./, "") || (item.type === "video" ? "mp4" : "jpg");
+      const finalFilename = sanitizeFilename(item.filename, item.id, ext);
+      const finalPath = path5.join(destDir, finalFilename);
+      if (archive.has(item.id) && fs8.existsSync(finalPath)) {
+        skipped++;
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Skipping already downloaded: ${finalFilename}`
+        });
+        continue;
+      }
       onProgress?.({
         job: jobName,
         downloadedCount: downloaded,
         skippedCount: skipped,
         currentFile: finalFilename,
-        statusText: `Skipping already downloaded: ${finalFilename}`
+        statusText: `Downloading: ${finalFilename}`
       });
-      continue;
-    }
-    onProgress?.({
-      job: jobName,
-      downloadedCount: downloaded,
-      skippedCount: skipped,
-      currentFile: finalFilename,
-      statusText: `Downloading: ${finalFilename}`
-    });
-    const tmpPath = `${finalPath}.download`;
-    try {
-      const reqHeaders = {};
-      if (options.referer) {
-        reqHeaders["Referer"] = options.referer;
-      }
-      const response = await httpClient.request(item.url, {
-        signal,
-        cookiePath: options.cookiePath,
-        headers: reqHeaders
-      });
-      if (!response.ok || !response.body) {
-        throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`);
-      }
-      const fileStream = fs8.createWriteStream(tmpPath);
-      await pipeline(Readable.fromWeb(response.body), fileStream, { signal });
-      if (item.date) {
+      const tmpPath = `${finalPath}.download`;
+      try {
+        const reqHeaders = {};
+        if (options.referer) {
+          reqHeaders["Referer"] = options.referer;
+        }
+        const response = await httpClient.request(item.url, {
+          signal,
+          cookiePath: options.cookiePath,
+          headers: reqHeaders
+        });
+        if (!response.ok || !response.body) {
+          try {
+            await response.body?.cancel();
+          } catch {
+          }
+          throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`);
+        }
+        const fileStream = fs8.createWriteStream(tmpPath);
+        await pipeline(Readable.fromWeb(response.body), fileStream, { signal });
+        if (item.date) {
+          try {
+            const mtime = new Date(item.date * 1e3);
+            await fsPromises2.utimes(tmpPath, mtime, mtime);
+          } catch {
+          }
+        }
+        await fsPromises2.rename(tmpPath, finalPath);
+        archive.add(item.id);
+        downloaded++;
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Saved: ${finalFilename}`
+        });
+      } catch (err) {
         try {
-          const mtime = new Date(item.date * 1e3);
-          await fsPromises2.utimes(tmpPath, mtime, mtime);
+          if (fs8.existsSync(tmpPath)) {
+            await fsPromises2.unlink(tmpPath);
+          }
         } catch {
         }
-      }
-      await fsPromises2.rename(tmpPath, finalPath);
-      archive.add(item.id);
-      downloaded++;
-      onProgress?.({
-        job: jobName,
-        downloadedCount: downloaded,
-        skippedCount: skipped,
-        currentFile: finalFilename,
-        statusText: `Saved: ${finalFilename}`
-      });
-    } catch (err) {
-      try {
-        if (fs8.existsSync(tmpPath)) {
-          await fsPromises2.unlink(tmpPath);
+        if (signal?.aborted) {
+          break;
         }
-      } catch {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        errors.push(`${finalFilename}: ${errMsg}`);
+        onProgress?.({
+          job: jobName,
+          downloadedCount: downloaded,
+          skippedCount: skipped,
+          currentFile: finalFilename,
+          statusText: `Failed: ${finalFilename} (${errMsg})`
+        });
       }
-      if (signal?.aborted) {
-        break;
-      }
-      const errMsg = err instanceof Error ? err.message : String(err);
-      errors.push(`${finalFilename}: ${errMsg}`);
-      onProgress?.({
-        job: jobName,
-        downloadedCount: downloaded,
-        skippedCount: skipped,
-        currentFile: finalFilename,
-        statusText: `Failed: ${finalFilename} (${errMsg})`
-      });
     }
   }
+  const workers = Array.from({ length: concurrency }, () => downloadWorker());
+  await Promise.all(workers);
   await saveArchive(destDir, archive);
   return { downloaded, skipped, errors };
 }
@@ -39182,8 +39441,8 @@ var GDL_ARCHIVE = "archive_gallery-dl.sqlite3";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 var PLATFORM_SLEEP = {
   tiktok: "0.6-1.2",
-  instagram: "2.0-2.8",
-  facebook: "1.5-2.5"
+  instagram: "1.0-1.8",
+  facebook: "1.0-1.8"
 };
 function buildGalleryDlArgs(options) {
   const { destDir, subDir, platform: platform2, cleanUrl, username, cookiePath } = options;
@@ -39223,12 +39482,12 @@ function buildGalleryDlArgs(options) {
   } else if (subDir === "Stories") {
     if (platform2 === "instagram") {
       targetUrl = `https://www.instagram.com/stories/${encodeURIComponent(username)}/`;
-      args.push("--sleep-request", "2.0-3.0");
+      args.push("--sleep-request", "1.0-1.8");
     }
   } else if (subDir === "Highlights") {
     if (platform2 === "instagram") {
       targetUrl = `https://www.instagram.com/${encodeURIComponent(username)}/highlights/`;
-      args.push("--sleep-request", "2.0-3.0");
+      args.push("--sleep-request", "1.0-1.8");
     }
   }
   if (cookiePath) {
@@ -39506,13 +39765,13 @@ function resolveDownloadBaseDir(customBaseDir) {
   if (customBaseDir && customBaseDir.trim()) {
     return path10.resolve(expandPath(customBaseDir.trim()));
   }
-  const configDir = loadConfig().downloadDir;
-  if (configDir && configDir.trim()) {
-    return path10.resolve(expandPath(configDir.trim()));
-  }
   const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
   if (envDir && envDir.trim()) {
     return path10.resolve(expandPath(envDir.trim()));
+  }
+  const configDir = loadConfig().downloadDir;
+  if (configDir && configDir.trim()) {
+    return path10.resolve(expandPath(configDir.trim()));
   }
   if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
     const raw = process.env.NAMI_BASE_DIR.trim();
