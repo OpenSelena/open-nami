@@ -47,14 +47,18 @@ test('resolveDownloadBaseDir honors config downloadDir', async () => {
 test('resolveDownloadBaseDir auto-detects platform Downloads folder and appends Open Nami', () => {
   const prevNamiDir = process.env.OPEN_NAMI_DIR
   const prevBase = process.env.NAMI_BASE_DIR
+  const prevConfig = process.env.OPEN_NAMI_CONFIG
   delete process.env.OPEN_NAMI_DIR
   delete process.env.NAMI_BASE_DIR
+  process.env.OPEN_NAMI_CONFIG = path.join(os.tmpdir(), 'non-existent-config.json')
   try {
     const baseDir = resolveDownloadBaseDir()
     assert.ok(baseDir.endsWith('Open Nami'), `Expected path ending in "Open Nami", got ${baseDir}`)
   } finally {
     if (prevNamiDir !== undefined) process.env.OPEN_NAMI_DIR = prevNamiDir
     if (prevBase !== undefined) process.env.NAMI_BASE_DIR = prevBase
+    if (prevConfig !== undefined) process.env.OPEN_NAMI_CONFIG = prevConfig
+    else delete process.env.OPEN_NAMI_CONFIG
   }
 })
 

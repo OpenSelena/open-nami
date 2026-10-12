@@ -86,3 +86,42 @@ test('XExtractor ensureGuestToken throws descriptive error when activation fails
   )
 })
 
+test('XExtractor fetchUserRestId extracts numerical user ID from twid cookie for i_history_likes', async () => {
+  const fs = await import('node:fs/promises')
+  const path = await import('node:path')
+  const os = await import('node:os')
+  const {XExtractor} = await import('./x.js')
+
+  const tmpCookiePath = path.join(os.tmpdir(), `test-twid-cookie-${Date.now()}.txt`)
+  const cookieContent = `.x.com\tTRUE\t/\tTRUE\t2147483647\ttwid\tu%3D9876543210\n`
+  await fs.writeFile(tmpCookiePath, cookieContent)
+
+  try {
+    const mockHttpClient: any = {
+      fetchJson: async () => ({}),
+      setHeader: () => {},
+    }
+    const extractor = new XExtractor(mockHttpClient)
+    const userId = await extractor.fetchUserRestId('i_history_likes', {
+      subDir: 'Photos',
+      cookiePath: tmpCookiePath,
+    })
+    assert.equal(userId, '9876543210')
+  } finally {
+    await fs.rm(tmpCookiePath, {force: true})
+  }
+})
+
+test('XExtractor fetchUserRestId throws when missing twid cookie for i_history_likes', async () => {
+  const {XExtractor} = await import('./x.js')
+  const mockHttpClient: any = {
+    fetchJson: async () => ({}),
+    setHeader: () => {},
+  }
+  const extractor = new XExtractor(mockHttpClient)
+  await assert.rejects(
+    () => extractor.fetchUserRestId('i_history_likes', {subDir: 'Photos'}),
+    {message: /missing 'twid' cookie/i},
+  )
+})
+

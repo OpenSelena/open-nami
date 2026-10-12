@@ -1,4 +1,4 @@
-import {HttpClient, sleep} from './http.js'
+import {HttpClient, sleep, loadCookiesFromPath} from './http.js'
 import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
@@ -151,6 +151,24 @@ export class XExtractor implements Extractor {
   }
 
   async fetchUserRestId(username: string, options: ExtractOptions): Promise<string> {
+    if (username.startsWith('id:')) {
+      return username.slice(3)
+    }
+
+    if (username === 'i_history_likes') {
+      if (options.cookiePath) {
+        const cookies = await loadCookiesFromPath(options.cookiePath, 'x.com')
+        const twid = cookies['twid']
+        if (twid) {
+          const rawId = twid.includes('%3D') ? twid.split('%3D').pop() : twid.replace(/^u=/, '')
+          if (rawId && /^\d+$/.test(rawId)) {
+            return rawId
+          }
+        }
+      }
+      throw new Error("Authentication required for X/Twitter likes history: missing 'twid' cookie")
+    }
+
     await this.ensureGuestToken(options)
 
     const variables = JSON.stringify({
@@ -190,16 +208,20 @@ export class XExtractor implements Extractor {
   async *extract(profile: ParsedProfile, options: ExtractOptions): AsyncGenerator<MediaItem, void, unknown> {
     const username = profile.username
     const subDir = options.subDir
+    const isLikes = username === 'i_history_likes'
 
     options.onProgress?.({
-      stage: 'Profile',
+      stage: isLikes ? 'Likes' : 'Profile',
       found: 0,
-      message: `Fetching X profile @${username}...`,
+      message: isLikes ? 'Fetching liked posts from X...' : `Fetching X profile @${username}...`,
     })
 
     const userId = await this.fetchUserRestId(username, options)
 
-    const endpoint = 'https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia'
+    // UserMedia endpoint or Likes endpoint (gallery-dl upstream v1.32.16+)
+    const endpoint = isLikes
+      ? 'https://x.com/i/api/graphql/TGEKkJG_meudeaFcqaxM-Q/Likes'
+      : 'https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia'
     let cursor: string | undefined
     let hasMore = true
     let found = 0

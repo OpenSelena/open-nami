@@ -48,6 +48,11 @@ test('parses X / Twitter profile URLs', () => {
   assert.equal(res.platform, 'x')
   assert.equal(res.username, 'elonmusk')
   assert.equal(res.cleanUrl, 'https://x.com/elonmusk')
+
+  const resLikes = parseProfileInput('https://x.com/i/history/likes')
+  assert.equal(resLikes.platform, 'x')
+  assert.equal(resLikes.username, 'i_history_likes')
+  assert.equal(resLikes.cleanUrl, 'https://x.com/i/history/likes')
 })
 
 test('parses platform prefix shortcuts', () => {

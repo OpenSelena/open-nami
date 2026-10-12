@@ -148,3 +148,92 @@ test('InstagramExtractor fetchNextPostsPage parses GraphQL pagination correctly'
   assert.equal(result.edges[0].node.id, 'post_page2_1')
 })
 
+test('IG_QUERIES contains upstream gallery-dl doc IDs', async () => {
+  const {IG_QUERIES} = await import('./instagram.js')
+  assert.equal(IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery, '26970053832668570')
+  assert.equal(IG_QUERIES.PolarisProfilePostsTabContentQuery_connection, '28142289515441884')
+  assert.equal(IG_QUERIES.PolarisProfileReelsTabContentQuery_connection, '28989741540630190')
+})
+
+test('InstagramExtractor fetchHighlightsTray uses GraphQL query with doc_id 26970053832668570', async () => {
+  let calledUrl = ''
+  let calledBody = ''
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init: any) => {
+      calledUrl = url
+      calledBody = init?.body || ''
+      if (url.includes('graphql/query') && calledBody.includes('26970053832668570')) {
+        return {
+          data: {
+            highlights: {
+              edges: [
+                {
+                  node: {
+                    id: 'highlight:12345678',
+                    title: 'My Trip',
+                  },
+                },
+              ],
+            },
+          },
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const tray = await extractor.fetchHighlightsTray('998877', {subDir: 'Highlights'})
+
+  assert.ok(calledUrl.includes('graphql/query'))
+  assert.ok(calledBody.includes('26970053832668570'))
+  assert.equal(tray.length, 1)
+  assert.equal(tray[0].id, 'highlight:12345678')
+})
+
+test('InstagramExtractor fetchNextReelsPage queries PolarisProfileReelsTabContentQuery_connection', async () => {
+  let calledUrl = ''
+  let calledBody = ''
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init: any) => {
+      calledUrl = url
+      calledBody = init?.body || ''
+      if (url.includes('graphql/query') && calledBody.includes('28989741540630190')) {
+        return {
+          data: {
+            fetch__XDTUserDict: {
+              reels: {
+                page_info: {
+                  has_next_page: true,
+                  end_cursor: 'REELS_CURSOR_2',
+                },
+                edges: [
+                  {
+                    node: {
+                      id: 'reel_video_1',
+                      shortcode: 'REEL123',
+                      is_video: true,
+                      video_url: 'https://instagram.com/reel1.mp4',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const result = await extractor.fetchNextReelsPage('998877', 'REELS_CURSOR_1', {subDir: 'Videos'})
+
+  assert.ok(calledUrl.includes('graphql/query'))
+  assert.ok(calledBody.includes('28989741540630190'))
+  assert.equal(result.hasNextPage, true)
+  assert.equal(result.nextCursor, 'REELS_CURSOR_2')
+  assert.equal(result.edges.length, 1)
+  assert.equal(result.edges[0].node.id, 'reel_video_1')
+})
+

@@ -4,7 +4,18 @@ import type {ParsedProfile} from '../../parser.js'
 
 export const IG_APP_ID = '936619743392459'
 export const IG_TIMELINE_QUERY_HASH = '69cba40317214236af40e7efa697781d'
-export const IG_POLARIS_DOC_ID = '28975909992013618'
+
+export const IG_QUERIES = {
+  PolarisProfilePostsTabContentQuery_connection: '28142289515441884',
+  PolarisProfileReelsTabContentQuery_connection: '28989741540630190',
+  PolarisProfileTaggedTabContentQuery_connection: '28794602806842110',
+  PolarisProfileStoryHighlightsTrayContentQuery: '26970053832668570',
+  PolarisStoriesV3ReelPageGalleryQuery: '28262315486766731',
+  PolarisStoriesV3TrayContainerQuery: '27703822975903310',
+  PolarisProfilePageContentQuery: '28036671149327607',
+} as const
+
+export const IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection
 
 export interface IgUser {
   id: string
@@ -186,6 +197,35 @@ export class InstagramExtractor implements Extractor {
   }
 
   async fetchHighlightsTray(userId: string, options: ExtractOptions): Promise<any[]> {
+    // 1. Try GraphQL PolarisProfileStoryHighlightsTrayContentQuery (gallery-dl upstream v1.32.16+)
+    try {
+      const variables = JSON.stringify({user_id: userId})
+      const body = new URLSearchParams({
+        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
+        variables,
+      }).toString()
+
+      const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/graphql/query', {
+        method: 'POST',
+        body,
+        cookiePath: options.cookiePath,
+        cookieDomain: 'instagram.com',
+        signal: options.signal,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-IG-App-ID': IG_APP_ID,
+          'X-FB-Friendly-Name': 'PolarisProfileStoryHighlightsTrayContentQuery',
+          'Referer': 'https://www.instagram.com/',
+        },
+      })
+
+      const edges = res?.data?.highlights?.edges
+      if (Array.isArray(edges) && edges.length > 0) {
+        return edges.map((e: any) => e.node)
+      }
+    } catch {}
+
+    // 2. Fallback to legacy REST endpoint
     const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`
     try {
       const res = await this.httpClient.fetchJson<{tray?: any[]}>(url, {
@@ -322,6 +362,65 @@ export class InstagramExtractor implements Extractor {
     return {edges: [], hasNextPage: false}
   }
 
+  async fetchNextReelsPage(
+    userId: string,
+    cursor: string,
+    options: ExtractOptions,
+  ): Promise<{edges: Array<{node: IgMediaNode}>; hasNextPage: boolean; nextCursor?: string}> {
+    try {
+      const variables = JSON.stringify({
+        after: cursor,
+        first: 12,
+        id: userId,
+        data: {
+          include_feed_video: true,
+          page_size: 12,
+          target_user_id: userId,
+        },
+      })
+      const postUrl = 'https://www.instagram.com/graphql/query'
+      const body = new URLSearchParams({
+        doc_id: IG_QUERIES.PolarisProfileReelsTabContentQuery_connection,
+        variables,
+      }).toString()
+
+      const res = await this.httpClient.fetchJson<any>(postUrl, {
+        method: 'POST',
+        body,
+        cookiePath: options.cookiePath,
+        cookieDomain: 'instagram.com',
+        signal: options.signal,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-IG-App-ID': IG_APP_ID,
+          'X-FB-Friendly-Name': 'PolarisProfileReelsTabContentQuery_connection',
+          'Referer': 'https://www.instagram.com/',
+        },
+      })
+
+      const reelsData = res?.data?.fetch__XDTUserDict
+      let connection = reelsData?.reels
+      if (!connection && reelsData) {
+        for (const val of Object.values(reelsData)) {
+          if (val && typeof val === 'object' && 'edges' in val) {
+            connection = val as any
+            break
+          }
+        }
+      }
+
+      if (connection?.edges && Array.isArray(connection.edges)) {
+        return {
+          edges: connection.edges,
+          hasNextPage: Boolean(connection.page_info?.has_next_page),
+          nextCursor: connection.page_info?.end_cursor,
+        }
+      }
+    } catch {}
+
+    return {edges: [], hasNextPage: false}
+  }
+
   async *extract(profile: ParsedProfile, options: ExtractOptions): AsyncGenerator<MediaItem, void, unknown> {
     const username = profile.username
     const subDir = options.subDir
@@ -380,6 +479,7 @@ export class InstagramExtractor implements Extractor {
     }
 
     let found = 0
+    const emittedItemIds = new Set<string>()
 
     // Timeline Media with pagination
     let currentEdges = user.edge_owner_to_timeline_media?.edges ?? []
@@ -392,6 +492,9 @@ export class InstagramExtractor implements Extractor {
         for (const item of items) {
           if (subDir === 'Photos' && item.type !== 'photo') continue
           if (subDir === 'Videos' && item.type !== 'video') continue
+
+          if (emittedItemIds.has(item.id)) continue
+          emittedItemIds.add(item.id)
 
           found++
           options.onProgress?.({
@@ -422,13 +525,16 @@ export class InstagramExtractor implements Extractor {
       }
     }
 
-    // Felix / Reels timeline
+    // Felix / Reels timeline + GraphQL Reels Tab pagination (gallery-dl v1.32.16+)
     if (subDir === 'Videos') {
       const videoEdges = user.edge_felix_video_timeline?.edges ?? []
       for (const edge of videoEdges) {
         const items = parseIgNodeToMediaItems(edge.node, username)
         for (const item of items) {
           if (item.type !== 'video') continue
+          if (emittedItemIds.has(item.id)) continue
+          emittedItemIds.add(item.id)
+
           found++
           options.onProgress?.({
             stage: 'Videos',
@@ -436,6 +542,43 @@ export class InstagramExtractor implements Extractor {
             message: `Found reel: ${item.filename}`,
           })
           yield item
+        }
+      }
+
+      // Paginate remaining reels tab via GraphQL connection
+      let reelsCursor = ''
+      let hasMoreReels = true
+
+      while (hasMoreReels && !options.signal?.aborted) {
+        try {
+          const reelsPage = await this.fetchNextReelsPage(userId, reelsCursor, options)
+          if (!reelsPage.edges || reelsPage.edges.length === 0) break
+
+          for (const edge of reelsPage.edges) {
+            const items = parseIgNodeToMediaItems(edge.node, username)
+            for (const item of items) {
+              if (item.type !== 'video') continue
+              if (emittedItemIds.has(item.id)) continue
+              emittedItemIds.add(item.id)
+
+              found++
+              options.onProgress?.({
+                stage: 'Videos',
+                found,
+                message: `Found reel: ${item.filename}`,
+              })
+              yield item
+            }
+          }
+
+          if (reelsPage.hasNextPage && reelsPage.nextCursor && reelsPage.nextCursor !== reelsCursor) {
+            reelsCursor = reelsPage.nextCursor
+            await sleep(1500, 2500, options.signal)
+          } else {
+            hasMoreReels = false
+          }
+        } catch {
+          break
         }
       }
     }

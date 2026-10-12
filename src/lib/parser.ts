@@ -159,6 +159,24 @@ export function parseProfileInput(input: string): ParsedProfile {
     }
 
     if (host.includes('x.com') || host.includes('twitter.com')) {
+      // Personal likes / bookmarks history (gallery-dl upstream v1.32.16+)
+      if (pathParts[0]?.toLowerCase() === 'i' && pathParts[1]?.toLowerCase() === 'history' && pathParts[2]?.toLowerCase() === 'likes') {
+        return {
+          platform: 'x',
+          username: 'i_history_likes',
+          cleanUrl: 'https://x.com/i/history/likes',
+          rawInput: input,
+        }
+      }
+      if (pathParts[0]?.toLowerCase() === 'i' && pathParts[1]?.toLowerCase() === 'bookmarks') {
+        return {
+          platform: 'x',
+          username: 'i_bookmarks',
+          cleanUrl: 'https://x.com/i/bookmarks',
+          rawInput: input,
+        }
+      }
+
       const firstPart = pathParts[0] || ''
       const reserved = ['home', 'explore', 'notifications', 'messages', 'i', 'settings']
       if (firstPart && !reserved.includes(firstPart.toLowerCase())) {

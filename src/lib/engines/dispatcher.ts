@@ -36,13 +36,13 @@ export function resolveDownloadBaseDir(customBaseDir?: string): string {
   if (customBaseDir && customBaseDir.trim()) {
     return path.resolve(expandPath(customBaseDir.trim()))
   }
-  const configDir = loadConfig().downloadDir
-  if (configDir && configDir.trim()) {
-    return path.resolve(expandPath(configDir.trim()))
-  }
   const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR
   if (envDir && envDir.trim()) {
     return path.resolve(expandPath(envDir.trim()))
+  }
+  const configDir = loadConfig().downloadDir
+  if (configDir && configDir.trim()) {
+    return path.resolve(expandPath(configDir.trim()))
   }
   if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
     const raw = process.env.NAMI_BASE_DIR.trim()
