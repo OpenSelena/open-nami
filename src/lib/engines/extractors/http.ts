@@ -94,7 +94,7 @@ export interface RequestOptions extends RequestInit {
   timeoutMs?: number
 }
 
-function combineTimeoutSignal(signal?: AbortSignal, timeoutMs?: number): AbortSignal | undefined {
+export function combineTimeoutSignal(signal?: AbortSignal, timeoutMs?: number): AbortSignal | undefined {
   if (!timeoutMs || timeoutMs <= 0) return signal
   const timeoutSignal = AbortSignal.timeout(timeoutMs)
   return signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal

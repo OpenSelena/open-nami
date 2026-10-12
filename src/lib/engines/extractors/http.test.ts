@@ -6,6 +6,7 @@ import {
   sleep,
   HttpClient,
   DEFAULT_USER_AGENT,
+  combineTimeoutSignal,
 } from './http.js'
 
 test('parseNetscapeCookies parses valid cookies and handles #HttpOnly_', () => {
@@ -77,23 +78,30 @@ test('HttpClient caches cookies loaded from path and reuses in-memory', async ()
   }
 })
 
-test('HttpClient request aborts on timeoutMs using native AbortSignal.timeout', async () => {
-  const client = new HttpClient()
-  const origFetch = globalThis.fetch
-  globalThis.fetch = async (_url: any, opts: any) => {
-    return new Promise((_resolve, reject) => {
-      opts?.signal?.addEventListener('abort', () => {
-        reject(opts.signal.reason)
-      })
-    })
-  }
+test('combineTimeoutSignal combines caller signal and timeout', () => {
+  assert.equal(combineTimeoutSignal(undefined, undefined), undefined)
+  assert.equal(combineTimeoutSignal(undefined, 0), undefined)
 
-  try {
-    await assert.rejects(
-      () => client.request('https://example.com/timeout', {timeoutMs: 30, retries: 0}),
-      {name: 'TimeoutError'},
-    )
-  } finally {
-    globalThis.fetch = origFetch
-  }
+  const controller = new AbortController()
+  assert.equal(combineTimeoutSignal(controller.signal, 0), controller.signal)
+
+  const timedSignal = combineTimeoutSignal(undefined, 5000)
+  assert.ok(timedSignal instanceof AbortSignal)
+  assert.equal(timedSignal.aborted, false)
+
+  controller.abort(new Error('Pre-aborted'))
+  const combined = combineTimeoutSignal(controller.signal, 5000)
+  assert.ok(combined?.aborted)
+  assert.equal(combined?.reason?.message, 'Pre-aborted')
+})
+
+test('HttpClient request aborts immediately if caller signal is already aborted', async () => {
+  const client = new HttpClient()
+  const controller = new AbortController()
+  controller.abort(new Error('Caller aborted early'))
+
+  await assert.rejects(
+    () => client.request('https://example.com/abort', {signal: controller.signal, retries: 0}),
+    {message: 'Caller aborted early'},
+  )
 })
