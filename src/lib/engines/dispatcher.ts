@@ -156,6 +156,12 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
 
         // Fallback to gallery-dl if native extractor failed or found 0 items
         if ((!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
+          onProgress?.({
+            job: subDir,
+            downloadedCount: totalDownloaded,
+            skippedCount: totalSkipped,
+            statusText: 'switching to gallery-dl engine…',
+          })
           const gdlRes = await runGdl(subDir)
           if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success) {
             res = gdlRes
@@ -172,6 +178,12 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           totalSkipped += res.skipped
         } else if (!options.signal?.aborted) {
           // Fallback to yt-dlp first for videos
+          onProgress?.({
+            job: 'Videos',
+            downloadedCount: totalDownloaded,
+            skippedCount: totalSkipped,
+            statusText: 'switching to yt-dlp engine…',
+          })
           const fbRes = await runYt()
           if (fbRes.downloaded > 0 || fbRes.skipped > 0 || fbRes.success) {
             totalDownloaded += fbRes.downloaded
@@ -179,6 +191,12 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
             if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`)
           } else if (!options.signal?.aborted) {
             // Further fallback to gallery-dl if yt-dlp also yielded nothing
+            onProgress?.({
+              job: 'Videos',
+              downloadedCount: totalDownloaded,
+              skippedCount: totalSkipped,
+              statusText: 'switching to gallery-dl engine…',
+            })
             const gdlRes = await runGdl('Videos')
             totalDownloaded += gdlRes.downloaded
             totalSkipped += gdlRes.skipped

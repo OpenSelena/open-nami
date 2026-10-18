@@ -229,7 +229,9 @@ export class HttpClient {
       } catch {}
       throw new Error(`HTTP ${res.status} (${res.statusText}) for ${url}`)
     }
-    return (await res.json()) as T
+    const text = await res.text()
+    const cleanText = text.replace(/^\s*(?:for\s*\(\s*;\s*;\s*\);|\)\]\}',)/, '').trim()
+    return JSON.parse(cleanText) as T
   }
 
   async fetchText(url: string, options: RequestOptions = {}): Promise<string> {

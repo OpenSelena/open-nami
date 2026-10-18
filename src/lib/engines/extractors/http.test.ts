@@ -105,3 +105,21 @@ test('HttpClient request aborts immediately if caller signal is already aborted'
     {message: 'Caller aborted early'},
   )
 })
+
+test('HttpClient fetchJson strips anti-XSSI prefixes like for (;;);', async () => {
+  const originalFetch = globalThis.fetch
+  try {
+    globalThis.fetch = async () =>
+      new Response('for (;;);{"data":{"status":"ok"}}', {
+        status: 200,
+        headers: {'Content-Type': 'application/json'},
+      })
+
+    const client = new HttpClient()
+    const result = await client.fetchJson<{data: {status: string}}>('https://example.com/api')
+    assert.equal(result.data.status, 'ok')
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+

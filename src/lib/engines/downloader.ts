@@ -112,12 +112,17 @@ export async function downloadMediaStream(
         consecutiveErrors++
         const errMsg = err instanceof Error ? err.message : String(err)
         errors.push(`Extraction stream error: ${errMsg}`)
+        const cleanErr = errMsg.includes('429')
+          ? 'rate limited by platform (HTTP 429)'
+          : errMsg.length > 50
+            ? `${errMsg.slice(0, 47)}…`
+            : errMsg
         onProgress?.({
           job: jobName,
           downloadedCount: downloaded,
           skippedCount: skipped,
           currentFile: '',
-          statusText: `Extractor glitch: ${errMsg}`,
+          statusText: `Extractor error: ${cleanErr}`,
         })
         if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS || signal?.aborted) {
           isDone = true

@@ -71,8 +71,9 @@ export async function runYtDlp(options: YtDlpOptions): Promise<{success: boolean
   let skippedCount = 0
   let errorOutput = ''
 
+  let engineCmdStr = 'yt-dlp'
   try {
-    await ensureYtDlp((status) => {
+    engineCmdStr = await ensureYtDlp((status) => {
       onProgress?.({
         job: 'Videos',
         downloadedCount: 0,
@@ -89,10 +90,19 @@ export async function runYtDlp(options: YtDlpOptions): Promise<{success: boolean
     }
   }
 
-  const engineCmd = resolveEngineCommand('yt-dlp')
+  const engineCmd = engineCmdStr.includes(path.sep)
+    ? {command: engineCmdStr, baseArgs: []}
+    : resolveEngineCommand('yt-dlp')
   const fullArgs = [...engineCmd.baseArgs, ...args]
 
   return new Promise((resolve) => {
+    onProgress?.({
+      job: 'Videos',
+      downloadedCount,
+      skippedCount,
+      statusText: 'downloading with yt-dlp…',
+    })
+
     const child = spawn(engineCmd.command, fullArgs, {
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],

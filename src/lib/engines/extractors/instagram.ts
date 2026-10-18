@@ -1,4 +1,5 @@
-import {HttpClient, sleep} from './http.js'
+import crypto from 'node:crypto'
+import {HttpClient, sleep, loadCookiesFromPath} from './http.js'
 import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
@@ -275,104 +276,239 @@ export class InstagramExtractor implements Extractor {
     }
   }
 
+  async fetchWebTokens(
+    username: string,
+    options: ExtractOptions,
+  ): Promise<{lsd?: string; fbDtsg?: string; csrfToken?: string; userId?: string}> {
+    let csrfToken: string | undefined
+    if (options.cookiePath) {
+      try {
+        const cookies = await loadCookiesFromPath(options.cookiePath, 'instagram.com')
+        csrfToken = cookies['csrftoken']
+      } catch {}
+    }
+    if (!csrfToken) {
+      csrfToken = crypto.randomBytes(16).toString('hex')
+    }
+
+    try {
+      const html = await this.httpClient.fetchText(`https://www.instagram.com/${encodeURIComponent(username)}/`, {
+        cookiePath: options.cookiePath,
+        cookieDomain: 'instagram.com',
+        signal: options.signal,
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      })
+
+      let lsd: string | undefined
+      let fbDtsg: string | undefined
+      let userId: string | undefined
+
+      const eqmcMatch = html.match(/id="__eqmc"[^>]*>([^<]+)<\/script>/)
+      if (eqmcMatch) {
+        try {
+          const eqmc = JSON.parse(eqmcMatch[1])
+          if (eqmc.l) lsd = eqmc.l
+          if (eqmc.f) fbDtsg = eqmc.f
+        } catch {}
+      }
+
+      if (!lsd) {
+        const m = html.match(/"lsd":"([^"]+)"/) || html.match(/"LSD",\[\],\{"token":"([^"]+)"/)
+        if (m) lsd = m[1]
+      }
+      if (!fbDtsg) {
+        const m = html.match(/"dtsg":\{"token":"([^"]+)"/)
+        if (m) fbDtsg = m[1]
+      }
+
+      const uMatch = html.match(/"profile_id":"([^"]+)"/) || html.match(/"user_id":"([^"]+)"/)
+      if (uMatch) userId = uMatch[1]
+
+      return {lsd, fbDtsg, csrfToken, userId}
+    } catch (err) {
+      logExtractorDebug('fetchWebTokens', err)
+      return {csrfToken}
+    }
+  }
+
+  async fetchPostsTabGraphQL(
+    username: string,
+    cursor: string | undefined,
+    tokens: {lsd?: string; fbDtsg?: string; csrfToken?: string},
+    options: ExtractOptions,
+  ): Promise<{edges: Array<{node: IgMediaNode}>; hasNextPage: boolean; nextCursor?: string; userId?: string}> {
+    const postVariables = JSON.stringify({
+      after: cursor || null,
+      before: null,
+      first: 12,
+      last: null,
+      username,
+      data: {
+        count: 12,
+        include_reel_media_seen_timestamp: true,
+        include_relationship_info: true,
+        latest_besties_reel_media: true,
+        latest_reel_media: true,
+      },
+      include_multi_captions: true,
+      __relay_internal__pv__PolarisMultiCaptionCarouselEnabledrelayprovider: true,
+      __relay_internal__pv__PolarisShortDramaEnabledrelayprovider: false,
+      __relay_internal__pv__PolarisReelsRecoDebugOverlayEnabledrelayprovider: false,
+    })
+
+    const bodyParams = new URLSearchParams({
+      av: '17841415137994167',
+      __d: 'www',
+      __user: '0',
+      __a: '1',
+      __req: '0',
+      __hs: '20731.HYP:instagram_web_pkg.2.1...0',
+      dpr: '1',
+      __ccg: 'EXCELLENT',
+      __rev: '1049285836',
+      __hsi: '7693193318680449885',
+      __comet_req: '7',
+      jazoest: '26461',
+      fb_api_caller_class: 'RelayModern',
+      fb_api_req_friendly_name: 'PolarisProfilePostsTabContentQuery_connection',
+      server_timestamps: 'true',
+      variables: postVariables,
+      doc_id: IG_POLARIS_DOC_ID,
+    })
+
+    if (tokens.fbDtsg) bodyParams.set('fb_dtsg', tokens.fbDtsg)
+    if (tokens.lsd) bodyParams.set('lsd', tokens.lsd)
+
+    const headers: Record<string, string> = {
+      'Accept': '*/*',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-IG-App-ID': IG_APP_ID,
+      'X-IG-Max-Touch-Points': '0',
+      'X-FB-Friendly-Name': 'PolarisProfilePostsTabContentQuery_connection',
+      'Referer': `https://www.instagram.com/${username}/`,
+      'Origin': 'https://www.instagram.com',
+      'X-ASBD-ID': '359341',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-origin',
+    }
+    if (tokens.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
+    if (tokens.lsd) headers['X-FB-LSD'] = tokens.lsd
+
+    const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/graphql/query', {
+      method: 'POST',
+      body: bodyParams.toString(),
+      cookiePath: options.cookiePath,
+      cookieDomain: 'instagram.com',
+      signal: options.signal,
+      headers,
+    })
+
+    const connection =
+      res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection ||
+      res?.data?.user?.edge_owner_to_timeline_media
+
+    if (connection?.edges && Array.isArray(connection.edges)) {
+      let resolvedUserId: string | undefined
+      for (const edge of connection.edges) {
+        const node = edge?.node
+        if (node?.owner_id) {
+          resolvedUserId = String(node.owner_id)
+          break
+        }
+        if (node?.user?.pk || node?.user?.id) {
+          resolvedUserId = String(node.user.pk || node.user.id)
+          break
+        }
+        if (typeof node?.id === 'string' && node.id.includes('_')) {
+          resolvedUserId = node.id.split('_')[1]
+          break
+        }
+      }
+      return {
+        edges: connection.edges,
+        hasNextPage: Boolean(connection.page_info?.has_next_page),
+        nextCursor: connection.page_info?.end_cursor,
+        userId: resolvedUserId,
+      }
+    }
+
+    return {edges: [], hasNextPage: false}
+  }
+
   async fetchNextPostsPage(
     userId: string,
     username: string,
     cursor: string,
     options: ExtractOptions,
+    tokens?: {lsd?: string; fbDtsg?: string; csrfToken?: string},
   ): Promise<{edges: Array<{node: IgMediaNode}>; hasNextPage: boolean; nextCursor?: string}> {
-    // 1. Try GraphQL query endpoint with query_hash
-    const variables = JSON.stringify({id: userId, first: 12, after: cursor})
-    const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`
+    // 1. Try GraphQL query endpoint with query_hash if userId is present
+    if (userId) {
+      const variables = JSON.stringify({id: userId, first: 12, after: cursor})
+      const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`
 
-    try {
-      const res = await this.httpClient.fetchJson<any>(url, {
-        cookiePath: options.cookiePath,
-        cookieDomain: 'instagram.com',
-        signal: options.signal,
-        headers: {
-          'X-IG-App-ID': IG_APP_ID,
-          'Referer': `https://www.instagram.com/${username}/`,
-        },
-      })
+      try {
+        const res = await this.httpClient.fetchJson<any>(url, {
+          cookiePath: options.cookiePath,
+          cookieDomain: 'instagram.com',
+          signal: options.signal,
+          headers: {
+            'X-IG-App-ID': IG_APP_ID,
+            'Referer': `https://www.instagram.com/${username}/`,
+          },
+        })
 
-      const data = res?.data?.user?.edge_owner_to_timeline_media
-      if (data?.edges && data.edges.length > 0) {
-        return {
-          edges: data.edges,
-          hasNextPage: Boolean(data.page_info?.has_next_page),
-          nextCursor: data.page_info?.end_cursor,
+        const data = res?.data?.user?.edge_owner_to_timeline_media
+        if (data?.edges && data.edges.length > 0) {
+          return {
+            edges: data.edges,
+            hasNextPage: Boolean(data.page_info?.has_next_page),
+            nextCursor: data.page_info?.end_cursor,
+          }
         }
+      } catch (err) {
+        logExtractorDebug('edge_owner_to_timeline_media', err)
       }
-    } catch (err) {
-      logExtractorDebug('edge_owner_to_timeline_media', err)
     }
 
-    // PolarisProfilePostsTabContentQuery GraphQL connection
+    // 2. PolarisProfilePostsTabContentQuery GraphQL connection
     try {
-      const postVariables = JSON.stringify({
-        after: cursor,
-        first: 12,
-        username,
-        data: {count: 12},
-      })
-      const postUrl = 'https://www.instagram.com/graphql/query'
-      const body = new URLSearchParams({
-        doc_id: IG_POLARIS_DOC_ID,
-        variables: postVariables,
-      }).toString()
-
-      const res = await this.httpClient.fetchJson<any>(postUrl, {
-        method: 'POST',
-        body,
-        cookiePath: options.cookiePath,
-        cookieDomain: 'instagram.com',
-        signal: options.signal,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-IG-App-ID': IG_APP_ID,
-          'X-FB-Friendly-Name': 'PolarisProfilePostsTabContentQuery_connection',
-          'Referer': `https://www.instagram.com/${username}/`,
-        },
-      })
-
-      const connection =
-        res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection ||
-        res?.data?.user?.edge_owner_to_timeline_media
-      if (connection?.edges && connection.edges.length > 0) {
-        return {
-          edges: connection.edges,
-          hasNextPage: Boolean(connection.page_info?.has_next_page),
-          nextCursor: connection.page_info?.end_cursor,
-        }
+      const page = await this.fetchPostsTabGraphQL(username, cursor, tokens || {}, options)
+      if (page.edges && page.edges.length > 0) {
+        return page
       }
     } catch (err) {
       logExtractorDebug('PolarisProfilePostsTabContentQuery_connection', err)
     }
 
-    // v1 user feed REST endpoint
-    try {
-      const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`
-      const res = await this.httpClient.fetchJson<any>(restUrl, {
-        cookiePath: options.cookiePath,
-        cookieDomain: 'instagram.com',
-        signal: options.signal,
-        headers: {
-          'X-IG-App-ID': IG_APP_ID,
-          'Referer': `https://www.instagram.com/${username}/`,
-        },
-      })
+    // 3. v1 user feed REST endpoint
+    if (userId) {
+      try {
+        const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`
+        const res = await this.httpClient.fetchJson<any>(restUrl, {
+          cookiePath: options.cookiePath,
+          cookieDomain: 'instagram.com',
+          signal: options.signal,
+          headers: {
+            'X-IG-App-ID': IG_APP_ID,
+            'Referer': `https://www.instagram.com/${username}/`,
+          },
+        })
 
-      if (Array.isArray(res?.items) && res.items.length > 0) {
-        const edges = res.items.map((item: any) => ({node: item}))
-        return {
-          edges,
-          hasNextPage: Boolean(res.more_available),
-          nextCursor: res.next_max_id ? String(res.next_max_id) : undefined,
+        if (Array.isArray(res?.items) && res.items.length > 0) {
+          const edges = res.items.map((item: any) => ({node: item}))
+          return {
+            edges,
+            hasNextPage: Boolean(res.more_available),
+            nextCursor: res.next_max_id ? String(res.next_max_id) : undefined,
+          }
         }
+      } catch (err) {
+        logExtractorDebug('v1 user feed REST', err)
       }
-    } catch (err) {
-      logExtractorDebug('v1 user feed REST', err)
     }
 
     return {edges: [], hasNextPage: false}
@@ -449,10 +585,33 @@ export class InstagramExtractor implements Extractor {
       message: `Fetching Instagram profile @${username}...`,
     })
 
-    const user = await this.fetchUserProfile(username, options)
-    const userId = user.id
+    let user: IgUser | null = null
+    try {
+      user = await this.fetchUserProfile(username, options)
+    } catch (err) {
+      logExtractorDebug('fetchUserProfile', err)
+    }
+
+    let webTokens: {lsd?: string; fbDtsg?: string; userId?: string} = {}
+    if (!user) {
+      webTokens = await this.fetchWebTokens(username, options)
+    }
+
+    let userId = user?.id || webTokens.userId
+
+    if (!userId && (subDir === 'Stories' || subDir === 'Highlights')) {
+      try {
+        const probe = await this.fetchPostsTabGraphQL(username, undefined, webTokens, options)
+        if (probe.userId) {
+          userId = probe.userId
+        }
+      } catch (err) {
+        logExtractorDebug('userId probe', err)
+      }
+    }
 
     if (subDir === 'Stories') {
+      if (!userId) return
       options.onProgress?.({
         stage: 'Stories',
         found: 0,
@@ -469,6 +628,7 @@ export class InstagramExtractor implements Extractor {
     }
 
     if (subDir === 'Highlights') {
+      if (!userId) return
       options.onProgress?.({
         stage: 'Highlights',
         found: 0,
@@ -478,7 +638,6 @@ export class InstagramExtractor implements Extractor {
       const highlightIds = tray.map(t => t.id).filter(Boolean)
 
       if (highlightIds.length > 0) {
-        // Chunk into groups of 5 to avoid query size limits
         const chunkSize = 5
         for (let i = 0; i < highlightIds.length; i += chunkSize) {
           if (options.signal?.aborted) break
@@ -499,10 +658,23 @@ export class InstagramExtractor implements Extractor {
     let found = 0
     const emittedItemIds = new Set<string>()
 
-    // Timeline Media with pagination
-    let currentEdges = user.edge_owner_to_timeline_media?.edges ?? []
-    let hasNextPage = Boolean(user.edge_owner_to_timeline_media?.page_info?.has_next_page)
-    let endCursor = user.edge_owner_to_timeline_media?.page_info?.end_cursor
+    let currentEdges = user?.edge_owner_to_timeline_media?.edges ?? []
+    let hasNextPage = Boolean(user?.edge_owner_to_timeline_media?.page_info?.has_next_page)
+    let endCursor = user?.edge_owner_to_timeline_media?.page_info?.end_cursor
+
+    if (!user) {
+      try {
+        const firstPage = await this.fetchPostsTabGraphQL(username, undefined, webTokens, options)
+        currentEdges = firstPage.edges
+        hasNextPage = firstPage.hasNextPage
+        endCursor = firstPage.nextCursor
+        if (!userId && firstPage.userId) {
+          userId = firstPage.userId
+        }
+      } catch (err) {
+        logExtractorDebug('fetchPostsTabGraphQL initial', err)
+      }
+    }
 
     while (true) {
       for (const edge of currentEdges) {
@@ -531,7 +703,7 @@ export class InstagramExtractor implements Extractor {
       await sleep(1500, 2500, options.signal)
 
       try {
-        const nextPage = await this.fetchNextPostsPage(userId, username, endCursor, options)
+        const nextPage = await this.fetchNextPostsPage(userId || '', username, endCursor, options, webTokens)
         currentEdges = nextPage.edges
         hasNextPage = nextPage.hasNextPage
         endCursor = nextPage.nextCursor
@@ -543,9 +715,8 @@ export class InstagramExtractor implements Extractor {
       }
     }
 
-    // Felix / Reels timeline + GraphQL Reels Tab pagination (gallery-dl v1.32.16+)
-    if (subDir === 'Videos') {
-      const videoEdges = user.edge_felix_video_timeline?.edges ?? []
+    if (subDir === 'Videos' && userId) {
+      const videoEdges = user?.edge_felix_video_timeline?.edges ?? []
       for (const edge of videoEdges) {
         const items = parseIgNodeToMediaItems(edge.node, username)
         for (const item of items) {
@@ -563,7 +734,6 @@ export class InstagramExtractor implements Extractor {
         }
       }
 
-      // Paginate remaining reels tab via GraphQL connection
       let reelsCursor = ''
       let hasMoreReels = true
 

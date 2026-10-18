@@ -267,3 +267,82 @@ test('InstagramExtractor fetchHighlightsTray emits debug warning on failed query
   }
 })
 
+test('InstagramExtractor extract falls back to GraphQL posts tab when fetchUserProfile fails (HTTP 429)', async () => {
+  let webPageRequested = false
+  let gqlRequested = false
+
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init?: any) => {
+      if (url.includes('api/v1/users/web_profile_info')) {
+        throw new Error('HTTP 429 (Too Many Requests)')
+      }
+      if (url.includes('graphql/query')) {
+        gqlRequested = true
+        return {
+          data: {
+            xdt_api__v1__feed__user_timeline_graphql_connection: {
+              edges: [
+                {
+                  node: {
+                    id: 'post_gql_100',
+                    shortcode: 'POST100',
+                    display_url: 'https://instagram.com/p100.jpg',
+                    taken_at: 1700000000,
+                  },
+                },
+              ],
+              page_info: {
+                has_next_page: false,
+              },
+            },
+          },
+        }
+      }
+      return {}
+    },
+    fetchText: async (url: string) => {
+      if (url.includes('humairaaaa_04')) {
+        webPageRequested = true
+        return `<html><script id="__eqmc">{"l":"lsd_token_123","f":"dtsg_token_456"}</script></html>`
+      }
+      return ''
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const items: any[] = []
+  for await (const item of extractor.extract(
+    {platform: 'instagram', username: 'humairaaaa_04', cleanUrl: 'https://instagram.com/humairaaaa_04', rawInput: 'humairaaaa_04'},
+    {subDir: 'Photos'}
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(webPageRequested, true)
+  assert.equal(gqlRequested, true)
+  assert.equal(items.length, 1)
+  assert.equal(items[0].id, 'POST100')
+  assert.equal(items[0].type, 'photo')
+})
+
+test('InstagramExtractor extract gracefully yields zero items when both REST and GraphQL fail', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error('HTTP 429 (Too Many Requests)')
+    },
+    fetchText: async () => {
+      throw new Error('Network error')
+    },
+  }
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const items: any[] = []
+  for await (const item of extractor.extract(
+    {platform: 'instagram', username: 'humairaaaa_04', cleanUrl: 'https://instagram.com/humairaaaa_04', rawInput: 'humairaaaa_04'},
+    {subDir: 'Photos'}
+  )) {
+    items.push(item)
+  }
+  assert.equal(items.length, 0)
+})
+
+

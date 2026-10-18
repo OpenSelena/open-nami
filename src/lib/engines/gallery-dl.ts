@@ -99,8 +99,9 @@ export async function runGalleryDl(options: GalleryDlOptions): Promise<{success:
   let skippedCount = 0
   let errorOutput = ''
 
+  let engineCmdStr = 'gallery-dl'
   try {
-    await ensureGalleryDl((status) => {
+    engineCmdStr = await ensureGalleryDl((status) => {
       onProgress?.({
         job: subDir,
         downloadedCount: 0,
@@ -117,10 +118,19 @@ export async function runGalleryDl(options: GalleryDlOptions): Promise<{success:
     }
   }
 
-  const engineCmd = resolveEngineCommand('gallery-dl')
+  const engineCmd = engineCmdStr.includes(path.sep)
+    ? {command: engineCmdStr, baseArgs: []}
+    : resolveEngineCommand('gallery-dl')
   const fullArgs = [...engineCmd.baseArgs, ...args]
 
   return new Promise((resolve) => {
+    onProgress?.({
+      job: subDir,
+      downloadedCount,
+      skippedCount,
+      statusText: 'downloading with gallery-dl…',
+    })
+
     const child = spawn(engineCmd.command, fullArgs, {
       windowsHide: true,
       stdio: ['ignore', 'pipe', 'pipe'],
