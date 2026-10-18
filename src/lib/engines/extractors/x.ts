@@ -25,7 +25,59 @@ export const TWITTER_FEATURES = {
   longform_notetweets_rich_text_read_enabled: true,
   longform_notetweets_inline_media_enabled: true,
   responsive_web_enhance_cards_enabled: false,
+  creator_subscriptions_tweet_preview_api_enabled: true,
+  communities_web_enable_tweet_community_results_fetch: true,
+  c9s_tweet_anatomy_moderator_badge_enabled: true,
+  articles_preview_enabled: true,
+  responsive_web_twitter_article_tweet_consumption_enabled: true,
+  responsive_web_grok_analyze_post_followups_enabled: true,
+  responsive_web_jetfuel_frame: true,
+  responsive_web_grok_share_attachment_enabled: true,
+  responsive_web_grok_analysis_button_from_backend: true,
+  responsive_web_grok_image_annotation_enabled: true,
+  responsive_web_grok_imagine_annotation_enabled: true,
+  profile_label_improvements_pcf_label_in_post_enabled: true,
+  rweb_tipjar_consumption_enabled: true,
 }
+
+export function shouldSkipTweetReply(
+  tweet: any,
+  targetUserId?: string,
+  mode: 'timeline' | 'likes' = 'timeline',
+): boolean {
+  const tweetResult = tweet.tweet || tweet
+  const legacy = tweetResult.legacy || tweetResult
+  const replyToUserId = legacy.in_reply_to_user_id_str
+
+  // Top-level tweet (not a reply) -> never skip
+  if (!replyToUserId) {
+    return false
+  }
+
+  const authorId = legacy.user_id_str || tweetResult.core?.user_results?.result?.rest_id
+
+  if (mode === 'timeline') {
+    // If targetUserId is provided, self-reply means target author replied to themselves
+    if (targetUserId) {
+      if (replyToUserId !== targetUserId || (authorId && authorId !== targetUserId)) {
+        return true
+      }
+      return false
+    }
+    // If targetUserId is unknown, check whether author replied to themselves
+    return Boolean(authorId && replyToUserId !== authorId)
+  }
+
+  // In likes mode (upstream cb#501):
+  // Liked items come from varied authors. Keep self-threads by the creator,
+  // skip conversational replies directed to other accounts.
+  if (authorId && replyToUserId === authorId) {
+    return false
+  }
+
+  return true
+}
+
 
 export interface TwitterMediaVariant {
   bitrate?: number
@@ -157,11 +209,21 @@ export class XExtractor implements Extractor {
 
     if (username === 'i_history_likes') {
       if (options.cookiePath) {
-        const cookies = await loadCookiesFromPath(options.cookiePath, 'x.com')
+        let cookies = await loadCookiesFromPath(options.cookiePath, 'x.com')
+        if (!cookies['twid']) {
+          cookies = await loadCookiesFromPath(options.cookiePath, 'twitter.com')
+        }
+        if (!cookies['twid']) {
+          cookies = await loadCookiesFromPath(options.cookiePath)
+        }
         const twid = cookies['twid']
         if (twid) {
           const decoded = decodeURIComponent(twid).replace(/^"|"$/g, '').trim()
-          const rawId = decoded.startsWith('u=') ? decoded.slice(2) : decoded
+          const rawId = decoded.startsWith('u=')
+            ? decoded.slice(2)
+            : decoded.includes('=')
+              ? decoded.split('=').pop()?.trim()
+              : decoded
           if (rawId && /^[a-zA-Z0-9_-]+$/.test(rawId)) {
             return rawId
           }
@@ -209,7 +271,23 @@ export class XExtractor implements Extractor {
   async *extract(profile: ParsedProfile, options: ExtractOptions): AsyncGenerator<MediaItem, void, unknown> {
     const username = profile.username
     const subDir = options.subDir
-    const isLikes = username === 'i_history_likes'
+    const isLikes = username === 'i_history_likes' || profile.cleanUrl?.endsWith('/likes')
+
+    // Read session cookies to attach CSRF token and auth-type headers
+    const authHeaders: Record<string, string> = {}
+    if (options.cookiePath) {
+      let cookies = await loadCookiesFromPath(options.cookiePath, 'x.com')
+      if (!cookies['ct0'] && !cookies['auth_token']) {
+        const twCookies = await loadCookiesFromPath(options.cookiePath, 'twitter.com')
+        cookies = {...twCookies, ...cookies}
+      }
+      if (cookies['ct0']) {
+        authHeaders['x-csrf-token'] = cookies['ct0']
+      }
+      if (cookies['auth_token']) {
+        authHeaders['x-twitter-auth-type'] = 'OAuth2Session'
+      }
+    }
 
     options.onProgress?.({
       stage: isLikes ? 'Likes' : 'Profile',
@@ -251,9 +329,14 @@ export class XExtractor implements Extractor {
           cookiePath: options.cookiePath,
           cookieDomain: 'x.com',
           signal: options.signal,
+          headers: authHeaders,
         })
       } catch (err) {
         break
+      }
+
+      if (res?.errors?.length && !res?.data?.user?.result) {
+        throw new Error(`X/Twitter API error: ${res.errors[0]?.message || 'GraphQL query failed'}`)
       }
 
       const instructions = res?.data?.user?.result?.timeline_v2?.timeline?.instructions || []
@@ -270,6 +353,11 @@ export class XExtractor implements Extractor {
 
           const tweetContent = entry.content?.itemContent?.tweet_results?.result
           if (tweetContent) {
+            // Filter third-party conversational replies while retaining self-threads
+            if (shouldSkipTweetReply(tweetContent, userId, isLikes ? 'likes' : 'timeline')) {
+              continue
+            }
+
             const mediaItems = parseTweetMediaEntities(tweetContent, username)
             for (const item of mediaItems) {
               if (subDir === 'Photos' && item.type !== 'photo') continue

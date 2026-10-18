@@ -181,10 +181,11 @@ export function parseProfileInput(input: string): ParsedProfile {
       const reserved = ['home', 'explore', 'notifications', 'messages', 'i', 'settings']
       if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
         const username = firstPart.replace(/^@/, '')
+        const isLikesUrl = pathParts[1]?.toLowerCase() === 'likes'
         return {
           platform: 'x',
           username: sanitizeUsername(username),
-          cleanUrl: `https://x.com/${username}`,
+          cleanUrl: isLikesUrl ? `https://x.com/${username}/likes` : `https://x.com/${username}`,
           rawInput: input,
         }
       }
