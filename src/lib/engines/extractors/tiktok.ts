@@ -3,18 +3,94 @@ import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
 
 export function parseTikTokRehydrationJson(html: string): any {
-  const match = html.match(
+  // Pattern 1: Modern __UNIVERSAL_DATA_FOR_REHYDRATION__
+  const universalMatch = html.match(
     /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/,
   )
-  if (!match) return null
-
-  try {
-    const raw = JSON.parse(match[1])
-    return raw?.['__DEFAULT_SCOPE__']
-  } catch {
-    return null
+  if (universalMatch) {
+    try {
+      const raw = JSON.parse(universalMatch[1])
+      const scope = raw?.['__DEFAULT_SCOPE__'] || raw
+      if (scope) return scope
+    } catch {}
   }
+
+  // Pattern 2: SIGI_STATE script tag
+  const sigiTagMatch = html.match(
+    /<script id="SIGI_STATE"[^>]*>([\s\S]*?)<\/script>/,
+  )
+  if (sigiTagMatch) {
+    try {
+      const raw = JSON.parse(sigiTagMatch[1])
+      const user = Object.values(raw?.UserModule?.users || {})[0] as any
+      const items = Object.values(raw?.ItemModule || {}) as any[]
+      return {
+        'webapp.user-detail': {
+          userInfo: { user },
+          itemList: items,
+        },
+        SIGI_STATE: raw,
+      }
+    } catch {}
+  }
+
+  // Pattern 3: window['SIGI_STATE'] assignment
+  const sigiWindowMatch = html.match(
+    /(?:window\[['"]SIGI_STATE['"]\]|SIGI_STATE)\s*=\s*(\{[\s\S]*?\})\s*;/i,
+  )
+  if (sigiWindowMatch) {
+    try {
+      const raw = JSON.parse(sigiWindowMatch[1])
+      const user = Object.values(raw?.UserModule?.users || {})[0] as any
+      const items = Object.values(raw?.ItemModule || {}) as any[]
+      return {
+        'webapp.user-detail': {
+          userInfo: { user },
+          itemList: items,
+        },
+        SIGI_STATE: raw,
+      }
+    } catch {}
+  }
+
+  // Pattern 4: __NEXT_DATA__ script tag
+  const nextDataMatch = html.match(
+    /<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/,
+  )
+  if (nextDataMatch) {
+    try {
+      const raw = JSON.parse(nextDataMatch[1])
+      const pageProps = raw?.props?.pageProps
+      if (pageProps) {
+        return {
+          'webapp.user-detail': {
+            userInfo: pageProps.userInfo,
+            itemList: pageProps.items || pageProps.itemList || [],
+          },
+          __NEXT_DATA__: raw,
+        }
+      }
+    } catch {}
+  }
+
+  // Pattern 5: Direct SecUid fallback regex
+  const secUidMatch = html.match(/(?:secUid|sec_uid)["':=\s]+(MS4wLjABAAAA[\w-]{32,64})/i)
+  if (secUidMatch) {
+    return {
+      'webapp.user-detail': {
+        userInfo: {
+          user: {
+            secUid: secUidMatch[1],
+          },
+        },
+        itemList: [],
+      },
+    }
+  }
+
+  return null
 }
+
 
 export function parseTikTokItem(item: any, username: string): MediaItem[] {
   const items: MediaItem[] = []
@@ -129,7 +205,19 @@ export class TikTokExtractor implements Extractor {
       if (visitedCursors.has(cursor)) break
       visitedCursors.add(cursor)
 
-      const apiUrl = `https://www.tiktok.com/api/post/item_list/?secUid=${encodeURIComponent(secUid)}&count=30&cursor=${cursor}&post_item_list_request_type=0`
+      const deviceId = `${Math.floor(7250000000000000000 + Math.random() * 75000000000000000)}`
+      const queryParams = new URLSearchParams({
+        aid: '1988',
+        app_name: 'tiktok_web',
+        device_platform: 'web_pc',
+        channel: 'tiktok_web',
+        device_id: deviceId,
+        secUid,
+        count: '30',
+        cursor,
+        post_item_list_request_type: '0',
+      })
+      const apiUrl = `https://www.tiktok.com/api/post/item_list/?${queryParams.toString()}`
 
       let res: any
       try {
@@ -137,6 +225,9 @@ export class TikTokExtractor implements Extractor {
           cookiePath: options.cookiePath,
           cookieDomain: 'tiktok.com',
           signal: options.signal,
+          headers: {
+            'Referer': profileUrl,
+          },
         })
       } catch {
         break
