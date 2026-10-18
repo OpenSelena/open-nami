@@ -151,8 +151,9 @@ test('InstagramExtractor fetchNextPostsPage parses GraphQL pagination correctly'
 test('IG_QUERIES contains upstream gallery-dl doc IDs', async () => {
   const {IG_QUERIES} = await import('./instagram.js')
   assert.equal(IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery, '26970053832668570')
-  assert.equal(IG_QUERIES.PolarisProfilePostsTabContentQuery_connection, '28142289515441884')
+  assert.equal(IG_QUERIES.PolarisProfilePostsTabContentQuery_connection, '39229011733413759')
   assert.equal(IG_QUERIES.PolarisProfileReelsTabContentQuery_connection, '28989741540630190')
+  assert.equal(IG_QUERIES.PolarisProfilePageContentQuery, '28649589871350527')
 })
 
 test('InstagramExtractor fetchHighlightsTray uses GraphQL query with doc_id 26970053832668570', async () => {
@@ -344,5 +345,73 @@ test('InstagramExtractor extract gracefully yields zero items when both REST and
   }
   assert.equal(items.length, 0)
 })
+
+test('parseIgNodeToMediaItems static-videos recovery retains static video with missing video versions as photo thumbnail', () => {
+  const staticVideoNode: any = {
+    id: 'static_vid_123',
+    shortcode: 'STATIC123',
+    is_video: true,
+    display_url: 'https://instagram.com/static_thumb.jpg',
+    taken_at_timestamp: 1700000000,
+    dimensions: {width: 1080, height: 1080},
+    // video_versions is empty or video_url is missing
+    video_versions: [],
+  }
+
+  const items = parseIgNodeToMediaItems(staticVideoNode, 'creator')
+  assert.equal(items.length, 1)
+  assert.equal(items[0].id, 'STATIC123')
+  assert.equal(items[0].type, 'photo')
+  assert.equal(items[0].url, 'https://instagram.com/static_thumb.jpg')
+})
+
+test('InstagramExtractor fetchUserProfile handles private profiles when friendship_status is null or missing without throwing TypeError', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => ({
+      data: {
+        user: {
+          id: 'user_private_1',
+          username: 'private_account',
+          is_private: true,
+          friendship_status: null, // Null friendship_status as seen in upstream cb#526
+          followed_by_viewer: false,
+        },
+      },
+    }),
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  await assert.rejects(
+    async () => {
+      await extractor.fetchUserProfile('private_account', {subDir: 'Photos'})
+    },
+    (err: Error) => {
+      assert.ok(err.message.includes('is private'))
+      // Must not be a TypeError: Cannot read properties of null
+      assert.ok(!err.message.includes('Cannot read properties'))
+      return true
+    }
+  )
+})
+
+test('InstagramExtractor fetchPostsTabGraphQL throws error when GraphQL response contains errors array', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => ({
+      errors: [{message: 'Execution error on PolarisProfilePostsTabContentQuery'}],
+    }),
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  await assert.rejects(
+    async () => {
+      await extractor.fetchPostsTabGraphQL('user_test', undefined, {}, {subDir: 'Photos'})
+    },
+    (err: Error) => {
+      assert.ok(err.message.includes('GraphQL query error'))
+      return true
+    }
+  )
+})
+
 
 

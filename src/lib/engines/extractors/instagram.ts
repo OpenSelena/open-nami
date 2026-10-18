@@ -7,13 +7,13 @@ export const IG_APP_ID = '936619743392459'
 export const IG_TIMELINE_QUERY_HASH = '69cba40317214236af40e7efa697781d'
 
 export const IG_QUERIES = {
-  PolarisProfilePostsTabContentQuery_connection: '28142289515441884',
+  PolarisProfilePostsTabContentQuery_connection: '39229011733413759',
   PolarisProfileReelsTabContentQuery_connection: '28989741540630190',
   PolarisProfileTaggedTabContentQuery_connection: '28794602806842110',
   PolarisProfileStoryHighlightsTrayContentQuery: '26970053832668570',
   PolarisStoriesV3ReelPageGalleryQuery: '28262315486766731',
   PolarisStoriesV3TrayContainerQuery: '27703822975903310',
-  PolarisProfilePageContentQuery: '28036671149327607',
+  PolarisProfilePageContentQuery: '28649589871350527',
 } as const
 
 export const IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection
@@ -29,6 +29,14 @@ export interface IgUser {
   id: string
   username: string
   full_name?: string
+  is_private?: boolean
+  followed_by_viewer?: boolean
+  friendship_status?: {
+    following?: boolean
+    followed_by?: boolean
+    blocking?: boolean
+    is_private?: boolean
+  } | null
   edge_owner_to_timeline_media?: {
     count?: number
     edges: Array<{node: IgMediaNode}>
@@ -112,6 +120,22 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
         height: video?.height ?? node.dimensions?.height,
         thumbnailUrl: node.display_url,
       })
+    } else {
+      // Static video recovery (upstream v1.32.17): retain static video / post with missing direct video URL as photo
+      const candidate = node.image_versions2?.candidates?.[0]
+      const photoUrl = candidate?.url || node.display_url
+      if (photoUrl) {
+        items.push({
+          id: baseId,
+          url: photoUrl,
+          filename: `${username}_${date || baseId}`,
+          extension: 'jpg',
+          type: 'photo',
+          date,
+          width: candidate?.width ?? node.dimensions?.width,
+          height: candidate?.height ?? node.dimensions?.height,
+        })
+      }
     }
   } else {
     const candidate = node.image_versions2?.candidates?.[0]
@@ -201,7 +225,16 @@ export class InstagramExtractor implements Extractor {
       throw new Error(`Instagram user not found or private profile: ${username}`)
     }
 
-    return res.data.user
+    const user = res.data.user
+    if (user.is_private) {
+      const fs = user.friendship_status
+      const isFollowing = fs ? Boolean(fs.following) : Boolean(user.followed_by_viewer)
+      if (!isFollowing) {
+        throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`)
+      }
+    }
+
+    return user
   }
 
   async fetchHighlightsTray(userId: string, options: ExtractOptions): Promise<any[]> {
@@ -226,6 +259,11 @@ export class InstagramExtractor implements Extractor {
           'Referer': 'https://www.instagram.com/',
         },
       })
+
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
+        throw new Error(`Instagram GraphQL query error: ${errMsg}`)
+      }
 
       const edges = res?.data?.highlights?.edges
       if (Array.isArray(edges) && edges.length > 0) {
@@ -342,9 +380,6 @@ export class InstagramExtractor implements Extractor {
     const postVariables = JSON.stringify({
       after: cursor || null,
       before: null,
-      first: 12,
-      last: null,
-      username,
       data: {
         count: 12,
         include_reel_media_seen_timestamp: true,
@@ -352,9 +387,13 @@ export class InstagramExtractor implements Extractor {
         latest_besties_reel_media: true,
         latest_reel_media: true,
       },
+      first: 12,
       include_multi_captions: true,
+      last: null,
+      username,
       __relay_internal__pv__PolarisMultiCaptionCarouselEnabledrelayprovider: true,
-      __relay_internal__pv__PolarisShortDramaEnabledrelayprovider: false,
+      __relay_internal__pv__PolarisShortDramaEnabledrelayprovider: true,
+      __relay_internal__pv__PolarisThreadsStyleCommentsEnabledrelayprovider: false,
       __relay_internal__pv__PolarisReelsRecoDebugOverlayEnabledrelayprovider: false,
     })
 
@@ -405,6 +444,11 @@ export class InstagramExtractor implements Extractor {
       signal: options.signal,
       headers,
     })
+
+    if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+      const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
+      throw new Error(`Instagram GraphQL query error: ${errMsg}`)
+    }
 
     const connection =
       res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection ||
@@ -549,6 +593,11 @@ export class InstagramExtractor implements Extractor {
           'Referer': 'https://www.instagram.com/',
         },
       })
+
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
+        throw new Error(`Instagram GraphQL query error: ${errMsg}`)
+      }
 
       const reelsData = res?.data?.fetch__XDTUserDict
       let connection = reelsData?.reels
