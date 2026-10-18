@@ -4,6 +4,22 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.5] - 2026-10-18
+
+### Added & Improved
+- **Upstream Engine Hardening**:
+  - Aligned Instagram GraphQL document IDs with upstream `gallery-dl` v1.32.17 (`39229011733413759` for posts, `28649589871350527` for profile pages).
+  - Added null-safe guard for `friendship_status` on private Instagram profiles and static video thumbnail recovery when direct video stream URLs are unavailable.
+  - Implemented self-reply thread preservation for X (Twitter) in both timeline and likes history, filtering out conversational third-party replies while preserving author threads.
+  - Added multi-domain `twid` cookie extraction (`x.com`, `twitter.com`) and CSRF `ct0` forwarding for personal `/i/history/likes` endpoints.
+  - Upgraded TikTok rehydration parser with 5 fallback strategies (`__UNIVERSAL_DATA_FOR_REHYDRATION__`, `SIGI_STATE` script tags, `window['SIGI_STATE']` assignments, `__NEXT_DATA__` page props, and direct `secUid` HTML regexes) and comprehensive device/app query parameters.
+  - Implemented Facebook mobile server-rendered fallback (`mbasic.facebook.com` / `m.facebook.com`) for blank desktop React shells, HTML5 video detection, and multi-page album cursor pagination.
+- **Failover & Cross-Engine Deduplication**:
+  - Added seamless failover in `EngineDispatch` to automatically hand off to `gallery-dl` or `yt-dlp` upon extraction barriers.
+  - Added bidirectional cross-engine archive deduplication with `archive_yt-dlp.txt` and `archive.txt`, preventing duplicate downloads across native TypeScript extractors, `yt-dlp`, and `gallery-dl`.
+- **Tests**:
+  - Expanded automated test suite from 118 to 143 passing unit tests with 100% pass rate.
+
 ## [1.0.4] - 2026-10-13
 
 ### Added & Improved
