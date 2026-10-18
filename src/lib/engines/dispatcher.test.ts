@@ -159,4 +159,149 @@ test('buildGalleryDlArgs includes anti-ban jitter and safe 429 backoff for TikTo
   assert.equal(xVideoArgs[xVideoArgs.indexOf('--sleep-request') + 1], '0.8-1.5')
 })
 
+test('dispatchDownload fails over to gallery-dl when native extractor throws or returns 0 items', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-failover-photos-'))
+
+  try {
+    let nativeCalled = false
+    let gdlCalled = false
+    const progressMessages: string[] = []
+
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'failover_user',
+        cleanUrl: 'https://www.instagram.com/failover_user/',
+        rawInput: 'failover_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      onProgress: p => {
+        progressMessages.push(p.statusText)
+      },
+      runnerOverrides: {
+        nativeRunner: async () => {
+          nativeCalled = true
+          // Native extractor fails (e.g. anti-bot challenge)
+          return {success: false, downloaded: 0, skipped: 0, error: 'Anti-bot challenge HTTP 429'}
+        },
+        gdlRunner: async () => {
+          gdlCalled = true
+          // gallery-dl fallback succeeds
+          return {success: true, downloaded: 5, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(nativeCalled, 'Native runner should be attempted first')
+    assert.ok(gdlCalled, 'gallery-dl fallback should be invoked when native runner fails')
+    assert.equal(result.downloadedCount, 5)
+    assert.ok(progressMessages.some(m => m.includes('switching to gallery-dl engine')))
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload fails over to yt-dlp first and then gallery-dl for videos', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-failover-videos-'))
+
+  try {
+    let nativeCalled = false
+    let ytdlpCalled = false
+    let gdlCalled = false
+    const progressMessages: string[] = []
+
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'tiktok',
+        username: 'video_creator',
+        cleanUrl: 'https://www.tiktok.com/@video_creator',
+        rawInput: 'video_creator',
+      },
+      choice: 'videos',
+      outputDir: tmpDir,
+      onProgress: p => {
+        progressMessages.push(p.statusText)
+      },
+      runnerOverrides: {
+        nativeRunner: async () => {
+          nativeCalled = true
+          // Native returns 0 items
+          return {success: true, downloaded: 0, skipped: 0}
+        },
+        ytRunner: async () => {
+          ytdlpCalled = true
+          // yt-dlp fails / yields 0
+          return {success: false, downloaded: 0, skipped: 0, error: 'Sign in to confirm you’re not a bot'}
+        },
+        gdlRunner: async () => {
+          gdlCalled = true
+          // gallery-dl succeeds
+          return {success: true, downloaded: 3, skipped: 1}
+        },
+      },
+    })
+
+    assert.ok(nativeCalled, 'Native runner should run first')
+    assert.ok(ytdlpCalled, 'yt-dlp should be attempted as first video fallback')
+    assert.ok(gdlCalled, 'gallery-dl should be attempted as secondary fallback')
+    assert.equal(result.downloadedCount, 3)
+    assert.equal(result.skippedCount, 1)
+    assert.ok(progressMessages.some(m => m.includes('switching to yt-dlp engine')))
+    assert.ok(progressMessages.some(m => m.includes('switching to gallery-dl engine')))
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload preserves native results and skips fallbacks when native succeeds', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-native-success-'))
+
+  try {
+    let nativeCalled = false
+    let gdlCalled = false
+    let ytCalled = false
+
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'x',
+        username: 'pure_native',
+        cleanUrl: 'https://x.com/pure_native',
+        rawInput: 'pure_native',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          nativeCalled = true
+          return {success: true, downloaded: 12, skipped: 2}
+        },
+        gdlRunner: async () => {
+          gdlCalled = true
+          return {success: true, downloaded: 0, skipped: 0}
+        },
+        ytRunner: async () => {
+          ytCalled = true
+          return {success: true, downloaded: 0, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(nativeCalled, 'Native runner should run')
+    assert.equal(gdlCalled, false, 'gallery-dl fallback should not be called when native succeeds')
+    assert.equal(ytCalled, false, 'yt-dlp fallback should not be called')
+    assert.equal(result.downloadedCount, 12)
+    assert.equal(result.skippedCount, 2)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+
 

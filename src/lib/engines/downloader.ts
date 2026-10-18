@@ -8,17 +8,53 @@ import type {MediaItem} from './extractors/types.js'
 import type {EngineProgress} from './types.js'
 
 export const ARCHIVE_FILENAME = '.open-nami-archive.json'
+export const YTDLP_ARCHIVE_FILENAME = 'archive_yt-dlp.txt'
+export const TEXT_ARCHIVE_FILENAME = 'archive.txt'
 
 export async function loadArchive(destDir: string): Promise<Set<string>> {
-  const archivePath = path.join(destDir, ARCHIVE_FILENAME)
+  const archive = new Set<string>()
+
+  // 1. JSON primary archive
+  const jsonPath = path.join(destDir, ARCHIVE_FILENAME)
   try {
-    const raw = await fsPromises.readFile(archivePath, 'utf-8')
+    const raw = await fsPromises.readFile(jsonPath, 'utf-8')
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed)) {
-      return new Set(parsed)
+      for (const id of parsed) {
+        if (id) archive.add(String(id))
+      }
     }
   } catch {}
-  return new Set<string>()
+
+  // 2. yt-dlp text archive (archive_yt-dlp.txt)
+  const ytdlpPath = path.join(destDir, YTDLP_ARCHIVE_FILENAME)
+  try {
+    const raw = await fsPromises.readFile(ytdlpPath, 'utf-8')
+    const lines = raw.split(/\r?\n/)
+    for (const rawLine of lines) {
+      const line = rawLine.trim()
+      if (!line || line.startsWith('#')) continue
+      const parts = line.split(/\s+/)
+      const id = parts[parts.length - 1]
+      if (id) archive.add(id)
+    }
+  } catch {}
+
+  // 3. Fallback generic text archive (archive.txt)
+  const textPath = path.join(destDir, TEXT_ARCHIVE_FILENAME)
+  try {
+    const raw = await fsPromises.readFile(textPath, 'utf-8')
+    const lines = raw.split(/\r?\n/)
+    for (const rawLine of lines) {
+      const line = rawLine.trim()
+      if (!line || line.startsWith('#')) continue
+      const parts = line.split(/\s+/)
+      const id = parts[parts.length - 1]
+      if (id) archive.add(id)
+    }
+  } catch {}
+
+  return archive
 }
 
 export async function saveArchive(destDir: string, archive: Set<string>): Promise<void> {
@@ -28,7 +64,20 @@ export async function saveArchive(destDir: string, archive: Set<string>): Promis
     await fsPromises.writeFile(tmpPath, JSON.stringify([...archive]), 'utf-8')
     await fsPromises.rename(tmpPath, archivePath)
   } catch {}
+
+  // Synchronize cross-engine text archives for yt-dlp & fallback engine deduplication
+  const textPaths = [
+    path.join(destDir, YTDLP_ARCHIVE_FILENAME),
+    path.join(destDir, TEXT_ARCHIVE_FILENAME),
+  ]
+  const content = [...archive].map(id => `${id}\n`).join('')
+  for (const tPath of textPaths) {
+    try {
+      await fsPromises.writeFile(tPath, content, 'utf-8')
+    } catch {}
+  }
 }
+
 
 export interface StreamDownloadOptions {
   jobName: string

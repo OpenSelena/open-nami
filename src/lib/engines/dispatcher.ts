@@ -94,7 +94,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       }
     }
 
-    const runNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights'): Promise<JobRunResult> => {
+    const defaultRunNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights'): Promise<JobRunResult> => {
       const dest = path.join(targetDir, subDir)
       try {
         const extractor = getExtractor(profile.platform as SupportedPlatform)
@@ -128,7 +128,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       }
     }
 
-    const runGdl = (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') =>
+    const runNative = options.runnerOverrides?.nativeRunner ?? defaultRunNative
+
+    const runGdl = options.runnerOverrides?.gdlRunner ?? ((subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') =>
       runGalleryDl({
         profile,
         targetDir,
@@ -136,16 +138,16 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
         onProgress,
-      })
+      }))
 
-    const runYt = () =>
+    const runYt = options.runnerOverrides?.ytRunner ?? (() =>
       runYtDlp({
         profile,
         targetDir,
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
         onProgress,
-      })
+      }))
 
     for (const job of jobs) {
       if (options.signal?.aborted) break

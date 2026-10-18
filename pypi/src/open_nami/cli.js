@@ -39476,17 +39476,48 @@ import path5 from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 var ARCHIVE_FILENAME = ".open-nami-archive.json";
+var YTDLP_ARCHIVE_FILENAME = "archive_yt-dlp.txt";
+var TEXT_ARCHIVE_FILENAME = "archive.txt";
 async function loadArchive(destDir) {
-  const archivePath = path5.join(destDir, ARCHIVE_FILENAME);
+  const archive = /* @__PURE__ */ new Set();
+  const jsonPath = path5.join(destDir, ARCHIVE_FILENAME);
   try {
-    const raw = await fsPromises2.readFile(archivePath, "utf-8");
+    const raw = await fsPromises2.readFile(jsonPath, "utf-8");
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      return new Set(parsed);
+      for (const id of parsed) {
+        if (id) archive.add(String(id));
+      }
     }
   } catch {
   }
-  return /* @__PURE__ */ new Set();
+  const ytdlpPath = path5.join(destDir, YTDLP_ARCHIVE_FILENAME);
+  try {
+    const raw = await fsPromises2.readFile(ytdlpPath, "utf-8");
+    const lines = raw.split(/\r?\n/);
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const parts = line.split(/\s+/);
+      const id = parts[parts.length - 1];
+      if (id) archive.add(id);
+    }
+  } catch {
+  }
+  const textPath = path5.join(destDir, TEXT_ARCHIVE_FILENAME);
+  try {
+    const raw = await fsPromises2.readFile(textPath, "utf-8");
+    const lines = raw.split(/\r?\n/);
+    for (const rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line || line.startsWith("#")) continue;
+      const parts = line.split(/\s+/);
+      const id = parts[parts.length - 1];
+      if (id) archive.add(id);
+    }
+  } catch {
+  }
+  return archive;
 }
 async function saveArchive(destDir, archive) {
   const archivePath = path5.join(destDir, ARCHIVE_FILENAME);
@@ -39495,6 +39526,18 @@ async function saveArchive(destDir, archive) {
     await fsPromises2.writeFile(tmpPath, JSON.stringify([...archive]), "utf-8");
     await fsPromises2.rename(tmpPath, archivePath);
   } catch {
+  }
+  const textPaths = [
+    path5.join(destDir, YTDLP_ARCHIVE_FILENAME),
+    path5.join(destDir, TEXT_ARCHIVE_FILENAME)
+  ];
+  const content = [...archive].map((id) => `${id}
+`).join("");
+  for (const tPath of textPaths) {
+    try {
+      await fsPromises2.writeFile(tPath, content, "utf-8");
+    } catch {
+    }
   }
 }
 function sanitizeFilename(rawFilename, fallbackId, ext) {
@@ -40337,7 +40380,7 @@ async function dispatchDownload(options) {
         jobs.push({ type: "highlights" });
       }
     }
-    const runNative = async (subDir) => {
+    const defaultRunNative = async (subDir) => {
       const dest = path10.join(targetDir, subDir);
       try {
         const extractor = getExtractor(profile.platform);
@@ -40370,21 +40413,22 @@ async function dispatchDownload(options) {
         };
       }
     };
-    const runGdl = (subDir) => runGalleryDl({
+    const runNative = options.runnerOverrides?.nativeRunner ?? defaultRunNative;
+    const runGdl = options.runnerOverrides?.gdlRunner ?? ((subDir) => runGalleryDl({
       profile,
       targetDir,
       subDir,
       cookiePath: cookieCopy?.filePath,
       signal: options.signal,
       onProgress
-    });
-    const runYt = () => runYtDlp({
+    }));
+    const runYt = options.runnerOverrides?.ytRunner ?? (() => runYtDlp({
       profile,
       targetDir,
       cookiePath: cookieCopy?.filePath,
       signal: options.signal,
       onProgress
-    });
+    }));
     for (const job of jobs) {
       if (options.signal?.aborted) break;
       if (job.type === "photos" || job.type === "stories" || job.type === "highlights") {

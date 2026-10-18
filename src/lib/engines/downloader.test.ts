@@ -225,3 +225,30 @@ test('downloadMediaStream continues processing remaining items when transient ex
   }
 })
 
+test('loadArchive interoperates with yt-dlp archive format and saveArchive persists text archive', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cross-archive-'))
+  try {
+    // Create pre-existing yt-dlp archive file
+    const ytdlpFile = path.join(tmpDir, 'archive_yt-dlp.txt')
+    await fs.writeFile(ytdlpFile, '# yt-dlp archive\ntiktok 7123456789\ninstagram 987654321\nstandalone_id_999\n')
+
+    const loaded = await loadArchive(tmpDir)
+    assert.ok(loaded.has('7123456789'))
+    assert.ok(loaded.has('987654321'))
+    assert.ok(loaded.has('standalone_id_999'))
+
+    // Test saveArchive writes both json and txt formats
+    loaded.add('newly_downloaded_123')
+    await saveArchive(tmpDir, loaded)
+
+    const reloaded = await loadArchive(tmpDir)
+    assert.ok(reloaded.has('newly_downloaded_123'))
+
+    const txtContent = await fs.readFile(ytdlpFile, 'utf-8')
+    assert.ok(txtContent.includes('newly_downloaded_123'))
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+

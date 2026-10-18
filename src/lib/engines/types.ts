@@ -18,11 +18,23 @@ export interface EngineResult {
   outputDir: string
 }
 
+export interface DispatchRunnerResult {
+  success: boolean
+  downloaded: number
+  skipped: number
+  error?: string
+}
+
 export interface DispatchOptions {
   profile: ParsedProfile
   choice: MediaTarget
   outputDir?: string
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void
+  runnerOverrides?: {
+    nativeRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => Promise<DispatchRunnerResult>
+    gdlRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => Promise<DispatchRunnerResult>
+    ytRunner?: () => Promise<DispatchRunnerResult>
+  }
 }
 
