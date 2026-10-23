@@ -157,11 +157,12 @@ export async function downloadMediaStream(
     return arch
   }
 
-  await getArchiveForDir(destDir)
-  if (options.destDirMap) {
+  if (options.destDirMap && Object.values(options.destDirMap).some(Boolean)) {
     for (const d of Object.values(options.destDirMap)) {
       if (d) await getArchiveForDir(d)
     }
+  } else {
+    await getArchiveForDir(destDir)
   }
 
   let downloaded = 0

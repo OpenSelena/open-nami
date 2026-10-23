@@ -498,6 +498,67 @@ test('InstagramExtractor extract populates webTokens and paginates through multi
   assert.equal(items[1].id, 'P2')
 })
 
+test('InstagramExtractor fetchPostsTabGraphQL extracts userId safely when owner_id is an object', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      return {
+        data: {
+          xdt_api__v1__feed__user_timeline_graphql_connection: {
+            edges: [
+              {
+                node: {
+                  id: '3451000925924683018_67776473510',
+                  owner_id: { pk: '67776473510', id: '67776473510' },
+                  user: { pk: '67776473510', id: '67776473510', username: 'testuser' },
+                },
+              },
+            ],
+            page_info: { has_next_page: false },
+          },
+        },
+      }
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const res = await extractor.fetchPostsTabGraphQL('testuser', undefined, {}, { subDir: 'Highlights' })
+  assert.equal(res.userId, '67776473510')
+  assert.notEqual(res.userId, '[object Object]')
+})
+
+test('InstagramExtractor fetchHighlightsTray throws descriptive error on auth failure', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error('HTTP 401 Unauthorized: not-logged-in')
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  await assert.rejects(
+    async () => {
+      await extractor.fetchHighlightsTray('67776473510', { subDir: 'Highlights' })
+    },
+    /Instagram Highlights require an active authenticated session/,
+  )
+})
+
+test('InstagramExtractor fetchReelsMedia throws descriptive error on auth failure', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error('HTTP 401 Unauthorized: login_required')
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  await assert.rejects(
+    async () => {
+      await extractor.fetchReelsMedia(['67776473510'], { subDir: 'Stories' })
+    },
+    /Instagram Stories require an active authenticated session/,
+  )
+})
+
+
 
 
 

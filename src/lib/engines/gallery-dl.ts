@@ -89,7 +89,7 @@ export function buildGalleryDlArgs(options: {
 
 export async function runGalleryDl(options: GalleryDlOptions): Promise<{success: boolean; downloaded: number; skipped: number; error?: string}> {
   const {profile, targetDir, subDir, cookiePath, onProgress} = options
-  const destDir = path.join(targetDir, subDir)
+  const destDir = subDir === 'All' ? targetDir : path.join(targetDir, subDir)
   await fs.mkdir(destDir, {recursive: true})
 
   const args = buildGalleryDlArgs({

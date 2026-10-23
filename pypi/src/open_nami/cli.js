@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.0",
+      version: "1.2.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -36929,6 +36929,7 @@ async function clearCheckpoint(destDir) {
 import path10 from "path";
 import os7 from "os";
 import fs12 from "fs/promises";
+import fsSync from "fs";
 
 // src/lib/cookies.ts
 import fs4 from "fs";
@@ -37578,25 +37579,43 @@ var InstagramExtractor = class {
     }
     return user;
   }
-  async fetchHighlightsTray(userId, options) {
+  async fetchHighlightsTray(userId, options, tokens) {
+    let authError = null;
     try {
       const variables = JSON.stringify({ user_id: userId });
-      const body = new URLSearchParams({
-        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
-        variables
-      }).toString();
+      const bodyParams = new URLSearchParams({
+        av: "17841415137994167",
+        __d: "www",
+        __user: "0",
+        __a: "1",
+        __req: "0",
+        dpr: "1",
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "PolarisProfileStoryHighlightsTrayContentQuery",
+        server_timestamps: "true",
+        variables,
+        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery
+      });
+      if (tokens?.fbDtsg) bodyParams.set("fb_dtsg", tokens.fbDtsg);
+      if (tokens?.lsd) bodyParams.set("lsd", tokens.lsd);
+      const headers = {
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-IG-App-ID": IG_APP_ID,
+        "X-FB-Friendly-Name": "PolarisProfileStoryHighlightsTrayContentQuery",
+        "Referer": "https://www.instagram.com/",
+        "Origin": "https://www.instagram.com",
+        "X-ASBD-ID": "359341"
+      };
+      if (tokens?.csrfToken) headers["X-CSRFToken"] = tokens.csrfToken;
+      if (tokens?.lsd) headers["X-FB-LSD"] = tokens.lsd;
       const res = await this.httpClient.fetchJson("https://www.instagram.com/graphql/query", {
         method: "POST",
-        body,
+        body: bodyParams.toString(),
         cookiePath: options.cookiePath,
         cookieDomain: "instagram.com",
         signal: options.signal,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-IG-App-ID": IG_APP_ID,
-          "X-FB-Friendly-Name": "PolarisProfileStoryHighlightsTrayContentQuery",
-          "Referer": "https://www.instagram.com/"
-        }
+        headers
       });
       const edges = res?.data?.highlights?.edges;
       if (Array.isArray(edges) && edges.length > 0) {
@@ -37607,10 +37626,16 @@ var InstagramExtractor = class {
       }
       if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
-        throw new Error(`Instagram GraphQL query error: ${errMsg}`);
+        if (errMsg.includes("login") || errMsg.includes("auth") || errMsg.includes("checkpoint")) {
+          authError = new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+        }
       }
     } catch (err) {
       logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE")) {
+        authError = new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+      }
     }
     const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`;
     try {
@@ -37619,12 +37644,21 @@ var InstagramExtractor = class {
         cookieDomain: "instagram.com",
         signal: options.signal,
         headers: {
-          "X-IG-App-ID": IG_APP_ID
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": "https://www.instagram.com/"
         }
       });
+      if (res.message === "login_required" || res.message === "checkpoint_required") {
+        throw new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+      }
       return res.tray ?? [];
     } catch (err) {
       logExtractorDebug("Highlights legacy REST", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE") || msg.includes("Unexpected token")) {
+        throw new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+      }
+      if (authError) throw authError;
       return [];
     }
   }
@@ -37638,13 +37672,21 @@ var InstagramExtractor = class {
         cookieDomain: "instagram.com",
         signal: options.signal,
         headers: {
-          "X-IG-App-ID": IG_APP_ID
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": "https://www.instagram.com/"
         }
       });
+      if (res.message === "login_required" || res.message === "checkpoint_required") {
+        throw new Error("Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+      }
       if (res.reels_media) return res.reels_media;
       if (res.reels) return Object.values(res.reels);
       return [];
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE") || msg.includes("Unexpected token")) {
+        throw new Error("Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
+      }
       return [];
     }
   }
@@ -37770,16 +37812,23 @@ var InstagramExtractor = class {
       for (const edge of connection.edges) {
         const node = edge?.node;
         if (node?.owner_id) {
-          resolvedUserId = String(node.owner_id);
-          break;
+          if (typeof node.owner_id === "object" && node.owner_id !== null) {
+            resolvedUserId = String(node.owner_id.pk || node.owner_id.id || "");
+          } else {
+            resolvedUserId = String(node.owner_id);
+          }
+          if (resolvedUserId && resolvedUserId !== "[object Object]") break;
         }
         if (node?.user?.pk || node?.user?.id) {
           resolvedUserId = String(node.user.pk || node.user.id);
-          break;
+          if (resolvedUserId && resolvedUserId !== "[object Object]") break;
         }
         if (typeof node?.id === "string" && node.id.includes("_")) {
-          resolvedUserId = node.id.split("_")[1];
-          break;
+          const candidate = node.id.split("_")[1];
+          if (candidate && candidate !== "[object Object]") {
+            resolvedUserId = candidate;
+            break;
+          }
         }
       }
       return {
@@ -37939,10 +37988,10 @@ var InstagramExtractor = class {
       logExtractorDebug("fetchWebTokens", err);
     }
     let userId = user?.id || webTokens.userId;
-    if (!userId && (subDir === "Stories" || subDir === "Highlights")) {
+    if ((!userId || userId === "[object Object]") && (subDir === "Stories" || subDir === "Highlights")) {
       try {
         const probe = await this.fetchPostsTabGraphQL(username, void 0, webTokens, options);
-        if (probe.userId) {
+        if (probe.userId && probe.userId !== "[object Object]") {
           userId = probe.userId;
         }
       } catch (err) {
@@ -37950,7 +37999,9 @@ var InstagramExtractor = class {
       }
     }
     if (subDir === "Stories") {
-      if (!userId) return;
+      if (!userId || userId === "[object Object]") {
+        throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`);
+      }
       options.onProgress?.({
         stage: "Stories",
         found: 0,
@@ -37966,13 +38017,15 @@ var InstagramExtractor = class {
       return;
     }
     if (subDir === "Highlights") {
-      if (!userId) return;
+      if (!userId || userId === "[object Object]") {
+        throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`);
+      }
       options.onProgress?.({
         stage: "Highlights",
         found: 0,
         message: `Fetching highlights tray for @${username}...`
       });
-      const tray = await this.fetchHighlightsTray(userId, options);
+      const tray = await this.fetchHighlightsTray(userId, options, webTokens);
       const highlightIds = tray.map((t) => t.id).filter(Boolean);
       if (highlightIds.length > 0) {
         const chunkSize = 5;
@@ -39167,11 +39220,12 @@ async function downloadMediaStream(items, options) {
     }
     return arch;
   };
-  await getArchiveForDir(destDir);
-  if (options.destDirMap) {
+  if (options.destDirMap && Object.values(options.destDirMap).some(Boolean)) {
     for (const d of Object.values(options.destDirMap)) {
       if (d) await getArchiveForDir(d);
     }
+  } else {
+    await getArchiveForDir(destDir);
   }
   let downloaded = 0;
   let skipped = 0;
@@ -39805,7 +39859,7 @@ function buildGalleryDlArgs(options) {
 }
 async function runGalleryDl(options) {
   const { profile, targetDir, subDir, cookiePath, onProgress } = options;
-  const destDir = path8.join(targetDir, subDir);
+  const destDir = subDir === "All" ? targetDir : path8.join(targetDir, subDir);
   await fs10.mkdir(destDir, { recursive: true });
   const args = buildGalleryDlArgs({
     destDir,
@@ -40109,6 +40163,30 @@ function resolveDefaultDownloadDir(platform2, username, baseDir) {
   const root = resolveDownloadBaseDir(baseDir);
   return path10.join(root, platform2, username);
 }
+async function cleanupEmptyCategoryDirs(targetDir) {
+  const candidateDirs = ["All", "Stories", "Highlights", "Photos", "Videos"];
+  for (const dirName of candidateDirs) {
+    const fullPath = path10.join(targetDir, dirName);
+    try {
+      if (!fsSync.existsSync(fullPath)) continue;
+      const entries = await fs12.readdir(fullPath);
+      const nonArchiveEntries = entries.filter(
+        (e) => e !== ".open-nami-archive.json" && e !== "archive.txt" && e !== "archive_yt-dlp.txt" && e !== "archive_gallery-dl.sqlite3"
+      );
+      if (nonArchiveEntries.length === 0) {
+        for (const entry of entries) {
+          try {
+            await fs12.unlink(path10.join(fullPath, entry));
+          } catch {
+          }
+        }
+        await fs12.rmdir(fullPath).catch(() => {
+        });
+      }
+    } catch {
+    }
+  }
+}
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
@@ -40141,7 +40219,7 @@ async function dispatchDownload(options) {
     const savedCheckpoint = options.resume ? await loadCheckpoint(targetDir) : null;
     const currentCursors = savedCheckpoint?.cursors ? { ...savedCheckpoint.cursors } : {};
     const defaultRunNative = async (subDir) => {
-      const dest = path10.join(targetDir, subDir);
+      const dest = subDir === "All" ? targetDir : path10.join(targetDir, subDir);
       const remainingLimit = globalLimit !== void 0 ? Math.max(0, globalLimit - totalDownloaded) : void 0;
       if (remainingLimit === 0) {
         return { success: true, downloaded: 0, skipped: 0 };
@@ -40276,7 +40354,8 @@ async function dispatchDownload(options) {
       } else if (job.type === "photos" || job.type === "stories" || job.type === "highlights") {
         const subDir = job.type === "photos" ? "Photos" : job.type === "stories" ? "Stories" : "Highlights";
         let res = await runNative(subDir);
-        if ((!res.success || res.downloaded === 0 && res.skipped === 0) && !options.signal?.aborted) {
+        const isAuthError = Boolean(res.error && (res.error.includes("cookie") || res.error.includes("authenticated session") || res.error.includes("Settings (^s)")));
+        if (!isAuthError && (!res.success || res.downloaded === 0 && res.skipped === 0) && !options.signal?.aborted) {
           onProgress?.({
             job: subDir,
             downloadedCount: totalDownloaded,
@@ -40284,7 +40363,7 @@ async function dispatchDownload(options) {
             statusText: "switching to gallery-dl engine\u2026"
           });
           const gdlRes = await runGdl(subDir);
-          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success) {
+          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success && !res.error) {
             res = gdlRes;
           }
         }
@@ -40323,6 +40402,7 @@ async function dispatchDownload(options) {
         }
       }
     }
+    await cleanupEmptyCategoryDirs(targetDir);
     if (errors.length === 0 && !options.signal?.aborted) {
       await clearCheckpoint(targetDir);
     }

@@ -260,27 +260,52 @@ export class InstagramExtractor implements Extractor {
     return user
   }
 
-  async fetchHighlightsTray(userId: string, options: ExtractOptions): Promise<any[]> {
+  async fetchHighlightsTray(
+    userId: string,
+    options: ExtractOptions,
+    tokens?: {lsd?: string; fbDtsg?: string; csrfToken?: string},
+  ): Promise<any[]> {
+    let authError: Error | null = null
+
     // 1. Try GraphQL PolarisProfileStoryHighlightsTrayContentQuery (gallery-dl upstream v1.32.16+)
     try {
       const variables = JSON.stringify({user_id: userId})
-      const body = new URLSearchParams({
-        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
+      const bodyParams = new URLSearchParams({
+        av: '17841415137994167',
+        __d: 'www',
+        __user: '0',
+        __a: '1',
+        __req: '0',
+        dpr: '1',
+        fb_api_caller_class: 'RelayModern',
+        fb_api_req_friendly_name: 'PolarisProfileStoryHighlightsTrayContentQuery',
+        server_timestamps: 'true',
         variables,
-      }).toString()
+        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
+      })
+
+      if (tokens?.fbDtsg) bodyParams.set('fb_dtsg', tokens.fbDtsg)
+      if (tokens?.lsd) bodyParams.set('lsd', tokens.lsd)
+
+      const headers: Record<string, string> = {
+        'Accept': '*/*',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-IG-App-ID': IG_APP_ID,
+        'X-FB-Friendly-Name': 'PolarisProfileStoryHighlightsTrayContentQuery',
+        'Referer': 'https://www.instagram.com/',
+        'Origin': 'https://www.instagram.com',
+        'X-ASBD-ID': '359341',
+      }
+      if (tokens?.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
+      if (tokens?.lsd) headers['X-FB-LSD'] = tokens.lsd
 
       const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/graphql/query', {
         method: 'POST',
-        body,
+        body: bodyParams.toString(),
         cookiePath: options.cookiePath,
         cookieDomain: 'instagram.com',
         signal: options.signal,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-IG-App-ID': IG_APP_ID,
-          'X-FB-Friendly-Name': 'PolarisProfileStoryHighlightsTrayContentQuery',
-          'Referer': 'https://www.instagram.com/',
-        },
+        headers,
       })
 
       const edges = res?.data?.highlights?.edges
@@ -293,26 +318,41 @@ export class InstagramExtractor implements Extractor {
 
       if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
-        throw new Error(`Instagram GraphQL query error: ${errMsg}`)
+        if (errMsg.includes('login') || errMsg.includes('auth') || errMsg.includes('checkpoint')) {
+          authError = new Error('Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('401') || msg.includes('403') || msg.includes('login') || msg.includes('not-logged-in') || msg.includes('<!DOCTYPE')) {
+        authError = new Error('Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+      }
     }
 
     // Fallback to legacy REST endpoint
     const url = `https://www.instagram.com/api/v1/highlights/${userId}/highlights_tray/`
     try {
-      const res = await this.httpClient.fetchJson<{tray?: any[]}>(url, {
+      const res = await this.httpClient.fetchJson<{tray?: any[]; message?: string}>(url, {
         cookiePath: options.cookiePath,
         cookieDomain: 'instagram.com',
         signal: options.signal,
         headers: {
           'X-IG-App-ID': IG_APP_ID,
+          'Referer': 'https://www.instagram.com/',
         },
       })
+      if (res.message === 'login_required' || res.message === 'checkpoint_required') {
+        throw new Error('Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+      }
       return res.tray ?? []
-    } catch (err) {
+    } catch (err: any) {
       logExtractorDebug('Highlights legacy REST', err)
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('401') || msg.includes('403') || msg.includes('login') || msg.includes('not-logged-in') || msg.includes('<!DOCTYPE') || msg.includes('Unexpected token')) {
+        throw new Error('Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+      }
+      if (authError) throw authError
       return []
     }
   }
@@ -323,19 +363,27 @@ export class InstagramExtractor implements Extractor {
     const url = `https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=${encodeURIComponent(idsParam)}`
 
     try {
-      const res = await this.httpClient.fetchJson<{reels_media?: any[]; reels?: Record<string, any>}>(url, {
+      const res = await this.httpClient.fetchJson<{reels_media?: any[]; reels?: Record<string, any>; message?: string}>(url, {
         cookiePath: options.cookiePath,
         cookieDomain: 'instagram.com',
         signal: options.signal,
         headers: {
           'X-IG-App-ID': IG_APP_ID,
+          'Referer': 'https://www.instagram.com/',
         },
       })
 
+      if (res.message === 'login_required' || res.message === 'checkpoint_required') {
+        throw new Error('Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+      }
       if (res.reels_media) return res.reels_media
       if (res.reels) return Object.values(res.reels)
       return []
-    } catch {
+    } catch (err: any) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('401') || msg.includes('403') || msg.includes('login') || msg.includes('not-logged-in') || msg.includes('<!DOCTYPE') || msg.includes('Unexpected token')) {
+        throw new Error('Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
+      }
       return []
     }
   }
@@ -484,16 +532,23 @@ export class InstagramExtractor implements Extractor {
       for (const edge of connection.edges) {
         const node = edge?.node
         if (node?.owner_id) {
-          resolvedUserId = String(node.owner_id)
-          break
+          if (typeof node.owner_id === 'object' && node.owner_id !== null) {
+            resolvedUserId = String(node.owner_id.pk || node.owner_id.id || '')
+          } else {
+            resolvedUserId = String(node.owner_id)
+          }
+          if (resolvedUserId && resolvedUserId !== '[object Object]') break
         }
         if (node?.user?.pk || node?.user?.id) {
           resolvedUserId = String(node.user.pk || node.user.id)
-          break
+          if (resolvedUserId && resolvedUserId !== '[object Object]') break
         }
         if (typeof node?.id === 'string' && node.id.includes('_')) {
-          resolvedUserId = node.id.split('_')[1]
-          break
+          const candidate = node.id.split('_')[1]
+          if (candidate && candidate !== '[object Object]') {
+            resolvedUserId = candidate
+            break
+          }
         }
       }
       return {
@@ -689,10 +744,10 @@ export class InstagramExtractor implements Extractor {
 
     let userId = user?.id || webTokens.userId
 
-    if (!userId && (subDir === 'Stories' || subDir === 'Highlights')) {
+    if ((!userId || userId === '[object Object]') && (subDir === 'Stories' || subDir === 'Highlights')) {
       try {
         const probe = await this.fetchPostsTabGraphQL(username, undefined, webTokens, options)
-        if (probe.userId) {
+        if (probe.userId && probe.userId !== '[object Object]') {
           userId = probe.userId
         }
       } catch (err) {
@@ -701,7 +756,9 @@ export class InstagramExtractor implements Extractor {
     }
 
     if (subDir === 'Stories') {
-      if (!userId) return
+      if (!userId || userId === '[object Object]') {
+        throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`)
+      }
       options.onProgress?.({
         stage: 'Stories',
         found: 0,
@@ -718,14 +775,16 @@ export class InstagramExtractor implements Extractor {
     }
 
     if (subDir === 'Highlights') {
-      if (!userId) return
+      if (!userId || userId === '[object Object]') {
+        throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`)
+      }
       options.onProgress?.({
         stage: 'Highlights',
         found: 0,
         message: `Fetching highlights tray for @${username}...`,
       })
-      const tray = await this.fetchHighlightsTray(userId, options)
-      const highlightIds = tray.map(t => t.id).filter(Boolean)
+      const tray = await this.fetchHighlightsTray(userId, options, webTokens)
+      const highlightIds = tray.map((t: any) => t.id).filter(Boolean)
 
       if (highlightIds.length > 0) {
         const chunkSize = 5

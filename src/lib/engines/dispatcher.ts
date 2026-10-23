@@ -1,6 +1,7 @@
 import path from 'node:path'
 import os from 'node:os'
 import fs from 'node:fs/promises'
+import fsSync from 'node:fs'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
 import {resolvePlatformDownloadsDir} from '../known-folders.js'
 import {loadConfig} from '../config.js'
@@ -64,6 +65,32 @@ export function resolveDefaultDownloadDir(
   return path.join(root, platform, username)
 }
 
+export async function cleanupEmptyCategoryDirs(targetDir: string): Promise<void> {
+  const candidateDirs = ['All', 'Stories', 'Highlights', 'Photos', 'Videos']
+  for (const dirName of candidateDirs) {
+    const fullPath = path.join(targetDir, dirName)
+    try {
+      if (!fsSync.existsSync(fullPath)) continue
+      const entries = await fs.readdir(fullPath)
+      const nonArchiveEntries = entries.filter(
+        e =>
+          e !== '.open-nami-archive.json' &&
+          e !== 'archive.txt' &&
+          e !== 'archive_yt-dlp.txt' &&
+          e !== 'archive_gallery-dl.sqlite3',
+      )
+      if (nonArchiveEntries.length === 0) {
+        for (const entry of entries) {
+          try {
+            await fs.unlink(path.join(fullPath, entry))
+          } catch {}
+        }
+        await fs.rmdir(fullPath).catch(() => {})
+      }
+    } catch {}
+  }
+}
+
 export async function dispatchDownload(options: DispatchOptions): Promise<EngineResult> {
   const {profile, choice, onProgress} = options
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
@@ -102,7 +129,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     const currentCursors: Record<string, string> = savedCheckpoint?.cursors ? {...savedCheckpoint.cursors} : {}
 
     const defaultRunNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All'): Promise<JobRunResult> => {
-      const dest = path.join(targetDir, subDir)
+      const dest = subDir === 'All' ? targetDir : path.join(targetDir, subDir)
       const remainingLimit = globalLimit !== undefined ? Math.max(0, globalLimit - totalDownloaded) : undefined
       if (remainingLimit === 0) {
         return {success: true, downloaded: 0, skipped: 0}
@@ -248,8 +275,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         const subDir = job.type === 'photos' ? 'Photos' : job.type === 'stories' ? 'Stories' : 'Highlights'
         let res = await runNative(subDir)
 
-        // Fallback to gallery-dl if native extractor failed or found 0 items
-        if ((!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
+        // Fallback to gallery-dl if native extractor failed or found 0 items (unless error was authentication failure)
+        const isAuthError = Boolean(res.error && (res.error.includes('cookie') || res.error.includes('authenticated session') || res.error.includes('Settings (^s)')))
+        if (!isAuthError && (!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
           onProgress?.({
             job: subDir,
             downloadedCount: totalDownloaded,
@@ -257,7 +285,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
             statusText: 'switching to gallery-dl engine…',
           })
           const gdlRes = await runGdl(subDir)
-          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || gdlRes.success) {
+          if (gdlRes.downloaded > 0 || gdlRes.skipped > 0 || (gdlRes.success && !res.error)) {
             res = gdlRes
           }
         }
@@ -299,6 +327,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         }
       }
     }
+
+    await cleanupEmptyCategoryDirs(targetDir)
 
     if (errors.length === 0 && !options.signal?.aborted) {
       await clearCheckpoint(targetDir)
