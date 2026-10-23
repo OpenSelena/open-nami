@@ -26,10 +26,12 @@ test('HINTS includes correct keybindings for picking phase', () => {
   ])
 })
 
-test('HINTS includes settings shortcut in input phase', () => {
+test('HINTS includes settings, watcher, and batch shortcuts in input phase', () => {
   assert.ok(HINTS.input, 'HINTS must include input phase')
   assert.deepEqual(HINTS.input, [
     ['↵', 'download'],
+    ['^w', 'watcher'],
+    ['^b', 'batch'],
     ['^s', 'settings'],
     ['^c', 'quit'],
   ])
@@ -45,3 +47,28 @@ test('HINTS includes navigation and action shortcuts in settings phase', () => {
   ])
 })
 
+test('HINTS includes watcher shortcuts', () => {
+  assert.ok(HINTS.watcher, 'HINTS must include watcher phase')
+  assert.deepEqual(HINTS.watcher, [
+    ['c', 'target'],
+    ['m', 'sidecar'],
+    ['o', 'open dir'],
+    ['esc', 'back'],
+    ['^c', 'quit'],
+  ])
+})
+
+test('HINTS includes batch shortcuts', () => {
+  assert.ok(HINTS.batch, 'HINTS must include batch phase')
+  assert.deepEqual(HINTS.batch, [
+    ['tab', 'switch field'],
+    ['c', 'target'],
+    ['m', 'sidecar'],
+    ['l', 'limit'],
+    ['d', 'date'],
+    ['r', 'resume'],
+    ['↵', 'start'],
+    ['esc', 'back'],
+    ['^c', 'quit'],
+  ])
+})

@@ -56,9 +56,9 @@ export function InputView({
       {warning ? (
         <Text color={theme.gray} dimColor={theme.dimSecondary}>✗ {warning}</Text>
       ) : clipboardOffered ? (
-        <Text color={theme.gray} dimColor={theme.dimSecondary}>link in your clipboard — Tab to paste it</Text>
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>link in your clipboard: Tab to paste it</Text>
       ) : clipboardAccepted ? (
-        <Text color={theme.gray} dimColor={theme.dimSecondary}>from your clipboard — ↵ to download it</Text>
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>from your clipboard: ↵ to download it</Text>
       ) : null}
       <Gap />
       <Text color={theme.gray} dimColor={theme.dimSecondary}>

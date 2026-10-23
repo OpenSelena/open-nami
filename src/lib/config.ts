@@ -6,6 +6,8 @@ export interface AppConfig {
   theme?: 'auto' | 'light' | 'dark'
   cookiesDir?: string
   downloadDir?: string
+  writeMetadata?: boolean
+  defaultLimit?: number
 }
 
 export function getDefaultConfigPath(): string {
@@ -25,6 +27,8 @@ export function loadConfig(configPath = getDefaultConfigPath()): AppConfig {
         theme: typeof parsed.theme === 'string' ? parsed.theme : undefined,
         cookiesDir: typeof parsed.cookiesDir === 'string' ? parsed.cookiesDir.trim() : undefined,
         downloadDir: typeof parsed.downloadDir === 'string' ? parsed.downloadDir.trim() : undefined,
+        writeMetadata: typeof parsed.writeMetadata === 'boolean' ? parsed.writeMetadata : undefined,
+        defaultLimit: typeof parsed.defaultLimit === 'number' ? parsed.defaultLimit : undefined,
       }
     }
   } catch {}

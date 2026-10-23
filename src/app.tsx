@@ -7,11 +7,13 @@ import {Shortcuts} from './components/shortcuts.js'
 import {InputView} from './components/views/input-view.js'
 import {PlatformView, PLATFORM_OPTIONS} from './components/views/platform-view.js'
 import {ProbingView} from './components/views/probing-view.js'
-import {PickingView, getPickingOptions} from './components/views/picking-view.js'
+import {PickingView, getPickingOptions, type PickingOptions} from './components/views/picking-view.js'
 import {DownloadingView} from './components/views/downloading-view.js'
 import {CompletionView} from './components/views/completion-view.js'
 import {ErrorView} from './components/views/error-view.js'
 import {SettingsView} from './components/views/settings-view.js'
+import {WatcherView} from './components/views/watcher-view.js'
+import {BatchView} from './components/views/batch-view.js'
 import {ThemeProvider, useTheme, nextThemeMode, type ThemeMode} from './theme.js'
 import {
   parseProfileInput,
@@ -25,6 +27,7 @@ import {revealInFileManager, openBrowser} from './lib/reveal.js'
 import {clickTargetAt, findFrameRow, frameRowSpan, type ClickTarget} from './lib/click-map.js'
 import {useMouseClick} from './lib/use-mouse-click.js'
 import {formatEngineError} from './lib/format.js'
+import {loadConfig} from './lib/config.js'
 import type {MediaTarget, EngineProgress, EngineResult} from './lib/engines/types.js'
 
 export const TAGLINE = 'grab any profile. paste. download. done.'
@@ -52,10 +55,14 @@ type AppPhase =
   | {name: 'done'; profile: ParsedProfile; result: EngineResult}
   | {name: 'error'; message: string; hint?: string}
   | {name: 'settings'}
+  | {name: 'watcher'}
+  | {name: 'batch'}
 
 export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
   input: [
     ['↵', 'download'],
+    ['^w', 'watcher'],
+    ['^b', 'batch'],
     ['^s', 'settings'],
     ['^c', 'quit'],
   ],
@@ -91,6 +98,24 @@ export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
   settings: [
     ['tab', 'switch field'],
     ['↵', 'save'],
+    ['esc', 'back'],
+    ['^c', 'quit'],
+  ],
+  watcher: [
+    ['c', 'target'],
+    ['m', 'sidecar'],
+    ['o', 'open dir'],
+    ['esc', 'back'],
+    ['^c', 'quit'],
+  ],
+  batch: [
+    ['tab', 'switch field'],
+    ['c', 'target'],
+    ['m', 'sidecar'],
+    ['l', 'limit'],
+    ['d', 'date'],
+    ['r', 'resume'],
+    ['↵', 'start'],
     ['esc', 'back'],
     ['^c', 'quit'],
   ],
@@ -169,9 +194,13 @@ function InnerApp({
   const {exit} = useApp()
   const {stdout} = useStdout()
 
+  const config = useMemo(() => loadConfig(), [])
+  const effectiveLimit = limit ?? config.defaultLimit
+  const effectiveWriteMetadata = writeMetadata ?? Boolean(config.writeMetadata)
+
   const [urlInput, setUrlInput] = useState(initialInput ?? '')
   const [clipboardUrl, setClipboardUrl] = useState<string | undefined>(undefined)
-  const [settingsFocus, setSettingsFocus] = useState<'cookies' | 'download'>('cookies')
+  const [settingsFocus, setSettingsFocus] = useState<'cookies' | 'download' | 'metadata' | 'limit'>('cookies')
 
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80
   const boxWidth = Math.max(14, Math.min(64, columns - 6))
@@ -226,28 +255,37 @@ function InnerApp({
     setPhase({name: 'input'})
   }, [])
 
-  const handleModeSelect = useCallback(async (choice: MediaTarget, profile: ParsedProfile) => {
+  const handleModeSelect = useCallback(async (
+    choiceOrOptions: MediaTarget | PickingOptions,
+    profile: ParsedProfile,
+  ) => {
     abortControllerRef.current?.abort()
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    setPhase({name: 'downloading', profile, choice})
+    const targetChoice = typeof choiceOrOptions === 'string' ? choiceOrOptions : choiceOrOptions.choice
+    const targetLimit = typeof choiceOrOptions === 'string' ? effectiveLimit : (choiceOrOptions.limit ?? effectiveLimit)
+    const targetSince = typeof choiceOrOptions === 'string' ? since : (choiceOrOptions.since ?? since)
+    const targetResume = typeof choiceOrOptions === 'string' ? resume : (choiceOrOptions.resume ?? resume)
+    const targetWriteMetadata = typeof choiceOrOptions === 'string' ? effectiveWriteMetadata : (choiceOrOptions.writeMetadata ?? effectiveWriteMetadata)
+
+    setPhase({name: 'downloading', profile, choice: targetChoice})
 
     try {
       const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir)
       const result = await dispatchDownload({
         profile,
-        choice,
+        choice: targetChoice,
         outputDir: targetDir,
-        since,
+        since: targetSince,
         until,
-        limit,
-        resume,
-        writeMetadata,
+        limit: targetLimit,
+        resume: targetResume,
+        writeMetadata: targetWriteMetadata,
         signal: controller.signal,
         onProgress: (progress) => {
           if (!controller.signal.aborted) {
-            setPhase({name: 'downloading', profile, choice, progress})
+            setPhase({name: 'downloading', profile, choice: targetChoice, progress})
           }
         },
       })
@@ -273,7 +311,7 @@ function InnerApp({
         hint: 'Check your internet connection or verify the profile exists.',
       })
     }
-  }, [outputDir, since, until, limit, resume, writeMetadata])
+  }, [outputDir, since, until, effectiveLimit, resume, effectiveWriteMetadata])
 
   const handlePlatformSelect = useCallback((platform: SupportedPlatform, username: string, rawInput?: string) => {
     const canonical = buildCanonicalProfile(platform, username, rawInput)
@@ -336,13 +374,31 @@ function InnerApp({
       return
     }
 
+    if (key.ctrl && (input === 'w' || input === 'W')) {
+      if (phase.name === 'watcher') {
+        setPhase({name: 'input'})
+      } else if (phase.name === 'input') {
+        setPhase({name: 'watcher'})
+      }
+      return
+    }
+
+    if (key.ctrl && (input === 'b' || input === 'B')) {
+      if (phase.name === 'batch') {
+        setPhase({name: 'input'})
+      } else if (phase.name === 'input') {
+        setPhase({name: 'batch'})
+      }
+      return
+    }
+
     if (key.ctrl && input === 'c') {
       exit()
       return
     }
 
     if (key.escape) {
-      if (phase.name === 'settings') {
+      if (phase.name === 'settings' || phase.name === 'watcher' || phase.name === 'batch') {
         setPhase({name: 'input'})
         return
       }
@@ -385,8 +441,12 @@ function InnerApp({
       if (key === '^c') return () => exit()
       if (key === '^t') return cycleTheme
       if (key === '^s') return () => setPhase(prev => (prev.name === 'settings' ? {name: 'input'} : {name: 'settings'}))
+      if (key === '^w') return () => setPhase(prev => (prev.name === 'watcher' ? {name: 'input'} : {name: 'watcher'}))
+      if (key === '^b') return () => setPhase(prev => (prev.name === 'batch' ? {name: 'input'} : {name: 'batch'}))
       if (key === 'esc') {
-        if (phase.name === 'settings' || phase.name === 'platform') return () => setPhase({name: 'input'})
+        if (phase.name === 'settings' || phase.name === 'platform' || phase.name === 'watcher' || phase.name === 'batch') {
+          return () => setPhase({name: 'input'})
+        }
         return resetToInput
       }
       if (key === '↵') {
@@ -533,7 +593,12 @@ function InnerApp({
         <PickingView
           contentWidth={contentWidth}
           profile={phase.profile}
-          onSelect={(choice) => handleModeSelect(choice, phase.profile)}
+          outputDir={outputDir}
+          initialLimit={effectiveLimit}
+          initialSince={since}
+          initialWriteMetadata={effectiveWriteMetadata}
+          initialResume={resume}
+          onSelect={(choiceOrOptions) => handleModeSelect(choiceOrOptions, phase.profile)}
           theme={theme}
           gapComponent={Gap}
         />
@@ -545,6 +610,9 @@ function InnerApp({
           choice={phase.choice}
           progress={phase.progress}
           outputDir={resolveDefaultDownloadDir(phase.profile.platform, phase.profile.username, outputDir)}
+          writeMetadata={effectiveWriteMetadata}
+          limit={effectiveLimit}
+          since={since}
           theme={theme}
           gapComponent={Gap}
         />
@@ -577,6 +645,31 @@ function InnerApp({
           onFocusChange={setSettingsFocus}
           onSave={() => setPhase({name: 'input'})}
           onCancel={() => setPhase({name: 'input'})}
+        />
+      )}
+
+      {phase.name === 'watcher' && (
+        <WatcherView
+          onBack={resetToInput}
+          outputDir={outputDir}
+          theme={theme}
+          gapComponent={Gap}
+          defaultChoice={initialChoice}
+          defaultWriteMetadata={effectiveWriteMetadata}
+        />
+      )}
+
+      {phase.name === 'batch' && (
+        <BatchView
+          onBack={resetToInput}
+          outputDir={outputDir}
+          boxWidth={boxWidth}
+          contentWidth={contentWidth}
+          theme={theme}
+          gapComponent={Gap}
+          defaultChoice={initialChoice}
+          defaultLimit={effectiveLimit}
+          defaultWriteMetadata={effectiveWriteMetadata}
         />
       )}
 

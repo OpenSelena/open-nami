@@ -13,8 +13,17 @@ export type DownloadingViewProps = {
   choice?: MediaTarget
   progress?: EngineProgress
   outputDir?: string
+  writeMetadata?: boolean
+  limit?: number
+  since?: string | number | Date
   theme: Theme
   gapComponent: React.ComponentType<{lines?: number}>
+}
+
+export function renderCarouselTrack(current: number, total: number): string {
+  const safeTotal = Math.max(1, Math.min(15, total))
+  const safeCurrent = Math.max(1, Math.min(safeTotal, current))
+  return Array.from({length: safeTotal}, (_, i) => (i < safeCurrent ? '●' : '○')).join(' ')
 }
 
 export function DownloadingView({
@@ -22,6 +31,9 @@ export function DownloadingView({
   choice,
   progress,
   outputDir,
+  writeMetadata,
+  limit,
+  since,
   theme,
   gapComponent: Gap,
 }: DownloadingViewProps) {
@@ -37,6 +49,23 @@ export function DownloadingView({
   const skipped = progress?.skippedCount ?? 0
   const currentFile = progress?.currentFile ? truncate(progress.currentFile, 42) : ''
   const statusLine = progress?.statusText || (currentFile ? currentFile : 'downloading…')
+
+  // Album slide extraction
+  let slideInfo: {current: number; total: number} | null = null
+  const slideRegex = /(?:Slide|Album\s+slide|Part)\s+(\d+)\/(\d+)/i
+  const match = statusLine.match(slideRegex) || currentFile.match(slideRegex)
+  if (match) {
+    const cur = parseInt(match[1], 10)
+    const tot = parseInt(match[2], 10)
+    if (!isNaN(cur) && !isNaN(tot) && tot > 1) {
+      slideInfo = {current: cur, total: tot}
+    }
+  }
+
+  const activeBadges: string[] = []
+  if (writeMetadata) activeBadges.push('Sidecars: ON')
+  if (limit) activeBadges.push(`Limit: ${limit}`)
+  if (since) activeBadges.push(`Date: ${since}`)
 
   return (
     <Box flexDirection="column" alignItems="center">
@@ -54,10 +83,24 @@ export function DownloadingView({
           {` ${statusLine}`}
         </Text>
       </Text>
+
+      {slideInfo ? (
+        <Box marginTop={1} flexDirection="column" alignItems="center">
+          <Text color={theme.primary} bold>
+            Album Slide [{renderCarouselTrack(slideInfo.current, slideInfo.total)}] {slideInfo.current}/{slideInfo.total}
+          </Text>
+        </Box>
+      ) : null}
+
       <Gap />
       <Text color={theme.gray} dimColor={theme.dimSecondary}>
         {`${downloaded} downloaded  ·  ${skipped} archived  ·  ${formatDuration(elapsed)} elapsed`}
       </Text>
+      {activeBadges.length > 0 ? (
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>
+          {activeBadges.join(' · ')}
+        </Text>
+      ) : null}
       {outputDir ? (
         <Text color={theme.gray} dimColor={theme.dimSecondary}>
           saving to {shortenPath(outputDir, os.homedir(), 54)}

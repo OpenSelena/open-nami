@@ -27,7 +27,7 @@ export const resolveVersion = (): string => {
 export const VERSION: string = resolveVersion()
 
 const HELP = `
-  Open Nami — bulk social media profile downloader for Instagram, TikTok, Facebook & X.
+  Open Nami: bulk social media profile downloader for Instagram, TikTok, Facebook & X.
 
   Usage:
     $ open-nami                          Launch interactive TUI
@@ -62,7 +62,14 @@ const HELP = `
     [Tab]            Paste from clipboard
     [↑ / ↓]          Navigate menus
     [Enter]          Submit / Start Download
+    [^w]             Clipboard Watcher Radar
+    [^b]             Batch Multi-Account Queue Manager
+    [^s]             Settings & Preferences
     [^t]             Cycle theme (auto / light / dark)
+    [m]              Toggle metadata sidecars (.json)
+    [d]              Cycle date range filter (All / 24h / 7d / 30d)
+    [l]              Cycle post download limit (All / 10 / 25 / 50 / 100)
+    [r]              Toggle resumable checkpoints
     [o]              Open Downloads folder on completion
     [Esc]            Back / Exit
 `
@@ -213,7 +220,7 @@ async function main() {
 
   if (isWatchMode) {
     const choice = initialChoice || 'all'
-    console.log(`\n  \x1b[36mOpen Nami\x1b[0m — Clipboard Watcher Active (v${VERSION})`)
+    console.log(`\n  \x1b[36mOpen Nami\x1b[0m: Clipboard Watcher Active (v${VERSION})`)
     console.log(`  \x1b[90mTarget media:\x1b[0m \x1b[33m${choice}\x1b[0m`)
     if (outputDir) console.log(`  \x1b[90mOutput directory:\x1b[0m ${outputDir}`)
     console.log(`  \x1b[90mMonitoring clipboard for Instagram, TikTok, Facebook & X profiles…\x1b[0m`)
@@ -255,7 +262,7 @@ async function main() {
 
   if (batchFile) {
     const choice = initialChoice || 'all'
-    console.log(`\n  \x1b[36mOpen Nami\x1b[0m — Batch Download Queue (v${VERSION})`)
+    console.log(`\n  \x1b[36mOpen Nami\x1b[0m: Batch Download Queue (v${VERSION})`)
     console.log(`  \x1b[90mBatch file:\x1b[0m ${batchFile}`)
     console.log(`  \x1b[90mTarget media:\x1b[0m \x1b[33m${choice}\x1b[0m`)
     if (outputDir) console.log(`  \x1b[90mOutput directory:\x1b[0m ${outputDir}`)
