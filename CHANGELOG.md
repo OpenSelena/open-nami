@@ -4,6 +4,14 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.7] - 2026-10-23
+
+### Fixed & Hardened
+- **Instagram GraphQL Non-Fatal Field Exception Handling**:
+  - Resolved profile pagination termination bug where Instagram GraphQL queries returning partial non-fatal field errors (such as `location.profile_pic_url` field_exception) in `res.errors` caused the extractor to throw and abort prematurely after the first page (e.g. exactly 17 photos on `@safreenzara`).
+  - Updated `fetchPostsTabGraphQL`, `fetchNextReelsPage`, and `fetchHighlightsTray` to evaluate connection data and yield complete batches when `connection.edges` exists, logging partial field errors via `logExtractorDebug` instead of throwing fatal exceptions.
+  - Verified deep multi-page pagination across profiles containing mixed carousels and reels.
+
 ## [1.0.6] - 2026-10-23
 
 ### Fixed & Hardened

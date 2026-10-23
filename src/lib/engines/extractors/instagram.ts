@@ -260,14 +260,17 @@ export class InstagramExtractor implements Extractor {
         },
       })
 
+      const edges = res?.data?.highlights?.edges
+      if (Array.isArray(edges) && edges.length > 0) {
+        if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+          logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery partial field errors', res.errors)
+        }
+        return edges.map((e: any) => e.node)
+      }
+
       if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
         throw new Error(`Instagram GraphQL query error: ${errMsg}`)
-      }
-
-      const edges = res?.data?.highlights?.edges
-      if (Array.isArray(edges) && edges.length > 0) {
-        return edges.map((e: any) => e.node)
       }
     } catch (err) {
       logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery', err)
@@ -445,16 +448,15 @@ export class InstagramExtractor implements Extractor {
       headers,
     })
 
-    if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-      const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
-      throw new Error(`Instagram GraphQL query error: ${errMsg}`)
-    }
-
     const connection =
       res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection ||
       res?.data?.user?.edge_owner_to_timeline_media
 
-    if (connection?.edges && Array.isArray(connection.edges)) {
+    if (connection?.edges && Array.isArray(connection.edges) && connection.edges.length > 0) {
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        logExtractorDebug('PolarisProfilePostsTabContentQuery partial field errors', res.errors)
+      }
+
       let resolvedUserId: string | undefined
       for (const edge of connection.edges) {
         const node = edge?.node
@@ -477,6 +479,11 @@ export class InstagramExtractor implements Extractor {
         nextCursor: connection.page_info?.end_cursor,
         userId: resolvedUserId,
       }
+    }
+
+    if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+      const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
+      throw new Error(`Instagram GraphQL query error: ${errMsg}`)
     }
 
     return {edges: [], hasNextPage: false}
@@ -600,11 +607,6 @@ export class InstagramExtractor implements Extractor {
         },
       })
 
-      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-        const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
-        throw new Error(`Instagram GraphQL query error: ${errMsg}`)
-      }
-
       const reelsData = res?.data?.fetch__XDTUserDict
       let connection = reelsData?.reels
       if (!connection && reelsData) {
@@ -616,12 +618,20 @@ export class InstagramExtractor implements Extractor {
         }
       }
 
-      if (connection?.edges && Array.isArray(connection.edges)) {
+      if (connection?.edges && Array.isArray(connection.edges) && connection.edges.length > 0) {
+        if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+          logExtractorDebug('PolarisProfileReelsTabContentQuery partial field errors', res.errors)
+        }
         return {
           edges: connection.edges,
           hasNextPage: Boolean(connection.page_info?.has_next_page),
           nextCursor: connection.page_info?.end_cursor,
         }
+      }
+
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        const errMsg = res.errors.map((e: any) => e.message || JSON.stringify(e)).join('; ')
+        throw new Error(`Instagram GraphQL query error: ${errMsg}`)
       }
     } catch (err) {
       logExtractorDebug('PolarisProfileReelsTabContentQuery_connection', err)

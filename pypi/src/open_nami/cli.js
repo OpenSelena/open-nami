@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.0.6",
+      version: "1.0.7",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -38154,13 +38154,16 @@ var InstagramExtractor = class {
           "Referer": "https://www.instagram.com/"
         }
       });
+      const edges = res?.data?.highlights?.edges;
+      if (Array.isArray(edges) && edges.length > 0) {
+        if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+          logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery partial field errors", res.errors);
+        }
+        return edges.map((e) => e.node);
+      }
       if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
         throw new Error(`Instagram GraphQL query error: ${errMsg}`);
-      }
-      const edges = res?.data?.highlights?.edges;
-      if (Array.isArray(edges) && edges.length > 0) {
-        return edges.map((e) => e.node);
       }
     } catch (err) {
       logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery", err);
@@ -38314,12 +38317,11 @@ var InstagramExtractor = class {
       signal: options.signal,
       headers
     });
-    if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-      const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
-      throw new Error(`Instagram GraphQL query error: ${errMsg}`);
-    }
     const connection = res?.data?.xdt_api__v1__feed__user_timeline_graphql_connection || res?.data?.user?.edge_owner_to_timeline_media;
-    if (connection?.edges && Array.isArray(connection.edges)) {
+    if (connection?.edges && Array.isArray(connection.edges) && connection.edges.length > 0) {
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        logExtractorDebug("PolarisProfilePostsTabContentQuery partial field errors", res.errors);
+      }
       let resolvedUserId;
       for (const edge of connection.edges) {
         const node = edge?.node;
@@ -38342,6 +38344,10 @@ var InstagramExtractor = class {
         nextCursor: connection.page_info?.end_cursor,
         userId: resolvedUserId
       };
+    }
+    if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+      const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
+      throw new Error(`Instagram GraphQL query error: ${errMsg}`);
     }
     return { edges: [], hasNextPage: false };
   }
@@ -38439,10 +38445,6 @@ var InstagramExtractor = class {
           "Referer": "https://www.instagram.com/"
         }
       });
-      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-        const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
-        throw new Error(`Instagram GraphQL query error: ${errMsg}`);
-      }
       const reelsData = res?.data?.fetch__XDTUserDict;
       let connection = reelsData?.reels;
       if (!connection && reelsData) {
@@ -38453,12 +38455,19 @@ var InstagramExtractor = class {
           }
         }
       }
-      if (connection?.edges && Array.isArray(connection.edges)) {
+      if (connection?.edges && Array.isArray(connection.edges) && connection.edges.length > 0) {
+        if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+          logExtractorDebug("PolarisProfileReelsTabContentQuery partial field errors", res.errors);
+        }
         return {
           edges: connection.edges,
           hasNextPage: Boolean(connection.page_info?.has_next_page),
           nextCursor: connection.page_info?.end_cursor
         };
+      }
+      if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
+        const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
+        throw new Error(`Instagram GraphQL query error: ${errMsg}`);
       }
     } catch (err) {
       logExtractorDebug("PolarisProfileReelsTabContentQuery_connection", err);

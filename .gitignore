@@ -14,3 +14,6 @@ downloads/
 .claude/
 .agents/
 .scratch/
+
+__pycache__/
+*.pyc
