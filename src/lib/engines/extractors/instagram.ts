@@ -10,7 +10,8 @@ export const IG_QUERIES = {
   PolarisProfilePostsTabContentQuery_connection: '39229011733413759',
   PolarisProfileReelsTabContentQuery_connection: '28989741540630190',
   PolarisProfileTaggedTabContentQuery_connection: '28794602806842110',
-  PolarisProfileStoryHighlightsTrayContentQuery: '26970053832668570',
+  ProfileStoryHighlightsTrayContentQuery_connection: '38168009559465141',
+  PolarisProfileStoryHighlightsTrayContentQuery: '38168009559465141',
   PolarisStoriesV3ReelPageGalleryQuery: '28262315486766731',
   PolarisStoriesV3TrayContainerQuery: '27703822975903310',
   PolarisProfilePageContentQuery: '28649589871350527',
@@ -279,7 +280,7 @@ export class InstagramExtractor implements Extractor {
   ): Promise<any[]> {
     let authError: Error | null = null
 
-    // 1. Try GraphQL PolarisProfileStoryHighlightsTrayContentQuery (gallery-dl upstream v1.32.16+)
+    // 1. Try GraphQL ProfileStoryHighlightsTrayContentQuery_connection (active web doc_id: 38168009559465141)
     try {
       const variables = JSON.stringify({user_id: userId})
       const bodyParams = new URLSearchParams({
@@ -288,12 +289,18 @@ export class InstagramExtractor implements Extractor {
         __user: '0',
         __a: '1',
         __req: '0',
+        __hs: '20731.HYP:instagram_web_pkg.2.1...0',
         dpr: '1',
+        __ccg: 'EXCELLENT',
+        __rev: '1049285836',
+        __hsi: '7693193318680449885',
+        __comet_req: '7',
+        jazoest: '26461',
         fb_api_caller_class: 'RelayModern',
-        fb_api_req_friendly_name: 'PolarisProfileStoryHighlightsTrayContentQuery',
+        fb_api_req_friendly_name: 'ProfileStoryHighlightsTrayContentQuery_connection',
         server_timestamps: 'true',
         variables,
-        doc_id: IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery,
+        doc_id: IG_QUERIES.ProfileStoryHighlightsTrayContentQuery_connection,
       })
 
       if (tokens?.fbDtsg) bodyParams.set('fb_dtsg', tokens.fbDtsg)
@@ -303,15 +310,19 @@ export class InstagramExtractor implements Extractor {
         'Accept': '*/*',
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-IG-App-ID': IG_APP_ID,
-        'X-FB-Friendly-Name': 'PolarisProfileStoryHighlightsTrayContentQuery',
+        'X-IG-Max-Touch-Points': '0',
+        'X-FB-Friendly-Name': 'ProfileStoryHighlightsTrayContentQuery_connection',
         'Referer': 'https://www.instagram.com/',
         'Origin': 'https://www.instagram.com',
         'X-ASBD-ID': '359341',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
       }
       if (tokens?.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
       if (tokens?.lsd) headers['X-FB-LSD'] = tokens.lsd
 
-      const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/graphql/query', {
+      const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/api/graphql', {
         method: 'POST',
         body: bodyParams.toString(),
         cookiePath: options.cookiePath,
@@ -323,7 +334,7 @@ export class InstagramExtractor implements Extractor {
       const edges = res?.data?.highlights?.edges
       if (Array.isArray(edges)) {
         if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
-          logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery partial field errors', res.errors)
+          logExtractorDebug('ProfileStoryHighlightsTrayContentQuery_connection partial field errors', res.errors)
         }
         return edges.map((e: any) => e.node).filter(Boolean)
       }
@@ -335,7 +346,7 @@ export class InstagramExtractor implements Extractor {
         }
       }
     } catch (err: any) {
-      logExtractorDebug('PolarisProfileStoryHighlightsTrayContentQuery', err)
+      logExtractorDebug('ProfileStoryHighlightsTrayContentQuery_connection', err)
       const msg = err instanceof Error ? err.message : String(err)
       if (isExplicitAuthError(msg)) {
         authError = new Error('Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).')
@@ -389,7 +400,13 @@ export class InstagramExtractor implements Extractor {
         __user: '0',
         __a: '1',
         __req: '0',
+        __hs: '20731.HYP:instagram_web_pkg.2.1...0',
         dpr: '1',
+        __ccg: 'EXCELLENT',
+        __rev: '1049285836',
+        __hsi: '7693193318680449885',
+        __comet_req: '7',
+        jazoest: '26461',
         fb_api_caller_class: 'RelayModern',
         fb_api_req_friendly_name: 'PolarisStoriesV3ReelPageGalleryQuery',
         server_timestamps: 'true',
@@ -404,15 +421,19 @@ export class InstagramExtractor implements Extractor {
         'Accept': '*/*',
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-IG-App-ID': IG_APP_ID,
+        'X-IG-Max-Touch-Points': '0',
         'X-FB-Friendly-Name': 'PolarisStoriesV3ReelPageGalleryQuery',
         'Referer': 'https://www.instagram.com/',
         'Origin': 'https://www.instagram.com',
         'X-ASBD-ID': '359341',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
       }
       if (tokens?.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
       if (tokens?.lsd) headers['X-FB-LSD'] = tokens.lsd
 
-      const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/graphql/query', {
+      const res = await this.httpClient.fetchJson<any>('https://www.instagram.com/api/graphql', {
         method: 'POST',
         body: bodyParams.toString(),
         cookiePath: options.cookiePath,
@@ -848,15 +869,6 @@ export class InstagramExtractor implements Extractor {
         throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`)
       }
 
-      if (user?.latest_reel_media === 0) {
-        options.onProgress?.({
-          stage: 'Stories',
-          found: 0,
-          message: `Profile @${username} has no active stories in the last 24 hours.`,
-        })
-        return
-      }
-
       options.onProgress?.({
         stage: 'Stories',
         found: 0,
@@ -886,15 +898,6 @@ export class InstagramExtractor implements Extractor {
     if (subDir === 'Highlights') {
       if (!userId || userId === '[object Object]') {
         throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`)
-      }
-
-      if (user?.highlight_reel_count === 0) {
-        options.onProgress?.({
-          stage: 'Highlights',
-          found: 0,
-          message: `Profile @${username} has no available highlights.`,
-        })
-        return
       }
 
       options.onProgress?.({

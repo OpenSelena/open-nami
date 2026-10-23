@@ -150,20 +150,20 @@ test('InstagramExtractor fetchNextPostsPage parses GraphQL pagination correctly'
 
 test('IG_QUERIES contains upstream gallery-dl doc IDs', async () => {
   const {IG_QUERIES} = await import('./instagram.js')
-  assert.equal(IG_QUERIES.PolarisProfileStoryHighlightsTrayContentQuery, '26970053832668570')
+  assert.equal(IG_QUERIES.ProfileStoryHighlightsTrayContentQuery_connection, '38168009559465141')
   assert.equal(IG_QUERIES.PolarisProfilePostsTabContentQuery_connection, '39229011733413759')
   assert.equal(IG_QUERIES.PolarisProfileReelsTabContentQuery_connection, '28989741540630190')
   assert.equal(IG_QUERIES.PolarisProfilePageContentQuery, '28649589871350527')
 })
 
-test('InstagramExtractor fetchHighlightsTray uses GraphQL query with doc_id 26970053832668570', async () => {
+test('InstagramExtractor fetchHighlightsTray uses GraphQL query with doc_id 38168009559465141', async () => {
   let calledUrl = ''
   let calledBody = ''
   const mockHttpClient: any = {
     fetchJson: async (url: string, init: any) => {
       calledUrl = url
       calledBody = init?.body || ''
-      if (url.includes('graphql/query') && calledBody.includes('26970053832668570')) {
+      if (url.includes('api/graphql') && calledBody.includes('38168009559465141')) {
         return {
           data: {
             highlights: {
@@ -186,8 +186,8 @@ test('InstagramExtractor fetchHighlightsTray uses GraphQL query with doc_id 2697
   const extractor = new InstagramExtractor(mockHttpClient)
   const tray = await extractor.fetchHighlightsTray('998877', {subDir: 'Highlights'})
 
-  assert.ok(calledUrl.includes('graphql/query'))
-  assert.ok(calledBody.includes('26970053832668570'))
+  assert.ok(calledUrl.includes('api/graphql'))
+  assert.ok(calledBody.includes('38168009559465141'))
   assert.equal(tray.length, 1)
   assert.equal(tray[0].id, 'highlight:12345678')
 })
@@ -257,7 +257,7 @@ test('InstagramExtractor fetchHighlightsTray emits debug warning on failed query
     const extractor = new InstagramExtractor(mockHttpClient)
     const result = await extractor.fetchHighlightsTray('12345', {subDir: 'Highlights'})
     assert.deepEqual(result, [])
-    assert.ok(debugLogs.some(log => log.includes('PolarisProfileStoryHighlightsTrayContentQuery')))
+    assert.ok(debugLogs.some(log => log.includes('ProfileStoryHighlightsTrayContentQuery_connection')))
   } finally {
     console.debug = origConsoleDebug
     if (origDebug !== undefined) {
