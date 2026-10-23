@@ -381,3 +381,36 @@ test('dispatchDownload fails over to gallery-dl and yt-dlp when unified All nati
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('dispatchDownload enforces limit across jobs', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-limit-test-'))
+
+  try {
+    const executedSubDirs: string[] = []
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'test_limit',
+        cleanUrl: 'https://www.instagram.com/test_limit/',
+        rawInput: 'test_limit',
+      },
+      choice: 'all',
+      outputDir: tmpDir,
+      limit: 10,
+      runnerOverrides: {
+        nativeRunner: async (subDir) => {
+          executedSubDirs.push(subDir)
+          return {success: true, downloaded: 10, skipped: 0}
+        },
+      },
+    })
+
+    assert.deepEqual(executedSubDirs, ['All'])
+    assert.equal(result.downloadedCount, 10)
+    assert.equal(result.success, true)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})

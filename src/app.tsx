@@ -101,12 +101,18 @@ export function App({
   initialChoice,
   initialThemeMode = 'auto',
   outputDir,
+  since,
+  until,
+  limit,
   version = '1.0.0',
 }: {
   initialInput?: string
   initialChoice?: MediaTarget
   initialThemeMode?: ThemeMode
   outputDir?: string
+  since?: string | number | Date
+  until?: string | number | Date
+  limit?: number
   version?: string
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode)
@@ -120,6 +126,9 @@ export function App({
         initialInput={initialInput}
         initialChoice={initialChoice}
         outputDir={outputDir}
+        since={since}
+        until={until}
+        limit={limit}
         version={version}
         cycleTheme={cycleTheme}
       />
@@ -131,12 +140,18 @@ function InnerApp({
   initialInput,
   initialChoice,
   outputDir,
+  since,
+  until,
+  limit,
   version = '1.0.0',
   cycleTheme,
 }: {
   initialInput?: string
   initialChoice?: MediaTarget
   outputDir?: string
+  since?: string | number | Date
+  until?: string | number | Date
+  limit?: number
   version?: string
   cycleTheme: () => void
 }) {
@@ -214,6 +229,9 @@ function InnerApp({
         profile,
         choice,
         outputDir: targetDir,
+        since,
+        until,
+        limit,
         signal: controller.signal,
         onProgress: (progress) => {
           if (!controller.signal.aborted) {

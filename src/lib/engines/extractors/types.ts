@@ -28,6 +28,9 @@ export interface ExtractOptions {
   cookiePath?: string | null
   signal?: AbortSignal
   onProgress?: (progress: ExtractProgress) => void
+  since?: number
+  until?: number
+  limit?: number
 }
 
 export interface Extractor {

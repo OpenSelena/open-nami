@@ -358,10 +358,17 @@ export class XExtractor implements Extractor {
               continue
             }
 
+            let reachedSinceLimit = false
             const mediaItems = parseTweetMediaEntities(tweetContent, username)
             for (const item of mediaItems) {
               if (subDir === 'Photos' && item.type !== 'photo') continue
               if (subDir === 'Videos' && item.type !== 'video') continue
+
+              if (options.until !== undefined && item.date && item.date > options.until) continue
+              if (options.since !== undefined && item.date && item.date < options.since) {
+                reachedSinceLimit = true
+                break
+              }
 
               found++
               pageItemCount++
@@ -371,6 +378,12 @@ export class XExtractor implements Extractor {
                 message: `Found item: ${item.filename}`,
               })
               yield item
+
+              if (options.limit !== undefined && found >= options.limit) return
+            }
+            if (reachedSinceLimit) {
+              hasMore = false
+              break
             }
           }
         }

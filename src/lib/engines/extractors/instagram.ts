@@ -744,11 +744,18 @@ export class InstagramExtractor implements Extractor {
     }
 
     while (true) {
+      let reachedSinceLimit = false
       for (const edge of currentEdges) {
         const items = parseIgNodeToMediaItems(edge.node, username)
         for (const item of items) {
           if (subDir === 'Photos' && item.type !== 'photo') continue
           if (subDir === 'Videos' && item.type !== 'video') continue
+
+          if (options.until !== undefined && item.date && item.date > options.until) continue
+          if (options.since !== undefined && item.date && item.date < options.since) {
+            reachedSinceLimit = true
+            break
+          }
 
           if (emittedItemIds.has(item.id)) continue
           emittedItemIds.add(item.id)
@@ -760,8 +767,13 @@ export class InstagramExtractor implements Extractor {
             message: `Found item: ${item.filename}`,
           })
           yield item
+
+          if (options.limit !== undefined && found >= options.limit) return
         }
+        if (reachedSinceLimit) break
       }
+
+      if (reachedSinceLimit) break
 
       if (!hasNextPage || !endCursor || options.signal?.aborted) {
         break

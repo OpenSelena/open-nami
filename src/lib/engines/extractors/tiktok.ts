@@ -236,11 +236,18 @@ export class TikTokExtractor implements Extractor {
       const items = res?.itemList || []
       if (items.length === 0) break
 
+      let reachedSinceLimit = false
       for (const rawItem of items) {
         const mediaList = parseTikTokItem(rawItem, cleanUsername)
         for (const item of mediaList) {
           if (subDir === 'Photos' && item.type !== 'photo') continue
           if (subDir === 'Videos' && item.type !== 'video') continue
+
+          if (options.until !== undefined && item.date && item.date > options.until) continue
+          if (options.since !== undefined && item.date && item.date < options.since) {
+            reachedSinceLimit = true
+            break
+          }
 
           found++
           options.onProgress?.({
@@ -249,8 +256,13 @@ export class TikTokExtractor implements Extractor {
             message: `Found item: ${item.filename}`,
           })
           yield item
+
+          if (options.limit !== undefined && found >= options.limit) return
         }
+        if (reachedSinceLimit) break
       }
+
+      if (reachedSinceLimit) break
 
       hasMore = Boolean(res?.hasMore)
       cursor = String(res?.cursor ?? '0')

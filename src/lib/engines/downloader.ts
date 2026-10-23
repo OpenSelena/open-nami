@@ -88,6 +88,7 @@ export interface StreamDownloadOptions {
   referer?: string
   signal?: AbortSignal
   concurrency?: number
+  limit?: number
   onProgress?: (progress: EngineProgress) => void
 }
 
@@ -180,6 +181,10 @@ export async function downloadMediaStream(
 
   async function downloadWorker(): Promise<void> {
     while (!isDone && !signal?.aborted) {
+      if (options.limit !== undefined && downloaded >= options.limit) {
+        isDone = true
+        break
+      }
       let item: MediaItem
       try {
         const next = await getNextItem()
@@ -276,6 +281,9 @@ export async function downloadMediaStream(
         archive.add(item.id)
         downloaded++
         consecutiveErrors = 0
+        if (options.limit !== undefined && downloaded >= options.limit) {
+          isDone = true
+        }
 
         onProgress?.({
           job: jobName,
