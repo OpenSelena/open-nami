@@ -4,7 +4,7 @@ import path from 'node:path'
 import {Readable} from 'node:stream'
 import {pipeline} from 'node:stream/promises'
 import {HttpClient} from './extractors/http.js'
-import type {MediaItem} from './extractors/types.js'
+import type {MediaItem, MediaType} from './extractors/types.js'
 import type {EngineProgress} from './types.js'
 
 export const ARCHIVE_FILENAME = '.open-nami-archive.json'
@@ -82,6 +82,7 @@ export async function saveArchive(destDir: string, archive: Set<string>): Promis
 export interface StreamDownloadOptions {
   jobName: string
   destDir: string
+  destDirMap?: Partial<Record<MediaType, string>>
   httpClient?: HttpClient
   cookiePath?: string | null
   referer?: string
@@ -140,8 +141,23 @@ export async function downloadMediaStream(
   const httpClient = options.httpClient ?? new HttpClient()
   const concurrency = Math.max(1, options.concurrency ?? 3)
 
-  await fsPromises.mkdir(destDir, {recursive: true})
-  const archive = await loadArchive(destDir)
+  const dirArchives = new Map<string, Set<string>>()
+  const getArchiveForDir = async (dir: string): Promise<Set<string>> => {
+    let arch = dirArchives.get(dir)
+    if (!arch) {
+      await fsPromises.mkdir(dir, {recursive: true})
+      arch = await loadArchive(dir)
+      dirArchives.set(dir, arch)
+    }
+    return arch
+  }
+
+  await getArchiveForDir(destDir)
+  if (options.destDirMap) {
+    for (const d of Object.values(options.destDirMap)) {
+      if (d) await getArchiveForDir(d)
+    }
+  }
 
   let downloaded = 0
   let skipped = 0
@@ -196,9 +212,11 @@ export async function downloadMediaStream(
         continue
       }
 
+      const targetDir = options.destDirMap?.[item.type] ?? destDir
+      const archive = await getArchiveForDir(targetDir)
       const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
       const finalFilename = sanitizeFilename(item.filename, item.id, ext)
-      const finalPath = path.join(destDir, finalFilename)
+      const finalPath = path.join(targetDir, finalFilename)
 
       if (archive.has(item.id) && fs.existsSync(finalPath)) {
         skipped++
@@ -294,7 +312,9 @@ export async function downloadMediaStream(
   const workers = Array.from({length: concurrency}, () => downloadWorker())
   await Promise.all(workers)
 
-  await saveArchive(destDir, archive)
+  for (const [d, arch] of dirArchives.entries()) {
+    await saveArchive(d, arch)
+  }
 
   return {downloaded, skipped, errors}
 }

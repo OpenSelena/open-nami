@@ -32,8 +32,8 @@ export interface DispatchOptions {
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void
   runnerOverrides?: {
-    nativeRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => Promise<DispatchRunnerResult>
-    gdlRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights') => Promise<DispatchRunnerResult>
+    nativeRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') => Promise<DispatchRunnerResult>
+    gdlRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') => Promise<DispatchRunnerResult>
     ytRunner?: () => Promise<DispatchRunnerResult>
   }
 }

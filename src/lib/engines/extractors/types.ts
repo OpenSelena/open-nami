@@ -15,7 +15,7 @@ export interface MediaItem {
   thumbnailUrl?: string
 }
 
-export type SubDirChoice = 'Photos' | 'Videos' | 'Stories' | 'Highlights'
+export type SubDirChoice = 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All'
 
 export interface ExtractProgress {
   stage: string

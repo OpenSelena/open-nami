@@ -782,7 +782,7 @@ export class InstagramExtractor implements Extractor {
       }
     }
 
-    if (subDir === 'Videos' && userId) {
+    if ((subDir === 'Videos' || subDir === 'All') && userId) {
       const videoEdges = user?.edge_felix_video_timeline?.edges ?? []
       for (const edge of videoEdges) {
         const items = parseIgNodeToMediaItems(edge.node, username)
