@@ -4,6 +4,21 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2026-10-23
+
+### Fixed & Hardened
+- **Instagram Extractor & Pagination**:
+  - Resolved profile pagination breakdown where `webTokens` (`lsd`, `fbDtsg`, `csrfToken`) were omitted when `user` was resolved via `web_profile_info`, enabling full deep-cursor pagination across all profile posts.
+  - Prioritized modern `PolarisProfilePostsTabContentQuery_connection` GraphQL document query over deprecated `query_hash` in `fetchNextPostsPage`.
+  - Added `X-CSRFToken` header forwarding across REST fallback pagination routes.
+- **CDN Cookie Isolation & Download Resilience**:
+  - Implemented CDN domain detection (`isCdnUrl`) for Meta CDN (`*.cdninstagram.com`, `*.fbcdn.net`), TikTok CDN, and Twitter media endpoints, completely stripping session cookies from media download requests to prevent edge HTTP 400 Bad Request and HTTP 403 Forbidden errors.
+  - Added exponential backoff retries with jitter for transient HTTP 429 and 5xx responses during media streaming.
+  - Reset consecutive download error count upon each successful asset download to prevent premature worker aborts.
+- **Tests & Platform Compatibility**:
+  - Isolated engine binary resolution tests from host environment paths (`OPEN_NAMI_BIN_DIR`).
+  - Expanded automated test suite to 146 passing unit tests with 100% pass rate.
+
 ## [1.0.5] - 2026-10-18
 
 ### Added & Improved

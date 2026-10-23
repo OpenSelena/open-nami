@@ -489,20 +489,33 @@ export class InstagramExtractor implements Extractor {
     options: ExtractOptions,
     tokens?: {lsd?: string; fbDtsg?: string; csrfToken?: string},
   ): Promise<{edges: Array<{node: IgMediaNode}>; hasNextPage: boolean; nextCursor?: string}> {
-    // 1. Try GraphQL query endpoint with query_hash if userId is present
+    // 1. PolarisProfilePostsTabContentQuery GraphQL connection (modern web endpoint)
+    try {
+      const page = await this.fetchPostsTabGraphQL(username, cursor, tokens || {}, options)
+      if (page.edges && page.edges.length > 0) {
+        return page
+      }
+    } catch (err) {
+      logExtractorDebug('PolarisProfilePostsTabContentQuery_connection', err)
+    }
+
+    // 2. Try GraphQL query endpoint with query_hash if userId is present
     if (userId) {
       const variables = JSON.stringify({id: userId, first: 12, after: cursor})
       const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`
 
       try {
+        const headers: Record<string, string> = {
+          'X-IG-App-ID': IG_APP_ID,
+          'Referer': `https://www.instagram.com/${username}/`,
+        }
+        if (tokens?.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
+
         const res = await this.httpClient.fetchJson<any>(url, {
           cookiePath: options.cookiePath,
           cookieDomain: 'instagram.com',
           signal: options.signal,
-          headers: {
-            'X-IG-App-ID': IG_APP_ID,
-            'Referer': `https://www.instagram.com/${username}/`,
-          },
+          headers,
         })
 
         const data = res?.data?.user?.edge_owner_to_timeline_media
@@ -518,28 +531,21 @@ export class InstagramExtractor implements Extractor {
       }
     }
 
-    // 2. PolarisProfilePostsTabContentQuery GraphQL connection
-    try {
-      const page = await this.fetchPostsTabGraphQL(username, cursor, tokens || {}, options)
-      if (page.edges && page.edges.length > 0) {
-        return page
-      }
-    } catch (err) {
-      logExtractorDebug('PolarisProfilePostsTabContentQuery_connection', err)
-    }
-
-    // 3. v1 user feed REST endpoint
+    // 3. v1 user feed REST endpoint with CSRF and Referer headers
     if (userId) {
       try {
         const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`
+        const headers: Record<string, string> = {
+          'X-IG-App-ID': IG_APP_ID,
+          'Referer': `https://www.instagram.com/${username}/`,
+        }
+        if (tokens?.csrfToken) headers['X-CSRFToken'] = tokens.csrfToken
+
         const res = await this.httpClient.fetchJson<any>(restUrl, {
           cookiePath: options.cookiePath,
           cookieDomain: 'instagram.com',
           signal: options.signal,
-          headers: {
-            'X-IG-App-ID': IG_APP_ID,
-            'Referer': `https://www.instagram.com/${username}/`,
-          },
+          headers,
         })
 
         if (Array.isArray(res?.items) && res.items.length > 0) {
@@ -641,9 +647,11 @@ export class InstagramExtractor implements Extractor {
       logExtractorDebug('fetchUserProfile', err)
     }
 
-    let webTokens: {lsd?: string; fbDtsg?: string; userId?: string} = {}
-    if (!user) {
+    let webTokens: {lsd?: string; fbDtsg?: string; csrfToken?: string; userId?: string} = {}
+    try {
       webTokens = await this.fetchWebTokens(username, options)
+    } catch (err) {
+      logExtractorDebug('fetchWebTokens', err)
     }
 
     let userId = user?.id || webTokens.userId

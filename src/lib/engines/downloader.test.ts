@@ -8,6 +8,7 @@ import {
   saveArchive,
   downloadMediaStream,
   sanitizeFilename,
+  isCdnUrl,
   ARCHIVE_FILENAME,
 } from './downloader.js'
 import type {MediaItem} from './extractors/types.js'
@@ -250,5 +251,60 @@ test('loadArchive interoperates with yt-dlp archive format and saveArchive persi
     await fs.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('isCdnUrl detects Meta, TikTok, and Twitter CDN domains accurately', () => {
+  assert.equal(isCdnUrl('https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/image.jpg'), true)
+  assert.equal(isCdnUrl('https://instagram.fdac14-1.fna.fbcdn.net/v/t51.2885-15/photo.jpg'), true)
+  assert.equal(isCdnUrl('https://p16-sign-va.tiktokcdn.com/tos-maliva-p/video.mp4'), true)
+  assert.equal(isCdnUrl('https://pbs.twimg.com/media/XYZ.jpg'), true)
+  assert.equal(isCdnUrl('https://video.twimg.com/ext_tw_video/123.mp4'), true)
+  assert.equal(isCdnUrl('https://www.instagram.com/api/v1/users/web_profile_info/'), false)
+  assert.equal(isCdnUrl('https://example.com/photo.jpg'), false)
+})
+
+test('downloadMediaStream strips cookiePath when downloading from CDN URLs to prevent HTTP 400 rejection', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cdn-cookies-'))
+  try {
+    let capturedCookiePath: string | undefined = 'initial'
+    const mockHttpClient: any = {
+      request: async (_url: string, opts: any) => {
+        capturedCookiePath = opts?.cookiePath
+        return {
+          ok: true,
+          body: new ReadableStream({
+            start(controller) {
+              controller.enqueue(Buffer.from('fake cdn media data'))
+              controller.close()
+            },
+          }),
+        }
+      },
+    }
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+      yield {
+        id: 'meta_cdn_item',
+        url: 'https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/test.jpg',
+        filename: 'test.jpg',
+        extension: 'jpg',
+        type: 'photo',
+      }
+    }
+
+    const result = await downloadMediaStream(mockItems(), {
+      jobName: 'CdnCookieJob',
+      destDir: tmpDir,
+      httpClient: mockHttpClient,
+      cookiePath: '/path/to/cookies.txt',
+    })
+
+    assert.equal(result.downloaded, 1)
+    // Verify cookiePath was set to undefined for CDN download request!
+    assert.equal(capturedCookiePath, undefined)
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
 
 

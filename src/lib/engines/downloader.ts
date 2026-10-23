@@ -116,6 +116,22 @@ export function sanitizeFilename(rawFilename: string, fallbackId: string, ext: s
   return sanitizedBase.includes('.') ? sanitizedBase : `${sanitizedBase}.${cleanExt}`
 }
 
+export function isCdnUrl(rawUrl: string): boolean {
+  try {
+    const hostname = new URL(rawUrl).hostname.toLowerCase()
+    return (
+      hostname.endsWith('.cdninstagram.com') ||
+      hostname.endsWith('.fbcdn.net') ||
+      hostname.endsWith('.tiktokcdn.com') ||
+      hostname.endsWith('.akamaized.net') ||
+      hostname === 'pbs.twimg.com' ||
+      hostname === 'video.twimg.com'
+    )
+  } catch {
+    return false
+  }
+}
+
 export async function downloadMediaStream(
   items: AsyncIterable<MediaItem>,
   options: StreamDownloadOptions,
@@ -211,10 +227,13 @@ export async function downloadMediaStream(
           reqHeaders['Referer'] = options.referer
         }
 
+        const isCdn = isCdnUrl(item.url)
         const response = await httpClient.request(item.url, {
           signal,
-          cookiePath: options.cookiePath,
+          cookiePath: isCdn ? undefined : options.cookiePath,
           headers: reqHeaders,
+          retries: 2,
+          retryDelayMs: 1500,
         })
 
         if (!response.ok || !response.body) {
@@ -238,6 +257,7 @@ export async function downloadMediaStream(
 
         archive.add(item.id)
         downloaded++
+        consecutiveErrors = 0
 
         onProgress?.({
           job: jobName,

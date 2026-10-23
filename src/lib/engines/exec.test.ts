@@ -33,7 +33,7 @@ test('resolveEngineCommand detects standalone binary in PATH before python', () 
 
 test('resolveEngineCommand falls back to python -m when standalone binary is missing', () => {
   const ytCmd = resolveEngineCommand('yt-dlp', {
-    env: {},
+    env: {OPEN_NAMI_BIN_DIR: 'C:/non-existent-open-nami-dir'},
     findExe: (name) => {
       if (name === 'python') return 'C:/Python/python.exe'
       return null
@@ -45,7 +45,7 @@ test('resolveEngineCommand falls back to python -m when standalone binary is mis
 
 test('resolveEngineCommand falls back to python3 -m on unix systems without python', () => {
   const ytCmd = resolveEngineCommand('yt-dlp', {
-    env: {},
+    env: {OPEN_NAMI_BIN_DIR: '/non-existent-open-nami-dir'},
     findExe: (name) => {
       if (name === 'python3') return '/usr/bin/python3'
       return null

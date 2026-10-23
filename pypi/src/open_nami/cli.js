@@ -26492,8 +26492,8 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.0.5",
-      description: "Open Nami \u2014 terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
+      version: "1.0.6",
+      description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
         "open-nami": "dist/cli.js",
@@ -38346,18 +38346,28 @@ var InstagramExtractor = class {
     return { edges: [], hasNextPage: false };
   }
   async fetchNextPostsPage(userId, username, cursor, options, tokens) {
+    try {
+      const page = await this.fetchPostsTabGraphQL(username, cursor, tokens || {}, options);
+      if (page.edges && page.edges.length > 0) {
+        return page;
+      }
+    } catch (err) {
+      logExtractorDebug("PolarisProfilePostsTabContentQuery_connection", err);
+    }
     if (userId) {
       const variables = JSON.stringify({ id: userId, first: 12, after: cursor });
       const url = `https://www.instagram.com/graphql/query/?query_hash=${IG_TIMELINE_QUERY_HASH}&variables=${encodeURIComponent(variables)}`;
       try {
+        const headers = {
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": `https://www.instagram.com/${username}/`
+        };
+        if (tokens?.csrfToken) headers["X-CSRFToken"] = tokens.csrfToken;
         const res = await this.httpClient.fetchJson(url, {
           cookiePath: options.cookiePath,
           cookieDomain: "instagram.com",
           signal: options.signal,
-          headers: {
-            "X-IG-App-ID": IG_APP_ID,
-            "Referer": `https://www.instagram.com/${username}/`
-          }
+          headers
         });
         const data = res?.data?.user?.edge_owner_to_timeline_media;
         if (data?.edges && data.edges.length > 0) {
@@ -38371,25 +38381,19 @@ var InstagramExtractor = class {
         logExtractorDebug("edge_owner_to_timeline_media", err);
       }
     }
-    try {
-      const page = await this.fetchPostsTabGraphQL(username, cursor, tokens || {}, options);
-      if (page.edges && page.edges.length > 0) {
-        return page;
-      }
-    } catch (err) {
-      logExtractorDebug("PolarisProfilePostsTabContentQuery_connection", err);
-    }
     if (userId) {
       try {
         const restUrl = `https://www.instagram.com/api/v1/feed/user/${userId}/?count=12&max_id=${encodeURIComponent(cursor)}`;
+        const headers = {
+          "X-IG-App-ID": IG_APP_ID,
+          "Referer": `https://www.instagram.com/${username}/`
+        };
+        if (tokens?.csrfToken) headers["X-CSRFToken"] = tokens.csrfToken;
         const res = await this.httpClient.fetchJson(restUrl, {
           cookiePath: options.cookiePath,
           cookieDomain: "instagram.com",
           signal: options.signal,
-          headers: {
-            "X-IG-App-ID": IG_APP_ID,
-            "Referer": `https://www.instagram.com/${username}/`
-          }
+          headers
         });
         if (Array.isArray(res?.items) && res.items.length > 0) {
           const edges = res.items.map((item) => ({ node: item }));
@@ -38476,8 +38480,10 @@ var InstagramExtractor = class {
       logExtractorDebug("fetchUserProfile", err);
     }
     let webTokens = {};
-    if (!user) {
+    try {
       webTokens = await this.fetchWebTokens(username, options);
+    } catch (err) {
+      logExtractorDebug("fetchWebTokens", err);
     }
     let userId = user?.id || webTokens.userId;
     if (!userId && (subDir === "Stories" || subDir === "Highlights")) {
@@ -39552,6 +39558,14 @@ function sanitizeFilename(rawFilename, fallbackId, ext) {
   }
   return sanitizedBase.includes(".") ? sanitizedBase : `${sanitizedBase}.${cleanExt}`;
 }
+function isCdnUrl(rawUrl) {
+  try {
+    const hostname = new URL(rawUrl).hostname.toLowerCase();
+    return hostname.endsWith(".cdninstagram.com") || hostname.endsWith(".fbcdn.net") || hostname.endsWith(".tiktokcdn.com") || hostname.endsWith(".akamaized.net") || hostname === "pbs.twimg.com" || hostname === "video.twimg.com";
+  } catch {
+    return false;
+  }
+}
 async function downloadMediaStream(items, options) {
   const { jobName, destDir, signal, onProgress } = options;
   const httpClient = options.httpClient ?? new HttpClient();
@@ -39632,10 +39646,13 @@ async function downloadMediaStream(items, options) {
         if (options.referer) {
           reqHeaders["Referer"] = options.referer;
         }
+        const isCdn = isCdnUrl(item.url);
         const response = await httpClient.request(item.url, {
           signal,
-          cookiePath: options.cookiePath,
-          headers: reqHeaders
+          cookiePath: isCdn ? void 0 : options.cookiePath,
+          headers: reqHeaders,
+          retries: 2,
+          retryDelayMs: 1500
         });
         if (!response.ok || !response.body) {
           try {
@@ -39656,6 +39673,7 @@ async function downloadMediaStream(items, options) {
         await fsPromises2.rename(tmpPath, finalPath);
         archive.add(item.id);
         downloaded++;
+        consecutiveErrors = 0;
         onProgress?.({
           job: jobName,
           downloadedCount: downloaded,

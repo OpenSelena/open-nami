@@ -413,5 +413,91 @@ test('InstagramExtractor fetchPostsTabGraphQL throws error when GraphQL response
   )
 })
 
+test('InstagramExtractor extract populates webTokens and paginates through multiple pages when user is resolved', async () => {
+  let webTokensRequested = false
+  let secondPageRequestedWithTokens = false
+
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init?: any) => {
+      if (url.includes('api/v1/users/web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: 'user_456',
+              username: 'natgeo',
+              edge_owner_to_timeline_media: {
+                page_info: {
+                  has_next_page: true,
+                  end_cursor: 'CURSOR_1',
+                },
+                edges: [
+                  {
+                    node: {
+                      id: 'post_p1',
+                      shortcode: 'P1',
+                      display_url: 'https://instagram.com/p1.jpg',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      if (url.includes('graphql/query')) {
+        const body = init?.body || ''
+        if (body.includes('CURSOR_1') && init?.headers?.['X-CSRFToken'] === 'test_csrf') {
+          secondPageRequestedWithTokens = true
+          return {
+            data: {
+              xdt_api__v1__feed__user_timeline_graphql_connection: {
+                page_info: {
+                  has_next_page: false,
+                },
+                edges: [
+                  {
+                    node: {
+                      id: 'post_p2',
+                      shortcode: 'P2',
+                      display_url: 'https://instagram.com/p2.jpg',
+                    },
+                  },
+                ],
+              },
+            },
+          }
+        }
+      }
+      return {}
+    },
+    fetchText: async () => {
+      webTokensRequested = true
+      return '<html><script id="__eqmc">{"l":"lsd_abc","f":"dtsg_xyz"}</script></html>'
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  // Mock fetchWebTokens to return tokens with test_csrf
+  extractor.fetchWebTokens = async () => {
+    webTokensRequested = true
+    return {lsd: 'lsd_abc', fbDtsg: 'dtsg_xyz', csrfToken: 'test_csrf', userId: 'user_456'}
+  }
+
+  const items: any[] = []
+  for await (const item of extractor.extract(
+    {platform: 'instagram', username: 'natgeo', cleanUrl: 'https://instagram.com/natgeo', rawInput: 'natgeo'},
+    {subDir: 'Photos'}
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(webTokensRequested, true)
+  assert.equal(secondPageRequestedWithTokens, true)
+  assert.equal(items.length, 2)
+  assert.equal(items[0].id, 'P1')
+  assert.equal(items[1].id, 'P2')
+})
+
+
 
 

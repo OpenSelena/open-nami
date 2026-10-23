@@ -1,7 +1,7 @@
 {
   "name": "open-nami",
-  "version": "1.0.5",
-  "description": "Open Nami — terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
+  "version": "1.0.6",
+  "description": "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
   "type": "module",
   "bin": {
     "open-nami": "dist/cli.js",
