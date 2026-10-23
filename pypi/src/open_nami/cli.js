@@ -9637,14 +9637,14 @@ var require_react_reconciler_production = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React23 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React26 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React23.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -22237,14 +22237,14 @@ var require_react_reconciler_development = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React23 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React26 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React23.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -26420,18 +26420,18 @@ var require_react_jsx_runtime_development = __commonJS({
       function isValidElement(object) {
         return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
       }
-      var React23 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React23.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+      var React26 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
         return null;
       };
-      React23 = {
+      React26 = {
         react_stack_bottom_frame: function(callStackForError) {
           return callStackForError();
         }
       };
       var specialPropKeyWarningShown;
       var didWarnAboutElementRef = {};
-      var unknownOwnerDebugStack = React23.react_stack_bottom_frame.bind(
-        React23,
+      var unknownOwnerDebugStack = React26.react_stack_bottom_frame.bind(
+        React26,
         UnknownOwner
       )();
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.1.0",
+      version: "1.2.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs15 = await import("fs");
-  const content = fs15.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs16 = await import("fs");
+  const content = fs16.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -35863,7 +35863,7 @@ var import_react32 = __toESM(require_react(), 1);
 var import_react33 = __toESM(require_react(), 1);
 
 // src/app.tsx
-var import_react45 = __toESM(require_react(), 1);
+var import_react48 = __toESM(require_react(), 1);
 
 // node_modules/ink-spinner/build/index.js
 var import_react34 = __toESM(require_react(), 1);
@@ -36438,7 +36438,7 @@ function InputView({
     warning ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       "\u2717 ",
       warning
-    ] }) : clipboardOffered ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "link in your clipboard \u2014 Tab to paste it" }) : clipboardAccepted ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "from your clipboard \u2014 \u21B5 to download it" }) : null,
+    ] }) : clipboardOffered ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "link in your clipboard: Tab to paste it" }) : clipboardAccepted ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "from your clipboard: \u21B5 to download it" }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: BRAND_COLOR, underline: true, children: terminalLink(`v${version}`, releaseUrl) }),
@@ -36889,319 +36889,62 @@ function Panel({ title, width, children }) {
 }
 
 // src/components/views/picking-view.tsx
-var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
-function ChoiceIndicator({ isSelected }) {
-  const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: isSelected ? "\u276F" : " " }) });
-}
-function ChoiceItem({ isSelected, label }) {
-  const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: isSelected, children: label });
-}
-function getPickingOptions(platform2) {
-  const items = [
-    { label: "Photos", value: "photos" },
-    { label: "Videos", value: "videos" }
-  ];
-  if (platform2 === "instagram") {
-    items.push({ label: "Stories", value: "stories" });
-    items.push({ label: "Highlights", value: "highlights" });
-  }
-  items.push({
-    label: "Everything",
-    value: "all"
-  });
-  return items;
-}
-function PickingView({
-  contentWidth,
-  profile,
-  onSelect,
-  onHighlight,
-  theme,
-  gapComponent: Gap2
-}) {
-  const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
-  const items = getPickingOptions(profile.platform);
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { width: contentWidth, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", flexGrow: 1, flexBasis: 0, paddingTop: 1, paddingRight: 3, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.primary, children: [
-        "@",
-        profile.username
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-        "\u25B8 ",
-        platformName,
-        profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Choose what to download from this profile" })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: "Download", width: 38, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-      SelectInput_default,
-      {
-        indicatorComponent: ChoiceIndicator,
-        itemComponent: ChoiceItem,
-        items: items.map((item, index) => ({
-          key: String(index),
-          label: item.label,
-          value: item.value
-        })),
-        onSelect: (item) => onSelect(item.value),
-        onHighlight: (item) => onHighlight?.(item.value)
-      }
-    ) })
-  ] });
-}
-
-// src/components/views/platform-view.tsx
-var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
-var PLATFORM_OPTIONS = [
-  { label: "Instagram", value: "instagram" },
-  { label: "TikTok", value: "tiktok" },
-  { label: "Facebook", value: "facebook" },
-  { label: "X (Twitter)", value: "x" }
-];
-function getPlatformOptions() {
-  return PLATFORM_OPTIONS;
-}
-function PlatformView({
-  contentWidth,
-  username,
-  onSelect,
-  onHighlight,
-  theme,
-  gapComponent: Gap2
-}) {
-  const items = getPlatformOptions();
-  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { width: contentWidth, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { flexDirection: "column", flexGrow: 1, flexBasis: 0, paddingTop: 1, paddingRight: 3, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Text, { bold: true, color: theme.primary, children: [
-        "@",
-        username.replace(/^@/, "")
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u25B8 Choose platform" }),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select target platform for this profile" })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Panel, { title: "Platform", width: 38, children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
-      SelectInput_default,
-      {
-        indicatorComponent: ChoiceIndicator,
-        itemComponent: ChoiceItem,
-        items: items.map((item, index) => ({
-          key: String(index),
-          label: item.label,
-          value: item.value
-        })),
-        onSelect: (item) => onSelect(item.value),
-        onHighlight: (item) => onHighlight?.(item.value)
-      }
-    ) })
-  ] });
-}
-
-// src/components/views/probing-view.tsx
-var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
-function ProbingView({
-  platformName,
-  target,
-  boxWidth,
-  theme,
-  buttonText
-}) {
-  const displayTarget = target.length > boxWidth - 8 ? `${target.slice(0, boxWidth - 9)}\u2026` : target;
-  return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(FramedInput, { title: platformName || "Paste a profile link", width: boxWidth, button: buttonText, buttonDim: true, children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: displayTarget }) }) });
-}
-
-// src/components/views/downloading-view.tsx
-var import_react43 = __toESM(require_react(), 1);
-import os3 from "os";
-
-// src/components/progress-bar.tsx
 var import_react42 = __toESM(require_react(), 1);
-var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
-function computeScannerTrack(tick, width = 30, blockWidth = 6) {
-  const safeWidth = Math.max(1, width);
-  const safeBlock = Math.min(safeWidth, Math.max(1, blockWidth));
-  const maxPos = safeWidth - safeBlock;
-  if (maxPos <= 0) {
-    return { before: 0, active: safeWidth, after: 0 };
+
+// src/lib/engines/checkpoint.ts
+import fsPromises from "fs/promises";
+import path from "path";
+var CHECKPOINT_FILENAME = ".open-nami-checkpoint.json";
+async function loadCheckpoint(destDir) {
+  const filePath = path.join(destDir, CHECKPOINT_FILENAME);
+  try {
+    const raw = await fsPromises.readFile(filePath, "utf-8");
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && parsed.cursors) {
+      return parsed;
+    }
+  } catch {
   }
-  const cycle = 2 * maxPos;
-  const phase = (tick % cycle + cycle) % cycle;
-  const pos = phase <= maxPos ? phase : cycle - phase;
-  return {
-    before: pos,
-    active: safeBlock,
-    after: safeWidth - pos - safeBlock
-  };
+  return null;
 }
-function getScannerSegments(tick, width = 30, blockWidth = 6) {
-  const { before, active, after } = computeScannerTrack(tick, width, blockWidth);
-  return {
-    beforeStr: "\u2591".repeat(before),
-    activeStr: "\u2588".repeat(active),
-    afterStr: "\u2591".repeat(after)
-  };
-}
-function ProgressBar({
-  percent = 0,
-  width = 30,
-  showPercent = true,
-  indeterminate = false,
-  tick: externalTick
-}) {
-  const theme = useTheme();
-  const [internalTick, setInternalTick] = import_react42.default.useState(0);
-  import_react42.default.useEffect(() => {
-    if (!indeterminate || externalTick !== void 0) return;
-    const timer = setInterval(() => setInternalTick((t) => t + 1), 75);
-    return () => clearInterval(timer);
-  }, [indeterminate, externalTick]);
-  if (indeterminate) {
-    const currentTick = externalTick ?? internalTick;
-    const { beforeStr, activeStr, afterStr } = getScannerSegments(currentTick, width);
-    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: beforeStr }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: activeStr }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: afterStr })
-    ] });
+async function saveCheckpoint(destDir, checkpoint) {
+  const filePath = path.join(destDir, CHECKPOINT_FILENAME);
+  const tmpPath = `${filePath}.tmp`;
+  try {
+    await fsPromises.mkdir(destDir, { recursive: true });
+    await fsPromises.writeFile(tmpPath, JSON.stringify(checkpoint, null, 2), "utf-8");
+    await fsPromises.rename(tmpPath, filePath);
+  } catch {
   }
-  const normalized = percent > 1 ? percent / 100 : Math.max(0, percent);
-  const clamped = Math.min(1, normalized);
-  const percentLabel = showPercent ? ` ${`${Math.round(clamped * 100)}%`.padStart(4)}` : "";
-  const barWidth = Math.max(1, showPercent ? width - percentLabel.length : width);
-  const filled = Math.round(clamped * barWidth);
-  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: "\u2588".repeat(filled) }),
-    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u2591".repeat(barWidth - filled) }),
-    percentLabel ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: percentLabel }) : null
-  ] });
+}
+async function clearCheckpoint(destDir) {
+  const filePath = path.join(destDir, CHECKPOINT_FILENAME);
+  try {
+    await fsPromises.unlink(filePath);
+  } catch {
+  }
 }
 
-// src/components/views/downloading-view.tsx
-var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
-function DownloadingView({
-  profile,
-  choice,
-  progress,
-  outputDir,
-  theme,
-  gapComponent: Gap2
-}) {
-  const [elapsed, setElapsed] = (0, import_react43.useState)(0);
-  (0, import_react43.useEffect)(() => {
-    const timer = setInterval(() => setElapsed((s) => s + 1), 1e3);
-    return () => clearInterval(timer);
-  }, []);
-  const job = progress?.job || (choice ? `${choice.charAt(0).toUpperCase() + choice.slice(1)}` : "Initializing");
-  const downloaded = progress?.downloadedCount ?? 0;
-  const skipped = progress?.skippedCount ?? 0;
-  const currentFile = progress?.currentFile ? truncate(progress.currentFile, 42) : "";
-  const statusLine = progress?.statusText || (currentFile ? currentFile : "downloading\u2026");
-  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-      "@",
-      profile.username,
-      " \xB7 ",
-      job
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ProgressBar, { indeterminate: true, width: 30 }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(build_default, { type: "dots" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` ${statusLine}` })
-    ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: `${downloaded} downloaded  \xB7  ${skipped} archived  \xB7  ${formatDuration(elapsed)} elapsed` }),
-    outputDir ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-      "saving to ",
-      shortenPath(outputDir, os3.homedir(), 54)
-    ] }) : null
-  ] });
-}
-
-// src/components/views/completion-view.tsx
-import os4 from "os";
-var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
-var DONE_LABEL = "\u21B5 download another";
-function CompletionView({
-  profile,
-  result,
-  theme,
-  gapComponent: Gap2
-}) {
-  const isZero = result.downloadedCount === 0 && result.skippedCount === 0;
-  const plural = result.downloadedCount === 1 ? "" : "s";
-  const skipText = result.skippedCount > 0 ? ` (${result.skippedCount} archived)` : "";
-  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: isZero ? /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "\u2713 profile scanned " }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.primary, children: "\u2014 0 media items found" })
-    ] }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "\u2713 profile downloaded! " }),
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.primary, children: "saved to:" })
-    ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(result.outputDir, os4.homedir(), 60) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isZero ? "no photos or videos available" : `${result.downloadedCount} media item${plural} downloaded${skipText}` }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "[o]" }),
-      " reveal in folder"
-    ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
-      Box_default,
-      {
-        borderStyle: "round",
-        borderColor: theme.gray,
-        borderDimColor: theme.dimSecondary,
-        borderBackgroundColor: theme.background,
-        paddingX: 3,
-        children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: DONE_LABEL })
-      }
-    ),
-    result.errors.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { flexDirection: "column", marginTop: 1, alignItems: "center", children: result.errors.slice(0, 3).map((err, i) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: "red", dimColor: true, wrap: "wrap", children: [
-      "\u2022 ",
-      cleanInlineError(err)
-    ] }, i)) }) : null
-  ] });
-}
-
-// src/components/views/error-view.tsx
-var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
-function ErrorView({ message, hint, columns, theme }) {
-  const width = Math.max(10, Math.min(columns - 6, 72));
-  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { bold: true, color: theme.primary, children: [
-      "\u2717 ",
-      message
-    ] }),
-    hint ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-      "Hint: ",
-      hint
-    ] }) }) : null
-  ] });
-}
-
-// src/components/views/settings-view.tsx
-var import_react44 = __toESM(require_react(), 1);
-import fs5 from "fs";
-import path3 from "path";
+// src/lib/engines/dispatcher.ts
+import path10 from "path";
 import os7 from "os";
+import fs12 from "fs/promises";
+
+// src/lib/cookies.ts
+import fs4 from "fs";
+import fsPromises2 from "fs/promises";
+import path3 from "path";
+import os4 from "os";
 
 // src/lib/config.ts
 import fs3 from "fs";
-import path from "path";
-import os5 from "os";
+import path2 from "path";
+import os3 from "os";
 function getDefaultConfigPath() {
   if (process.env.OPEN_NAMI_CONFIG && process.env.OPEN_NAMI_CONFIG.trim()) {
-    return path.resolve(process.env.OPEN_NAMI_CONFIG.trim());
+    return path2.resolve(process.env.OPEN_NAMI_CONFIG.trim());
   }
-  return path.join(os5.homedir(), ".open-nami", "config.json");
+  return path2.join(os3.homedir(), ".open-nami", "config.json");
 }
 function loadConfig(configPath = getDefaultConfigPath()) {
   try {
@@ -37212,7 +36955,9 @@ function loadConfig(configPath = getDefaultConfigPath()) {
       return {
         theme: typeof parsed.theme === "string" ? parsed.theme : void 0,
         cookiesDir: typeof parsed.cookiesDir === "string" ? parsed.cookiesDir.trim() : void 0,
-        downloadDir: typeof parsed.downloadDir === "string" ? parsed.downloadDir.trim() : void 0
+        downloadDir: typeof parsed.downloadDir === "string" ? parsed.downloadDir.trim() : void 0,
+        writeMetadata: typeof parsed.writeMetadata === "boolean" ? parsed.writeMetadata : void 0,
+        defaultLimit: typeof parsed.defaultLimit === "number" ? parsed.defaultLimit : void 0
       };
     }
   } catch {
@@ -37221,7 +36966,7 @@ function loadConfig(configPath = getDefaultConfigPath()) {
 }
 function saveConfig(config, configPath = getDefaultConfigPath()) {
   try {
-    const dir = path.dirname(configPath);
+    const dir = path2.dirname(configPath);
     if (!fs3.existsSync(dir)) {
       fs3.mkdirSync(dir, { recursive: true, mode: 448 });
     }
@@ -37232,25 +36977,21 @@ function saveConfig(config, configPath = getDefaultConfigPath()) {
 }
 
 // src/lib/cookies.ts
-import fs4 from "fs";
-import fsPromises from "fs/promises";
-import path2 from "path";
-import os6 from "os";
 var CANDIDATE_DIRS = [
-  path2.join(os6.homedir(), ".open-nami", "cookies"),
-  path2.join(os6.homedir(), ".nami", "cookies"),
-  path2.join(process.cwd(), "cookies")
+  path3.join(os4.homedir(), ".open-nami", "cookies"),
+  path3.join(os4.homedir(), ".nami", "cookies"),
+  path3.join(process.cwd(), "cookies")
 ];
 function getCandidateDirs(customDir) {
   const dirs = [];
   const configured = loadConfig().cookiesDir;
   const custom = customDir || process.env.OPEN_NAMI_COOKIES_DIR || process.env.NAMI_COOKIES_DIR || configured;
   if (custom && custom.trim()) {
-    dirs.push(path2.resolve(custom.trim()));
+    dirs.push(path3.resolve(custom.trim()));
   }
-  const seen = new Set(dirs.map((d) => path2.normalize(d).toLowerCase()));
+  const seen = new Set(dirs.map((d) => path3.normalize(d).toLowerCase()));
   for (const dir of CANDIDATE_DIRS) {
-    const norm = path2.normalize(dir).toLowerCase();
+    const norm = path3.normalize(dir).toLowerCase();
     if (!seen.has(norm)) {
       seen.add(norm);
       dirs.push(dir);
@@ -37272,7 +37013,7 @@ function findCookieFile(platform2, customDir) {
   for (const dir of candidateDirs) {
     if (!fs4.existsSync(dir)) continue;
     for (const file of filenames) {
-      const fullPath = path2.join(dir, file);
+      const fullPath = path3.join(dir, file);
       if (fs4.existsSync(fullPath)) {
         try {
           const stats = fs4.statSync(fullPath);
@@ -37291,353 +37032,33 @@ function detectAvailableCookies(customDir) {
   return platforms.filter((p) => Boolean(findCookieFile(p, customDir)));
 }
 async function createSafeCookieCopy(masterPath) {
-  const userTempDir = path2.join(os6.homedir(), ".open-nami", "temp");
+  const userTempDir = path3.join(os4.homedir(), ".open-nami", "temp");
   let targetDir = userTempDir;
   try {
-    await fsPromises.mkdir(userTempDir, { recursive: true, mode: 448 });
+    await fsPromises2.mkdir(userTempDir, { recursive: true, mode: 448 });
   } catch {
-    targetDir = os6.tmpdir();
+    targetDir = os4.tmpdir();
   }
-  const tempPath = path2.join(targetDir, `nami_cookie_${Date.now()}_${Math.random().toString(36).slice(2)}.txt`);
-  await fsPromises.copyFile(masterPath, tempPath);
-  await fsPromises.chmod(tempPath, 384).catch(() => {
+  const tempPath = path3.join(targetDir, `nami_cookie_${Date.now()}_${Math.random().toString(36).slice(2)}.txt`);
+  await fsPromises2.copyFile(masterPath, tempPath);
+  await fsPromises2.chmod(tempPath, 384).catch(() => {
   });
   return {
     filePath: tempPath,
     isTemporary: true,
     cleanup: async () => {
       try {
-        await fsPromises.unlink(tempPath);
+        await fsPromises2.unlink(tempPath);
       } catch {
       }
     }
   };
 }
 
-// src/components/views/settings-view.tsx
-var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
-function expandDir(dir) {
-  if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path3.join(os7.homedir(), dir.slice(1));
-  }
-  return dir;
-}
-function SettingsView({
-  boxWidth,
-  theme,
-  gapComponent: Gap2,
-  focusedField: controlledFocus,
-  onFocusChange,
-  onSave,
-  onCancel
-}) {
-  const initialConfig = (0, import_react44.useMemo)(() => loadConfig(), []);
-  const [internalFocus, setInternalFocus] = (0, import_react44.useState)("cookies");
-  const focusedField = controlledFocus ?? internalFocus;
-  const setField = (0, import_react44.useCallback)(
-    (field) => {
-      setInternalFocus(field);
-      onFocusChange?.(field);
-    },
-    [onFocusChange]
-  );
-  const [cookiesDir, setCookiesDir] = (0, import_react44.useState)(initialConfig.cookiesDir ?? "");
-  const [downloadDir, setDownloadDir] = (0, import_react44.useState)(initialConfig.downloadDir ?? "");
-  const [saved, setSaved] = (0, import_react44.useState)(false);
-  const handleSave = (0, import_react44.useCallback)(() => {
-    const existing = loadConfig();
-    const nextConfig = {
-      ...existing,
-      cookiesDir: cookiesDir.trim() ? cookiesDir.trim() : void 0,
-      downloadDir: downloadDir.trim() ? downloadDir.trim() : void 0
-    };
-    saveConfig(nextConfig);
-    setSaved(true);
-    onSave();
-  }, [cookiesDir, downloadDir, onSave]);
-  const cookieFeedback = (0, import_react44.useMemo)(() => {
-    const dir = cookiesDir.trim();
-    if (!dir) {
-      const defaultCookies = detectAvailableCookies();
-      return {
-        ok: defaultCookies.length > 0,
-        text: defaultCookies.length > 0 ? `default paths \xB7 ${defaultCookies.length} cookie(s) found (${defaultCookies.join(", ")})` : "default paths \xB7 no recognized cookies found"
-      };
-    }
-    const expanded = expandDir(dir);
-    if (!fs5.existsSync(expanded)) {
-      return {
-        ok: false,
-        text: "directory does not exist yet"
-      };
-    }
-    const detected = detectAvailableCookies(expanded);
-    if (detected.length === 0) {
-      return {
-        ok: false,
-        text: "no recognized cookie files found in this directory"
-      };
-    }
-    return {
-      ok: true,
-      text: `\u2713 ${detected.length} cookie(s) found (${detected.join(", ")})`
-    };
-  }, [cookiesDir]);
-  const downloadFeedback = (0, import_react44.useMemo)(() => {
-    const dir = downloadDir.trim();
-    if (!dir) {
-      return "default: platform Downloads / Open Nami";
-    }
-    return `target: ${path3.resolve(expandDir(dir))}`;
-  }, [downloadDir]);
-  use_input_default((input, key) => {
-    if (key.escape) {
-      onCancel();
-      return;
-    }
-    if (key.ctrl && (input === "s" || input === "S")) {
-      handleSave();
-      return;
-    }
-  }, { isActive: Boolean(process.stdin.isTTY) });
-  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-      FramedInput,
-      {
-        title: focusedField === "cookies" ? "\u25CF Cookies Folder" : "\u25CB Cookies Folder",
-        width: boxWidth,
-        children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-          TextInput,
-          {
-            value: cookiesDir,
-            onChange: setCookiesDir,
-            onSubmit: () => setField("download"),
-            focus: focusedField === "cookies",
-            onTab: () => setField("download"),
-            onArrowDown: () => setField("download"),
-            onArrowUp: () => setField("download"),
-            placeholder: "e.g. F:\\Nami\\cookies or ./cookies",
-            width: boxWidth - 6
-          }
-        )
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: cookieFeedback.ok ? theme.primary : theme.gray, dimColor: !cookieFeedback.ok && theme.dimSecondary, children: cookieFeedback.text }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-      FramedInput,
-      {
-        title: focusedField === "download" ? "\u25CF Download Directory" : "\u25CB Download Directory",
-        width: boxWidth,
-        children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
-          TextInput,
-          {
-            value: downloadDir,
-            onChange: setDownloadDir,
-            onSubmit: handleSave,
-            focus: focusedField === "download",
-            onTab: () => setField("cookies"),
-            onArrowDown: () => setField("cookies"),
-            onArrowUp: () => setField("cookies"),
-            placeholder: "e.g. D:\\Downloads\\Open Nami",
-            width: boxWidth - 6
-          }
-        )
-      }
-    ),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadFeedback }),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: saved ? "\u2713 preferences saved to ~/.open-nami/config.json" : "tab / \u2191\u2193 switch field \xB7 \u21B5 advance/save \xB7 esc back" })
-  ] });
-}
-
-// src/lib/parser.ts
-var INVALID_CHARS_REGEX = /[<>:"/\\|?*\x00-\x1f]/g;
-var WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
-function sanitizeUsername(username) {
-  let cleaned = username.replace(INVALID_CHARS_REGEX, "_").trim().replace(/^[.\s]+|[.\s]+$/g, "");
-  if (WINDOWS_RESERVED_NAMES.test(cleaned)) {
-    cleaned = `_${cleaned}`;
-  }
-  return cleaned.slice(0, 120) || "unknown";
-}
-function buildProfileUrl(platform2, username) {
-  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
-  switch (platform2) {
-    case "instagram":
-      return `https://www.instagram.com/${cleanUser}/`;
-    case "tiktok":
-      return `https://www.tiktok.com/@${cleanUser}`;
-    case "facebook":
-      return `https://www.facebook.com/${cleanUser}`;
-    case "x":
-      return `https://x.com/${cleanUser}`;
-  }
-}
-function buildCanonicalProfile(platform2, username, rawInput) {
-  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
-  return {
-    platform: platform2,
-    username: sanitizeUsername(cleanUser),
-    cleanUrl: buildProfileUrl(platform2, cleanUser),
-    rawInput: rawInput ?? cleanUser
-  };
-}
-function isBareUsername(input) {
-  const trimmed = input.trim();
-  if (!trimmed) return false;
-  if (/^https?:\/\//i.test(trimmed) || /[\/\\:\s]/.test(trimmed)) return false;
-  const user = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
-  if (!user) return false;
-  if (!/^[a-zA-Z0-9._-]+$/.test(user)) return false;
-  if (!/[a-zA-Z0-9]/.test(user)) return false;
-  const cleaned = user.replace(/^[.\s]+|[.\s]+$/g, "");
-  return cleaned.length > 0 && /[a-zA-Z0-9]/.test(cleaned);
-}
-function parseProfileInput(input) {
-  const trimmed = input.trim();
-  if (!trimmed) {
-    return { platform: "unknown", username: "", cleanUrl: "", rawInput: input };
-  }
-  const prefixMatch = trimmed.match(/^(ig|instagram|tt|tiktok|fb|facebook|x|twitter):([^\s/]+)$/i);
-  if (prefixMatch) {
-    const rawPrefix = prefixMatch[1].toLowerCase();
-    const rawUser = prefixMatch[2];
-    if (rawPrefix === "ig" || rawPrefix === "instagram") {
-      return buildCanonicalProfile("instagram", rawUser, input);
-    } else if (rawPrefix === "tt" || rawPrefix === "tiktok") {
-      return buildCanonicalProfile("tiktok", rawUser, input);
-    } else if (rawPrefix === "fb" || rawPrefix === "facebook") {
-      return buildCanonicalProfile("facebook", rawUser, input);
-    } else if (rawPrefix === "x" || rawPrefix === "twitter") {
-      return buildCanonicalProfile("x", rawUser, input);
-    }
-  }
-  let candidate = trimmed;
-  if (!/^https?:\/\//i.test(candidate)) {
-    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
-      candidate = "https://" + candidate;
-    }
-  }
-  try {
-    const url = new URL(candidate);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "");
-    const pathname = url.pathname.replace(/\/+$/, "");
-    const pathParts = pathname.split("/").filter(Boolean);
-    if (host.includes("tiktok.com")) {
-      const userPart = pathParts[0] || "";
-      const username = userPart.startsWith("@") ? userPart.slice(1) : userPart;
-      if (username) {
-        return {
-          platform: "tiktok",
-          username: sanitizeUsername(username),
-          cleanUrl: `https://www.tiktok.com/@${username}`,
-          rawInput: input
-        };
-      }
-    }
-    if (host.includes("instagram.com")) {
-      const firstPart = pathParts[0] || "";
-      const reserved = ["p", "reel", "reels", "tv", "stories", "explore", "direct", "accounts"];
-      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
-        const username = firstPart.replace(/^@/, "");
-        return {
-          platform: "instagram",
-          username: sanitizeUsername(username),
-          cleanUrl: `https://www.instagram.com/${username}/`,
-          rawInput: input
-        };
-      }
-    }
-    if (host.includes("facebook.com") || host === "fb.com") {
-      if (pathParts[0]?.toLowerCase() === "profile.php") {
-        const id = url.searchParams.get("id");
-        if (id) {
-          return {
-            platform: "facebook",
-            username: sanitizeUsername(id),
-            cleanUrl: `https://www.facebook.com/profile.php?id=${id}`,
-            rawInput: input
-          };
-        }
-      } else if (pathParts[0]?.toLowerCase() === "people" && pathParts[1]) {
-        return {
-          platform: "facebook",
-          username: sanitizeUsername(pathParts[1]),
-          cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
-          rawInput: input
-        };
-      } else if (pathParts[0]) {
-        const reserved = ["watch", "videos", "reel", "groups", "pages", "events", "photo"];
-        if (!reserved.includes(pathParts[0].toLowerCase())) {
-          return {
-            platform: "facebook",
-            username: sanitizeUsername(pathParts[0]),
-            cleanUrl: `https://www.facebook.com/${pathParts[0]}`,
-            rawInput: input
-          };
-        }
-      }
-    }
-    if (host.includes("x.com") || host.includes("twitter.com")) {
-      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {
-        return {
-          platform: "x",
-          username: "i_history_likes",
-          cleanUrl: "https://x.com/i/history/likes",
-          rawInput: input
-        };
-      }
-      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "bookmarks") {
-        return {
-          platform: "x",
-          username: "i_bookmarks",
-          cleanUrl: "https://x.com/i/bookmarks",
-          rawInput: input
-        };
-      }
-      const firstPart = pathParts[0] || "";
-      const reserved = ["home", "explore", "notifications", "messages", "i", "settings"];
-      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
-        const username = firstPart.replace(/^@/, "");
-        const isLikesUrl = pathParts[1]?.toLowerCase() === "likes";
-        return {
-          platform: "x",
-          username: sanitizeUsername(username),
-          cleanUrl: isLikesUrl ? `https://x.com/${username}/likes` : `https://x.com/${username}`,
-          rawInput: input
-        };
-      }
-    }
-  } catch {
-  }
-  if (isBareUsername(trimmed)) {
-    const rawUser = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
-    const user = rawUser.replace(/^[.\s]+|[.\s]+$/g, "");
-    return {
-      platform: "unknown",
-      username: user,
-      cleanUrl: "",
-      rawInput: input
-    };
-  }
-  return {
-    platform: "unknown",
-    username: "",
-    cleanUrl: "",
-    rawInput: input
-  };
-}
-
-// src/lib/engines/dispatcher.ts
-import path11 from "path";
-import os10 from "os";
-import fs13 from "fs/promises";
-
 // src/lib/known-folders.ts
 import { execFileSync as execFileSync2 } from "child_process";
-import fs6 from "fs";
-import os8 from "os";
+import fs5 from "fs";
+import os5 from "os";
 import path4 from "path";
 var KNOWN_FOLDER_DOWNLOADS_GUID = "{374DE290-123F-4565-9164-39C4925E467B}";
 var USER_SHELL_FOLDERS_REG_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
@@ -37678,7 +37099,7 @@ function parseLinuxUserDirsOutput(content) {
   }
   return void 0;
 }
-function isPathDriveAccessible(filePath, fsExists = fs6.existsSync, platform2 = process.platform) {
+function isPathDriveAccessible(filePath, fsExists = fs5.existsSync, platform2 = process.platform) {
   try {
     if (fsExists(filePath)) {
       return true;
@@ -37704,7 +37125,7 @@ function isPathDriveAccessible(filePath, fsExists = fs6.existsSync, platform2 = 
   }
 }
 function resolveWindowsDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os8.homedir();
+  const homeDir = options.homeDir ?? os5.homedir();
   const env3 = options.env ?? process.env;
   const runQuery = options.regQueryFn ?? ((key, value) => {
     try {
@@ -37716,7 +37137,7 @@ function resolveWindowsDownloadsDir(options = {}) {
       return "";
     }
   });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs6.existsSync, "win32"));
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs5.existsSync, "win32"));
   let raw = parseWindowsRegistryOutput(
     runQuery(USER_SHELL_FOLDERS_REG_KEY, KNOWN_FOLDER_DOWNLOADS_GUID),
     KNOWN_FOLDER_DOWNLOADS_GUID
@@ -37733,16 +37154,16 @@ function resolveWindowsDownloadsDir(options = {}) {
   return void 0;
 }
 function resolveLinuxDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os8.homedir();
+  const homeDir = options.homeDir ?? os5.homedir();
   const env3 = options.env ?? process.env;
   const readFn = options.readFileFn ?? ((p) => {
     try {
-      return fs6.readFileSync(p, "utf8");
+      return fs5.readFileSync(p, "utf8");
     } catch {
       return "";
     }
   });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs6.existsSync, "linux"));
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs5.existsSync, "linux"));
   const configHome = env3.XDG_CONFIG_HOME || path4.join(homeDir, ".config");
   const userDirsFile = path4.join(configHome, "user-dirs.dirs");
   const content = readFn(userDirsFile);
@@ -37757,7 +37178,7 @@ function resolveLinuxDownloadsDir(options = {}) {
 }
 function resolvePlatformDownloadsDir(options = {}) {
   const platform2 = options.platform ?? process.platform;
-  const homeDir = options.homeDir ?? os8.homedir();
+  const homeDir = options.homeDir ?? os5.homedir();
   const defaultFallback = path4.join(homeDir, "Downloads");
   if (platform2 === "win32") {
     const resolved = resolveWindowsDownloadsDir(options);
@@ -37773,7 +37194,7 @@ function resolvePlatformDownloadsDir(options = {}) {
 import crypto from "crypto";
 
 // src/lib/engines/extractors/http.ts
-import fs7 from "fs/promises";
+import fs6 from "fs/promises";
 import { setTimeout as setTimeoutPromise } from "timers/promises";
 var DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 var DEFAULT_CHROME_HEADERS = {
@@ -37816,7 +37237,7 @@ function parseNetscapeCookies(content, filterDomain) {
 }
 async function loadCookiesFromPath(filePath, filterDomain) {
   try {
-    const content = await fs7.readFile(filePath, "utf-8");
+    const content = await fs6.readFile(filePath, "utf-8");
     return parseNetscapeCookies(content, filterDomain);
   } catch {
     return {};
@@ -38149,8 +37570,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs15 = user.friendship_status;
-      const isFollowing = fs15 ? Boolean(fs15.following) : Boolean(user.followed_by_viewer);
+      const fs16 = user.friendship_status;
+      const isFollowing = fs16 ? Boolean(fs16.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -39586,14 +39007,14 @@ function getExtractor(platform2) {
 }
 
 // src/lib/engines/downloader.ts
-import fs8 from "fs";
-import fsPromises3 from "fs/promises";
+import fs7 from "fs";
+import fsPromises4 from "fs/promises";
 import path5 from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 
 // src/lib/engines/metadata.ts
-import fsPromises2 from "fs/promises";
+import fsPromises3 from "fs/promises";
 function extractHashtags(caption) {
   if (!caption) return [];
   const matches = caption.match(/#([\p{L}\p{N}_]+)/gu);
@@ -39635,12 +39056,12 @@ function buildMetadataSidecar(item, finalFilename, fallbackPlatform, fallbackAut
 async function writeMetadataSidecar(sidecarPath, sidecar, date) {
   const tmpPath = `${sidecarPath}.tmp`;
   const jsonContent = JSON.stringify(sidecar, null, 2);
-  await fsPromises2.writeFile(tmpPath, jsonContent, "utf-8");
-  await fsPromises2.rename(tmpPath, sidecarPath);
+  await fsPromises3.writeFile(tmpPath, jsonContent, "utf-8");
+  await fsPromises3.rename(tmpPath, sidecarPath);
   if (date) {
     try {
       const mtime = new Date(date * 1e3);
-      await fsPromises2.utimes(sidecarPath, mtime, mtime);
+      await fsPromises3.utimes(sidecarPath, mtime, mtime);
     } catch {
     }
   }
@@ -39654,7 +39075,7 @@ async function loadArchive(destDir) {
   const archive = /* @__PURE__ */ new Set();
   const jsonPath = path5.join(destDir, ARCHIVE_FILENAME);
   try {
-    const raw = await fsPromises3.readFile(jsonPath, "utf-8");
+    const raw = await fsPromises4.readFile(jsonPath, "utf-8");
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
       for (const id of parsed) {
@@ -39665,7 +39086,7 @@ async function loadArchive(destDir) {
   }
   const ytdlpPath = path5.join(destDir, YTDLP_ARCHIVE_FILENAME);
   try {
-    const raw = await fsPromises3.readFile(ytdlpPath, "utf-8");
+    const raw = await fsPromises4.readFile(ytdlpPath, "utf-8");
     const lines = raw.split(/\r?\n/);
     for (const rawLine of lines) {
       const line = rawLine.trim();
@@ -39678,7 +39099,7 @@ async function loadArchive(destDir) {
   }
   const textPath = path5.join(destDir, TEXT_ARCHIVE_FILENAME);
   try {
-    const raw = await fsPromises3.readFile(textPath, "utf-8");
+    const raw = await fsPromises4.readFile(textPath, "utf-8");
     const lines = raw.split(/\r?\n/);
     for (const rawLine of lines) {
       const line = rawLine.trim();
@@ -39695,8 +39116,8 @@ async function saveArchive(destDir, archive) {
   const archivePath = path5.join(destDir, ARCHIVE_FILENAME);
   const tmpPath = `${archivePath}.tmp`;
   try {
-    await fsPromises3.writeFile(tmpPath, JSON.stringify([...archive]), "utf-8");
-    await fsPromises3.rename(tmpPath, archivePath);
+    await fsPromises4.writeFile(tmpPath, JSON.stringify([...archive]), "utf-8");
+    await fsPromises4.rename(tmpPath, archivePath);
   } catch {
   }
   const textPaths = [
@@ -39707,7 +39128,7 @@ async function saveArchive(destDir, archive) {
 `).join("");
   for (const tPath of textPaths) {
     try {
-      await fsPromises3.writeFile(tPath, content, "utf-8");
+      await fsPromises4.writeFile(tPath, content, "utf-8");
     } catch {
     }
   }
@@ -39740,7 +39161,7 @@ async function downloadMediaStream(items, options) {
   const getArchiveForDir = async (dir) => {
     let arch = dirArchives.get(dir);
     if (!arch) {
-      await fsPromises3.mkdir(dir, { recursive: true });
+      await fsPromises4.mkdir(dir, { recursive: true });
       arch = await loadArchive(dir);
       dirArchives.set(dir, arch);
     }
@@ -39809,8 +39230,8 @@ async function downloadMediaStream(items, options) {
       const finalFilename = sanitizeFilename(item.filename, item.id, ext);
       const finalPath = path5.join(targetDir, finalFilename);
       const sidecarPath = path5.join(targetDir, `${path5.parse(finalFilename).name}.json`);
-      if (archive.has(item.id) && fs8.existsSync(finalPath)) {
-        if (options.writeMetadata && !fs8.existsSync(sidecarPath)) {
+      if (archive.has(item.id) && fs7.existsSync(finalPath)) {
+        if (options.writeMetadata && !fs7.existsSync(sidecarPath)) {
           try {
             const sidecar = buildMetadataSidecar(item, finalFilename, options.defaultPlatform, options.defaultAuthor);
             await writeMetadataSidecar(sidecarPath, sidecar, item.date);
@@ -39855,16 +39276,16 @@ async function downloadMediaStream(items, options) {
           }
           throw new Error(`HTTP ${response.status} (${response.statusText}) for ${item.url}`);
         }
-        const fileStream = fs8.createWriteStream(tmpPath);
+        const fileStream = fs7.createWriteStream(tmpPath);
         await pipeline(Readable.fromWeb(response.body), fileStream, { signal });
         if (item.date) {
           try {
             const mtime = new Date(item.date * 1e3);
-            await fsPromises3.utimes(tmpPath, mtime, mtime);
+            await fsPromises4.utimes(tmpPath, mtime, mtime);
           } catch {
           }
         }
-        await fsPromises3.rename(tmpPath, finalPath);
+        await fsPromises4.rename(tmpPath, finalPath);
         if (options.writeMetadata) {
           try {
             const sidecar = buildMetadataSidecar(item, finalFilename, options.defaultPlatform, options.defaultAuthor);
@@ -39887,8 +39308,8 @@ async function downloadMediaStream(items, options) {
         });
       } catch (err) {
         try {
-          if (fs8.existsSync(tmpPath)) {
-            await fsPromises3.unlink(tmpPath);
+          if (fs7.existsSync(tmpPath)) {
+            await fsPromises4.unlink(tmpPath);
           }
         } catch {
         }
@@ -39913,40 +39334,6 @@ async function downloadMediaStream(items, options) {
     await saveArchive(d, arch);
   }
   return { downloaded, skipped, errors };
-}
-
-// src/lib/engines/checkpoint.ts
-import fsPromises4 from "fs/promises";
-import path6 from "path";
-var CHECKPOINT_FILENAME = ".open-nami-checkpoint.json";
-async function loadCheckpoint(destDir) {
-  const filePath = path6.join(destDir, CHECKPOINT_FILENAME);
-  try {
-    const raw = await fsPromises4.readFile(filePath, "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object" && parsed.cursors) {
-      return parsed;
-    }
-  } catch {
-  }
-  return null;
-}
-async function saveCheckpoint(destDir, checkpoint) {
-  const filePath = path6.join(destDir, CHECKPOINT_FILENAME);
-  const tmpPath = `${filePath}.tmp`;
-  try {
-    await fsPromises4.mkdir(destDir, { recursive: true });
-    await fsPromises4.writeFile(tmpPath, JSON.stringify(checkpoint, null, 2), "utf-8");
-    await fsPromises4.rename(tmpPath, filePath);
-  } catch {
-  }
-}
-async function clearCheckpoint(destDir) {
-  const filePath = path6.join(destDir, CHECKPOINT_FILENAME);
-  try {
-    await fsPromises4.unlink(filePath);
-  } catch {
-  }
 }
 
 // src/lib/engines/filters.ts
@@ -40054,27 +39441,27 @@ async function* filterMediaStream(items, filters) {
 
 // src/lib/engines/gallery-dl.ts
 import { spawn as spawn2 } from "child_process";
-import path9 from "path";
-import fs11 from "fs/promises";
+import path8 from "path";
+import fs10 from "fs/promises";
 
 // src/lib/engines/exec.ts
-import fs10 from "fs";
-import path8 from "path";
+import fs9 from "fs";
+import path7 from "path";
 
 // src/lib/engines/fetcher.ts
 import { spawn } from "child_process";
 import { createWriteStream } from "fs";
-import fs9 from "fs/promises";
-import os9 from "os";
-import path7 from "path";
+import fs8 from "fs/promises";
+import os6 from "os";
+import path6 from "path";
 import { Readable as Readable2 } from "stream";
 import { pipeline as pipeline2 } from "stream/promises";
 function getOpenNamiBinDir(env3 = process.env) {
   if (env3.OPEN_NAMI_BIN_DIR && env3.OPEN_NAMI_BIN_DIR.trim()) {
-    return path7.resolve(env3.OPEN_NAMI_BIN_DIR.trim());
+    return path6.resolve(env3.OPEN_NAMI_BIN_DIR.trim());
   }
-  const base = env3.OPEN_NAMI_DIR && env3.OPEN_NAMI_DIR.trim() ? env3.OPEN_NAMI_DIR.trim() : os9.homedir();
-  return path7.join(base, ".open-nami", "bin");
+  const base = env3.OPEN_NAMI_DIR && env3.OPEN_NAMI_DIR.trim() ? env3.OPEN_NAMI_DIR.trim() : os6.homedir();
+  return path6.join(base, ".open-nami", "bin");
 }
 var YTDLP_RELEASE_BASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 var GALLERYDL_CODEBERG_API = "https://codeberg.org/api/v1/repos/mikf/gallery-dl/releases/latest";
@@ -40125,7 +39512,7 @@ function getBinaryVersion(executablePath) {
   });
 }
 async function downloadBinary(url, targetFile, signal) {
-  await fs9.mkdir(path7.dirname(targetFile), { recursive: true });
+  await fs8.mkdir(path6.dirname(targetFile), { recursive: true });
   const response = await fetch(url, {
     signal,
     headers: { "User-Agent": "open-nami" }
@@ -40137,18 +39524,18 @@ async function downloadBinary(url, targetFile, signal) {
   try {
     await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
     try {
-      await fs9.chmod(tmp, 493);
+      await fs8.chmod(tmp, 493);
     } catch {
     }
-    const stats = await fs9.stat(tmp);
+    const stats = await fs8.stat(tmp);
     if (stats.size < 100 * 1024) {
       throw new Error(`Downloaded binary from ${url} is unexpectedly small (${stats.size} bytes). File may be incomplete or corrupted.`);
     }
-    await fs9.rename(tmp, targetFile);
+    await fs8.rename(tmp, targetFile);
     return targetFile;
   } catch (err) {
     try {
-      await fs9.unlink(tmp);
+      await fs8.unlink(tmp);
     } catch {
     }
     throw err;
@@ -40157,7 +39544,7 @@ async function downloadBinary(url, targetFile, signal) {
 async function downloadLatestYtDlp(targetDir, signal, onStatus) {
   const dir = targetDir || getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path7.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   const asset = ytDlpAssetName();
   const url = `${YTDLP_RELEASE_BASE}/${asset}`;
   onStatus?.(`fetching latest yt-dlp (${asset})\u2026`);
@@ -40193,7 +39580,7 @@ async function downloadLatestGalleryDl(targetDir, signal, onStatus) {
   }
   const dir = targetDir || getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path7.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   const asset = galleryDlAssetName();
   const candidateUrls = await getGalleryDlDownloadUrls(asset, fetch, signal);
   let lastError;
@@ -40211,7 +39598,7 @@ async function downloadLatestGalleryDl(targetDir, signal, onStatus) {
 async function ensureYtDlp(onStatus, signal) {
   if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path7.join(getOpenNamiBinDir(), binaryName);
+  const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
   if (await commandWorks("python", ["-m", "yt_dlp", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "yt_dlp", "--version"])) return "python3";
@@ -40221,7 +39608,7 @@ async function ensureYtDlp(onStatus, signal) {
 async function ensureGalleryDl(onStatus, signal) {
   if (await commandWorks("gallery-dl", ["--version"])) return "gallery-dl";
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path7.join(getOpenNamiBinDir(), binaryName);
+  const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
   if (await commandWorks("python", ["-m", "gallery_dl", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "gallery_dl", "--version"])) return "python3";
@@ -40234,7 +39621,7 @@ async function updateYtDlp(options) {
   const signal = options?.signal;
   const dir = getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
-  const local = path7.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   let previousVersion;
   if (await commandWorks(local, ["--version"])) {
     previousVersion = await getBinaryVersion(local);
@@ -40257,7 +39644,7 @@ async function updateGalleryDl(options) {
   const signal = options?.signal;
   const dir = getOpenNamiBinDir();
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
-  const local = path7.join(dir, binaryName);
+  const local = path6.join(dir, binaryName);
   let previousVersion;
   if (await commandWorks(local, ["--version"])) {
     previousVersion = await getBinaryVersion(local);
@@ -40278,16 +39665,16 @@ async function updateGalleryDl(options) {
 // src/lib/engines/exec.ts
 function findExecutable(binName, pathEnv = process.env.PATH || "") {
   if (!pathEnv) return null;
-  const delimiter = path8.delimiter;
+  const delimiter = path7.delimiter;
   const dirs = pathEnv.split(delimiter).filter(Boolean);
   const isWin = process.platform === "win32";
   const extensions = isWin ? [".exe", ".cmd", ".bat", ""] : [""];
   for (const dir of dirs) {
     for (const ext of extensions) {
-      const fullPath = path8.join(dir, `${binName}${ext}`);
+      const fullPath = path7.join(dir, `${binName}${ext}`);
       try {
-        if (fs10.existsSync(fullPath)) {
-          const stat = fs10.statSync(fullPath);
+        if (fs9.existsSync(fullPath)) {
+          const stat = fs9.statSync(fullPath);
           if (stat.isFile()) {
             return fullPath;
           }
@@ -40317,10 +39704,10 @@ function resolveEngineCommand(engine, options = {}) {
   }
   const binDir = getOpenNamiBinDir(env3);
   const isWin = process.platform === "win32";
-  const localBin = path8.join(binDir, `${engine}${isWin ? ".exe" : ""}`);
+  const localBin = path7.join(binDir, `${engine}${isWin ? ".exe" : ""}`);
   try {
-    if (fs10.existsSync(localBin)) {
-      const stat = fs10.statSync(localBin);
+    if (fs9.existsSync(localBin)) {
+      const stat = fs9.statSync(localBin);
       if (stat.isFile()) {
         return {
           command: localBin,
@@ -40377,7 +39764,7 @@ function buildGalleryDlArgs(options) {
     "-o",
     'headers.sec-ch-ua-platform="Windows"',
     "--download-archive",
-    path9.join(destDir, GDL_ARCHIVE),
+    path8.join(destDir, GDL_ARCHIVE),
     "--retries",
     "3",
     "--sleep-429",
@@ -40418,8 +39805,8 @@ function buildGalleryDlArgs(options) {
 }
 async function runGalleryDl(options) {
   const { profile, targetDir, subDir, cookiePath, onProgress } = options;
-  const destDir = path9.join(targetDir, subDir);
-  await fs11.mkdir(destDir, { recursive: true });
+  const destDir = path8.join(targetDir, subDir);
+  await fs10.mkdir(destDir, { recursive: true });
   const args = buildGalleryDlArgs({
     destDir,
     subDir,
@@ -40450,7 +39837,7 @@ async function runGalleryDl(options) {
       error: err.message || String(err)
     };
   }
-  const engineCmd = engineCmdStr.includes(path9.sep) ? { command: engineCmdStr, baseArgs: [] } : resolveEngineCommand("gallery-dl");
+  const engineCmd = engineCmdStr.includes(path8.sep) ? { command: engineCmdStr, baseArgs: [] } : resolveEngineCommand("gallery-dl");
   const fullArgs = [...engineCmd.baseArgs, ...args];
   return new Promise((resolve) => {
     onProgress?.({
@@ -40469,7 +39856,7 @@ async function runGalleryDl(options) {
       if (!trimmed) return;
       if (trimmed.startsWith("#")) {
         skippedCount++;
-        const filename = path9.basename(trimmed.slice(1).trim());
+        const filename = path8.basename(trimmed.slice(1).trim());
         onProgress?.({
           job: subDir,
           downloadedCount,
@@ -40477,9 +39864,9 @@ async function runGalleryDl(options) {
           currentFile: filename,
           statusText: `Skipped: ${filename}`
         });
-      } else if (trimmed.match(/\.(jpe?g|png|gif|webp|bmp|jfif|heic|avif|tiff|svg|mp4|mov|webm|mkv|avi|flv|m4v)$/i) || trimmed.includes(path9.sep)) {
+      } else if (trimmed.match(/\.(jpe?g|png|gif|webp|bmp|jfif|heic|avif|tiff|svg|mp4|mov|webm|mkv|avi|flv|m4v)$/i) || trimmed.includes(path8.sep)) {
         downloadedCount++;
-        const filename = path9.basename(trimmed);
+        const filename = path8.basename(trimmed);
         onProgress?.({
           job: subDir,
           downloadedCount,
@@ -40530,15 +39917,15 @@ async function runGalleryDl(options) {
 
 // src/lib/engines/yt-dlp.ts
 import { spawn as spawn3 } from "child_process";
-import path10 from "path";
-import fs12 from "fs/promises";
+import path9 from "path";
+import fs11 from "fs/promises";
 var YTDLP_ARCHIVE = "archive_yt-dlp.txt";
 var UA2 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 function buildYtDlpArgs(options) {
   const { destDir, platform: platform2, cleanUrl, cookiePath, writeMetadata } = options;
   const args = [
     "-o",
-    path10.join(destDir, "%(title).150B [%(id)s].%(ext)s"),
+    path9.join(destDir, "%(title).150B [%(id)s].%(ext)s"),
     "--windows-filenames",
     "--newline",
     "--ignore-errors",
@@ -40546,7 +39933,7 @@ function buildYtDlpArgs(options) {
     "--user-agent",
     UA2,
     "--download-archive",
-    path10.join(destDir, YTDLP_ARCHIVE),
+    path9.join(destDir, YTDLP_ARCHIVE),
     "--concurrent-fragments",
     "4",
     "--retries",
@@ -40574,8 +39961,8 @@ function buildYtDlpArgs(options) {
 }
 async function runYtDlp(options) {
   const { profile, targetDir, cookiePath, onProgress } = options;
-  const destDir = path10.join(targetDir, "Videos");
-  await fs12.mkdir(destDir, { recursive: true });
+  const destDir = path9.join(targetDir, "Videos");
+  await fs11.mkdir(destDir, { recursive: true });
   const args = buildYtDlpArgs({
     destDir,
     platform: profile.platform,
@@ -40604,7 +39991,7 @@ async function runYtDlp(options) {
       error: err.message || String(err)
     };
   }
-  const engineCmd = engineCmdStr.includes(path10.sep) ? { command: engineCmdStr, baseArgs: [] } : resolveEngineCommand("yt-dlp");
+  const engineCmd = engineCmdStr.includes(path9.sep) ? { command: engineCmdStr, baseArgs: [] } : resolveEngineCommand("yt-dlp");
   const fullArgs = [...engineCmd.baseArgs, ...args];
   return new Promise((resolve) => {
     onProgress?.({
@@ -40631,7 +40018,7 @@ async function runYtDlp(options) {
         });
       } else if (trimmed.includes("[download] Destination:")) {
         const dest = trimmed.replace("[download] Destination:", "").trim();
-        const filename = path10.basename(dest);
+        const filename = path9.basename(dest);
         onProgress?.({
           job: "Videos",
           downloadedCount,
@@ -40696,36 +40083,36 @@ var REFERER_MAP = {
 };
 function expandPath(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path11.join(os10.homedir(), dir.slice(1));
+    return path10.join(os7.homedir(), dir.slice(1));
   }
   return dir;
 }
 function resolveDownloadBaseDir(customBaseDir) {
   if (customBaseDir && customBaseDir.trim()) {
-    return path11.resolve(expandPath(customBaseDir.trim()));
+    return path10.resolve(expandPath(customBaseDir.trim()));
   }
   const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
   if (envDir && envDir.trim()) {
-    return path11.resolve(expandPath(envDir.trim()));
+    return path10.resolve(expandPath(envDir.trim()));
   }
   const configDir = loadConfig().downloadDir;
   if (configDir && configDir.trim()) {
-    return path11.resolve(expandPath(configDir.trim()));
+    return path10.resolve(expandPath(configDir.trim()));
   }
   if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
     const raw = process.env.NAMI_BASE_DIR.trim();
-    return path11.resolve(expandPath(raw.endsWith("downloads") ? raw : path11.join(raw, "downloads")));
+    return path10.resolve(expandPath(raw.endsWith("downloads") ? raw : path10.join(raw, "downloads")));
   }
-  return path11.join(resolvePlatformDownloadsDir(), "Open Nami");
+  return path10.join(resolvePlatformDownloadsDir(), "Open Nami");
 }
 function resolveDefaultDownloadDir(platform2, username, baseDir) {
   const root = resolveDownloadBaseDir(baseDir);
-  return path11.join(root, platform2, username);
+  return path10.join(root, platform2, username);
 }
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
-  await fs13.mkdir(targetDir, { recursive: true });
+  await fs12.mkdir(targetDir, { recursive: true });
   const masterCookie = findCookieFile(profile.platform);
   const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
   let totalDownloaded = 0;
@@ -40754,7 +40141,7 @@ async function dispatchDownload(options) {
     const savedCheckpoint = options.resume ? await loadCheckpoint(targetDir) : null;
     const currentCursors = savedCheckpoint?.cursors ? { ...savedCheckpoint.cursors } : {};
     const defaultRunNative = async (subDir) => {
-      const dest = path11.join(targetDir, subDir);
+      const dest = path10.join(targetDir, subDir);
       const remainingLimit = globalLimit !== void 0 ? Math.max(0, globalLimit - totalDownloaded) : void 0;
       if (remainingLimit === 0) {
         return { success: true, downloaded: 0, skipped: 0 };
@@ -40796,8 +40183,8 @@ async function dispatchDownload(options) {
           jobName: `${profile.username} ${subDir}`,
           destDir: dest,
           destDirMap: subDir === "All" ? {
-            photo: path11.join(targetDir, "Photos"),
-            video: path11.join(targetDir, "Videos")
+            photo: path10.join(targetDir, "Photos"),
+            video: path10.join(targetDir, "Videos")
           } : void 0,
           cookiePath: cookieCopy?.filePath,
           referer: REFERER_MAP[profile.platform],
@@ -40953,6 +40340,680 @@ async function dispatchDownload(options) {
   }
 }
 
+// src/components/views/picking-view.tsx
+var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+function ChoiceIndicator({ isSelected }) {
+  const theme = useTheme();
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: isSelected ? "\u276F" : " " }) });
+}
+function ChoiceItem({ isSelected, label }) {
+  const theme = useTheme();
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: isSelected, children: label });
+}
+function getPickingOptions(platform2) {
+  const items = [
+    { label: "Photos", value: "photos" },
+    { label: "Videos", value: "videos" }
+  ];
+  if (platform2 === "instagram") {
+    items.push({ label: "Stories", value: "stories" });
+    items.push({ label: "Highlights", value: "highlights" });
+  }
+  items.push({
+    label: "Everything",
+    value: "all"
+  });
+  return items;
+}
+function PickingView({
+  contentWidth,
+  profile,
+  outputDir,
+  initialLimit,
+  initialSince,
+  initialWriteMetadata = false,
+  initialResume = true,
+  onSelect,
+  onHighlight,
+  theme,
+  gapComponent: Gap2
+}) {
+  const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
+  const items = getPickingOptions(profile.platform);
+  const [limit, setLimit] = (0, import_react42.useState)(initialLimit);
+  const [dateFilter, setDateFilter] = (0, import_react42.useState)(() => {
+    if (typeof initialSince === "string" && (initialSince === "24h" || initialSince === "7d" || initialSince === "30d")) {
+      return initialSince;
+    }
+    return "all";
+  });
+  const [writeMetadata, setWriteMetadata] = (0, import_react42.useState)(initialWriteMetadata);
+  const [resume, setResume] = (0, import_react42.useState)(initialResume);
+  const [hasCheckpoint, setHasCheckpoint] = (0, import_react42.useState)(false);
+  const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir);
+  (0, import_react42.useEffect)(() => {
+    let isMounted = true;
+    loadCheckpoint(targetDir).then((cp) => {
+      if (isMounted && cp && !cp.completed && Object.keys(cp.cursors || {}).length > 0) {
+        setHasCheckpoint(true);
+        setResume(true);
+      }
+    }).catch(() => {
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [targetDir]);
+  const cycleLimit = (0, import_react42.useCallback)(() => {
+    setLimit((prev) => {
+      if (!prev) return 10;
+      if (prev === 10) return 25;
+      if (prev === 25) return 50;
+      if (prev === 50) return 100;
+      return void 0;
+    });
+  }, []);
+  const cycleDate = (0, import_react42.useCallback)(() => {
+    setDateFilter((prev) => {
+      if (prev === "all") return "24h";
+      if (prev === "24h") return "7d";
+      if (prev === "7d") return "30d";
+      return "all";
+    });
+  }, []);
+  const toggleMetadata = (0, import_react42.useCallback)(() => {
+    setWriteMetadata((prev) => !prev);
+  }, []);
+  const toggleResume = (0, import_react42.useCallback)(() => {
+    setResume((prev) => !prev);
+  }, []);
+  use_input_default((input) => {
+    if (input === "l" || input === "L") {
+      cycleLimit();
+      return;
+    }
+    if (input === "d" || input === "D") {
+      cycleDate();
+      return;
+    }
+    if (input === "m" || input === "M") {
+      toggleMetadata();
+      return;
+    }
+    if (input === "r" || input === "R") {
+      toggleResume();
+      return;
+    }
+  }, { isActive: Boolean(process.stdin.isTTY) });
+  const handleItemSelect = (selectedChoice) => {
+    onSelect({
+      choice: selectedChoice,
+      limit,
+      since: dateFilter === "all" ? void 0 : dateFilter,
+      writeMetadata,
+      resume
+    });
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { width: contentWidth, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", flexGrow: 1, flexBasis: 0, paddingTop: 1, paddingRight: 3, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.primary, children: [
+        "@",
+        profile.username
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u25B8 ",
+        platformName,
+        profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Choose media category to download." }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Use hotkeys [l], [d], [m], [r] to adjust options." }),
+      hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Panel, { title: "Download", width: 38, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+        SelectInput_default,
+        {
+          indicatorComponent: ChoiceIndicator,
+          itemComponent: ChoiceItem,
+          items: items.map((item, index) => ({
+            key: String(index),
+            label: item.label,
+            value: item.value
+          })),
+          onSelect: (item) => handleItemSelect(item.value),
+          onHighlight: (item) => onHighlight?.(item.value)
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
+        Box_default,
+        {
+          flexDirection: "column",
+          marginTop: 1,
+          borderStyle: "round",
+          borderColor: theme.gray,
+          borderDimColor: true,
+          paddingX: 1,
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[l] Limit: ",
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit}` : "ALL" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[d] Date: ",
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter === "all" ? "ALL" : dateFilter.toUpperCase() })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[m] Sidecars: ",
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[r] Resume: ",
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
+              ] })
+            ] })
+          ]
+        }
+      )
+    ] })
+  ] });
+}
+
+// src/components/views/platform-view.tsx
+var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
+var PLATFORM_OPTIONS = [
+  { label: "Instagram", value: "instagram" },
+  { label: "TikTok", value: "tiktok" },
+  { label: "Facebook", value: "facebook" },
+  { label: "X (Twitter)", value: "x" }
+];
+function getPlatformOptions() {
+  return PLATFORM_OPTIONS;
+}
+function PlatformView({
+  contentWidth,
+  username,
+  onSelect,
+  onHighlight,
+  theme,
+  gapComponent: Gap2
+}) {
+  const items = getPlatformOptions();
+  return /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { width: contentWidth, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Box_default, { flexDirection: "column", flexGrow: 1, flexBasis: 0, paddingTop: 1, paddingRight: 3, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsxs)(Text, { bold: true, color: theme.primary, children: [
+        "@",
+        username.replace(/^@/, "")
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u25B8 Choose platform" }),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select target platform for this profile" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(Panel, { title: "Platform", width: 38, children: /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
+      SelectInput_default,
+      {
+        indicatorComponent: ChoiceIndicator,
+        itemComponent: ChoiceItem,
+        items: items.map((item, index) => ({
+          key: String(index),
+          label: item.label,
+          value: item.value
+        })),
+        onSelect: (item) => onSelect(item.value),
+        onHighlight: (item) => onHighlight?.(item.value)
+      }
+    ) })
+  ] });
+}
+
+// src/components/views/probing-view.tsx
+var import_jsx_runtime10 = __toESM(require_jsx_runtime(), 1);
+function ProbingView({
+  platformName,
+  target,
+  boxWidth,
+  theme,
+  buttonText
+}) {
+  const displayTarget = target.length > boxWidth - 8 ? `${target.slice(0, boxWidth - 9)}\u2026` : target;
+  return /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(FramedInput, { title: platformName || "Paste a profile link", width: boxWidth, button: buttonText, buttonDim: true, children: /* @__PURE__ */ (0, import_jsx_runtime10.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: displayTarget }) }) });
+}
+
+// src/components/views/downloading-view.tsx
+var import_react44 = __toESM(require_react(), 1);
+import os8 from "os";
+
+// src/components/progress-bar.tsx
+var import_react43 = __toESM(require_react(), 1);
+var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
+function computeScannerTrack(tick, width = 30, blockWidth = 6) {
+  const safeWidth = Math.max(1, width);
+  const safeBlock = Math.min(safeWidth, Math.max(1, blockWidth));
+  const maxPos = safeWidth - safeBlock;
+  if (maxPos <= 0) {
+    return { before: 0, active: safeWidth, after: 0 };
+  }
+  const cycle = 2 * maxPos;
+  const phase = (tick % cycle + cycle) % cycle;
+  const pos = phase <= maxPos ? phase : cycle - phase;
+  return {
+    before: pos,
+    active: safeBlock,
+    after: safeWidth - pos - safeBlock
+  };
+}
+function getScannerSegments(tick, width = 30, blockWidth = 6) {
+  const { before, active, after } = computeScannerTrack(tick, width, blockWidth);
+  return {
+    beforeStr: "\u2591".repeat(before),
+    activeStr: "\u2588".repeat(active),
+    afterStr: "\u2591".repeat(after)
+  };
+}
+function ProgressBar({
+  percent = 0,
+  width = 30,
+  showPercent = true,
+  indeterminate = false,
+  tick: externalTick
+}) {
+  const theme = useTheme();
+  const [internalTick, setInternalTick] = import_react43.default.useState(0);
+  import_react43.default.useEffect(() => {
+    if (!indeterminate || externalTick !== void 0) return;
+    const timer = setInterval(() => setInternalTick((t) => t + 1), 75);
+    return () => clearInterval(timer);
+  }, [indeterminate, externalTick]);
+  if (indeterminate) {
+    const currentTick = externalTick ?? internalTick;
+    const { beforeStr, activeStr, afterStr } = getScannerSegments(currentTick, width);
+    return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: beforeStr }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: activeStr }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: afterStr })
+    ] });
+  }
+  const normalized = percent > 1 ? percent / 100 : Math.max(0, percent);
+  const clamped = Math.min(1, normalized);
+  const percentLabel = showPercent ? ` ${`${Math.round(clamped * 100)}%`.padStart(4)}` : "";
+  const barWidth = Math.max(1, showPercent ? width - percentLabel.length : width);
+  const filled = Math.round(clamped * barWidth);
+  return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)(Text, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: "\u2588".repeat(filled) }),
+    /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u2591".repeat(barWidth - filled) }),
+    percentLabel ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(Text, { color: theme.primary, children: percentLabel }) : null
+  ] });
+}
+
+// src/components/views/downloading-view.tsx
+var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+function renderCarouselTrack(current, total) {
+  const safeTotal = Math.max(1, Math.min(15, total));
+  const safeCurrent = Math.max(1, Math.min(safeTotal, current));
+  return Array.from({ length: safeTotal }, (_, i) => i < safeCurrent ? "\u25CF" : "\u25CB").join(" ");
+}
+function DownloadingView({
+  profile,
+  choice,
+  progress,
+  outputDir,
+  writeMetadata,
+  limit,
+  since,
+  theme,
+  gapComponent: Gap2
+}) {
+  const [elapsed, setElapsed] = (0, import_react44.useState)(0);
+  (0, import_react44.useEffect)(() => {
+    const timer = setInterval(() => setElapsed((s) => s + 1), 1e3);
+    return () => clearInterval(timer);
+  }, []);
+  const job = progress?.job || (choice ? `${choice.charAt(0).toUpperCase() + choice.slice(1)}` : "Initializing");
+  const downloaded = progress?.downloadedCount ?? 0;
+  const skipped = progress?.skippedCount ?? 0;
+  const currentFile = progress?.currentFile ? truncate(progress.currentFile, 42) : "";
+  const statusLine = progress?.statusText || (currentFile ? currentFile : "downloading\u2026");
+  let slideInfo = null;
+  const slideRegex = /(?:Slide|Album\s+slide|Part)\s+(\d+)\/(\d+)/i;
+  const match = statusLine.match(slideRegex) || currentFile.match(slideRegex);
+  if (match) {
+    const cur = parseInt(match[1], 10);
+    const tot = parseInt(match[2], 10);
+    if (!isNaN(cur) && !isNaN(tot) && tot > 1) {
+      slideInfo = { current: cur, total: tot };
+    }
+  }
+  const activeBadges = [];
+  if (writeMetadata) activeBadges.push("Sidecars: ON");
+  if (limit) activeBadges.push(`Limit: ${limit}`);
+  if (since) activeBadges.push(`Date: ${since}`);
+  return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      "@",
+      profile.username,
+      " \xB7 ",
+      job
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(ProgressBar, { indeterminate: true, width: 30 }),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(build_default, { type: "dots" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` ${statusLine}` })
+    ] }),
+    slideInfo ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Box_default, { marginTop: 1, flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.primary, bold: true, children: [
+      "Album Slide [",
+      renderCarouselTrack(slideInfo.current, slideInfo.total),
+      "] ",
+      slideInfo.current,
+      "/",
+      slideInfo.total
+    ] }) }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: `${downloaded} downloaded  \xB7  ${skipped} archived  \xB7  ${formatDuration(elapsed)} elapsed` }),
+    activeBadges.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: activeBadges.join(" \xB7 ") }) : null,
+    outputDir ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      "saving to ",
+      shortenPath(outputDir, os8.homedir(), 54)
+    ] }) : null
+  ] });
+}
+
+// src/components/views/completion-view.tsx
+import os9 from "os";
+var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+var DONE_LABEL = "\u21B5 download another";
+function CompletionView({
+  profile,
+  result,
+  theme,
+  gapComponent: Gap2
+}) {
+  const isZero = result.downloadedCount === 0 && result.skippedCount === 0;
+  const plural = result.downloadedCount === 1 ? "" : "s";
+  const skipText = result.skippedCount > 0 ? ` (${result.skippedCount} archived)` : "";
+  return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { children: isZero ? /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "\u2713 profile scanned " }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.primary, children: "\u2014 0 media items found" })
+    ] }) : /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(import_jsx_runtime13.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "\u2713 profile downloaded! " }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.primary, children: "saved to:" })
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(result.outputDir, os9.homedir(), 60) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isZero ? "no photos or videos available" : `${result.downloadedCount} media item${plural} downloaded${skipText}` }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "[o]" }),
+      " reveal in folder"
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
+      Box_default,
+      {
+        borderStyle: "round",
+        borderColor: theme.gray,
+        borderDimColor: theme.dimSecondary,
+        borderBackgroundColor: theme.background,
+        paddingX: 3,
+        children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: DONE_LABEL })
+      }
+    ),
+    result.errors.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { flexDirection: "column", marginTop: 1, alignItems: "center", children: result.errors.slice(0, 3).map((err, i) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: "red", dimColor: true, wrap: "wrap", children: [
+      "\u2022 ",
+      cleanInlineError(err)
+    ] }, i)) }) : null
+  ] });
+}
+
+// src/components/views/error-view.tsx
+var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+function ErrorView({ message, hint, columns, theme }) {
+  const width = Math.max(10, Math.min(columns - 6, 72));
+  return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { bold: true, color: theme.primary, children: [
+      "\u2717 ",
+      message
+    ] }),
+    hint ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      "Hint: ",
+      hint
+    ] }) }) : null
+  ] });
+}
+
+// src/components/views/settings-view.tsx
+var import_react45 = __toESM(require_react(), 1);
+import fs13 from "fs";
+import path11 from "path";
+import os10 from "os";
+var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+function expandDir(dir) {
+  if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
+    return path11.join(os10.homedir(), dir.slice(1));
+  }
+  return dir;
+}
+var LIMIT_OPTIONS = [void 0, 10, 25, 50, 100];
+function SettingsView({
+  boxWidth,
+  theme,
+  gapComponent: Gap2,
+  focusedField: controlledFocus,
+  onFocusChange,
+  onSave,
+  onCancel
+}) {
+  const initialConfig = (0, import_react45.useMemo)(() => loadConfig(), []);
+  const [internalFocus, setInternalFocus] = (0, import_react45.useState)("cookies");
+  const focusedField = controlledFocus ?? internalFocus;
+  const setField = (0, import_react45.useCallback)(
+    (field) => {
+      setInternalFocus(field);
+      onFocusChange?.(field);
+    },
+    [onFocusChange]
+  );
+  const [cookiesDir, setCookiesDir] = (0, import_react45.useState)(initialConfig.cookiesDir ?? "");
+  const [downloadDir, setDownloadDir] = (0, import_react45.useState)(initialConfig.downloadDir ?? "");
+  const [writeMetadata, setWriteMetadata] = (0, import_react45.useState)(Boolean(initialConfig.writeMetadata));
+  const [defaultLimit, setDefaultLimit] = (0, import_react45.useState)(initialConfig.defaultLimit);
+  const [saved, setSaved] = (0, import_react45.useState)(false);
+  const handleSave = (0, import_react45.useCallback)(() => {
+    const existing = loadConfig();
+    const nextConfig = {
+      ...existing,
+      cookiesDir: cookiesDir.trim() ? cookiesDir.trim() : void 0,
+      downloadDir: downloadDir.trim() ? downloadDir.trim() : void 0,
+      writeMetadata,
+      defaultLimit
+    };
+    saveConfig(nextConfig);
+    setSaved(true);
+    onSave();
+  }, [cookiesDir, downloadDir, writeMetadata, defaultLimit, onSave]);
+  const cookieFeedback = (0, import_react45.useMemo)(() => {
+    const dir = cookiesDir.trim();
+    if (!dir) {
+      const defaultCookies = detectAvailableCookies();
+      return {
+        ok: defaultCookies.length > 0,
+        text: defaultCookies.length > 0 ? `default paths \xB7 ${defaultCookies.length} cookie(s) found (${defaultCookies.join(", ")})` : "default paths \xB7 no recognized cookies found"
+      };
+    }
+    const expanded = expandDir(dir);
+    if (!fs13.existsSync(expanded)) {
+      return {
+        ok: false,
+        text: "directory does not exist yet"
+      };
+    }
+    const detected = detectAvailableCookies(expanded);
+    if (detected.length === 0) {
+      return {
+        ok: false,
+        text: "no recognized cookie files found in this directory"
+      };
+    }
+    return {
+      ok: true,
+      text: `\u2713 ${detected.length} cookie(s) found (${detected.join(", ")})`
+    };
+  }, [cookiesDir]);
+  const downloadFeedback = (0, import_react45.useMemo)(() => {
+    const dir = downloadDir.trim();
+    if (!dir) {
+      return "default: platform Downloads / Open Nami";
+    }
+    return `target: ${path11.resolve(expandDir(dir))}`;
+  }, [downloadDir]);
+  const cycleFocus = (0, import_react45.useCallback)((forward = true) => {
+    const fields = ["cookies", "download", "metadata", "limit"];
+    const idx = fields.indexOf(focusedField);
+    const nextIdx = forward ? (idx + 1) % fields.length : (idx - 1 + fields.length) % fields.length;
+    setField(fields[nextIdx]);
+  }, [focusedField, setField]);
+  const cycleLimit = (0, import_react45.useCallback)(() => {
+    setDefaultLimit((prev) => {
+      const idx = LIMIT_OPTIONS.indexOf(prev);
+      const nextIdx = (idx + 1) % LIMIT_OPTIONS.length;
+      return LIMIT_OPTIONS[nextIdx];
+    });
+  }, []);
+  use_input_default((input, key) => {
+    if (key.escape) {
+      onCancel();
+      return;
+    }
+    if (key.ctrl && (input === "s" || input === "S")) {
+      handleSave();
+      return;
+    }
+    if (focusedField === "metadata") {
+      if (input === " " || key.return) {
+        setWriteMetadata((prev) => !prev);
+        return;
+      }
+      if (key.tab || key.downArrow) {
+        cycleFocus(true);
+        return;
+      }
+      if (key.upArrow) {
+        cycleFocus(false);
+        return;
+      }
+    }
+    if (focusedField === "limit") {
+      if (input === " " || key.return) {
+        cycleLimit();
+        return;
+      }
+      if (key.tab || key.downArrow) {
+        cycleFocus(true);
+        return;
+      }
+      if (key.upArrow) {
+        cycleFocus(false);
+        return;
+      }
+    }
+  }, { isActive: Boolean(process.stdin.isTTY) });
+  return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+      FramedInput,
+      {
+        title: focusedField === "cookies" ? "\u25CF Cookies Folder" : "\u25CB Cookies Folder",
+        width: boxWidth,
+        children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          TextInput,
+          {
+            value: cookiesDir,
+            onChange: setCookiesDir,
+            onSubmit: () => setField("download"),
+            focus: focusedField === "cookies",
+            onTab: () => cycleFocus(true),
+            onArrowDown: () => cycleFocus(true),
+            onArrowUp: () => cycleFocus(false),
+            placeholder: "e.g. F:\\Nami\\cookies or ./cookies",
+            width: boxWidth - 6
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: cookieFeedback.ok ? theme.primary : theme.gray, dimColor: !cookieFeedback.ok && theme.dimSecondary, children: cookieFeedback.text }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+      FramedInput,
+      {
+        title: focusedField === "download" ? "\u25CF Download Directory" : "\u25CB Download Directory",
+        width: boxWidth,
+        children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+          TextInput,
+          {
+            value: downloadDir,
+            onChange: setDownloadDir,
+            onSubmit: () => setField("metadata"),
+            focus: focusedField === "download",
+            onTab: () => cycleFocus(true),
+            onArrowDown: () => cycleFocus(true),
+            onArrowUp: () => cycleFocus(false),
+            placeholder: "e.g. D:\\Downloads\\Open Nami",
+            width: boxWidth - 6
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadFeedback }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
+      Box_default,
+      {
+        width: boxWidth,
+        borderStyle: "round",
+        borderColor: focusedField === "metadata" ? theme.primary : theme.gray,
+        borderDimColor: focusedField !== "metadata",
+        paddingX: 2,
+        justifyContent: "space-between",
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: focusedField === "metadata" ? theme.primary : theme.gray, bold: focusedField === "metadata", children: [
+            focusedField === "metadata" ? "\u25CF " : "\u25CB ",
+            "Write Captions & Metadata Sidecars (.json)"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: writeMetadata ? theme.primary : theme.gray, bold: true, children: writeMetadata ? "[ENABLED]" : "[DISABLED]" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
+      Box_default,
+      {
+        width: boxWidth,
+        borderStyle: "round",
+        borderColor: focusedField === "limit" ? theme.primary : theme.gray,
+        borderDimColor: focusedField !== "limit",
+        paddingX: 2,
+        justifyContent: "space-between",
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: focusedField === "limit" ? theme.primary : theme.gray, bold: focusedField === "limit", children: [
+            focusedField === "limit" ? "\u25CF " : "\u25CB ",
+            "Default Post Limit"
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.primary, bold: true, children: defaultLimit ? `[${defaultLimit} posts]` : "[ALL]" })
+        ]
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: saved ? "\u2713 preferences saved to ~/.open-nami/config.json" : "tab / \u2191\u2193 switch field \xB7 space toggle/cycle \xB7 ^s / \u21B5 save \xB7 esc back" })
+  ] });
+}
+
+// src/components/views/watcher-view.tsx
+var import_react46 = __toESM(require_react(), 1);
+
 // src/lib/clipboard.ts
 import { execFileSync as execFileSync3 } from "child_process";
 var COMMANDS = process.platform === "darwin" ? [["pbpaste", []]] : process.platform === "win32" ? [["powershell", ["-NoProfile", "-Command", "Get-Clipboard"]]] : [
@@ -40971,6 +41032,268 @@ function readClipboard(execFn = execFileSync3) {
     }
   }
   return "";
+}
+
+// src/lib/parser.ts
+var INVALID_CHARS_REGEX = /[<>:"/\\|?*\x00-\x1f]/g;
+var WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
+function sanitizeUsername(username) {
+  let cleaned = username.replace(INVALID_CHARS_REGEX, "_").trim().replace(/^[.\s]+|[.\s]+$/g, "");
+  if (WINDOWS_RESERVED_NAMES.test(cleaned)) {
+    cleaned = `_${cleaned}`;
+  }
+  return cleaned.slice(0, 120) || "unknown";
+}
+function buildProfileUrl(platform2, username) {
+  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
+  switch (platform2) {
+    case "instagram":
+      return `https://www.instagram.com/${cleanUser}/`;
+    case "tiktok":
+      return `https://www.tiktok.com/@${cleanUser}`;
+    case "facebook":
+      return `https://www.facebook.com/${cleanUser}`;
+    case "x":
+      return `https://x.com/${cleanUser}`;
+  }
+}
+function buildCanonicalProfile(platform2, username, rawInput) {
+  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
+  return {
+    platform: platform2,
+    username: sanitizeUsername(cleanUser),
+    cleanUrl: buildProfileUrl(platform2, cleanUser),
+    rawInput: rawInput ?? cleanUser
+  };
+}
+function isBareUsername(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+  if (/^https?:\/\//i.test(trimmed) || /[\/\\:\s]/.test(trimmed)) return false;
+  const user = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+  if (!user) return false;
+  if (!/^[a-zA-Z0-9._-]+$/.test(user)) return false;
+  if (!/[a-zA-Z0-9]/.test(user)) return false;
+  const cleaned = user.replace(/^[.\s]+|[.\s]+$/g, "");
+  return cleaned.length > 0 && /[a-zA-Z0-9]/.test(cleaned);
+}
+function parseProfileInput(input) {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return { platform: "unknown", username: "", cleanUrl: "", rawInput: input };
+  }
+  const prefixMatch = trimmed.match(/^(ig|instagram|tt|tiktok|fb|facebook|x|twitter):([^\s/]+)$/i);
+  if (prefixMatch) {
+    const rawPrefix = prefixMatch[1].toLowerCase();
+    const rawUser = prefixMatch[2];
+    if (rawPrefix === "ig" || rawPrefix === "instagram") {
+      return buildCanonicalProfile("instagram", rawUser, input);
+    } else if (rawPrefix === "tt" || rawPrefix === "tiktok") {
+      return buildCanonicalProfile("tiktok", rawUser, input);
+    } else if (rawPrefix === "fb" || rawPrefix === "facebook") {
+      return buildCanonicalProfile("facebook", rawUser, input);
+    } else if (rawPrefix === "x" || rawPrefix === "twitter") {
+      return buildCanonicalProfile("x", rawUser, input);
+    }
+  }
+  let candidate = trimmed;
+  if (!/^https?:\/\//i.test(candidate)) {
+    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
+      candidate = "https://" + candidate;
+    }
+  }
+  try {
+    const url = new URL(candidate);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "");
+    const pathname = url.pathname.replace(/\/+$/, "");
+    const pathParts = pathname.split("/").filter(Boolean);
+    if (host.includes("tiktok.com")) {
+      const userPart = pathParts[0] || "";
+      const username = userPart.startsWith("@") ? userPart.slice(1) : userPart;
+      if (username) {
+        return {
+          platform: "tiktok",
+          username: sanitizeUsername(username),
+          cleanUrl: `https://www.tiktok.com/@${username}`,
+          rawInput: input
+        };
+      }
+    }
+    if (host.includes("instagram.com")) {
+      const firstPart = pathParts[0] || "";
+      const reserved = ["p", "reel", "reels", "tv", "stories", "explore", "direct", "accounts"];
+      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
+        const username = firstPart.replace(/^@/, "");
+        return {
+          platform: "instagram",
+          username: sanitizeUsername(username),
+          cleanUrl: `https://www.instagram.com/${username}/`,
+          rawInput: input
+        };
+      }
+    }
+    if (host.includes("facebook.com") || host === "fb.com") {
+      if (pathParts[0]?.toLowerCase() === "profile.php") {
+        const id = url.searchParams.get("id");
+        if (id) {
+          return {
+            platform: "facebook",
+            username: sanitizeUsername(id),
+            cleanUrl: `https://www.facebook.com/profile.php?id=${id}`,
+            rawInput: input
+          };
+        }
+      } else if (pathParts[0]?.toLowerCase() === "people" && pathParts[1]) {
+        return {
+          platform: "facebook",
+          username: sanitizeUsername(pathParts[1]),
+          cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
+          rawInput: input
+        };
+      } else if (pathParts[0]) {
+        const reserved = ["watch", "videos", "reel", "groups", "pages", "events", "photo"];
+        if (!reserved.includes(pathParts[0].toLowerCase())) {
+          return {
+            platform: "facebook",
+            username: sanitizeUsername(pathParts[0]),
+            cleanUrl: `https://www.facebook.com/${pathParts[0]}`,
+            rawInput: input
+          };
+        }
+      }
+    }
+    if (host.includes("x.com") || host.includes("twitter.com")) {
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {
+        return {
+          platform: "x",
+          username: "i_history_likes",
+          cleanUrl: "https://x.com/i/history/likes",
+          rawInput: input
+        };
+      }
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "bookmarks") {
+        return {
+          platform: "x",
+          username: "i_bookmarks",
+          cleanUrl: "https://x.com/i/bookmarks",
+          rawInput: input
+        };
+      }
+      const firstPart = pathParts[0] || "";
+      const reserved = ["home", "explore", "notifications", "messages", "i", "settings"];
+      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
+        const username = firstPart.replace(/^@/, "");
+        const isLikesUrl = pathParts[1]?.toLowerCase() === "likes";
+        return {
+          platform: "x",
+          username: sanitizeUsername(username),
+          cleanUrl: isLikesUrl ? `https://x.com/${username}/likes` : `https://x.com/${username}`,
+          rawInput: input
+        };
+      }
+    }
+  } catch {
+  }
+  if (isBareUsername(trimmed)) {
+    const rawUser = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+    const user = rawUser.replace(/^[.\s]+|[.\s]+$/g, "");
+    return {
+      platform: "unknown",
+      username: user,
+      cleanUrl: "",
+      rawInput: input
+    };
+  }
+  return {
+    platform: "unknown",
+    username: "",
+    cleanUrl: "",
+    rawInput: input
+  };
+}
+
+// src/lib/watcher.ts
+function startClipboardWatcher(options = {}) {
+  const choice = options.choice || "all";
+  const intervalMs = options.intervalMs ?? 1e3;
+  const readClip = options.readClipboardFn ?? readClipboard;
+  const dispatch = options.dispatchFn ?? dispatchDownload;
+  let isRunning = true;
+  let lastClipboardText = "";
+  const processedUrls = /* @__PURE__ */ new Set();
+  let timer = null;
+  let resolvePromise = null;
+  const stop = () => {
+    if (!isRunning && !timer && !resolvePromise) return;
+    isRunning = false;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+    if (resolvePromise) {
+      const resolve = resolvePromise;
+      resolvePromise = null;
+      resolve();
+    }
+  };
+  if (options.signal) {
+    if (options.signal.aborted) {
+      isRunning = false;
+    } else {
+      options.signal.addEventListener("abort", stop, { once: true });
+    }
+  }
+  const promise = new Promise((resolve) => {
+    resolvePromise = resolve;
+    if (!isRunning || options.signal?.aborted) {
+      resolvePromise = null;
+      resolve();
+      return;
+    }
+    const loop = async () => {
+      if (!isRunning || options.signal?.aborted) {
+        stop();
+        return;
+      }
+      try {
+        const text = readClip().trim();
+        if (text && text !== lastClipboardText) {
+          lastClipboardText = text;
+          const parsed = parseProfileInput(text);
+          if (parsed.platform !== "unknown" && parsed.cleanUrl && !processedUrls.has(parsed.cleanUrl)) {
+            processedUrls.add(parsed.cleanUrl);
+            options.onDetected?.(parsed);
+            try {
+              const res = await dispatch({
+                profile: parsed,
+                choice,
+                outputDir: options.outputDir,
+                writeMetadata: options.writeMetadata,
+                signal: options.signal,
+                onProgress: (p) => {
+                  if (p.statusText) {
+                    options.onProgress?.(parsed, p.statusText);
+                  }
+                }
+              });
+              options.onComplete?.(parsed, res);
+            } catch (err) {
+              const error = err instanceof Error ? err : new Error(String(err));
+              options.onError?.(parsed, error);
+            }
+          }
+        }
+      } catch {
+      }
+      if (isRunning && !options.signal?.aborted) {
+        timer = setTimeout(loop, intervalMs);
+      } else {
+        stop();
+      }
+    };
+    loop();
+  });
+  return { stop, promise };
 }
 
 // src/lib/reveal.ts
@@ -41033,6 +41356,622 @@ function revealInFileManager(targetPath) {
   }
 }
 
+// src/components/views/watcher-view.tsx
+var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+function WatcherView({
+  onBack,
+  outputDir,
+  theme,
+  gapComponent: Gap2,
+  defaultChoice = "all",
+  defaultWriteMetadata = false
+}) {
+  const [mediaChoice, setMediaChoice] = (0, import_react46.useState)(defaultChoice);
+  const [writeMetadata, setWriteMetadata] = (0, import_react46.useState)(defaultWriteMetadata);
+  const [history, setHistory] = (0, import_react46.useState)([]);
+  const [activeJob, setActiveJob] = (0, import_react46.useState)(null);
+  const [stats, setStats] = (0, import_react46.useState)({ detected: 0, downloaded: 0, skipped: 0 });
+  const [pulseTick, setPulseTick] = (0, import_react46.useState)(0);
+  const mediaChoiceRef = (0, import_react46.useRef)(mediaChoice);
+  mediaChoiceRef.current = mediaChoice;
+  const writeMetadataRef = (0, import_react46.useRef)(writeMetadata);
+  writeMetadataRef.current = writeMetadata;
+  (0, import_react46.useEffect)(() => {
+    const pulseTimer = setInterval(() => {
+      setPulseTick((t) => t + 1);
+    }, 120);
+    return () => clearInterval(pulseTimer);
+  }, []);
+  (0, import_react46.useEffect)(() => {
+    const watcher = startClipboardWatcher({
+      choice: mediaChoiceRef.current,
+      outputDir,
+      writeMetadata: writeMetadataRef.current,
+      onDetected: (profile) => {
+        setStats((prev) => ({ ...prev, detected: prev.detected + 1 }));
+        const newItem = {
+          profile,
+          status: "downloading",
+          statusText: "starting download\u2026"
+        };
+        setActiveJob(newItem);
+        setHistory((prev) => [newItem, ...prev.slice(0, 4)]);
+      },
+      onProgress: (profile, statusText) => {
+        setActiveJob((prev) => {
+          if (!prev || prev.profile.cleanUrl !== profile.cleanUrl) return prev;
+          return { ...prev, statusText };
+        });
+      },
+      onComplete: (profile, result) => {
+        setStats((prev) => ({
+          ...prev,
+          downloaded: prev.downloaded + result.downloadedCount,
+          skipped: prev.skipped + result.skippedCount
+        }));
+        const completedItem = {
+          profile,
+          status: result.success ? "completed" : "failed",
+          statusText: result.success ? `${result.downloadedCount} downloaded, ${result.skippedCount} skipped` : result.errors[0] || "failed",
+          downloaded: result.downloadedCount,
+          skipped: result.skippedCount
+        };
+        setActiveJob(null);
+        setHistory((prev) => [
+          completedItem,
+          ...prev.filter((item) => item.profile.cleanUrl !== profile.cleanUrl).slice(0, 4)
+        ]);
+      },
+      onError: (profile, err) => {
+        const failedItem = {
+          profile,
+          status: "failed",
+          statusText: err.message,
+          error: err.message
+        };
+        setActiveJob(null);
+        setHistory((prev) => [
+          failedItem,
+          ...prev.filter((item) => item.profile.cleanUrl !== profile.cleanUrl).slice(0, 4)
+        ]);
+      }
+    });
+    return () => {
+      watcher.stop();
+    };
+  }, [outputDir]);
+  const cycleChoice = (0, import_react46.useCallback)(() => {
+    setMediaChoice((prev) => {
+      if (prev === "all") return "photos";
+      if (prev === "photos") return "videos";
+      return "all";
+    });
+  }, []);
+  const toggleMetadata = (0, import_react46.useCallback)(() => {
+    setWriteMetadata((prev) => !prev);
+  }, []);
+  const openFolder = (0, import_react46.useCallback)(() => {
+    const target = outputDir || resolveDefaultDownloadDir("instagram", "watcher");
+    revealInFileManager(target);
+  }, [outputDir]);
+  use_input_default((input, key) => {
+    if (key.escape) {
+      onBack();
+      return;
+    }
+    if (input === "c" || input === "C") {
+      cycleChoice();
+      return;
+    }
+    if (input === "m" || input === "M") {
+      toggleMetadata();
+      return;
+    }
+    if (input === "o" || input === "O") {
+      openFolder();
+      return;
+    }
+  }, { isActive: Boolean(process.stdin.isTTY) });
+  const radarIcon = ["\u25CE", "\u25C9", "\u25CB", "\u25CF"][pulseTick % 4];
+  return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Panel, { title: "Clipboard Watcher Radar", width: 64, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { justifyContent: "space-between", marginBottom: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.primary, bold: true, children: [
+        radarIcon,
+        " RADAR ACTIVE"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "interval: 1.0s \xB7 auto-download" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(ProgressBar, { indeterminate: true, width: 58, tick: pulseTick }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Listening for Instagram, TikTok, Facebook, or X profile links in clipboard." }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Simply copy any profile link in your browser and Open Nami will download it!" }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+      Box_default,
+      {
+        borderStyle: "round",
+        borderColor: activeJob ? theme.primary : theme.gray,
+        borderDimColor: !activeJob,
+        flexDirection: "column",
+        paddingX: 1,
+        paddingY: 1,
+        children: activeJob ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(build_default, { type: "dots" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.primary, children: ` Downloading @${activeJob.profile.username} (${activeJob.profile.platform})` })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: `Status: ${activeJob.statusText || "downloading\u2026"}` })
+        ] }) : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Waiting for copied profile links\u2026 (radar scanning)" })
+      }
+    ),
+    history.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", marginTop: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { bold: true, color: theme.primary, children: "Recent Activity:" }),
+      history.map((item, idx) => /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { justifyContent: "space-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: item.status === "completed" ? theme.primary : item.status === "failed" ? "red" : theme.gray, children: [
+          item.status === "completed" ? "\u2713 " : item.status === "failed" ? "\u2717 " : "\u25B6 ",
+          "@",
+          item.profile.username,
+          " (",
+          item.profile.platform,
+          ")"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: item.statusText })
+      ] }, `${item.profile.cleanUrl}-${idx}`))
+    ] }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { justifyContent: "space-between", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "[c] Target: ",
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: mediaChoice.toUpperCase() })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "[m] Sidecars: ",
+        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[o] Open Folder" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      "Session Stats: ",
+      stats.detected,
+      " detected \xB7 ",
+      stats.downloaded,
+      " downloaded \xB7 ",
+      stats.skipped,
+      " skipped"
+    ] }) })
+  ] }) }) });
+}
+
+// src/components/views/batch-view.tsx
+var import_react47 = __toESM(require_react(), 1);
+import fs15 from "fs";
+
+// src/lib/batch.ts
+import fsPromises5 from "fs/promises";
+function parseBatchContent(content) {
+  const lines = content.split(/\r?\n/);
+  const result = [];
+  for (const rawLine of lines) {
+    let line = rawLine.trim();
+    if (!line || line.startsWith("#") || line.startsWith("//")) {
+      continue;
+    }
+    const hashIdx = line.indexOf(" #");
+    if (hashIdx !== -1) {
+      line = line.slice(0, hashIdx).trim();
+    }
+    const slashIdx = line.indexOf(" //");
+    if (slashIdx !== -1) {
+      line = line.slice(0, slashIdx).trim();
+    }
+    if (line) {
+      result.push(line);
+    }
+  }
+  return result;
+}
+async function loadBatchFile(filePath) {
+  const content = await fsPromises5.readFile(filePath, "utf-8");
+  return parseBatchContent(content);
+}
+async function runBatchQueue(options) {
+  const rawEntries = options.lines ?? (options.filePath ? await loadBatchFile(options.filePath) : []);
+  const choice = options.choice || "all";
+  const minDelay = options.minDelayMs ?? 2e3;
+  const maxDelay = options.maxDelayMs ?? 5e3;
+  const items = rawEntries.map((raw) => ({
+    raw,
+    profile: parseProfileInput(raw),
+    status: "pending",
+    downloaded: 0,
+    skipped: 0
+  }));
+  let totalDownloaded = 0;
+  let totalSkipped = 0;
+  let succeeded = 0;
+  let failed = 0;
+  for (let i = 0; i < items.length; i++) {
+    if (options.signal?.aborted) {
+      break;
+    }
+    const item = items[i];
+    item.status = "running";
+    if (item.profile.platform === "unknown" || !item.profile.cleanUrl) {
+      item.status = "failed";
+      item.error = `Invalid profile URL or unsupported username: ${item.raw}`;
+      failed++;
+      options.onAccountError?.(item, new Error(item.error));
+      continue;
+    }
+    options.onAccountStart?.(item, i, items.length);
+    try {
+      const res = await dispatchDownload({
+        profile: item.profile,
+        choice,
+        outputDir: options.outputDir,
+        since: options.since,
+        until: options.until,
+        limit: options.limit,
+        resume: options.resume,
+        writeMetadata: options.writeMetadata,
+        signal: options.signal,
+        runnerOverrides: options.runnerOverrides,
+        onProgress: (progress) => {
+          options.onAccountProgress?.(item, progress);
+        }
+      });
+      item.downloaded = res.downloadedCount;
+      item.skipped = res.skippedCount;
+      totalDownloaded += res.downloadedCount;
+      totalSkipped += res.skippedCount;
+      if (res.success) {
+        item.status = "success";
+        succeeded++;
+      } else {
+        item.status = "failed";
+        item.error = res.errors.join("; ") || "Download failed";
+        failed++;
+      }
+      options.onAccountComplete?.(item, i, items.length);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      item.status = "failed";
+      item.error = errMsg;
+      failed++;
+      options.onAccountError?.(item, err instanceof Error ? err : new Error(errMsg));
+    }
+    if (i < items.length - 1 && !options.signal?.aborted) {
+      await sleep(minDelay, maxDelay, options.signal);
+    }
+  }
+  return {
+    total: items.length,
+    succeeded,
+    failed,
+    totalDownloaded,
+    totalSkipped,
+    items
+  };
+}
+
+// src/components/views/batch-view.tsx
+var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+function BatchView({
+  onBack,
+  outputDir,
+  boxWidth,
+  theme,
+  gapComponent: Gap2,
+  defaultChoice = "all",
+  defaultLimit,
+  defaultWriteMetadata = false
+}) {
+  const [phase, setPhase] = (0, import_react47.useState)("input");
+  const [inputField, setInputField] = (0, import_react47.useState)("text");
+  const [rawText, setRawText] = (0, import_react47.useState)("");
+  const [filePath, setFilePath] = (0, import_react47.useState)("");
+  const [errorMessage, setErrorMessage] = (0, import_react47.useState)(null);
+  const [choice, setChoice] = (0, import_react47.useState)(defaultChoice);
+  const [limit, setLimit] = (0, import_react47.useState)(defaultLimit);
+  const [dateFilter, setDateFilter] = (0, import_react47.useState)("all");
+  const [writeMetadata, setWriteMetadata] = (0, import_react47.useState)(defaultWriteMetadata);
+  const [resume, setResume] = (0, import_react47.useState)(true);
+  const [queueItems, setQueueItems] = (0, import_react47.useState)([]);
+  const [currentIndex, setCurrentIndex] = (0, import_react47.useState)(0);
+  const [currentProgressText, setCurrentProgressText] = (0, import_react47.useState)("");
+  const [isCooldown, setIsCooldown] = (0, import_react47.useState)(false);
+  const [result, setResult] = (0, import_react47.useState)(null);
+  const abortControllerRef = (0, import_react47.useRef)(null);
+  const cycleChoice = (0, import_react47.useCallback)(() => {
+    setChoice((prev) => {
+      if (prev === "all") return "photos";
+      if (prev === "photos") return "videos";
+      return "all";
+    });
+  }, []);
+  const cycleLimit = (0, import_react47.useCallback)(() => {
+    setLimit((prev) => {
+      if (!prev) return 10;
+      if (prev === 10) return 25;
+      if (prev === 25) return 50;
+      if (prev === 50) return 100;
+      return void 0;
+    });
+  }, []);
+  const cycleDate = (0, import_react47.useCallback)(() => {
+    setDateFilter((prev) => {
+      if (prev === "all") return "24h";
+      if (prev === "24h") return "7d";
+      if (prev === "7d") return "30d";
+      return "all";
+    });
+  }, []);
+  const toggleMetadata = (0, import_react47.useCallback)(() => {
+    setWriteMetadata((prev) => !prev);
+  }, []);
+  const toggleResume = (0, import_react47.useCallback)(() => {
+    setResume((prev) => !prev);
+  }, []);
+  const startQueue = (0, import_react47.useCallback)(async () => {
+    setErrorMessage(null);
+    let lines = [];
+    if (inputField === "file") {
+      const trimmed = filePath.trim();
+      if (!trimmed) {
+        setErrorMessage("Please enter a valid batch file path");
+        return;
+      }
+      if (!fs15.existsSync(trimmed)) {
+        setErrorMessage(`File not found: ${trimmed}`);
+        return;
+      }
+    } else {
+      lines = rawText.split(/[\n,;]+/).map((s) => s.trim()).filter(Boolean);
+      if (lines.length === 0) {
+        setErrorMessage("Please enter at least one profile URL or username");
+        return;
+      }
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setPhase("running");
+    try {
+      const queueRes = await runBatchQueue({
+        filePath: inputField === "file" ? filePath.trim() : void 0,
+        lines: inputField === "text" ? lines : void 0,
+        choice,
+        outputDir,
+        since: dateFilter === "all" ? void 0 : dateFilter,
+        limit,
+        resume,
+        writeMetadata,
+        signal: controller.signal,
+        onAccountStart: (item, idx) => {
+          setIsCooldown(false);
+          setCurrentIndex(idx);
+          setCurrentProgressText(`Probing @${item.profile.username || item.raw}\u2026`);
+          setQueueItems((prev) => {
+            const next = [...prev];
+            if (next[idx]) next[idx] = { ...item };
+            else next.push({ ...item });
+            return next;
+          });
+        },
+        onAccountProgress: (item, progress) => {
+          setCurrentProgressText(progress.statusText);
+        },
+        onAccountComplete: (item, idx) => {
+          setIsCooldown(true);
+          setQueueItems((prev) => {
+            const next = [...prev];
+            next[idx] = { ...item };
+            return next;
+          });
+        },
+        onAccountError: (item) => {
+          setQueueItems((prev) => {
+            const idx = prev.findIndex((i) => i.raw === item.raw);
+            if (idx !== -1) {
+              const next = [...prev];
+              next[idx] = { ...item };
+              return next;
+            }
+            return prev;
+          });
+        }
+      });
+      setResult(queueRes);
+      setPhase("done");
+    } catch (err) {
+      if (controller.signal.aborted) {
+        setPhase("input");
+        return;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      setErrorMessage(msg);
+      setPhase("input");
+    }
+  }, [inputField, filePath, rawText, choice, outputDir, dateFilter, limit, resume, writeMetadata]);
+  use_input_default((input, key) => {
+    if (key.escape) {
+      if (phase === "running") {
+        abortControllerRef.current?.abort();
+        setPhase("input");
+        return;
+      }
+      onBack();
+      return;
+    }
+    if (phase === "done") {
+      if (key.return) {
+        setPhase("input");
+        return;
+      }
+      if (input === "o" || input === "O") {
+        const target = outputDir || resolveDefaultDownloadDir("instagram", "batch");
+        revealInFileManager(target);
+        return;
+      }
+      return;
+    }
+    if (phase === "input") {
+      if (input === "c" || input === "C") {
+        cycleChoice();
+        return;
+      }
+      if (input === "l" || input === "L") {
+        cycleLimit();
+        return;
+      }
+      if (input === "d" || input === "D") {
+        cycleDate();
+        return;
+      }
+      if (input === "m" || input === "M") {
+        toggleMetadata();
+        return;
+      }
+      if (input === "r" || input === "R") {
+        toggleResume();
+        return;
+      }
+    }
+  }, { isActive: Boolean(process.stdin.isTTY) });
+  const currentItem = queueItems[currentIndex];
+  const completedCount = queueItems.filter((i) => i.status === "success" || i.status === "failed").length;
+  const totalCount = queueItems.length > 0 ? queueItems.length : 1;
+  const percent = Math.min(100, Math.floor(completedCount / totalCount * 100));
+  return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Multi-Account Queue Manager", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Queue multiple creator profiles with automatic anti-ban cooldown between downloads." }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { marginBottom: 1, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "text" ? theme.primary : theme.gray, children: inputField === "text" ? "\u25CF Paste Links / Usernames" : "\u25CB Paste Links / Usernames" }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "   (Tab to switch)   " }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "file" ? theme.primary : theme.gray, children: inputField === "file" ? "\u25CF Load Batch File (.txt)" : "\u25CB Load Batch File (.txt)" })
+      ] }),
+      inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Enter links or @handles separated by commas or spaces", width: Math.max(60, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        TextInput,
+        {
+          value: rawText,
+          onChange: setRawText,
+          onSubmit: startQueue,
+          placeholder: "e.g. instagram.com/user1, @user2, tiktok.com/@user3",
+          width: Math.max(54, boxWidth - 10),
+          onTab: () => setInputField("file"),
+          onArrowDown: () => setInputField("file")
+        }
+      ) }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Enter path to .txt batch file", width: Math.max(60, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        TextInput,
+        {
+          value: filePath,
+          onChange: setFilePath,
+          onSubmit: startQueue,
+          placeholder: "e.g. targets.txt or C:\\path\\to\\creators.txt",
+          width: Math.max(54, boxWidth - 10),
+          onTab: () => setInputField("text"),
+          onArrowUp: () => setInputField("text")
+        }
+      ) }),
+      errorMessage ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: "red", children: [
+        "\u2717 ",
+        errorMessage
+      ] }) }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Batch Queue Options:" }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "[c] Target: ",
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: choice.toUpperCase() })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "[l] Limit: ",
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit} posts` : "ALL" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "[d] Date: ",
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter === "all" ? "ALL TIME" : dateFilter.toUpperCase() })
+        ] })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "[m] Sidecars: ",
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "[r] Resume Checkpoint: ",
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[\u21B5] Start Queue" })
+      ] })
+    ] }) }),
+    phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running (Anti-Ban Hardened)", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginBottom: 1, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.primary, bold: true, children: [
+          "Account ",
+          currentIndex + 1,
+          " of ",
+          queueItems.length,
+          " (",
+          percent,
+          "%)"
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isCooldown ? "\u23F3 Anti-ban cooldown active" : "\u25B6 Downloading" })
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ProgressBar, { percent, width: 58 }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      currentItem ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: theme.primary, paddingX: 1, paddingY: 1, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(build_default, { type: "dots" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: ` @${currentItem.profile.username || currentItem.raw} (${currentItem.profile.platform || "resolving"})` })
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: currentProgressText || "processing media items\u2026" })
+      ] }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Queue Overview:" }),
+      queueItems.slice(0, 5).map((item, idx) => /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: item.status === "success" ? theme.primary : item.status === "failed" ? "red" : theme.gray, children: [
+          item.status === "success" ? "\u2713 " : item.status === "failed" ? "\u2717 " : item.status === "running" ? "\u25B6 " : "\xB7 ",
+          "@",
+          item.profile.username || item.raw
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: item.status === "success" ? `${item.downloaded} downloaded, ${item.skipped} skipped` : item.status === "failed" ? item.error || "failed" : item.status === "running" ? "downloading\u2026" : "queued" })
+      ] }, `${item.raw}-${idx}`)),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[esc] Stop queue and return" })
+    ] }) }),
+    phase === "done" && result && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Completed", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { bold: true, color: theme.primary, children: [
+        "\u2713 Successfully processed ",
+        result.total,
+        " profile(s)"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u2022 Successful accounts: ",
+        result.succeeded
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u2022 Failed accounts: ",
+        result.failed
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u2022 Total media downloaded: ",
+        result.totalDownloaded
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u2022 Total items skipped (already archived): ",
+        result.totalSkipped
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: "[o] Open Downloads Folder" }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[\u21B5] Return to Start" })
+      ] })
+    ] }) })
+  ] });
+}
+
 // src/lib/click-map.ts
 var ANSI_PATTERN = new RegExp(
   [
@@ -41085,13 +42024,15 @@ function frameRowSpan(row) {
 }
 
 // src/app.tsx
-var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
 var TAGLINE = "grab any profile. paste. download. done.";
 var DOWNLOAD_BUTTON = "download";
-var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { children: " " }, i)) });
+var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { children: " " }, i)) });
 var HINTS = {
   input: [
     ["\u21B5", "download"],
+    ["^w", "watcher"],
+    ["^b", "batch"],
     ["^s", "settings"],
     ["^c", "quit"]
   ],
@@ -41129,6 +42070,24 @@ var HINTS = {
     ["\u21B5", "save"],
     ["esc", "back"],
     ["^c", "quit"]
+  ],
+  watcher: [
+    ["c", "target"],
+    ["m", "sidecar"],
+    ["o", "open dir"],
+    ["esc", "back"],
+    ["^c", "quit"]
+  ],
+  batch: [
+    ["tab", "switch field"],
+    ["c", "target"],
+    ["m", "sidecar"],
+    ["l", "limit"],
+    ["d", "date"],
+    ["r", "resume"],
+    ["\u21B5", "start"],
+    ["esc", "back"],
+    ["^c", "quit"]
   ]
 };
 function App2({
@@ -41143,11 +42102,11 @@ function App2({
   writeMetadata,
   version = "1.0.0"
 }) {
-  const [themeMode, setThemeMode] = (0, import_react45.useState)(initialThemeMode);
-  const cycleTheme = (0, import_react45.useCallback)(() => {
+  const [themeMode, setThemeMode] = (0, import_react48.useState)(initialThemeMode);
+  const cycleTheme = (0, import_react48.useCallback)(() => {
     setThemeMode(nextThemeMode);
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
     InnerApp,
     {
       initialInput,
@@ -41178,13 +42137,16 @@ function InnerApp({
   const theme = useTheme();
   const { exit } = use_app_default();
   const { stdout } = use_stdout_default();
-  const [urlInput, setUrlInput] = (0, import_react45.useState)(initialInput ?? "");
-  const [clipboardUrl, setClipboardUrl] = (0, import_react45.useState)(void 0);
-  const [settingsFocus, setSettingsFocus] = (0, import_react45.useState)("cookies");
+  const config = (0, import_react48.useMemo)(() => loadConfig(), []);
+  const effectiveLimit = limit ?? config.defaultLimit;
+  const effectiveWriteMetadata = writeMetadata ?? Boolean(config.writeMetadata);
+  const [urlInput, setUrlInput] = (0, import_react48.useState)(initialInput ?? "");
+  const [clipboardUrl, setClipboardUrl] = (0, import_react48.useState)(void 0);
+  const [settingsFocus, setSettingsFocus] = (0, import_react48.useState)("cookies");
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
-  const [phase, setPhase] = (0, import_react45.useState)(() => {
+  const [phase, setPhase] = (0, import_react48.useState)(() => {
     if (initialInput) {
       const parsed = parseProfileInput(initialInput);
       if (parsed.platform !== "unknown" && parsed.cleanUrl) {
@@ -41196,7 +42158,7 @@ function InnerApp({
     }
     return { name: "input" };
   });
-  (0, import_react45.useEffect)(() => {
+  (0, import_react48.useEffect)(() => {
     try {
       const clip = readClipboard();
       if (clip && (clip.startsWith("http://") || clip.startsWith("https://") || clip.startsWith("@"))) {
@@ -41207,9 +42169,9 @@ function InnerApp({
   }, []);
   const clipboardOffered = Boolean(clipboardUrl) && urlInput === "";
   const clipboardAccepted = Boolean(clipboardUrl) && urlInput === clipboardUrl;
-  const abortControllerRef = (0, import_react45.useRef)(null);
-  const probingTimeoutRef = (0, import_react45.useRef)(null);
-  (0, import_react45.useEffect)(() => {
+  const abortControllerRef = (0, import_react48.useRef)(null);
+  const probingTimeoutRef = (0, import_react48.useRef)(null);
+  (0, import_react48.useEffect)(() => {
     return () => {
       abortControllerRef.current?.abort();
       if (probingTimeoutRef.current) {
@@ -41217,7 +42179,7 @@ function InnerApp({
       }
     };
   }, []);
-  const resetToInput = (0, import_react45.useCallback)(() => {
+  const resetToInput = (0, import_react48.useCallback)(() => {
     if (probingTimeoutRef.current) {
       clearTimeout(probingTimeoutRef.current);
       probingTimeoutRef.current = null;
@@ -41227,26 +42189,31 @@ function InnerApp({
     setUrlInput("");
     setPhase({ name: "input" });
   }, []);
-  const handleModeSelect = (0, import_react45.useCallback)(async (choice, profile) => {
+  const handleModeSelect = (0, import_react48.useCallback)(async (choiceOrOptions, profile) => {
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    setPhase({ name: "downloading", profile, choice });
+    const targetChoice = typeof choiceOrOptions === "string" ? choiceOrOptions : choiceOrOptions.choice;
+    const targetLimit = typeof choiceOrOptions === "string" ? effectiveLimit : choiceOrOptions.limit ?? effectiveLimit;
+    const targetSince = typeof choiceOrOptions === "string" ? since : choiceOrOptions.since ?? since;
+    const targetResume = typeof choiceOrOptions === "string" ? resume : choiceOrOptions.resume ?? resume;
+    const targetWriteMetadata = typeof choiceOrOptions === "string" ? effectiveWriteMetadata : choiceOrOptions.writeMetadata ?? effectiveWriteMetadata;
+    setPhase({ name: "downloading", profile, choice: targetChoice });
     try {
       const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir);
       const result = await dispatchDownload({
         profile,
-        choice,
+        choice: targetChoice,
         outputDir: targetDir,
-        since,
+        since: targetSince,
         until,
-        limit,
-        resume,
-        writeMetadata,
+        limit: targetLimit,
+        resume: targetResume,
+        writeMetadata: targetWriteMetadata,
         signal: controller.signal,
         onProgress: (progress) => {
           if (!controller.signal.aborted) {
-            setPhase({ name: "downloading", profile, choice, progress });
+            setPhase({ name: "downloading", profile, choice: targetChoice, progress });
           }
         }
       });
@@ -41270,8 +42237,8 @@ function InnerApp({
         hint: "Check your internet connection or verify the profile exists."
       });
     }
-  }, [outputDir, since, until, limit, resume, writeMetadata]);
-  const handlePlatformSelect = (0, import_react45.useCallback)((platform2, username, rawInput) => {
+  }, [outputDir, since, until, effectiveLimit, resume, effectiveWriteMetadata]);
+  const handlePlatformSelect = (0, import_react48.useCallback)((platform2, username, rawInput) => {
     const canonical = buildCanonicalProfile(platform2, username, rawInput);
     setPhase({ name: "probing", target: canonical.cleanUrl, status: "probing profile\u2026" });
     if (probingTimeoutRef.current) clearTimeout(probingTimeoutRef.current);
@@ -41284,7 +42251,7 @@ function InnerApp({
       }
     }, 450);
   }, [initialChoice, handleModeSelect]);
-  const handleInputSubmit = (0, import_react45.useCallback)((input) => {
+  const handleInputSubmit = (0, import_react48.useCallback)((input) => {
     const trimmed = input.trim();
     if (!trimmed) return;
     const parsed = parseProfileInput(trimmed);
@@ -41323,12 +42290,28 @@ function InnerApp({
       }
       return;
     }
+    if (key.ctrl && (input === "w" || input === "W")) {
+      if (phase.name === "watcher") {
+        setPhase({ name: "input" });
+      } else if (phase.name === "input") {
+        setPhase({ name: "watcher" });
+      }
+      return;
+    }
+    if (key.ctrl && (input === "b" || input === "B")) {
+      if (phase.name === "batch") {
+        setPhase({ name: "input" });
+      } else if (phase.name === "input") {
+        setPhase({ name: "batch" });
+      }
+      return;
+    }
     if (key.ctrl && input === "c") {
       exit();
       return;
     }
     if (key.escape) {
-      if (phase.name === "settings") {
+      if (phase.name === "settings" || phase.name === "watcher" || phase.name === "batch") {
         setPhase({ name: "input" });
         return;
       }
@@ -41362,13 +42345,17 @@ function InnerApp({
   }, { isActive: Boolean(process.stdin.isTTY) });
   const hints = [...HINTS[phase.name], ["^t", `theme:${theme.mode}`]];
   const releaseUrl = `https://github.com/OpenSelena/open-nami/releases/tag/v${version}`;
-  const clickTargets = (0, import_react45.useMemo)(() => {
+  const clickTargets = (0, import_react48.useMemo)(() => {
     const hintAction = (key) => {
       if (key === "^c") return () => exit();
       if (key === "^t") return cycleTheme;
       if (key === "^s") return () => setPhase((prev) => prev.name === "settings" ? { name: "input" } : { name: "settings" });
+      if (key === "^w") return () => setPhase((prev) => prev.name === "watcher" ? { name: "input" } : { name: "watcher" });
+      if (key === "^b") return () => setPhase((prev) => prev.name === "batch" ? { name: "input" } : { name: "batch" });
       if (key === "esc") {
-        if (phase.name === "settings" || phase.name === "platform") return () => setPhase({ name: "input" });
+        if (phase.name === "settings" || phase.name === "platform" || phase.name === "watcher" || phase.name === "batch") {
+          return () => setPhase({ name: "input" });
+        }
         return resetToInput;
       }
       if (key === "\u21B5") {
@@ -41454,13 +42441,13 @@ function InnerApp({
     },
     Boolean(process.stdin.isTTY)
   );
-  return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(FullScreen, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Logo, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, children: TAGLINE }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "instagram \xB7 tiktok \xB7 facebook \xB7 x \xB7 +more" }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap, {}),
-    phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(FullScreen, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Logo, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: TAGLINE }),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "instagram \xB7 tiktok \xB7 facebook \xB7 x \xB7 +more" }),
+    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, {}),
+    phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       InputView,
       {
         urlInput,
@@ -41478,7 +42465,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "platform" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "platform" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       PlatformView,
       {
         contentWidth,
@@ -41488,7 +42475,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       ProbingView,
       {
         target: phase.target,
@@ -41497,28 +42484,36 @@ function InnerApp({
         buttonText: DOWNLOAD_BUTTON
       }
     ),
-    phase.name === "picking" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "picking" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       PickingView,
       {
         contentWidth,
         profile: phase.profile,
-        onSelect: (choice) => handleModeSelect(choice, phase.profile),
+        outputDir,
+        initialLimit: effectiveLimit,
+        initialSince: since,
+        initialWriteMetadata: effectiveWriteMetadata,
+        initialResume: resume,
+        onSelect: (choiceOrOptions) => handleModeSelect(choiceOrOptions, phase.profile),
         theme,
         gapComponent: Gap
       }
     ),
-    phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       DownloadingView,
       {
         profile: phase.profile,
         choice: phase.choice,
         progress: phase.progress,
         outputDir: resolveDefaultDownloadDir(phase.profile.platform, phase.profile.username, outputDir),
+        writeMetadata: effectiveWriteMetadata,
+        limit: effectiveLimit,
+        since,
         theme,
         gapComponent: Gap
       }
     ),
-    phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       CompletionView,
       {
         profile: phase.profile,
@@ -41527,7 +42522,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       ErrorView,
       {
         message: phase.message,
@@ -41536,7 +42531,7 @@ function InnerApp({
         theme
       }
     ),
-    phase.name === "settings" && /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "settings" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
       SettingsView,
       {
         boxWidth,
@@ -41548,15 +42543,40 @@ function InnerApp({
         onCancel: () => setPhase({ name: "input" })
       }
     ),
-    hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(import_jsx_runtime16.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap, { lines: 2 }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    phase.name === "watcher" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      WatcherView,
+      {
+        onBack: resetToInput,
+        outputDir,
+        theme,
+        gapComponent: Gap,
+        defaultChoice: initialChoice,
+        defaultWriteMetadata: effectiveWriteMetadata
+      }
+    ),
+    phase.name === "batch" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      BatchView,
+      {
+        onBack: resetToInput,
+        outputDir,
+        boxWidth,
+        contentWidth,
+        theme,
+        gapComponent: Gap,
+        defaultChoice: initialChoice,
+        defaultLimit: effectiveLimit,
+        defaultWriteMetadata: effectiveWriteMetadata
+      }
+    ),
+    hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(import_jsx_runtime18.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, { lines: 2 }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
         Shortcuts,
         {
           items: hints,
-          leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(build_default, { type: "dots" }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(build_default, { type: "dots" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
               " ",
               phase.status
             ] })
@@ -41757,200 +42777,8 @@ function generateCompletion(shell) {
   }
 }
 
-// src/lib/watcher.ts
-function startClipboardWatcher(options = {}) {
-  const choice = options.choice || "all";
-  const intervalMs = options.intervalMs ?? 1e3;
-  const readClip = options.readClipboardFn ?? readClipboard;
-  const dispatch = options.dispatchFn ?? dispatchDownload;
-  let isRunning = true;
-  let lastClipboardText = "";
-  const processedUrls = /* @__PURE__ */ new Set();
-  let timer = null;
-  let resolvePromise = null;
-  const stop = () => {
-    if (!isRunning && !timer && !resolvePromise) return;
-    isRunning = false;
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
-    if (resolvePromise) {
-      const resolve = resolvePromise;
-      resolvePromise = null;
-      resolve();
-    }
-  };
-  if (options.signal) {
-    if (options.signal.aborted) {
-      isRunning = false;
-    } else {
-      options.signal.addEventListener("abort", stop, { once: true });
-    }
-  }
-  const promise = new Promise((resolve) => {
-    resolvePromise = resolve;
-    if (!isRunning || options.signal?.aborted) {
-      resolvePromise = null;
-      resolve();
-      return;
-    }
-    const loop = async () => {
-      if (!isRunning || options.signal?.aborted) {
-        stop();
-        return;
-      }
-      try {
-        const text = readClip().trim();
-        if (text && text !== lastClipboardText) {
-          lastClipboardText = text;
-          const parsed = parseProfileInput(text);
-          if (parsed.platform !== "unknown" && parsed.cleanUrl && !processedUrls.has(parsed.cleanUrl)) {
-            processedUrls.add(parsed.cleanUrl);
-            options.onDetected?.(parsed);
-            try {
-              const res = await dispatch({
-                profile: parsed,
-                choice,
-                outputDir: options.outputDir,
-                writeMetadata: options.writeMetadata,
-                signal: options.signal,
-                onProgress: (p) => {
-                  if (p.statusText) {
-                    options.onProgress?.(parsed, p.statusText);
-                  }
-                }
-              });
-              options.onComplete?.(parsed, res);
-            } catch (err) {
-              const error = err instanceof Error ? err : new Error(String(err));
-              options.onError?.(parsed, error);
-            }
-          }
-        }
-      } catch {
-      }
-      if (isRunning && !options.signal?.aborted) {
-        timer = setTimeout(loop, intervalMs);
-      } else {
-        stop();
-      }
-    };
-    loop();
-  });
-  return { stop, promise };
-}
-
-// src/lib/batch.ts
-import fsPromises5 from "fs/promises";
-function parseBatchContent(content) {
-  const lines = content.split(/\r?\n/);
-  const result = [];
-  for (const rawLine of lines) {
-    let line = rawLine.trim();
-    if (!line || line.startsWith("#") || line.startsWith("//")) {
-      continue;
-    }
-    const hashIdx = line.indexOf(" #");
-    if (hashIdx !== -1) {
-      line = line.slice(0, hashIdx).trim();
-    }
-    const slashIdx = line.indexOf(" //");
-    if (slashIdx !== -1) {
-      line = line.slice(0, slashIdx).trim();
-    }
-    if (line) {
-      result.push(line);
-    }
-  }
-  return result;
-}
-async function loadBatchFile(filePath) {
-  const content = await fsPromises5.readFile(filePath, "utf-8");
-  return parseBatchContent(content);
-}
-async function runBatchQueue(options) {
-  const rawEntries = options.lines ?? (options.filePath ? await loadBatchFile(options.filePath) : []);
-  const choice = options.choice || "all";
-  const minDelay = options.minDelayMs ?? 2e3;
-  const maxDelay = options.maxDelayMs ?? 5e3;
-  const items = rawEntries.map((raw) => ({
-    raw,
-    profile: parseProfileInput(raw),
-    status: "pending",
-    downloaded: 0,
-    skipped: 0
-  }));
-  let totalDownloaded = 0;
-  let totalSkipped = 0;
-  let succeeded = 0;
-  let failed = 0;
-  for (let i = 0; i < items.length; i++) {
-    if (options.signal?.aborted) {
-      break;
-    }
-    const item = items[i];
-    item.status = "running";
-    if (item.profile.platform === "unknown" || !item.profile.cleanUrl) {
-      item.status = "failed";
-      item.error = `Invalid profile URL or unsupported username: ${item.raw}`;
-      failed++;
-      options.onAccountError?.(item, new Error(item.error));
-      continue;
-    }
-    options.onAccountStart?.(item, i, items.length);
-    try {
-      const res = await dispatchDownload({
-        profile: item.profile,
-        choice,
-        outputDir: options.outputDir,
-        since: options.since,
-        until: options.until,
-        limit: options.limit,
-        resume: options.resume,
-        writeMetadata: options.writeMetadata,
-        signal: options.signal,
-        runnerOverrides: options.runnerOverrides,
-        onProgress: (progress) => {
-          options.onAccountProgress?.(item, progress);
-        }
-      });
-      item.downloaded = res.downloadedCount;
-      item.skipped = res.skippedCount;
-      totalDownloaded += res.downloadedCount;
-      totalSkipped += res.skippedCount;
-      if (res.success) {
-        item.status = "success";
-        succeeded++;
-      } else {
-        item.status = "failed";
-        item.error = res.errors.join("; ") || "Download failed";
-        failed++;
-      }
-      options.onAccountComplete?.(item, i, items.length);
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : String(err);
-      item.status = "failed";
-      item.error = errMsg;
-      failed++;
-      options.onAccountError?.(item, err instanceof Error ? err : new Error(errMsg));
-    }
-    if (i < items.length - 1 && !options.signal?.aborted) {
-      await sleep(minDelay, maxDelay, options.signal);
-    }
-  }
-  return {
-    total: items.length,
-    succeeded,
-    failed,
-    totalDownloaded,
-    totalSkipped,
-    items
-  };
-}
-
 // src/cli.tsx
-var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
 var resolveVersion = () => {
   try {
     if (typeof import.meta !== "undefined" && import.meta?.url) {
@@ -41966,7 +42794,7 @@ var resolveVersion = () => {
 };
 var VERSION = resolveVersion();
 var HELP = `
-  Open Nami \u2014 bulk social media profile downloader for Instagram, TikTok, Facebook & X.
+  Open Nami: bulk social media profile downloader for Instagram, TikTok, Facebook & X.
 
   Usage:
     $ open-nami                          Launch interactive TUI
@@ -42001,7 +42829,14 @@ var HELP = `
     [Tab]            Paste from clipboard
     [\u2191 / \u2193]          Navigate menus
     [Enter]          Submit / Start Download
+    [^w]             Clipboard Watcher Radar
+    [^b]             Batch Multi-Account Queue Manager
+    [^s]             Settings & Preferences
     [^t]             Cycle theme (auto / light / dark)
+    [m]              Toggle metadata sidecars (.json)
+    [d]              Cycle date range filter (All / 24h / 7d / 30d)
+    [l]              Cycle post download limit (All / 10 / 25 / 50 / 100)
+    [r]              Toggle resumable checkpoints
     [o]              Open Downloads folder on completion
     [Esc]            Back / Exit
 `;
@@ -42139,7 +42974,7 @@ async function main() {
   if (isWatchMode) {
     const choice = initialChoice || "all";
     console.log(`
-  \x1B[36mOpen Nami\x1B[0m \u2014 Clipboard Watcher Active (v${VERSION})`);
+  \x1B[36mOpen Nami\x1B[0m: Clipboard Watcher Active (v${VERSION})`);
     console.log(`  \x1B[90mTarget media:\x1B[0m \x1B[33m${choice}\x1B[0m`);
     if (outputDir) console.log(`  \x1B[90mOutput directory:\x1B[0m ${outputDir}`);
     console.log(`  \x1B[90mMonitoring clipboard for Instagram, TikTok, Facebook & X profiles\u2026\x1B[0m`);
@@ -42180,7 +43015,7 @@ async function main() {
   if (batchFile) {
     const choice = initialChoice || "all";
     console.log(`
-  \x1B[36mOpen Nami\x1B[0m \u2014 Batch Download Queue (v${VERSION})`);
+  \x1B[36mOpen Nami\x1B[0m: Batch Download Queue (v${VERSION})`);
     console.log(`  \x1B[90mBatch file:\x1B[0m ${batchFile}`);
     console.log(`  \x1B[90mTarget media:\x1B[0m \x1B[33m${choice}\x1B[0m`);
     if (outputDir) console.log(`  \x1B[90mOutput directory:\x1B[0m ${outputDir}`);
@@ -42273,7 +43108,7 @@ async function main() {
   }
   try {
     const { waitUntilExit } = render_default(
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
         App2,
         {
           initialInput,
