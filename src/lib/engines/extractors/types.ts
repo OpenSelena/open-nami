@@ -31,6 +31,8 @@ export interface ExtractOptions {
   since?: number
   until?: number
   limit?: number
+  initialCursor?: string
+  onCheckpoint?: (cursorKey: string, cursorValue: string) => Promise<void> | void
 }
 
 export interface Extractor {

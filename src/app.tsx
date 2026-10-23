@@ -104,6 +104,7 @@ export function App({
   since,
   until,
   limit,
+  resume,
   version = '1.0.0',
 }: {
   initialInput?: string
@@ -113,6 +114,7 @@ export function App({
   since?: string | number | Date
   until?: string | number | Date
   limit?: number
+  resume?: boolean
   version?: string
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode)
@@ -129,6 +131,7 @@ export function App({
         since={since}
         until={until}
         limit={limit}
+        resume={resume}
         version={version}
         cycleTheme={cycleTheme}
       />
@@ -143,6 +146,7 @@ function InnerApp({
   since,
   until,
   limit,
+  resume,
   version = '1.0.0',
   cycleTheme,
 }: {
@@ -152,6 +156,7 @@ function InnerApp({
   since?: string | number | Date
   until?: string | number | Date
   limit?: number
+  resume?: boolean
   version?: string
   cycleTheme: () => void
 }) {
@@ -232,6 +237,7 @@ function InnerApp({
         since,
         until,
         limit,
+        resume,
         signal: controller.signal,
         onProgress: (progress) => {
           if (!controller.signal.aborted) {

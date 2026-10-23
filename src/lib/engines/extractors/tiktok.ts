@@ -196,7 +196,7 @@ export class TikTokExtractor implements Extractor {
     }
 
     // Paginated posts via item_list API
-    let cursor = '0'
+    let cursor = options.initialCursor || '0'
     let hasMore = true
     const visitedCursors = new Set<string>()
 
@@ -266,6 +266,11 @@ export class TikTokExtractor implements Extractor {
 
       hasMore = Boolean(res?.hasMore)
       cursor = String(res?.cursor ?? '0')
+      if (hasMore && cursor && cursor !== '0') {
+        options.onCheckpoint?.('timeline', cursor)
+      } else {
+        options.onCheckpoint?.('timeline', '')
+      }
 
       await sleep(1000, 2000, options.signal)
     }

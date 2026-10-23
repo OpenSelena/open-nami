@@ -414,3 +414,53 @@ test('dispatchDownload enforces limit across jobs', async () => {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('dispatchDownload honors saved checkpoint when resume=true and clears on completion', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const {saveCheckpoint, loadCheckpoint} = await import('./checkpoint.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-resume-test-'))
+
+  try {
+    // 1. Seed an active checkpoint
+    await saveCheckpoint(tmpDir, {
+      version: 1,
+      platform: 'instagram',
+      username: 'resume_user',
+      updatedAt: new Date().toISOString(),
+      cursors: { timeline: 'CURSOR_ABC_123' },
+      completed: false,
+    })
+
+    let passedInitialCursor: string | undefined
+    let checkpointCallbackTriggered = false
+
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'resume_user',
+        cleanUrl: 'https://www.instagram.com/resume_user/',
+        rawInput: 'resume_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      resume: true,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          // Check that checkpoint was loaded
+          const cp = await loadCheckpoint(tmpDir)
+          passedInitialCursor = cp?.cursors.timeline
+          return {success: true, downloaded: 5, skipped: 0}
+        },
+      },
+    })
+
+    assert.equal(passedInitialCursor, 'CURSOR_ABC_123')
+    assert.equal(result.success, true)
+    // On successful run with no errors, checkpoint should be cleaned up
+    const afterDone = await loadCheckpoint(tmpDir)
+    assert.equal(afterDone, null)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})

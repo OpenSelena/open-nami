@@ -6,6 +6,7 @@ import {resolvePlatformDownloadsDir} from '../known-folders.js'
 import {loadConfig} from '../config.js'
 import {getExtractor} from './extractors/index.js'
 import {downloadMediaStream} from './downloader.js'
+import {loadCheckpoint, saveCheckpoint, clearCheckpoint} from './checkpoint.js'
 import {filterMediaStream, parseDateBoundary, parseLimit} from './filters.js'
 import {runGalleryDl} from './gallery-dl.js'
 import {runYtDlp} from './yt-dlp.js'
@@ -97,6 +98,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     const sinceSeconds = parseDateBoundary(options.since, 'since')
     const untilSeconds = parseDateBoundary(options.until, 'until')
     const globalLimit = parseLimit(options.limit)
+    const savedCheckpoint = options.resume ? await loadCheckpoint(targetDir) : null
+    const currentCursors: Record<string, string> = savedCheckpoint?.cursors ? {...savedCheckpoint.cursors} : {}
 
     const defaultRunNative = async (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All'): Promise<JobRunResult> => {
       const dest = path.join(targetDir, subDir)
@@ -106,6 +109,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       }
       try {
         const extractor = getExtractor(profile.platform as SupportedPlatform)
+        const subDirKey = (subDir === 'All' ? 'timeline' : subDir.toLowerCase())
+        const initialCursor = options.resume ? currentCursors[subDirKey] : undefined
         const items = extractor.extract(profile, {
           subDir,
           cookiePath: cookieCopy?.filePath,
@@ -113,6 +118,22 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           since: sinceSeconds,
           until: untilSeconds,
           limit: remainingLimit,
+          initialCursor,
+          onCheckpoint: async (key, val) => {
+            if (val) {
+              currentCursors[key] = val
+            } else {
+              delete currentCursors[key]
+            }
+            await saveCheckpoint(targetDir, {
+              version: 1,
+              platform: profile.platform,
+              username: profile.username,
+              updatedAt: new Date().toISOString(),
+              cursors: currentCursors,
+              completed: Object.keys(currentCursors).length === 0,
+            })
+          },
         })
         const filtered = filterMediaStream(items, {
           since: sinceSeconds,
@@ -272,6 +293,10 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           }
         }
       }
+    }
+
+    if (errors.length === 0 && !options.signal?.aborted) {
+      await clearCheckpoint(targetDir)
     }
 
     return {

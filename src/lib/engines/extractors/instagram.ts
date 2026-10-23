@@ -729,7 +729,19 @@ export class InstagramExtractor implements Extractor {
     let hasNextPage = Boolean(user?.edge_owner_to_timeline_media?.page_info?.has_next_page)
     let endCursor = user?.edge_owner_to_timeline_media?.page_info?.end_cursor
 
-    if (!user) {
+    if (options.initialCursor) {
+      endCursor = options.initialCursor
+      hasNextPage = true
+      currentEdges = []
+      try {
+        const resumedPage = await this.fetchNextPostsPage(userId || '', username, endCursor, options, webTokens)
+        currentEdges = resumedPage.edges
+        hasNextPage = resumedPage.hasNextPage
+        endCursor = resumedPage.nextCursor
+      } catch (err) {
+        logExtractorDebug('fetchNextPostsPage resume', err)
+      }
+    } else if (!user) {
       try {
         const firstPage = await this.fetchPostsTabGraphQL(username, undefined, webTokens, options)
         currentEdges = firstPage.edges
@@ -786,6 +798,9 @@ export class InstagramExtractor implements Extractor {
         currentEdges = nextPage.edges
         hasNextPage = nextPage.hasNextPage
         endCursor = nextPage.nextCursor
+        if (endCursor) {
+          options.onCheckpoint?.('timeline', endCursor)
+        }
         if (currentEdges.length === 0) {
           break
         }

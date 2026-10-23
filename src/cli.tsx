@@ -52,6 +52,7 @@ const HELP = `
     --since <date>       Filter posts on or after date (YYYY-MM-DD or 7d, 30d)
     --until <date>       Filter posts on or before date (YYYY-MM-DD)
     -l, --limit <n>      Limit maximum items to download
+    --resume             Resume download from saved pagination checkpoint
     --completion         Generate shell completion script (bash, zsh, fish, powershell)
 
   Hotkeys in TUI:
@@ -154,6 +155,7 @@ async function main() {
   let since: string | undefined
   let until: string | undefined
   let limit: number | undefined
+  let isResume = false
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
@@ -191,6 +193,8 @@ async function main() {
     } else if (arg.startsWith('--limit=')) {
       const parsed = parseInt(arg.slice('--limit='.length), 10)
       if (!isNaN(parsed) && parsed > 0) limit = parsed
+    } else if (arg === '--resume') {
+      isResume = true
     } else if (!arg.startsWith('-') && !initialInput) {
       initialInput = arg
     }
@@ -255,6 +259,7 @@ async function main() {
         since,
         until,
         limit,
+        resume: isResume,
         onProgress: (progress) => {
           if (progress.currentFile) {
             console.log(`[open-nami] [${progress.job}] ${progress.currentFile}`)
@@ -291,6 +296,7 @@ async function main() {
         since={since}
         until={until}
         limit={limit}
+        resume={isResume}
         version={VERSION}
       />,
       {stdout: captureFrames(process.stdout)},

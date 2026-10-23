@@ -301,7 +301,7 @@ export class XExtractor implements Extractor {
     const endpoint = isLikes
       ? 'https://x.com/i/api/graphql/TGEKkJG_meudeaFcqaxM-Q/Likes'
       : 'https://x.com/i/api/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia'
-    let cursor: string | undefined
+    let cursor: string | undefined = options.initialCursor
     let hasMore = true
     let found = 0
 
@@ -391,8 +391,10 @@ export class XExtractor implements Extractor {
 
       if (!newCursor || newCursor === cursor || pageItemCount === 0) {
         hasMore = false
+        options.onCheckpoint?.('timeline', '')
       } else {
         cursor = newCursor
+        options.onCheckpoint?.('timeline', cursor)
         await sleep(1500, 2500, options.signal)
       }
     }
