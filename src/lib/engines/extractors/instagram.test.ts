@@ -558,6 +558,106 @@ test('InstagramExtractor fetchReelsMedia throws descriptive error on auth failur
   )
 })
 
+test('InstagramExtractor fetchHighlightsTray does not throw auth error on HTML or JSON parse error', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error(`Unexpected token '<', "<!DOCTYPE "... is not valid JSON`)
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const tray = await extractor.fetchHighlightsTray('67776473510', { subDir: 'Highlights' })
+  assert.deepEqual(tray, [])
+})
+
+test('InstagramExtractor fetchReelsMedia does not throw auth error on HTML or JSON parse error', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async () => {
+      throw new Error(`Unexpected token '<', "<!DOCTYPE "... is not valid JSON`)
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const reels = await extractor.fetchReelsMedia(['67776473510'], { subDir: 'Stories' })
+  assert.deepEqual(reels, [])
+})
+
+test('InstagramExtractor extract Stories finishes cleanly when latest_reel_media is 0', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async (url: string) => {
+      if (url.includes('web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: '12345',
+              username: 'nostoryuser',
+              latest_reel_media: 0,
+            },
+          },
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const progressMessages: string[] = []
+  const items: any[] = []
+
+  for await (const item of extractor.extract(
+    { platform: 'instagram', username: 'nostoryuser', cleanUrl: 'https://instagram.com/nostoryuser', rawInput: 'nostoryuser' },
+    {
+      subDir: 'Stories',
+      onProgress: p => {
+        if (p.message) progressMessages.push(p.message)
+      },
+    }
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(items.length, 0)
+  assert.ok(progressMessages.some(m => m.includes('has no active stories in the last 24 hours')))
+})
+
+test('InstagramExtractor extract Highlights finishes cleanly when highlights tray is empty', async () => {
+  const mockHttpClient: any = {
+    fetchJson: async (url: string) => {
+      if (url.includes('web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: '12345',
+              username: 'nohighlightsuser',
+              highlight_reel_count: 0,
+            },
+          },
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const progressMessages: string[] = []
+  const items: any[] = []
+
+  for await (const item of extractor.extract(
+    { platform: 'instagram', username: 'nohighlightsuser', cleanUrl: 'https://instagram.com/nohighlightsuser', rawInput: 'nohighlightsuser' },
+    {
+      subDir: 'Highlights',
+      onProgress: p => {
+        if (p.message) progressMessages.push(p.message)
+      },
+    }
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(items.length, 0)
+  assert.ok(progressMessages.some(m => m.includes('has no available highlights')))
+})
+
 
 
 

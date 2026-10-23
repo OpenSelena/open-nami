@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.1",
+      version: "1.2.2",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -37411,6 +37411,9 @@ var IG_QUERIES = {
   PolarisProfilePageContentQuery: "28649589871350527"
 };
 var IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection;
+function isExplicitAuthError(msg) {
+  return msg.includes("401") || msg.includes("403") || msg.includes("login_required") || msg.includes("checkpoint_required") || msg.includes("not-logged-in");
+}
 function logExtractorDebug(endpoint, err) {
   if (process.env.DEBUG || process.env.OPEN_NAMI_DEBUG) {
     const message = err instanceof Error ? err.message : String(err);
@@ -37618,22 +37621,22 @@ var InstagramExtractor = class {
         headers
       });
       const edges = res?.data?.highlights?.edges;
-      if (Array.isArray(edges) && edges.length > 0) {
+      if (Array.isArray(edges)) {
         if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
           logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery partial field errors", res.errors);
         }
-        return edges.map((e) => e.node);
+        return edges.map((e) => e.node).filter(Boolean);
       }
       if (res?.errors && Array.isArray(res.errors) && res.errors.length > 0) {
         const errMsg = res.errors.map((e) => e.message || JSON.stringify(e)).join("; ");
-        if (errMsg.includes("login") || errMsg.includes("auth") || errMsg.includes("checkpoint")) {
+        if (isExplicitAuthError(errMsg)) {
           authError = new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
         }
       }
     } catch (err) {
       logExtractorDebug("PolarisProfileStoryHighlightsTrayContentQuery", err);
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE")) {
+      if (isExplicitAuthError(msg)) {
         authError = new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
       }
     }
@@ -37648,22 +37651,80 @@ var InstagramExtractor = class {
           "Referer": "https://www.instagram.com/"
         }
       });
-      if (res.message === "login_required" || res.message === "checkpoint_required") {
+      if (res?.message === "login_required" || res?.message === "checkpoint_required") {
         throw new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
       }
-      return res.tray ?? [];
+      return res?.tray ?? [];
     } catch (err) {
       logExtractorDebug("Highlights legacy REST", err);
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE") || msg.includes("Unexpected token")) {
+      if (isExplicitAuthError(msg)) {
         throw new Error("Instagram Highlights require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
       }
       if (authError) throw authError;
       return [];
     }
   }
-  async fetchReelsMedia(reelIds, options) {
+  async fetchReelsMediaGraphQL(reelIds, options, tokens) {
     if (reelIds.length === 0) return [];
+    try {
+      const variables = JSON.stringify({
+        initial_reel_id: reelIds[0],
+        reel_ids: reelIds,
+        first: 3,
+        last: 2,
+        __relay_internal__pv__PolarisCommunityNoteStoriesLabelEnabledrelayprovider: true
+      });
+      const bodyParams = new URLSearchParams({
+        av: "17841415137994167",
+        __d: "www",
+        __user: "0",
+        __a: "1",
+        __req: "0",
+        dpr: "1",
+        fb_api_caller_class: "RelayModern",
+        fb_api_req_friendly_name: "PolarisStoriesV3ReelPageGalleryQuery",
+        server_timestamps: "true",
+        variables,
+        doc_id: IG_QUERIES.PolarisStoriesV3ReelPageGalleryQuery
+      });
+      if (tokens?.fbDtsg) bodyParams.set("fb_dtsg", tokens.fbDtsg);
+      if (tokens?.lsd) bodyParams.set("lsd", tokens.lsd);
+      const headers = {
+        "Accept": "*/*",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "X-IG-App-ID": IG_APP_ID,
+        "X-FB-Friendly-Name": "PolarisStoriesV3ReelPageGalleryQuery",
+        "Referer": "https://www.instagram.com/",
+        "Origin": "https://www.instagram.com",
+        "X-ASBD-ID": "359341"
+      };
+      if (tokens?.csrfToken) headers["X-CSRFToken"] = tokens.csrfToken;
+      if (tokens?.lsd) headers["X-FB-LSD"] = tokens.lsd;
+      const res = await this.httpClient.fetchJson("https://www.instagram.com/graphql/query", {
+        method: "POST",
+        body: bodyParams.toString(),
+        cookiePath: options.cookiePath,
+        cookieDomain: "instagram.com",
+        signal: options.signal,
+        headers
+      });
+      const connection = res?.data?.xdt_api__v1__feed__reels_media__connection;
+      const edges = connection?.edges;
+      if (Array.isArray(edges) && edges.length > 0) {
+        return edges.map((e) => e.node).filter(Boolean);
+      }
+    } catch (err) {
+      logExtractorDebug("PolarisStoriesV3ReelPageGalleryQuery", err);
+    }
+    return [];
+  }
+  async fetchReelsMedia(reelIds, options, tokens) {
+    if (reelIds.length === 0) return [];
+    const gqlReels = await this.fetchReelsMediaGraphQL(reelIds, options, tokens);
+    if (gqlReels.length > 0) {
+      return gqlReels;
+    }
     const idsParam = reelIds.join(",");
     const url = `https://www.instagram.com/api/v1/feed/reels_media/?reel_ids=${encodeURIComponent(idsParam)}`;
     try {
@@ -37676,17 +37737,18 @@ var InstagramExtractor = class {
           "Referer": "https://www.instagram.com/"
         }
       });
-      if (res.message === "login_required" || res.message === "checkpoint_required") {
+      if (res?.message === "login_required" || res?.message === "checkpoint_required") {
         throw new Error("Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
       }
-      if (res.reels_media) return res.reels_media;
-      if (res.reels) return Object.values(res.reels);
+      if (res?.reels_media) return res.reels_media;
+      if (res?.reels) return Object.values(res.reels);
       return [];
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("401") || msg.includes("403") || msg.includes("login") || msg.includes("not-logged-in") || msg.includes("<!DOCTYPE") || msg.includes("Unexpected token")) {
+      if (isExplicitAuthError(msg)) {
         throw new Error("Instagram Stories require an active authenticated session. Your session cookie is missing or expired. Update your cookies in Settings (^s).");
       }
+      logExtractorDebug("Reels media legacy REST", err);
       return [];
     }
   }
@@ -38002,23 +38064,50 @@ var InstagramExtractor = class {
       if (!userId || userId === "[object Object]") {
         throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`);
       }
+      if (user?.latest_reel_media === 0) {
+        options.onProgress?.({
+          stage: "Stories",
+          found: 0,
+          message: `Profile @${username} has no active stories in the last 24 hours.`
+        });
+        return;
+      }
       options.onProgress?.({
         stage: "Stories",
         found: 0,
         message: `Fetching stories for @${username}...`
       });
-      const reels = await this.fetchReelsMedia([userId], options);
+      const reels = await this.fetchReelsMedia([userId], options, webTokens);
+      let count = 0;
       for (const reel of reels) {
         for (const rawItem of reel.items || []) {
           const item = parseReelItemToMediaItem(rawItem, username);
-          if (item) yield item;
+          if (item) {
+            count++;
+            yield item;
+          }
         }
+      }
+      if (count === 0) {
+        options.onProgress?.({
+          stage: "Stories",
+          found: 0,
+          message: `Profile @${username} has no active stories in the last 24 hours.`
+        });
       }
       return;
     }
     if (subDir === "Highlights") {
       if (!userId || userId === "[object Object]") {
         throw new Error(`Could not resolve user ID for @${username}. Profile may be private or unavailable.`);
+      }
+      if (user?.highlight_reel_count === 0) {
+        options.onProgress?.({
+          stage: "Highlights",
+          found: 0,
+          message: `Profile @${username} has no available highlights.`
+        });
+        return;
       }
       options.onProgress?.({
         stage: "Highlights",
@@ -38027,20 +38116,26 @@ var InstagramExtractor = class {
       });
       const tray = await this.fetchHighlightsTray(userId, options, webTokens);
       const highlightIds = tray.map((t) => t.id).filter(Boolean);
-      if (highlightIds.length > 0) {
-        const chunkSize = 5;
-        for (let i = 0; i < highlightIds.length; i += chunkSize) {
-          if (options.signal?.aborted) break;
-          const chunk = highlightIds.slice(i, i + chunkSize);
-          const reels = await this.fetchReelsMedia(chunk, options);
-          for (const reel of reels) {
-            for (const rawItem of reel.items || []) {
-              const item = parseReelItemToMediaItem(rawItem, username);
-              if (item) yield item;
-            }
+      if (highlightIds.length === 0) {
+        options.onProgress?.({
+          stage: "Highlights",
+          found: 0,
+          message: `Profile @${username} has no available highlights.`
+        });
+        return;
+      }
+      const chunkSize = 5;
+      for (let i = 0; i < highlightIds.length; i += chunkSize) {
+        if (options.signal?.aborted) break;
+        const chunk = highlightIds.slice(i, i + chunkSize);
+        const reels = await this.fetchReelsMedia(chunk, options, webTokens);
+        for (const reel of reels) {
+          for (const rawItem of reel.items || []) {
+            const item = parseReelItemToMediaItem(rawItem, username);
+            if (item) yield item;
           }
-          await sleep(1e3, 1500, options.signal);
         }
+        await sleep(1e3, 1500, options.signal);
       }
       return;
     }
