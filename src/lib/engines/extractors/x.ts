@@ -112,7 +112,7 @@ export function parseTweetMediaEntities(
   for (let idx = 0; idx < entities.length; idx++) {
     const media: TwitterMediaEntity = entities[idx]
     const subIndex = idx + 1
-    const baseFilename = `${username}_${tweetId}_${subIndex}`
+    const baseFilename = `${username}_${rawDate ? `${rawDate}_` : ''}${tweetId}_${subIndex}`
 
     if (media.type === 'video' || media.type === 'animated_gif') {
       const variants = (media.video_info?.variants || [])

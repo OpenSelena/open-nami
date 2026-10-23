@@ -106,7 +106,7 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
         items.push({
           id: `${id}_${idx + 1}`,
           url: imgUrl,
-          filename: `${username}_${id}_${idx + 1}`,
+          filename: `${username}_${date ? `${date}_` : ''}${id}_${idx + 1}`,
           extension: 'jpg',
           type: 'photo',
           caption,
@@ -128,7 +128,7 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
     items.push({
       id,
       url: videoUrl,
-      filename: `${username}_${id}`,
+      filename: `${username}_${date ? `${date}_` : ''}${id}`,
       extension: 'mp4',
       type: 'video',
       caption,

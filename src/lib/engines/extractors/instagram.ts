@@ -97,7 +97,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
       const subItems = parseIgNodeToMediaItems(childNode, username)
       for (const item of subItems) {
         item.id = `${baseId}_${index + 1}`
-        item.filename = `${username}_${date || baseId}_${index + 1}`
+        item.filename = `${username}_${date ? `${date}_` : ''}${baseId}_${index + 1}`
         item.author = username
         item.platform = 'instagram'
         item.caption = item.caption || caption
@@ -119,7 +119,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
       items.push({
         id: baseId,
         url: videoUrl,
-        filename: `${username}_${date || baseId}`,
+        filename: `${username}_${date ? `${date}_` : ''}${baseId}`,
         extension: 'mp4',
         type: 'video',
         caption,
@@ -138,7 +138,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
         items.push({
           id: baseId,
           url: photoUrl,
-          filename: `${username}_${date || baseId}`,
+          filename: `${username}_${date ? `${date}_` : ''}${baseId}`,
           extension: 'jpg',
           type: 'photo',
           caption,
@@ -157,7 +157,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
       items.push({
         id: baseId,
         url: photoUrl,
-        filename: `${username}_${date || baseId}`,
+        filename: `${username}_${date ? `${date}_` : ''}${baseId}`,
         extension: 'jpg',
         type: 'photo',
         caption,
@@ -187,7 +187,7 @@ export function parseReelItemToMediaItem(item: any, username: string): MediaItem
     return {
       id,
       url: videoUrl,
-      filename: `${username}_${date || id}`,
+      filename: `${username}_${date ? `${date}_` : ''}${id}`,
       extension: 'mp4',
       type: 'video',
       caption,
@@ -206,7 +206,7 @@ export function parseReelItemToMediaItem(item: any, username: string): MediaItem
     return {
       id,
       url: photoUrl,
-      filename: `${username}_${date || id}`,
+      filename: `${username}_${date ? `${date}_` : ''}${id}`,
       extension: 'jpg',
       type: 'photo',
       caption,
