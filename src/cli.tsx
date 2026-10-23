@@ -9,6 +9,7 @@ import type {MediaTarget} from './lib/engines/types.js'
 import {generateCompletion} from './lib/completion.js'
 import {updateYtDlp, updateGalleryDl} from './lib/engines/fetcher.js'
 import {startClipboardWatcher} from './lib/watcher.js'
+import {runBatchQueue} from './lib/batch.js'
 
 export const resolveVersion = (): string => {
   try {
@@ -40,6 +41,7 @@ const HELP = `
     -v, --version        Show version
     -o, --output         Set custom output directory
     -w, --watch          Watch clipboard for profile links and auto-download
+    -b, --batch <file>   Download multiple profiles listed in a text file (one URL/user per line)
     -U, --update         Update bundled engines (yt-dlp and gallery-dl) to latest release
     --update-ytdlp       Update only bundled yt-dlp binary
     --update-gallerydl   Update only bundled gallery-dl binary
@@ -152,6 +154,7 @@ async function main() {
   let outputDir: string | undefined
   let themeMode: any = 'auto'
   let isWatchMode = false
+  let batchFile: string | undefined
   let since: string | undefined
   let until: string | undefined
   let limit: number | undefined
@@ -195,6 +198,10 @@ async function main() {
       if (!isNaN(parsed) && parsed > 0) limit = parsed
     } else if (arg === '--resume') {
       isResume = true
+    } else if (arg === '-b' || arg === '--batch') {
+      batchFile = args[++i]
+    } else if (arg.startsWith('--batch=')) {
+      batchFile = arg.slice('--batch='.length)
     } else if (!arg.startsWith('-') && !initialInput) {
       initialInput = arg
     }
@@ -239,6 +246,58 @@ async function main() {
 
     await promise
     process.exit(0)
+  }
+
+  if (batchFile) {
+    const choice = initialChoice || 'all'
+    console.log(`\n  \x1b[36mOpen Nami\x1b[0m — Batch Download Queue (v${VERSION})`)
+    console.log(`  \x1b[90mBatch file:\x1b[0m ${batchFile}`)
+    console.log(`  \x1b[90mTarget media:\x1b[0m \x1b[33m${choice}\x1b[0m`)
+    if (outputDir) console.log(`  \x1b[90mOutput directory:\x1b[0m ${outputDir}`)
+    if (limit) console.log(`  \x1b[90mPer-account limit:\x1b[0m ${limit}`)
+    console.log()
+
+    const controller = new AbortController()
+    process.on('SIGINT', () => {
+      console.log('\n[open-nami] Aborting batch queue…')
+      controller.abort()
+    })
+
+    try {
+      const result = await runBatchQueue({
+        filePath: batchFile,
+        choice,
+        outputDir,
+        since,
+        until,
+        limit,
+        resume: isResume,
+        signal: controller.signal,
+        onAccountStart: (item, idx, total) => {
+          console.log(`\x1b[36m[${idx + 1}/${total}]\x1b[0m \x1b[1m@${item.profile.username}\x1b[0m on \x1b[35m${item.profile.platform}\x1b[0m…`)
+        },
+        onAccountProgress: (_item, progress) => {
+          if (progress.currentFile) {
+            process.stdout.write(`\r  \x1b[90m→ [${progress.job}] ${progress.currentFile.slice(0, 60)}\x1b[0m\x1b[K`)
+          }
+        },
+        onAccountComplete: (item) => {
+          process.stdout.write('\r\x1b[K')
+          console.log(`  \x1b[32m✓ @${item.profile.username}:\x1b[0m ${item.downloaded} downloaded, ${item.skipped} skipped\n`)
+        },
+        onAccountError: (item, err) => {
+          process.stdout.write('\r\x1b[K')
+          console.error(`  \x1b[31m✗ @${item.profile.username || item.raw}:\x1b[0m ${err.message}\n`)
+        },
+      })
+
+      console.log(`\x1b[1mBatch completed:\x1b[0m ${result.succeeded} succeeded, ${result.failed} failed of ${result.total} total accounts.`)
+      console.log(`\x1b[32mTotal media downloaded:\x1b[0m ${result.totalDownloaded} items (${result.totalSkipped} skipped).`)
+      process.exit(result.failed > 0 ? 1 : 0)
+    } catch (err: any) {
+      console.error(`open-nami batch error: ${err.message || String(err)}`)
+      process.exit(1)
+    }
   }
 
   const isTTY = Boolean(process.stdout.isTTY)
