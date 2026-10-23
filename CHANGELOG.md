@@ -4,6 +4,29 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-10-23
+
+### Added
+- **Unified Single-Pass Timeline Extraction**:
+  - Replaced multiple sequential timeline walks with a single pass when downloading all media.
+  - Dynamically routes photos and videos to their respective directories without double-fetching or hitting rate limits.
+- **Background Clipboard Watcher Daemon (`-w, --watch`)**:
+  - Automatically detects copied Instagram, TikTok, Facebook, and X profile URLs from the clipboard and downloads them in real time with duplicate suppression.
+- **Date Range and Post Limit Filters (`--since`, `--until`, `-l, --limit`)**:
+  - Supports ISO dates, relative offsets (`7d`, `24h`), and limit counters across all media streams.
+  - Early-stopping pagination on reverse-chronological feeds to minimize network requests.
+- **Resumable Pagination Checkpointing (`--resume`)**:
+  - Persists pagination cursors in `.open-nami-checkpoint.json` per target directory, allowing interrupted downloads to resume exactly where they left off.
+- **Batch Multi-Account Queue (`-b, --batch <file.txt>`)**:
+  - Queues multiple accounts from a text file with comment stripping, randomized anti-ban cooldown jitter between profiles, and comprehensive summary reporting.
+- **Post Metadata & Captions Sidecar Export (`--write-metadata`)**:
+  - Generates structured `.json` sidecars containing post captions, hashtags (Latin and Unicode), timestamps, dimensions, and album provenance.
+  - Synchronizes file modification times (`mtime`) and automatically backfills missing sidecars for previously downloaded media.
+  - Forwards sidecar export flags to `gallery-dl` and `yt-dlp`.
+- **Carousel & Album Integrity Preservation**:
+  - Enforces `{username}_{date}_{id}_{index}.{ext}` sequence formatting with 1-based indexing across Instagram, TikTok, and X.
+  - Preserves mixed-media slides (photos and videos) with distinct extensions while keeping consistent album grouping.
+
 ## [1.0.7] - 2026-10-23
 
 ### Fixed & Hardened
