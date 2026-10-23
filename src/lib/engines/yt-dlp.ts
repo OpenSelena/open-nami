@@ -14,6 +14,7 @@ export interface YtDlpOptions {
   targetDir: string
   cookiePath?: string | null
   signal?: AbortSignal
+  writeMetadata?: boolean
   onProgress?: (progress: EngineProgress) => void
 }
 
@@ -22,8 +23,9 @@ export function buildYtDlpArgs(options: {
   platform: ParsedProfile['platform']
   cleanUrl: string
   cookiePath?: string | null
+  writeMetadata?: boolean
 }): string[] {
-  const {destDir, platform, cleanUrl, cookiePath} = options
+  const {destDir, platform, cleanUrl, cookiePath, writeMetadata} = options
   const args = [
     '-o', path.join(destDir, '%(title).150B [%(id)s].%(ext)s'),
     '--windows-filenames',
@@ -46,6 +48,10 @@ export function buildYtDlpArgs(options: {
     args.push('--sleep-requests', '0.8:1.8', '--retry-sleep', '429:exp=5:30')
   }
 
+  if (writeMetadata) {
+    args.push('--write-info-json', '--write-description')
+  }
+
   if (cookiePath) {
     args.push('--cookies', cookiePath)
   }
@@ -65,6 +71,7 @@ export async function runYtDlp(options: YtDlpOptions): Promise<{success: boolean
     platform: profile.platform,
     cleanUrl: profile.cleanUrl,
     cookiePath,
+    writeMetadata: options.writeMetadata,
   })
 
   let downloadedCount = 0

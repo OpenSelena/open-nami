@@ -107,6 +107,7 @@ export function parseTweetMediaEntities(
   const entities = legacy.extended_entities?.media || legacy.entities?.media || []
   const tweetId = tweetResult.rest_id || legacy.id_str || String(Date.now())
   const rawDate = legacy.created_at ? new Date(legacy.created_at).getTime() / 1000 : undefined
+  const caption = legacy.full_text || legacy.text
 
   for (let idx = 0; idx < entities.length; idx++) {
     const media: TwitterMediaEntity = entities[idx]
@@ -126,8 +127,16 @@ export function parseTweetMediaEntities(
           filename: baseFilename,
           extension: 'mp4',
           type: 'video',
+          caption,
+          author: username,
+          platform: 'x',
           date: rawDate,
           thumbnailUrl: media.media_url_https,
+          ...(entities.length > 1 ? {
+            carouselId: tweetId,
+            carouselIndex: subIndex,
+            carouselTotal: entities.length,
+          } : {}),
         })
       }
     } else {
@@ -145,9 +154,17 @@ export function parseTweetMediaEntities(
           filename: baseFilename,
           extension: ext,
           type: 'photo',
+          caption,
+          author: username,
+          platform: 'x',
           date: rawDate,
           width: media.original_info?.width,
           height: media.original_info?.height,
+          ...(entities.length > 1 ? {
+            carouselId: tweetId,
+            carouselIndex: subIndex,
+            carouselTotal: entities.length,
+          } : {}),
         })
       }
     }

@@ -105,6 +105,7 @@ export function App({
   until,
   limit,
   resume,
+  writeMetadata,
   version = '1.0.0',
 }: {
   initialInput?: string
@@ -115,6 +116,7 @@ export function App({
   until?: string | number | Date
   limit?: number
   resume?: boolean
+  writeMetadata?: boolean
   version?: string
 }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode)
@@ -132,6 +134,7 @@ export function App({
         until={until}
         limit={limit}
         resume={resume}
+        writeMetadata={writeMetadata}
         version={version}
         cycleTheme={cycleTheme}
       />
@@ -147,6 +150,7 @@ function InnerApp({
   until,
   limit,
   resume,
+  writeMetadata,
   version = '1.0.0',
   cycleTheme,
 }: {
@@ -157,6 +161,7 @@ function InnerApp({
   until?: string | number | Date
   limit?: number
   resume?: boolean
+  writeMetadata?: boolean
   version?: string
   cycleTheme: () => void
 }) {
@@ -238,6 +243,7 @@ function InnerApp({
         until,
         limit,
         resume,
+        writeMetadata,
         signal: controller.signal,
         onProgress: (progress) => {
           if (!controller.signal.aborted) {
@@ -267,7 +273,7 @@ function InnerApp({
         hint: 'Check your internet connection or verify the profile exists.',
       })
     }
-  }, [outputDir])
+  }, [outputDir, since, until, limit, resume, writeMetadata])
 
   const handlePlatformSelect = useCallback((platform: SupportedPlatform, username: string, rawInput?: string) => {
     const canonical = buildCanonicalProfile(platform, username, rawInput)

@@ -151,6 +151,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           referer: REFERER_MAP[profile.platform as SupportedPlatform],
           signal: options.signal,
           limit: remainingLimit,
+          writeMetadata: options.writeMetadata,
+          defaultPlatform: profile.platform,
+          defaultAuthor: profile.username,
           onProgress,
         })
         return {
@@ -179,6 +182,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         subDir,
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
+        writeMetadata: options.writeMetadata,
         onProgress,
       }))
 
@@ -188,6 +192,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         targetDir,
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
+        writeMetadata: options.writeMetadata,
         onProgress,
       }))
 

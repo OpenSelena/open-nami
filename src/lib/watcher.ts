@@ -8,6 +8,7 @@ export interface WatcherOptions {
   choice?: MediaTarget
   outputDir?: string
   intervalMs?: number
+  writeMetadata?: boolean
   signal?: AbortSignal
   readClipboardFn?: () => string
   dispatchFn?: typeof dispatchDownload
@@ -85,6 +86,7 @@ export function startClipboardWatcher(options: WatcherOptions = {}): {
                 profile: parsed,
                 choice,
                 outputDir: options.outputDir,
+                writeMetadata: options.writeMetadata,
                 signal: options.signal,
                 onProgress: (p) => {
                   if (p.statusText) {

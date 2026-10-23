@@ -1,374 +1,852 @@
-import test from 'node:test'
-import assert from 'node:assert/strict'
-import fs from 'node:fs/promises'
-import path from 'node:path'
-import os from 'node:os'
-import {
-  loadArchive,
-  saveArchive,
-  downloadMediaStream,
-  sanitizeFilename,
-  isCdnUrl,
-  ARCHIVE_FILENAME,
-} from './downloader.js'
-import type {MediaItem} from './extractors/types.js'
-
-test('loadArchive returns empty set when no archive exists', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
-  try {
-    const archive = await loadArchive(tmpDir)
-    assert.equal(archive.size, 0)
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('saveArchive and loadArchive roundtrips saved item IDs', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
-  try {
-    const initial = new Set(['item_1', 'item_2', 'item_3'])
-    await saveArchive(tmpDir, initial)
-
-    const loaded = await loadArchive(tmpDir)
-    assert.equal(loaded.size, 3)
-    assert.ok(loaded.has('item_1'))
-    assert.ok(loaded.has('item_2'))
-    assert.ok(loaded.has('item_3'))
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('downloadMediaStream skips already archived files', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
-  try {
-    // Pre-create file and archive
-    const existingFile = path.join(tmpDir, 'photo_1.jpg')
-    await fs.writeFile(existingFile, 'fake image data')
-    await saveArchive(tmpDir, new Set(['photo_1']))
-
-    async function* mockItems(): AsyncGenerator<MediaItem> {
-      yield {
-        id: 'photo_1',
-        url: 'https://example.com/photo_1.jpg',
-        filename: 'photo_1.jpg',
-        extension: 'jpg',
-        type: 'photo',
-      }
-    }
-
-    const progressLogs: string[] = []
-    const result = await downloadMediaStream(mockItems(), {
-      jobName: 'TestJob',
-      destDir: tmpDir,
-      onProgress: p => {
-        progressLogs.push(p.statusText)
-      },
-    })
-
-    assert.equal(result.skipped, 1)
-    assert.equal(result.downloaded, 0)
-    assert.ok(progressLogs.some(msg => msg.includes('Skipping already downloaded')))
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('downloadMediaStream passes referer header to request', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
-  try {
-    let capturedHeaders: Record<string, string> | undefined
-    const mockHttpClient: any = {
-      request: async (_url: string, opts: any) => {
-        capturedHeaders = opts?.headers
-        return {
-          ok: true,
-          body: new ReadableStream({
-            start(controller) {
-              controller.enqueue(Buffer.from('dummy data'))
-              controller.close()
-            },
-          }),
-        }
-      },
-    }
-
-    async function* mockItems(): AsyncGenerator<MediaItem> {
-      yield {
-        id: 'photo_test',
-        url: 'https://example.com/photo.jpg',
-        filename: 'photo.jpg',
-        extension: 'jpg',
-        type: 'photo',
-      }
-    }
-
-    const result = await downloadMediaStream(mockItems(), {
-      jobName: 'RefererJob',
-      destDir: tmpDir,
-      httpClient: mockHttpClient,
-      referer: 'https://www.tiktok.com/',
-    })
-
-    assert.equal(result.downloaded, 1)
-    assert.equal(capturedHeaders?.['Referer'], 'https://www.tiktok.com/')
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('downloadMediaStream sanitizes filenames and blocks path traversal attempts', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
-  try {
-    const mockHttpClient: any = {
-      request: async () => ({
-        ok: true,
-        body: new ReadableStream({
-          start(controller) {
-            controller.enqueue(Buffer.from('dummy data'))
-            controller.close()
-          },
-        }),
-      }),
-    }
-
-    async function* mockItems(): AsyncGenerator<MediaItem> {
-      yield {
-        id: 'traversal_item',
-        url: 'https://example.com/evil.jpg',
-        filename: '../../../../escaped_file.jpg',
-        extension: 'jpg',
-        type: 'photo',
-      }
-    }
-
-    const result = await downloadMediaStream(mockItems(), {
-      jobName: 'TraversalJob',
-      destDir: tmpDir,
-      httpClient: mockHttpClient,
-    })
-
-    assert.equal(result.downloaded, 1)
-    // Verify file was saved safely inside tmpDir, not escaped
-    const expectedFile = path.join(tmpDir, 'escaped_file.jpg')
-    assert.ok(await fs.stat(expectedFile).then(() => true).catch(() => false))
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('sanitizeFilename prefixes Windows reserved device names and strips illegal characters', () => {
-  assert.equal(sanitizeFilename('CON', '123', 'jpg'), '_CON.jpg')
-  assert.equal(sanitizeFilename('aux.png', '123', 'png'), '_aux.png')
-  assert.equal(sanitizeFilename('NUL.mp4', '123', 'mp4'), '_NUL.mp4')
-  assert.equal(sanitizeFilename('com1.jpg', '123', 'jpg'), '_com1.jpg')
-  assert.equal(sanitizeFilename('lpt5', '123', 'mp4'), '_lpt5.mp4')
-
-  // Illegal chars stripped
-  assert.equal(sanitizeFilename('foo:bar?baz*qux.jpg', '123', 'jpg'), 'foo_bar_baz_qux.jpg')
-
-  // Trailing dots and spaces stripped
-  assert.equal(sanitizeFilename('trail...  ', '123', 'jpg'), 'trail.jpg')
-
-  // Empty or all-stripped fallback
-  assert.equal(sanitizeFilename('', '999', 'jpg'), 'item_999.jpg')
-  assert.equal(sanitizeFilename(':::???', '888', 'jpg'), 'item_888.jpg')
-})
-
-test('downloadMediaStream continues processing remaining items when transient extractor error occurs', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-resilience-'))
-  try {
-    const mockHttpClient: any = {
-      request: async () => ({
-        ok: true,
-        body: new ReadableStream({
-          start(controller) {
-            controller.enqueue(Buffer.from('dummy data'))
-            controller.close()
-          },
-        }),
-      }),
-    }
-
-    let callCount = 0
-    const resilientIterable: AsyncIterable<MediaItem> = {
-      [Symbol.asyncIterator]() {
-        return {
-          async next() {
-            callCount++
-            if (callCount === 1) {
-              return {done: false, value: {id: 'item_1', url: 'https://ex.com/1.jpg', filename: '1.jpg', extension: 'jpg', type: 'photo'}}
-            }
-            if (callCount === 2) {
-              throw new Error('Transient network glitch')
-            }
-            if (callCount === 3) {
-              return {done: false, value: {id: 'item_2', url: 'https://ex.com/2.jpg', filename: '2.jpg', extension: 'jpg', type: 'photo'}}
-            }
-            return {done: true, value: undefined as any}
-          },
-        }
-      },
-    }
-
-    const result = await downloadMediaStream(resilientIterable, {
-      jobName: 'ResilienceJob',
-      destDir: tmpDir,
-      httpClient: mockHttpClient,
-      concurrency: 1,
-    })
-
-    assert.equal(result.downloaded, 2)
-    assert.equal(result.errors.length, 1)
-    assert.ok(result.errors[0].includes('Transient network glitch'))
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('loadArchive interoperates with yt-dlp archive format and saveArchive persists text archive', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cross-archive-'))
-  try {
-    // Create pre-existing yt-dlp archive file
-    const ytdlpFile = path.join(tmpDir, 'archive_yt-dlp.txt')
-    await fs.writeFile(ytdlpFile, '# yt-dlp archive\ntiktok 7123456789\ninstagram 987654321\nstandalone_id_999\n')
-
-    const loaded = await loadArchive(tmpDir)
-    assert.ok(loaded.has('7123456789'))
-    assert.ok(loaded.has('987654321'))
-    assert.ok(loaded.has('standalone_id_999'))
-
-    // Test saveArchive writes both json and txt formats
-    loaded.add('newly_downloaded_123')
-    await saveArchive(tmpDir, loaded)
-
-    const reloaded = await loadArchive(tmpDir)
-    assert.ok(reloaded.has('newly_downloaded_123'))
-
-    const txtContent = await fs.readFile(ytdlpFile, 'utf-8')
-    assert.ok(txtContent.includes('newly_downloaded_123'))
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('isCdnUrl detects Meta, TikTok, and Twitter CDN domains accurately', () => {
-  assert.equal(isCdnUrl('https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/image.jpg'), true)
-  assert.equal(isCdnUrl('https://instagram.fdac14-1.fna.fbcdn.net/v/t51.2885-15/photo.jpg'), true)
-  assert.equal(isCdnUrl('https://p16-sign-va.tiktokcdn.com/tos-maliva-p/video.mp4'), true)
-  assert.equal(isCdnUrl('https://pbs.twimg.com/media/XYZ.jpg'), true)
-  assert.equal(isCdnUrl('https://video.twimg.com/ext_tw_video/123.mp4'), true)
-  assert.equal(isCdnUrl('https://www.instagram.com/api/v1/users/web_profile_info/'), false)
-  assert.equal(isCdnUrl('https://example.com/photo.jpg'), false)
-})
-
-test('downloadMediaStream strips cookiePath when downloading from CDN URLs to prevent HTTP 400 rejection', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cdn-cookies-'))
-  try {
-    let capturedCookiePath: string | undefined = 'initial'
-    const mockHttpClient: any = {
-      request: async (_url: string, opts: any) => {
-        capturedCookiePath = opts?.cookiePath
-        return {
-          ok: true,
-          body: new ReadableStream({
-            start(controller) {
-              controller.enqueue(Buffer.from('fake cdn media data'))
-              controller.close()
-            },
-          }),
-        }
-      },
-    }
-
-    async function* mockItems(): AsyncGenerator<MediaItem> {
-      yield {
-        id: 'meta_cdn_item',
-        url: 'https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/test.jpg',
-        filename: 'test.jpg',
-        extension: 'jpg',
-        type: 'photo',
-      }
-    }
-
-    const result = await downloadMediaStream(mockItems(), {
-      jobName: 'CdnCookieJob',
-      destDir: tmpDir,
-      httpClient: mockHttpClient,
-      cookiePath: '/path/to/cookies.txt',
-    })
-
-    assert.equal(result.downloaded, 1)
-    // Verify cookiePath was set to undefined for CDN download request!
-    assert.equal(capturedCookiePath, undefined)
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
-
-test('downloadMediaStream routes items to subdirectories and isolates archives using destDirMap', async () => {
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-destdirmap-'))
-  const photosDir = path.join(tmpDir, 'Photos')
-  const videosDir = path.join(tmpDir, 'Videos')
-
-  try {
-    const mockHttpClient: any = {
-      request: async () => ({
-        ok: true,
-        body: new ReadableStream({
-          start(controller) {
-            controller.enqueue(Buffer.from('fake media data'))
-            controller.close()
-          },
-        }),
-      }),
-    }
-
-    async function* mockItems(): AsyncGenerator<MediaItem> {
-      yield {
-        id: 'photo_101',
-        url: 'https://example.com/p101.jpg',
-        filename: 'p101.jpg',
-        extension: 'jpg',
-        type: 'photo',
-      }
-      yield {
-        id: 'video_202',
-        url: 'https://example.com/v202.mp4',
-        filename: 'v202.mp4',
-        extension: 'mp4',
-        type: 'video',
-      }
-    }
-
-    const result = await downloadMediaStream(mockItems(), {
-      jobName: 'DestDirMapJob',
-      destDir: tmpDir,
-      destDirMap: {
-        photo: photosDir,
-        video: videosDir,
-      },
-      httpClient: mockHttpClient,
-    })
-
-    assert.equal(result.downloaded, 2)
-    assert.equal(result.skipped, 0)
-    assert.equal(result.errors.length, 0)
-
-    // Verify files landed in their respective subdirectories
-    const photoExists = await fs.stat(path.join(photosDir, 'p101.jpg')).then(() => true).catch(() => false)
-    const videoExists = await fs.stat(path.join(videosDir, 'v202.mp4')).then(() => true).catch(() => false)
-    assert.ok(photoExists, 'Photo should be saved in Photos directory')
-    assert.ok(videoExists, 'Video should be saved in Videos directory')
-
-    // Verify archives in both directories were populated
-    const photoArchive = await loadArchive(photosDir)
-    const videoArchive = await loadArchive(videosDir)
-    assert.ok(photoArchive.has('photo_101'), 'Photo archive should contain photo_101')
-    assert.ok(!photoArchive.has('video_202'), 'Photo archive should not contain video_202')
-    assert.ok(videoArchive.has('video_202'), 'Video archive should contain video_202')
-    assert.ok(!videoArchive.has('photo_101'), 'Video archive should not contain photo_101')
-  } finally {
-    await fs.rm(tmpDir, {recursive: true, force: true})
-  }
-})
+import test from 'node:test'
+
+import assert from 'node:assert/strict'
+
+import fs from 'node:fs/promises'
+
+import path from 'node:path'
+
+import os from 'node:os'
+
+import {
+
+  loadArchive,
+
+  saveArchive,
+
+  downloadMediaStream,
+
+  sanitizeFilename,
+
+  isCdnUrl,
+
+  ARCHIVE_FILENAME,
+
+} from './downloader.js'
+
+import type {MediaItem} from './extractors/types.js'
+
+
+
+test('loadArchive returns empty set when no archive exists', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+
+  try {
+
+    const archive = await loadArchive(tmpDir)
+
+    assert.equal(archive.size, 0)
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('saveArchive and loadArchive roundtrips saved item IDs', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+
+  try {
+
+    const initial = new Set(['item_1', 'item_2', 'item_3'])
+
+    await saveArchive(tmpDir, initial)
+
+
+
+    const loaded = await loadArchive(tmpDir)
+
+    assert.equal(loaded.size, 3)
+
+    assert.ok(loaded.has('item_1'))
+
+    assert.ok(loaded.has('item_2'))
+
+    assert.ok(loaded.has('item_3'))
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('downloadMediaStream skips already archived files', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+
+  try {
+
+    // Pre-create file and archive
+
+    const existingFile = path.join(tmpDir, 'photo_1.jpg')
+
+    await fs.writeFile(existingFile, 'fake image data')
+
+    await saveArchive(tmpDir, new Set(['photo_1']))
+
+
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+
+      yield {
+
+        id: 'photo_1',
+
+        url: 'https://example.com/photo_1.jpg',
+
+        filename: 'photo_1.jpg',
+
+        extension: 'jpg',
+
+        type: 'photo',
+
+      }
+
+    }
+
+
+
+    const progressLogs: string[] = []
+
+    const result = await downloadMediaStream(mockItems(), {
+
+      jobName: 'TestJob',
+
+      destDir: tmpDir,
+
+      onProgress: p => {
+
+        progressLogs.push(p.statusText)
+
+      },
+
+    })
+
+
+
+    assert.equal(result.skipped, 1)
+
+    assert.equal(result.downloaded, 0)
+
+    assert.ok(progressLogs.some(msg => msg.includes('Skipping already downloaded')))
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('downloadMediaStream passes referer header to request', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+
+  try {
+
+    let capturedHeaders: Record<string, string> | undefined
+
+    const mockHttpClient: any = {
+
+      request: async (_url: string, opts: any) => {
+
+        capturedHeaders = opts?.headers
+
+        return {
+
+          ok: true,
+
+          body: new ReadableStream({
+
+            start(controller) {
+
+              controller.enqueue(Buffer.from('dummy data'))
+
+              controller.close()
+
+            },
+
+          }),
+
+        }
+
+      },
+
+    }
+
+
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+
+      yield {
+
+        id: 'photo_test',
+
+        url: 'https://example.com/photo.jpg',
+
+        filename: 'photo.jpg',
+
+        extension: 'jpg',
+
+        type: 'photo',
+
+      }
+
+    }
+
+
+
+    const result = await downloadMediaStream(mockItems(), {
+
+      jobName: 'RefererJob',
+
+      destDir: tmpDir,
+
+      httpClient: mockHttpClient,
+
+      referer: 'https://www.tiktok.com/',
+
+    })
+
+
+
+    assert.equal(result.downloaded, 1)
+
+    assert.equal(capturedHeaders?.['Referer'], 'https://www.tiktok.com/')
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('downloadMediaStream sanitizes filenames and blocks path traversal attempts', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-test-'))
+
+  try {
+
+    const mockHttpClient: any = {
+
+      request: async () => ({
+
+        ok: true,
+
+        body: new ReadableStream({
+
+          start(controller) {
+
+            controller.enqueue(Buffer.from('dummy data'))
+
+            controller.close()
+
+          },
+
+        }),
+
+      }),
+
+    }
+
+
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+
+      yield {
+
+        id: 'traversal_item',
+
+        url: 'https://example.com/evil.jpg',
+
+        filename: '../../../../escaped_file.jpg',
+
+        extension: 'jpg',
+
+        type: 'photo',
+
+      }
+
+    }
+
+
+
+    const result = await downloadMediaStream(mockItems(), {
+
+      jobName: 'TraversalJob',
+
+      destDir: tmpDir,
+
+      httpClient: mockHttpClient,
+
+    })
+
+
+
+    assert.equal(result.downloaded, 1)
+
+    // Verify file was saved safely inside tmpDir, not escaped
+
+    const expectedFile = path.join(tmpDir, 'escaped_file.jpg')
+
+    assert.ok(await fs.stat(expectedFile).then(() => true).catch(() => false))
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('sanitizeFilename prefixes Windows reserved device names and strips illegal characters', () => {
+
+  assert.equal(sanitizeFilename('CON', '123', 'jpg'), '_CON.jpg')
+
+  assert.equal(sanitizeFilename('aux.png', '123', 'png'), '_aux.png')
+
+  assert.equal(sanitizeFilename('NUL.mp4', '123', 'mp4'), '_NUL.mp4')
+
+  assert.equal(sanitizeFilename('com1.jpg', '123', 'jpg'), '_com1.jpg')
+
+  assert.equal(sanitizeFilename('lpt5', '123', 'mp4'), '_lpt5.mp4')
+
+
+
+  // Illegal chars stripped
+
+  assert.equal(sanitizeFilename('foo:bar?baz*qux.jpg', '123', 'jpg'), 'foo_bar_baz_qux.jpg')
+
+
+
+  // Trailing dots and spaces stripped
+
+  assert.equal(sanitizeFilename('trail...  ', '123', 'jpg'), 'trail.jpg')
+
+
+
+  // Empty or all-stripped fallback
+
+  assert.equal(sanitizeFilename('', '999', 'jpg'), 'item_999.jpg')
+
+  assert.equal(sanitizeFilename(':::???', '888', 'jpg'), 'item_888.jpg')
+
+})
+
+
+
+test('downloadMediaStream continues processing remaining items when transient extractor error occurs', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-down-resilience-'))
+
+  try {
+
+    const mockHttpClient: any = {
+
+      request: async () => ({
+
+        ok: true,
+
+        body: new ReadableStream({
+
+          start(controller) {
+
+            controller.enqueue(Buffer.from('dummy data'))
+
+            controller.close()
+
+          },
+
+        }),
+
+      }),
+
+    }
+
+
+
+    let callCount = 0
+
+    const resilientIterable: AsyncIterable<MediaItem> = {
+
+      [Symbol.asyncIterator]() {
+
+        return {
+
+          async next() {
+
+            callCount++
+
+            if (callCount === 1) {
+
+              return {done: false, value: {id: 'item_1', url: 'https://ex.com/1.jpg', filename: '1.jpg', extension: 'jpg', type: 'photo'}}
+
+            }
+
+            if (callCount === 2) {
+
+              throw new Error('Transient network glitch')
+
+            }
+
+            if (callCount === 3) {
+
+              return {done: false, value: {id: 'item_2', url: 'https://ex.com/2.jpg', filename: '2.jpg', extension: 'jpg', type: 'photo'}}
+
+            }
+
+            return {done: true, value: undefined as any}
+
+          },
+
+        }
+
+      },
+
+    }
+
+
+
+    const result = await downloadMediaStream(resilientIterable, {
+
+      jobName: 'ResilienceJob',
+
+      destDir: tmpDir,
+
+      httpClient: mockHttpClient,
+
+      concurrency: 1,
+
+    })
+
+
+
+    assert.equal(result.downloaded, 2)
+
+    assert.equal(result.errors.length, 1)
+
+    assert.ok(result.errors[0].includes('Transient network glitch'))
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('loadArchive interoperates with yt-dlp archive format and saveArchive persists text archive', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cross-archive-'))
+
+  try {
+
+    // Create pre-existing yt-dlp archive file
+
+    const ytdlpFile = path.join(tmpDir, 'archive_yt-dlp.txt')
+
+    await fs.writeFile(ytdlpFile, '# yt-dlp archive\ntiktok 7123456789\ninstagram 987654321\nstandalone_id_999\n')
+
+
+
+    const loaded = await loadArchive(tmpDir)
+
+    assert.ok(loaded.has('7123456789'))
+
+    assert.ok(loaded.has('987654321'))
+
+    assert.ok(loaded.has('standalone_id_999'))
+
+
+
+    // Test saveArchive writes both json and txt formats
+
+    loaded.add('newly_downloaded_123')
+
+    await saveArchive(tmpDir, loaded)
+
+
+
+    const reloaded = await loadArchive(tmpDir)
+
+    assert.ok(reloaded.has('newly_downloaded_123'))
+
+
+
+    const txtContent = await fs.readFile(ytdlpFile, 'utf-8')
+
+    assert.ok(txtContent.includes('newly_downloaded_123'))
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('isCdnUrl detects Meta, TikTok, and Twitter CDN domains accurately', () => {
+
+  assert.equal(isCdnUrl('https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/image.jpg'), true)
+
+  assert.equal(isCdnUrl('https://instagram.fdac14-1.fna.fbcdn.net/v/t51.2885-15/photo.jpg'), true)
+
+  assert.equal(isCdnUrl('https://p16-sign-va.tiktokcdn.com/tos-maliva-p/video.mp4'), true)
+
+  assert.equal(isCdnUrl('https://pbs.twimg.com/media/XYZ.jpg'), true)
+
+  assert.equal(isCdnUrl('https://video.twimg.com/ext_tw_video/123.mp4'), true)
+
+  assert.equal(isCdnUrl('https://www.instagram.com/api/v1/users/web_profile_info/'), false)
+
+  assert.equal(isCdnUrl('https://example.com/photo.jpg'), false)
+
+})
+
+
+
+test('downloadMediaStream strips cookiePath when downloading from CDN URLs to prevent HTTP 400 rejection', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-cdn-cookies-'))
+
+  try {
+
+    let capturedCookiePath: string | undefined = 'initial'
+
+    const mockHttpClient: any = {
+
+      request: async (_url: string, opts: any) => {
+
+        capturedCookiePath = opts?.cookiePath
+
+        return {
+
+          ok: true,
+
+          body: new ReadableStream({
+
+            start(controller) {
+
+              controller.enqueue(Buffer.from('fake cdn media data'))
+
+              controller.close()
+
+            },
+
+          }),
+
+        }
+
+      },
+
+    }
+
+
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+
+      yield {
+
+        id: 'meta_cdn_item',
+
+        url: 'https://scontent-iad3-1.cdninstagram.com/v/t51.2885-15/test.jpg',
+
+        filename: 'test.jpg',
+
+        extension: 'jpg',
+
+        type: 'photo',
+
+      }
+
+    }
+
+
+
+    const result = await downloadMediaStream(mockItems(), {
+
+      jobName: 'CdnCookieJob',
+
+      destDir: tmpDir,
+
+      httpClient: mockHttpClient,
+
+      cookiePath: '/path/to/cookies.txt',
+
+    })
+
+
+
+    assert.equal(result.downloaded, 1)
+
+    // Verify cookiePath was set to undefined for CDN download request!
+
+    assert.equal(capturedCookiePath, undefined)
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+
+test('downloadMediaStream routes items to subdirectories and isolates archives using destDirMap', async () => {
+
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-destdirmap-'))
+
+  const photosDir = path.join(tmpDir, 'Photos')
+
+  const videosDir = path.join(tmpDir, 'Videos')
+
+
+
+  try {
+
+    const mockHttpClient: any = {
+
+      request: async () => ({
+
+        ok: true,
+
+        body: new ReadableStream({
+
+          start(controller) {
+
+            controller.enqueue(Buffer.from('fake media data'))
+
+            controller.close()
+
+          },
+
+        }),
+
+      }),
+
+    }
+
+
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+
+      yield {
+
+        id: 'photo_101',
+
+        url: 'https://example.com/p101.jpg',
+
+        filename: 'p101.jpg',
+
+        extension: 'jpg',
+
+        type: 'photo',
+
+      }
+
+      yield {
+
+        id: 'video_202',
+
+        url: 'https://example.com/v202.mp4',
+
+        filename: 'v202.mp4',
+
+        extension: 'mp4',
+
+        type: 'video',
+
+      }
+
+    }
+
+
+
+    const result = await downloadMediaStream(mockItems(), {
+
+      jobName: 'DestDirMapJob',
+
+      destDir: tmpDir,
+
+      destDirMap: {
+
+        photo: photosDir,
+
+        video: videosDir,
+
+      },
+
+      httpClient: mockHttpClient,
+
+    })
+
+
+
+    assert.equal(result.downloaded, 2)
+
+    assert.equal(result.skipped, 0)
+
+    assert.equal(result.errors.length, 0)
+
+
+
+    // Verify files landed in their respective subdirectories
+
+    const photoExists = await fs.stat(path.join(photosDir, 'p101.jpg')).then(() => true).catch(() => false)
+
+    const videoExists = await fs.stat(path.join(videosDir, 'v202.mp4')).then(() => true).catch(() => false)
+
+    assert.ok(photoExists, 'Photo should be saved in Photos directory')
+
+    assert.ok(videoExists, 'Video should be saved in Videos directory')
+
+
+
+    // Verify archives in both directories were populated
+
+    const photoArchive = await loadArchive(photosDir)
+
+    const videoArchive = await loadArchive(videosDir)
+
+    assert.ok(photoArchive.has('photo_101'), 'Photo archive should contain photo_101')
+
+    assert.ok(!photoArchive.has('video_202'), 'Photo archive should not contain video_202')
+
+    assert.ok(videoArchive.has('video_202'), 'Video archive should contain video_202')
+
+    assert.ok(!videoArchive.has('photo_101'), 'Video archive should not contain photo_101')
+
+  } finally {
+
+    await fs.rm(tmpDir, {recursive: true, force: true})
+
+  }
+
+})
+
+
+test('downloadMediaStream generates .json metadata sidecars when writeMetadata is enabled', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-sidecar-'))
+
+  try {
+    const mockHttpClient: any = {
+      request: async () => ({
+        ok: true,
+        body: new ReadableStream({
+          start(controller) {
+            controller.enqueue(Buffer.from('dummy image bytes'))
+            controller.close()
+          },
+        }),
+      }),
+    }
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+      yield {
+        id: 'post_888',
+        url: 'https://example.com/p888.jpg',
+        filename: 'author_post_888',
+        extension: 'jpg',
+        type: 'photo',
+        caption: 'Enjoying sunny vibes #beach #vacation',
+        date: 1690000000,
+        author: 'author',
+        platform: 'instagram',
+      }
+    }
+
+    const result = await downloadMediaStream(mockItems(), {
+      jobName: 'SidecarTestJob',
+      destDir: tmpDir,
+      httpClient: mockHttpClient,
+      writeMetadata: true,
+    })
+
+    assert.equal(result.downloaded, 1)
+
+    const mediaPath = path.join(tmpDir, 'author_post_888.jpg')
+    const sidecarPath = path.join(tmpDir, 'author_post_888.json')
+
+    assert.ok(await fs.stat(mediaPath).then(() => true).catch(() => false))
+    assert.ok(await fs.stat(sidecarPath).then(() => true).catch(() => false))
+
+    const sidecar = JSON.parse(await fs.readFile(sidecarPath, 'utf-8'))
+    assert.equal(sidecar.id, 'post_888')
+    assert.equal(sidecar.caption, 'Enjoying sunny vibes #beach #vacation')
+    assert.deepEqual(sidecar.hashtags, ['beach', 'vacation'])
+    assert.equal(sidecar.author, 'author')
+    assert.equal(sidecar.platform, 'instagram')
+    assert.equal(sidecar.date, 1690000000)
+    assert.equal(sidecar.isoDate, '2023-07-22T04:26:40.000Z')
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('downloadMediaStream backfills missing .json sidecar for skipped files when writeMetadata is enabled', async () => {
+  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'nami-backfill-'))
+
+  try {
+    // Media was previously downloaded and archived without metadata sidecar
+    const mediaPath = path.join(tmpDir, 'old_post.mp4')
+    await fs.writeFile(mediaPath, 'dummy video data')
+    await saveArchive(tmpDir, new Set(['old_post_id']))
+
+    const sidecarPath = path.join(tmpDir, 'old_post.json')
+    assert.equal(await fs.stat(sidecarPath).then(() => true).catch(() => false), false)
+
+    async function* mockItems(): AsyncGenerator<MediaItem> {
+      yield {
+        id: 'old_post_id',
+        url: 'https://example.com/old_post.mp4',
+        filename: 'old_post',
+        extension: 'mp4',
+        type: 'video',
+        caption: 'Classic clip #throwback',
+        date: 1650000000,
+        author: 'creator',
+        platform: 'tiktok',
+      }
+    }
+
+    const result = await downloadMediaStream(mockItems(), {
+      jobName: 'BackfillJob',
+      destDir: tmpDir,
+      writeMetadata: true,
+    })
+
+    assert.equal(result.skipped, 1)
+    assert.equal(result.downloaded, 0)
+
+    // Sidecar was backfilled!
+    assert.ok(await fs.stat(sidecarPath).then(() => true).catch(() => false))
+    const sidecar = JSON.parse(await fs.readFile(sidecarPath, 'utf-8'))
+    assert.equal(sidecar.id, 'old_post_id')
+    assert.equal(sidecar.caption, 'Classic clip #throwback')
+    assert.deepEqual(sidecar.hashtags, ['throwback'])
+  } finally {
+    await fs.rm(tmpDir, {recursive: true, force: true})
+  }
+})

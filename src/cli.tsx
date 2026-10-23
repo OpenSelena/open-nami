@@ -55,6 +55,7 @@ const HELP = `
     --until <date>       Filter posts on or before date (YYYY-MM-DD)
     -l, --limit <n>      Limit maximum items to download
     --resume             Resume download from saved pagination checkpoint
+    --write-metadata     Save post metadata & captions to sidecar .json files
     --completion         Generate shell completion script (bash, zsh, fish, powershell)
 
   Hotkeys in TUI:
@@ -159,6 +160,7 @@ async function main() {
   let until: string | undefined
   let limit: number | undefined
   let isResume = false
+  let writeMetadata = false
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
@@ -198,6 +200,8 @@ async function main() {
       if (!isNaN(parsed) && parsed > 0) limit = parsed
     } else if (arg === '--resume') {
       isResume = true
+    } else if (arg === '--write-metadata') {
+      writeMetadata = true
     } else if (arg === '-b' || arg === '--batch') {
       batchFile = args[++i]
     } else if (arg.startsWith('--batch=')) {
@@ -225,6 +229,7 @@ async function main() {
     const {promise} = startClipboardWatcher({
       choice,
       outputDir,
+      writeMetadata,
       signal: controller.signal,
       onDetected: (p) => {
         console.log(`\n❯ \x1b[32mDetected:\x1b[0m @${p.username} on \x1b[35m${p.platform}\x1b[0m`)
@@ -272,6 +277,7 @@ async function main() {
         until,
         limit,
         resume: isResume,
+        writeMetadata,
         signal: controller.signal,
         onAccountStart: (item, idx, total) => {
           console.log(`\x1b[36m[${idx + 1}/${total}]\x1b[0m \x1b[1m@${item.profile.username}\x1b[0m on \x1b[35m${item.profile.platform}\x1b[0m…`)
@@ -319,6 +325,7 @@ async function main() {
         until,
         limit,
         resume: isResume,
+        writeMetadata,
         onProgress: (progress) => {
           if (progress.currentFile) {
             console.log(`[open-nami] [${progress.job}] ${progress.currentFile}`)
@@ -356,6 +363,7 @@ async function main() {
         until={until}
         limit={limit}
         resume={isResume}
+        writeMetadata={writeMetadata}
         version={VERSION}
       />,
       {stdout: captureFrames(process.stdout)},

@@ -6,6 +6,7 @@ import {pipeline} from 'node:stream/promises'
 import {HttpClient} from './extractors/http.js'
 import type {MediaItem, MediaType} from './extractors/types.js'
 import type {EngineProgress} from './types.js'
+import {buildMetadataSidecar, writeMetadataSidecar} from './metadata.js'
 
 export const ARCHIVE_FILENAME = '.open-nami-archive.json'
 export const YTDLP_ARCHIVE_FILENAME = 'archive_yt-dlp.txt'
@@ -89,6 +90,9 @@ export interface StreamDownloadOptions {
   signal?: AbortSignal
   concurrency?: number
   limit?: number
+  writeMetadata?: boolean
+  defaultPlatform?: string
+  defaultAuthor?: string
   onProgress?: (progress: EngineProgress) => void
 }
 
@@ -222,8 +226,15 @@ export async function downloadMediaStream(
       const ext = item.extension.replace(/^\./, '') || (item.type === 'video' ? 'mp4' : 'jpg')
       const finalFilename = sanitizeFilename(item.filename, item.id, ext)
       const finalPath = path.join(targetDir, finalFilename)
+      const sidecarPath = path.join(targetDir, `${path.parse(finalFilename).name}.json`)
 
       if (archive.has(item.id) && fs.existsSync(finalPath)) {
+        if (options.writeMetadata && !fs.existsSync(sidecarPath)) {
+          try {
+            const sidecar = buildMetadataSidecar(item, finalFilename, options.defaultPlatform, options.defaultAuthor)
+            await writeMetadataSidecar(sidecarPath, sidecar, item.date)
+          } catch {}
+        }
         skipped++
         onProgress?.({
           job: jobName,
@@ -277,6 +288,13 @@ export async function downloadMediaStream(
         }
 
         await fsPromises.rename(tmpPath, finalPath)
+
+        if (options.writeMetadata) {
+          try {
+            const sidecar = buildMetadataSidecar(item, finalFilename, options.defaultPlatform, options.defaultAuthor)
+            await writeMetadataSidecar(sidecarPath, sidecar, item.date)
+          } catch {}
+        }
 
         archive.add(item.id)
         downloaded++

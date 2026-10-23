@@ -13,6 +13,12 @@ export interface MediaItem {
   width?: number
   height?: number
   thumbnailUrl?: string
+  author?: string
+  platform?: SupportedPlatform
+  carouselId?: string
+  carouselIndex?: number
+  carouselTotal?: number
+  metadata?: Record<string, any>
 }
 
 export type SubDirChoice = 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All'

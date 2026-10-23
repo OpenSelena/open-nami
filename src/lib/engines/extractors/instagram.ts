@@ -81,6 +81,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
   const anyNode = node as any
   const baseId = node.shortcode || node.id || anyNode.pk
   const date = node.taken_at_timestamp || anyNode.taken_at
+  const caption = anyNode.edge_media_to_caption?.edges?.[0]?.node?.text || anyNode.caption?.text || (typeof anyNode.caption === 'string' ? anyNode.caption : undefined)
 
   // Handle carousel / sidecar posts (GraphQL edge_sidecar_to_children or REST carousel_media)
   const childrenEdges = node.edge_sidecar_to_children?.edges
@@ -97,6 +98,12 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
       for (const item of subItems) {
         item.id = `${baseId}_${index + 1}`
         item.filename = `${username}_${date || baseId}_${index + 1}`
+        item.author = username
+        item.platform = 'instagram'
+        item.caption = item.caption || caption
+        item.carouselId = baseId
+        item.carouselIndex = index + 1
+        item.carouselTotal = childrenList.length
         items.push(item)
       }
     })
@@ -115,6 +122,9 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
         filename: `${username}_${date || baseId}`,
         extension: 'mp4',
         type: 'video',
+        caption,
+        author: username,
+        platform: 'instagram',
         date,
         width: video?.width ?? node.dimensions?.width,
         height: video?.height ?? node.dimensions?.height,
@@ -131,6 +141,9 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
           filename: `${username}_${date || baseId}`,
           extension: 'jpg',
           type: 'photo',
+          caption,
+          author: username,
+          platform: 'instagram',
           date,
           width: candidate?.width ?? node.dimensions?.width,
           height: candidate?.height ?? node.dimensions?.height,
@@ -147,6 +160,9 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
         filename: `${username}_${date || baseId}`,
         extension: 'jpg',
         type: 'photo',
+        caption,
+        author: username,
+        platform: 'instagram',
         date,
         width: candidate?.width ?? node.dimensions?.width,
         height: candidate?.height ?? node.dimensions?.height,
@@ -160,6 +176,7 @@ export function parseIgNodeToMediaItems(node: IgMediaNode, username: string): Me
 export function parseReelItemToMediaItem(item: any, username: string): MediaItem | null {
   const id = item.id || item.pk || String(Date.now())
   const date = item.taken_at || item.created_at
+  const caption = item.caption?.text || (typeof item.caption === 'string' ? item.caption : undefined)
   const isVideo = item.media_type === 2 || Boolean(item.video_versions && item.video_versions.length > 0)
 
   if (isVideo) {
@@ -173,6 +190,9 @@ export function parseReelItemToMediaItem(item: any, username: string): MediaItem
       filename: `${username}_${date || id}`,
       extension: 'mp4',
       type: 'video',
+      caption,
+      author: username,
+      platform: 'instagram',
       date,
       width: video?.width ?? item.original_width,
       height: video?.height ?? item.original_height,
@@ -189,6 +209,9 @@ export function parseReelItemToMediaItem(item: any, username: string): MediaItem
       filename: `${username}_${date || id}`,
       extension: 'jpg',
       type: 'photo',
+      caption,
+      author: username,
+      platform: 'instagram',
       date,
       width: candidate?.width ?? item.original_width,
       height: candidate?.height ?? item.original_height,

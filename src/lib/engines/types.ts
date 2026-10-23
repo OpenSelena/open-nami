@@ -33,6 +33,7 @@ export interface DispatchOptions {
   until?: string | number | Date
   limit?: number
   resume?: boolean
+  writeMetadata?: boolean
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void
   runnerOverrides?: {

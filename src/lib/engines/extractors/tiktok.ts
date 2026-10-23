@@ -111,6 +111,11 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
           type: 'photo',
           caption,
           date,
+          author: username,
+          platform: 'tiktok',
+          carouselId: id,
+          carouselIndex: idx + 1,
+          carouselTotal: imageList.length,
         })
       }
     })
@@ -131,6 +136,8 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
       width: video?.width,
       height: video?.height,
       thumbnailUrl: video?.cover || video?.originCover,
+      author: username,
+      platform: 'tiktok',
     })
   }
 
