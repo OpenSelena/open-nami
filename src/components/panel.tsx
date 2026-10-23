@@ -9,13 +9,16 @@ import {useTheme} from '../theme.js'
  */
 export function Panel({title, width, children}: {title: string; width: number; children: ReactNode}) {
   const theme = useTheme()
-  const inner = width - 2
-  const tail = Math.max(0, inner - title.length - 3)
+  const inner = Math.max(0, width - 2)
+  const maxTitleLen = Math.max(0, inner - 4)
+  const displayTitle = title.length > maxTitleLen ? title.slice(0, Math.max(0, maxTitleLen - 1)) + '…' : title
+  const tail = Math.max(0, inner - displayTitle.length - 3)
+
   return (
     <Box flexDirection="column" width={width}>
-      <Text>
+      <Text wrap="truncate-end">
         <Text color={theme.gray} dimColor={theme.dimSecondary}>{'╭─ '}</Text>
-        <Text color={theme.primary}>{title}</Text>
+        <Text color={theme.primary}>{displayTitle}</Text>
         <Text color={theme.gray} dimColor={theme.dimSecondary}>{` ${'─'.repeat(tail)}╮`}</Text>
       </Text>
       <Box

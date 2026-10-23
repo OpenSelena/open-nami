@@ -2,6 +2,7 @@ import {test} from 'node:test'
 import assert from 'node:assert/strict'
 import {
   parseDateBoundary,
+  resolveDateFilter,
   parseLimit,
   shouldIncludeItem,
   filterMediaStream,
@@ -17,6 +18,42 @@ test('parseDateBoundary parses ISO dates with correct since/until boundaries', (
   assert.equal(since, Math.floor(new Date('2024-05-01T00:00:00.000Z').getTime() / 1000))
   assert.equal(until, Math.floor(new Date('2024-05-01T23:59:59.999Z').getTime() / 1000))
   assert.ok(until > since)
+})
+
+test('parseDateBoundary parses 4-digit years (2021, 2022) as full calendar year boundaries', () => {
+  const since2021 = parseDateBoundary('2021', 'since')
+  const until2021 = parseDateBoundary('2021', 'until')
+
+  assert.ok(since2021 !== undefined)
+  assert.ok(until2021 !== undefined)
+  assert.equal(since2021, Math.floor(new Date('2021-01-01T00:00:00.000Z').getTime() / 1000))
+  assert.equal(until2021, Math.floor(new Date('2021-12-31T23:59:59.999Z').getTime() / 1000))
+  assert.ok(until2021 > since2021)
+
+  const since2022 = parseDateBoundary('2022', 'since')
+  const until2022 = parseDateBoundary('2022', 'until')
+  assert.equal(since2022, Math.floor(new Date('2022-01-01T00:00:00.000Z').getTime() / 1000))
+  assert.equal(until2022, Math.floor(new Date('2022-12-31T23:59:59.999Z').getTime() / 1000))
+})
+
+test('parseDateBoundary parses YYYY-MM strings correctly', () => {
+  const since = parseDateBoundary('2021-05', 'since')
+  const until = parseDateBoundary('2021-05', 'until')
+
+  assert.ok(since !== undefined)
+  assert.ok(until !== undefined)
+  assert.equal(since, Math.floor(new Date('2021-05-01T00:00:00.000Z').getTime() / 1000))
+  assert.equal(until, Math.floor(new Date('2021-05-31T23:59:59.999Z').getTime() / 1000))
+})
+
+test('resolveDateFilter resolves years, ranges, and offsets', () => {
+  assert.deepEqual(resolveDateFilter('2021'), {since: '2021', until: '2021'})
+  assert.deepEqual(resolveDateFilter('2022'), {since: '2022', until: '2022'})
+  assert.deepEqual(resolveDateFilter('2021..2022'), {since: '2021', until: '2022'})
+  assert.deepEqual(resolveDateFilter('24h'), {since: '24h', until: undefined})
+  assert.deepEqual(resolveDateFilter('7d'), {since: '7d', until: undefined})
+  assert.deepEqual(resolveDateFilter('all'), {})
+  assert.deepEqual(resolveDateFilter(undefined), {})
 })
 
 test('parseDateBoundary parses compact YYYYMMDD date format', () => {
@@ -58,9 +95,11 @@ test('parseDateBoundary returns undefined on invalid inputs', () => {
 
 test('parseLimit parses positive integers safely', () => {
   assert.equal(parseLimit('50'), 50)
+  assert.equal(parseLimit('24'), 24)
   assert.equal(parseLimit(100), 100)
   assert.equal(parseLimit(0), undefined)
   assert.equal(parseLimit(-5), undefined)
+  assert.equal(parseLimit('all'), undefined)
   assert.equal(parseLimit('abc'), undefined)
   assert.equal(parseLimit(undefined), undefined)
 })

@@ -266,6 +266,7 @@ function InnerApp({
     const targetChoice = typeof choiceOrOptions === 'string' ? choiceOrOptions : choiceOrOptions.choice
     const targetLimit = typeof choiceOrOptions === 'string' ? effectiveLimit : (choiceOrOptions.limit ?? effectiveLimit)
     const targetSince = typeof choiceOrOptions === 'string' ? since : (choiceOrOptions.since ?? since)
+    const targetUntil = typeof choiceOrOptions === 'string' ? until : (choiceOrOptions.until ?? until)
     const targetResume = typeof choiceOrOptions === 'string' ? resume : (choiceOrOptions.resume ?? resume)
     const targetWriteMetadata = typeof choiceOrOptions === 'string' ? effectiveWriteMetadata : (choiceOrOptions.writeMetadata ?? effectiveWriteMetadata)
 
@@ -278,7 +279,7 @@ function InnerApp({
         choice: targetChoice,
         outputDir: targetDir,
         since: targetSince,
-        until,
+        until: targetUntil,
         limit: targetLimit,
         resume: targetResume,
         writeMetadata: targetWriteMetadata,
@@ -596,6 +597,7 @@ function InnerApp({
           outputDir={outputDir}
           initialLimit={effectiveLimit}
           initialSince={since}
+          initialUntil={until}
           initialWriteMetadata={effectiveWriteMetadata}
           initialResume={resume}
           onSelect={(choiceOrOptions) => handleModeSelect(choiceOrOptions, phase.profile)}

@@ -4,6 +4,23 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.4] - 2026-10-24
+
+### Fixed & Enhanced
+- **TUI Text Formatting & Border Line Wrapping**:
+  - Implemented automatic title length clamping and `wrap="truncate-end"` in `Panel` and `FramedInput`, preventing top corner border characters (`╮`) from wrapping on 80-column terminals.
+  - Shortened verbose panel titles, removed cluttered explanatory paragraphs, and converted options to concise badges (`[c] Media`, `[l] Posts`, `[d] Date`, `[m] Meta`, `[r] Resume`).
+- **Batch Queue Keystroke Isolation**:
+  - Isolated focus between the text input and options bar in `BatchView`, preventing bare letters (`c`, `l`, `d`, `m`, `r`) from mutating filters while typing profile handles or URLs.
+  - Added smooth arrow navigation (`↓` to focus options, `↑` to return to text input).
+- **Calendar Year & Date Range Filters**:
+  - Added 4-digit calendar year parsing (`^\d{4}$`) to `parseDateBoundary` in `filters.ts`, properly mapping years like `2021` and `2022` to Jan 1st for `since` and Dec 31st for `until`.
+  - Added `resolveDateFilter` supporting single years, year ranges (`2021..2022`), year-month strings (`2021-05`), and relative offsets (`24h`, `7d`, `30d`).
+- **Custom Limit & Date Inputs in TUI**:
+  - Added quick presets for `2021`, `2022`, `2023`, `2024`, and `24 posts` directly in `[d]` and `[l]` cycle loops across `PickingView` and `BatchView`.
+  - Added an inline custom modal allowing users to type any custom limit (e.g. `24`) or date/year (e.g. `2021`, `2022`) directly in the TUI with Enter to save and Esc to cancel.
+  - Forwarded `until` parameter through `PickingOptions` to the download dispatcher.
+
 ## [1.1.0] - 2026-10-23
 
 ### Added

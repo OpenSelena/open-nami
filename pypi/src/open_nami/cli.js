@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.3",
+      version: "1.2.4",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -36085,15 +36085,17 @@ function FramedInput({
   children
 }) {
   const theme = useTheme();
-  const inner = width - 2;
-  const tail = Math.max(0, inner - title.length - 3);
+  const inner = Math.max(0, width - 2);
+  const maxTitleLen = Math.max(0, inner - 4);
+  const displayTitle = title.length > maxTitleLen ? title.slice(0, Math.max(0, maxTitleLen - 1)) + "\u2026" : title;
+  const tail = Math.max(0, inner - displayTitle.length - 3);
   const buttonW = button ? frameButtonWidth(button) : 0;
   const fillColor = buttonDim ? theme.gray : theme.primary;
   return /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Box_default, { width: width + buttonW, children: [
     /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Box_default, { flexDirection: "column", width, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Text, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Text, { wrap: "truncate-end", children: [
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u256D\u2500 " }),
-        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Text, { color: theme.primary, children: title }),
+        /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Text, { color: theme.primary, children: displayTitle }),
         /* @__PURE__ */ (0, import_jsx_runtime4.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` ${"\u2500".repeat(tail)}${button ? "\u2500" : "\u256E"}` })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime4.jsxs)(Box_default, { width, height: 1, overflow: "hidden", children: [
@@ -36863,12 +36865,14 @@ var SelectInput_default = SelectInput;
 var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
 function Panel({ title, width, children }) {
   const theme = useTheme();
-  const inner = width - 2;
-  const tail = Math.max(0, inner - title.length - 3);
+  const inner = Math.max(0, width - 2);
+  const maxTitleLen = Math.max(0, inner - 4);
+  const displayTitle = title.length > maxTitleLen ? title.slice(0, Math.max(0, maxTitleLen - 1)) + "\u2026" : title;
+  const tail = Math.max(0, inner - displayTitle.length - 3);
   return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Box_default, { flexDirection: "column", width, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Text, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Text, { wrap: "truncate-end", children: [
       /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u256D\u2500 " }),
-      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.primary, children: title }),
+      /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.primary, children: displayTitle }),
       /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` ${"\u2500".repeat(tail)}\u256E` })
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
@@ -39523,6 +39527,15 @@ function parseDateBoundary(input, boundary) {
     return nowSeconds - offsetSeconds;
   }
   if (/^\d+$/.test(trimmed)) {
+    if (trimmed.length === 4) {
+      const year = parseInt(trimmed, 10);
+      if (year >= 1990 && year <= 2100) {
+        const date = boundary === "until" ? new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999)) : new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+        if (!isNaN(date.getTime())) {
+          return Math.floor(date.getTime() / 1e3);
+        }
+      }
+    }
     if (trimmed.length === 8) {
       const year = parseInt(trimmed.slice(0, 4), 10);
       const month = parseInt(trimmed.slice(4, 6), 10) - 1;
@@ -39538,6 +39551,14 @@ function parseDateBoundary(input, boundary) {
     }
     return num;
   }
+  if (/^\d{4}-\d{2}$/.test(trimmed)) {
+    const year = parseInt(trimmed.slice(0, 4), 10);
+    const month = parseInt(trimmed.slice(5, 7), 10);
+    const date = boundary === "until" ? new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)) : new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    if (!isNaN(date.getTime())) {
+      return Math.floor(date.getTime() / 1e3);
+    }
+  }
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
     const timeStr = boundary === "until" ? "T23:59:59.999Z" : "T00:00:00.000Z";
     const parsed2 = /* @__PURE__ */ new Date(`${trimmed}${timeStr}`);
@@ -39551,8 +39572,34 @@ function parseDateBoundary(input, boundary) {
   }
   return void 0;
 }
+function resolveDateFilter(input) {
+  if (!input) return {};
+  const trimmed = input.trim();
+  if (!trimmed || trimmed.toLowerCase() === "all" || trimmed.toLowerCase() === "none") return {};
+  if (trimmed.includes("..") || /\s+-\s+/.test(trimmed)) {
+    const parts = trimmed.split(/\.\.|\s+-\s+/);
+    return {
+      since: parts[0]?.trim(),
+      until: parts[1]?.trim()
+    };
+  }
+  if (/^\d{4}$/.test(trimmed) || /^\d{4}-\d{2}$/.test(trimmed)) {
+    return {
+      since: trimmed,
+      until: trimmed
+    };
+  }
+  return {
+    since: trimmed,
+    until: void 0
+  };
+}
 function parseLimit(input) {
   if (input === void 0 || input === null) return void 0;
+  if (typeof input === "string") {
+    const trimmed = input.trim().toLowerCase();
+    if (!trimmed || trimmed === "all" || trimmed === "none" || trimmed === "0") return void 0;
+  }
   const num = typeof input === "number" ? input : parseInt(String(input).trim(), 10);
   if (isNaN(num) || num <= 0) return void 0;
   return Math.floor(num);
@@ -40545,6 +40592,8 @@ function getPickingOptions(platform2) {
   });
   return items;
 }
+var DATE_PRESETS = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
+var LIMIT_PRESETS = [void 0, 10, 24, 50, 100, "custom"];
 function PickingView({
   contentWidth,
   profile,
@@ -40562,14 +40611,17 @@ function PickingView({
   const items = getPickingOptions(profile.platform);
   const [limit, setLimit] = (0, import_react42.useState)(initialLimit);
   const [dateFilter, setDateFilter] = (0, import_react42.useState)(() => {
-    if (typeof initialSince === "string" && (initialSince === "24h" || initialSince === "7d" || initialSince === "30d")) {
-      return initialSince;
+    if (typeof initialSince === "string" && initialSince.trim()) {
+      return initialSince.trim();
     }
     return "all";
   });
   const [writeMetadata, setWriteMetadata] = (0, import_react42.useState)(initialWriteMetadata);
   const [resume, setResume] = (0, import_react42.useState)(initialResume);
   const [hasCheckpoint, setHasCheckpoint] = (0, import_react42.useState)(false);
+  const [editingModal, setEditingModal] = (0, import_react42.useState)(null);
+  const [customLimitText, setCustomLimitText] = (0, import_react42.useState)("");
+  const [customDateText, setCustomDateText] = (0, import_react42.useState)("");
   const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir);
   (0, import_react42.useEffect)(() => {
     let isMounted = true;
@@ -40585,29 +40637,40 @@ function PickingView({
     };
   }, [targetDir]);
   const cycleLimit = (0, import_react42.useCallback)(() => {
-    setLimit((prev) => {
-      if (!prev) return 10;
-      if (prev === 10) return 25;
-      if (prev === 25) return 50;
-      if (prev === 50) return 100;
-      return void 0;
-    });
-  }, []);
+    const curIdx = LIMIT_PRESETS.findIndex((p) => p === limit);
+    const nextIdx = (curIdx + 1) % LIMIT_PRESETS.length;
+    const nextVal = LIMIT_PRESETS[nextIdx];
+    if (nextVal === "custom") {
+      setCustomLimitText(limit ? String(limit) : "24");
+      setEditingModal("limit");
+    } else {
+      setLimit(nextVal);
+    }
+  }, [limit]);
   const cycleDate = (0, import_react42.useCallback)(() => {
-    setDateFilter((prev) => {
-      if (prev === "all") return "24h";
-      if (prev === "24h") return "7d";
-      if (prev === "7d") return "30d";
-      return "all";
-    });
-  }, []);
+    const curIdx = DATE_PRESETS.indexOf(dateFilter);
+    const nextIdx = (curIdx + 1) % DATE_PRESETS.length;
+    const nextVal = DATE_PRESETS[nextIdx];
+    if (nextVal === "custom") {
+      setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
+      setEditingModal("date");
+    } else {
+      setDateFilter(nextVal);
+    }
+  }, [dateFilter]);
   const toggleMetadata = (0, import_react42.useCallback)(() => {
     setWriteMetadata((prev) => !prev);
   }, []);
   const toggleResume = (0, import_react42.useCallback)(() => {
     setResume((prev) => !prev);
   }, []);
-  use_input_default((input) => {
+  use_input_default((input, key) => {
+    if (editingModal) {
+      if (key.escape) {
+        setEditingModal(null);
+      }
+      return;
+    }
     if (input === "l" || input === "L") {
       cycleLimit();
       return;
@@ -40626,10 +40689,13 @@ function PickingView({
     }
   }, { isActive: Boolean(process.stdin.isTTY) });
   const handleItemSelect = (selectedChoice) => {
+    if (editingModal) return;
+    const dateRange = resolveDateFilter(dateFilter);
     onSelect({
       choice: selectedChoice,
       limit,
-      since: dateFilter === "all" ? void 0 : dateFilter,
+      since: dateRange.since,
+      until: dateRange.until,
       writeMetadata,
       resume
     });
@@ -40647,12 +40713,11 @@ function PickingView({
         profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Choose media category to download." }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Use hotkeys [l], [d], [m], [r] to adjust options." }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select media type. Hotkeys [l], [d], [m], [r] adjust options." }),
       hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Panel, { title: "Download", width: 38, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+      !editingModal && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
         SelectInput_default,
         {
           indicatorComponent: ChoiceIndicator,
@@ -40666,29 +40731,61 @@ function PickingView({
           onHighlight: (item) => onHighlight?.(item.value)
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
         Box_default,
         {
           flexDirection: "column",
           marginTop: 1,
           borderStyle: "round",
-          borderColor: theme.gray,
-          borderDimColor: true,
+          borderColor: editingModal ? theme.primary : theme.gray,
+          borderDimColor: !editingModal,
           paddingX: 1,
-          children: [
+          children: editingModal === "limit" ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, color: theme.primary, children: "Set post limit (e.g. 24, all):" }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+              TextInput,
+              {
+                value: customLimitText,
+                onChange: setCustomLimitText,
+                onSubmit: (val) => {
+                  const parsed = parseLimit(val);
+                  setLimit(parsed);
+                  setEditingModal(null);
+                },
+                width: 24
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
+          ] }) : editingModal === "date" ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, color: theme.primary, children: "Set date or year (e.g. 2021, 7d):" }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+              TextInput,
+              {
+                value: customDateText,
+                onChange: setCustomDateText,
+                onSubmit: (val) => {
+                  const trimmed = val.trim();
+                  setDateFilter(trimmed ? trimmed : "all");
+                  setEditingModal(null);
+                },
+                width: 24
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
               /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[l] Limit: ",
+                "[l] Posts: ",
                 /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit}` : "ALL" })
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                 "[d] Date: ",
-                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter === "all" ? "ALL" : dateFilter.toUpperCase() })
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter.toUpperCase() })
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
               /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[m] Sidecars: ",
+                "[m] Meta: ",
                 /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
@@ -40696,7 +40793,7 @@ function PickingView({
                 /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
               ] })
             ] })
-          ]
+          ] })
         }
       )
     ] })
@@ -41836,6 +41933,8 @@ async function runBatchQueue(options) {
 
 // src/components/views/batch-view.tsx
 var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+var DATE_PRESETS2 = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
+var LIMIT_PRESETS2 = [void 0, 10, 24, 50, 100, "custom"];
 function BatchView({
   onBack,
   outputDir,
@@ -41851,6 +41950,9 @@ function BatchView({
   const [rawText, setRawText] = (0, import_react47.useState)("");
   const [filePath, setFilePath] = (0, import_react47.useState)("");
   const [errorMessage, setErrorMessage] = (0, import_react47.useState)(null);
+  const [focusSection, setFocusSection] = (0, import_react47.useState)("input");
+  const [customLimitText, setCustomLimitText] = (0, import_react47.useState)("");
+  const [customDateText, setCustomDateText] = (0, import_react47.useState)("");
   const [choice, setChoice] = (0, import_react47.useState)(defaultChoice);
   const [limit, setLimit] = (0, import_react47.useState)(defaultLimit);
   const [dateFilter, setDateFilter] = (0, import_react47.useState)("all");
@@ -41870,22 +41972,27 @@ function BatchView({
     });
   }, []);
   const cycleLimit = (0, import_react47.useCallback)(() => {
-    setLimit((prev) => {
-      if (!prev) return 10;
-      if (prev === 10) return 25;
-      if (prev === 25) return 50;
-      if (prev === 50) return 100;
-      return void 0;
-    });
-  }, []);
+    const curIdx = LIMIT_PRESETS2.findIndex((p) => p === limit);
+    const nextIdx = (curIdx + 1) % LIMIT_PRESETS2.length;
+    const nextVal = LIMIT_PRESETS2[nextIdx];
+    if (nextVal === "custom") {
+      setCustomLimitText(limit ? String(limit) : "24");
+      setFocusSection("custom-limit");
+    } else {
+      setLimit(nextVal);
+    }
+  }, [limit]);
   const cycleDate = (0, import_react47.useCallback)(() => {
-    setDateFilter((prev) => {
-      if (prev === "all") return "24h";
-      if (prev === "24h") return "7d";
-      if (prev === "7d") return "30d";
-      return "all";
-    });
-  }, []);
+    const curIdx = DATE_PRESETS2.indexOf(dateFilter);
+    const nextIdx = (curIdx + 1) % DATE_PRESETS2.length;
+    const nextVal = DATE_PRESETS2[nextIdx];
+    if (nextVal === "custom") {
+      setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
+      setFocusSection("custom-date");
+    } else {
+      setDateFilter(nextVal);
+    }
+  }, [dateFilter]);
   const toggleMetadata = (0, import_react47.useCallback)(() => {
     setWriteMetadata((prev) => !prev);
   }, []);
@@ -41916,12 +42023,14 @@ function BatchView({
     abortControllerRef.current = controller;
     setPhase("running");
     try {
+      const dateRange = resolveDateFilter(dateFilter);
       const queueRes = await runBatchQueue({
         filePath: inputField === "file" ? filePath.trim() : void 0,
         lines: inputField === "text" ? lines : void 0,
         choice,
         outputDir,
-        since: dateFilter === "all" ? void 0 : dateFilter,
+        since: dateRange.since,
+        until: dateRange.until,
         limit,
         resume,
         writeMetadata,
@@ -41937,7 +42046,7 @@ function BatchView({
             return next;
           });
         },
-        onAccountProgress: (item, progress) => {
+        onAccountProgress: (_item, progress) => {
           setCurrentProgressText(progress.statusText);
         },
         onAccountComplete: (item, idx) => {
@@ -41974,6 +42083,14 @@ function BatchView({
   }, [inputField, filePath, rawText, choice, outputDir, dateFilter, limit, resume, writeMetadata]);
   use_input_default((input, key) => {
     if (key.escape) {
+      if (focusSection === "custom-limit" || focusSection === "custom-date") {
+        setFocusSection("options");
+        return;
+      }
+      if (focusSection === "options") {
+        setFocusSection("input");
+        return;
+      }
       if (phase === "running") {
         abortControllerRef.current?.abort();
         setPhase("input");
@@ -41995,25 +42112,67 @@ function BatchView({
       return;
     }
     if (phase === "input") {
-      if (input === "c" || input === "C") {
-        cycleChoice();
+      if (focusSection === "custom-limit" || focusSection === "custom-date") {
         return;
       }
-      if (input === "l" || input === "L") {
-        cycleLimit();
-        return;
+      if (key.ctrl) {
+        if (input === "l" || input === "L") {
+          setCustomLimitText(limit ? String(limit) : "24");
+          setFocusSection("custom-limit");
+          return;
+        }
+        if (input === "d" || input === "D") {
+          setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
+          setFocusSection("custom-date");
+          return;
+        }
+        if (input === "c" || input === "C") {
+          cycleChoice();
+          return;
+        }
+        if (input === "m" || input === "M") {
+          toggleMetadata();
+          return;
+        }
+        if (input === "r" || input === "R") {
+          toggleResume();
+          return;
+        }
       }
-      if (input === "d" || input === "D") {
-        cycleDate();
-        return;
-      }
-      if (input === "m" || input === "M") {
-        toggleMetadata();
-        return;
-      }
-      if (input === "r" || input === "R") {
-        toggleResume();
-        return;
+      if (focusSection === "input") {
+        if (key.downArrow) {
+          setFocusSection("options");
+          return;
+        }
+      } else if (focusSection === "options") {
+        if (key.upArrow) {
+          setFocusSection("input");
+          return;
+        }
+        if (key.return) {
+          startQueue();
+          return;
+        }
+        if (input === "c" || input === "C") {
+          cycleChoice();
+          return;
+        }
+        if (input === "l" || input === "L") {
+          cycleLimit();
+          return;
+        }
+        if (input === "d" || input === "D") {
+          cycleDate();
+          return;
+        }
+        if (input === "m" || input === "M") {
+          toggleMetadata();
+          return;
+        }
+        if (input === "r" || input === "R") {
+          toggleResume();
+          return;
+        }
       }
     }
   }, { isActive: Boolean(process.stdin.isTTY) });
@@ -42022,70 +42181,114 @@ function BatchView({
   const totalCount = queueItems.length > 0 ? queueItems.length : 1;
   const percent = Math.min(100, Math.floor(completedCount / totalCount * 100));
   return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Multi-Account Queue Manager", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Queue multiple creator profiles with automatic anti-ban cooldown between downloads." }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { marginBottom: 1, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "text" ? theme.primary : theme.gray, children: inputField === "text" ? "\u25CF Paste Links / Usernames" : "\u25CB Paste Links / Usernames" }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "   (Tab to switch)   " }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "file" ? theme.primary : theme.gray, children: inputField === "file" ? "\u25CF Load Batch File (.txt)" : "\u25CB Load Batch File (.txt)" })
+    phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { marginBottom: 1, justifyContent: "center", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "text" ? theme.primary : theme.gray, children: inputField === "text" ? "\u25CF Links / Handles" : "\u25CB Links / Handles" }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "   \xB7   " }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "file" ? theme.primary : theme.gray, children: inputField === "file" ? "\u25CF File (.txt)" : "\u25CB File (.txt)" })
       ] }),
-      inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Enter links or @handles separated by commas or spaces", width: Math.max(60, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Links or @handles", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         TextInput,
         {
           value: rawText,
           onChange: setRawText,
           onSubmit: startQueue,
-          placeholder: "e.g. instagram.com/user1, @user2, tiktok.com/@user3",
-          width: Math.max(54, boxWidth - 10),
+          placeholder: "@user1, @user2, tiktok.com/@user3\u2026",
+          width: Math.max(50, boxWidth - 10),
+          focus: focusSection === "input",
           onTab: () => setInputField("file"),
-          onArrowDown: () => setInputField("file")
+          onArrowDown: () => setFocusSection("options")
         }
-      ) }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Enter path to .txt batch file", width: Math.max(60, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+      ) }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Batch file (.txt)", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         TextInput,
         {
           value: filePath,
           onChange: setFilePath,
           onSubmit: startQueue,
-          placeholder: "e.g. targets.txt or C:\\path\\to\\creators.txt",
-          width: Math.max(54, boxWidth - 10),
+          placeholder: "e.g. creators.txt or C:\\path\\creators.txt",
+          width: Math.max(50, boxWidth - 10),
+          focus: focusSection === "input",
           onTab: () => setInputField("text"),
-          onArrowUp: () => setInputField("text")
+          onArrowDown: () => setFocusSection("options")
         }
       ) }),
       errorMessage ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: "red", children: [
         "\u2717 ",
         errorMessage
       ] }) }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Batch Queue Options:" }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "[c] Target: ",
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: choice.toUpperCase() })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "[l] Limit: ",
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit} posts` : "ALL" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "[d] Date: ",
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter === "all" ? "ALL TIME" : dateFilter.toUpperCase() })
-        ] })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "[m] Sidecars: ",
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "[r] Resume Checkpoint: ",
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[\u21B5] Start Queue" })
-      ] })
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        Box_default,
+        {
+          flexDirection: "column",
+          marginTop: 1,
+          borderStyle: "round",
+          borderColor: focusSection === "options" || focusSection === "custom-limit" || focusSection === "custom-date" ? theme.primary : theme.gray,
+          borderDimColor: focusSection === "input",
+          paddingX: 1,
+          children: focusSection === "custom-limit" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set post limit (e.g. 24, all):" }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+              TextInput,
+              {
+                value: customLimitText,
+                onChange: setCustomLimitText,
+                onSubmit: (val) => {
+                  const parsed = parseLimit(val);
+                  setLimit(parsed);
+                  setFocusSection("options");
+                },
+                width: 24
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
+          ] }) : focusSection === "custom-date" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set date or year (e.g. 2021, 2022, 7d):" }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+              TextInput,
+              {
+                value: customDateText,
+                onChange: setCustomDateText,
+                onSubmit: (val) => {
+                  const trimmed = val.trim();
+                  setDateFilter(trimmed ? trimmed : "all");
+                  setFocusSection("options");
+                },
+                width: 24
+              }
+            ) }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(import_jsx_runtime17.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[c] Media: ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: choice.toUpperCase() })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[l] Posts: ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit}` : "ALL" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[d] Date: ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter.toUpperCase() })
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[m] Meta: ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[r] Resume: ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: "[\u21B5] Start Queue" })
+            ] })
+          ] })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: focusSection === "input" ? "Press \u2193 to adjust options \xB7 \u21B5 to start queue" : "Hotkeys [c] [l] [d] [m] [r] \xB7 \u2191 to edit text \xB7 \u21B5 to start" }) })
     ] }) }),
-    phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running (Anti-Ban Hardened)", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginBottom: 1, children: [
         /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.primary, bold: true, children: [
           "Account ",
@@ -42096,9 +42299,9 @@ function BatchView({
           percent,
           "%)"
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isCooldown ? "\u23F3 Anti-ban cooldown active" : "\u25B6 Downloading" })
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isCooldown ? "\u23F3 Cooldown active" : "\u25B6 Downloading" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ProgressBar, { percent, width: 58 }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ProgressBar, { percent, width: 54 }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
       currentItem ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: theme.primary, paddingX: 1, paddingY: 1, children: [
         /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { children: [
@@ -42120,7 +42323,7 @@ function BatchView({
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[esc] Stop queue and return" })
     ] }) }),
-    phase === "done" && result && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Completed", width: Math.max(64, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    phase === "done" && result && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Completed", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { bold: true, color: theme.primary, children: [
         "\u2713 Successfully processed ",
         result.total,
@@ -42140,7 +42343,7 @@ function BatchView({
         result.totalDownloaded
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-        "\u2022 Total items skipped (already archived): ",
+        "\u2022 Total items skipped: ",
         result.totalSkipped
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
@@ -42376,6 +42579,7 @@ function InnerApp({
     const targetChoice = typeof choiceOrOptions === "string" ? choiceOrOptions : choiceOrOptions.choice;
     const targetLimit = typeof choiceOrOptions === "string" ? effectiveLimit : choiceOrOptions.limit ?? effectiveLimit;
     const targetSince = typeof choiceOrOptions === "string" ? since : choiceOrOptions.since ?? since;
+    const targetUntil = typeof choiceOrOptions === "string" ? until : choiceOrOptions.until ?? until;
     const targetResume = typeof choiceOrOptions === "string" ? resume : choiceOrOptions.resume ?? resume;
     const targetWriteMetadata = typeof choiceOrOptions === "string" ? effectiveWriteMetadata : choiceOrOptions.writeMetadata ?? effectiveWriteMetadata;
     setPhase({ name: "downloading", profile, choice: targetChoice });
@@ -42386,7 +42590,7 @@ function InnerApp({
         choice: targetChoice,
         outputDir: targetDir,
         since: targetSince,
-        until,
+        until: targetUntil,
         limit: targetLimit,
         resume: targetResume,
         writeMetadata: targetWriteMetadata,
@@ -42672,6 +42876,7 @@ function InnerApp({
         outputDir,
         initialLimit: effectiveLimit,
         initialSince: since,
+        initialUntil: until,
         initialWriteMetadata: effectiveWriteMetadata,
         initialResume: resume,
         onSelect: (choiceOrOptions) => handleModeSelect(choiceOrOptions, phase.profile),

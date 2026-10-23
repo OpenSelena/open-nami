@@ -8,6 +8,7 @@ import {TextInput} from '../text-input.js'
 import {ProgressBar} from '../progress-bar.js'
 import {runBatchQueue, type BatchItem, type BatchQueueResult} from '../../lib/batch.js'
 import {resolveDefaultDownloadDir} from '../../lib/engines/dispatcher.js'
+import {resolveDateFilter, parseLimit} from '../../lib/engines/filters.js'
 import {revealInFileManager} from '../../lib/reveal.js'
 import type {MediaTarget} from '../../lib/engines/types.js'
 import type {Theme} from '../../theme.js'
@@ -26,6 +27,9 @@ export interface BatchViewProps {
 
 type BatchPhase = 'input' | 'running' | 'done'
 
+const DATE_PRESETS = ['all', '24h', '7d', '30d', '2024', '2023', '2022', '2021', 'custom']
+const LIMIT_PRESETS: Array<number | 'custom' | undefined> = [undefined, 10, 24, 50, 100, 'custom']
+
 export function BatchView({
   onBack,
   outputDir,
@@ -42,10 +46,15 @@ export function BatchView({
   const [filePath, setFilePath] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  // Focus section: 'input' (main text field), 'options' (hotkey bar), or custom mini inputs
+  const [focusSection, setFocusSection] = useState<'input' | 'options' | 'custom-limit' | 'custom-date'>('input')
+  const [customLimitText, setCustomLimitText] = useState('')
+  const [customDateText, setCustomDateText] = useState('')
+
   // Options
   const [choice, setChoice] = useState<MediaTarget>(defaultChoice)
   const [limit, setLimit] = useState<number | undefined>(defaultLimit)
-  const [dateFilter, setDateFilter] = useState<'all' | '24h' | '7d' | '30d'>('all')
+  const [dateFilter, setDateFilter] = useState<string>('all')
   const [writeMetadata, setWriteMetadata] = useState(defaultWriteMetadata)
   const [resume, setResume] = useState(true)
 
@@ -67,23 +76,28 @@ export function BatchView({
   }, [])
 
   const cycleLimit = useCallback(() => {
-    setLimit(prev => {
-      if (!prev) return 10
-      if (prev === 10) return 25
-      if (prev === 25) return 50
-      if (prev === 50) return 100
-      return undefined
-    })
-  }, [])
+    const curIdx = LIMIT_PRESETS.findIndex(p => p === limit)
+    const nextIdx = (curIdx + 1) % LIMIT_PRESETS.length
+    const nextVal = LIMIT_PRESETS[nextIdx]
+    if (nextVal === 'custom') {
+      setCustomLimitText(limit ? String(limit) : '24')
+      setFocusSection('custom-limit')
+    } else {
+      setLimit(nextVal)
+    }
+  }, [limit])
 
   const cycleDate = useCallback(() => {
-    setDateFilter(prev => {
-      if (prev === 'all') return '24h'
-      if (prev === '24h') return '7d'
-      if (prev === '7d') return '30d'
-      return 'all'
-    })
-  }, [])
+    const curIdx = DATE_PRESETS.indexOf(dateFilter)
+    const nextIdx = (curIdx + 1) % DATE_PRESETS.length
+    const nextVal = DATE_PRESETS[nextIdx]
+    if (nextVal === 'custom') {
+      setCustomDateText(dateFilter !== 'all' ? dateFilter : '2021')
+      setFocusSection('custom-date')
+    } else {
+      setDateFilter(nextVal)
+    }
+  }, [dateFilter])
 
   const toggleMetadata = useCallback(() => {
     setWriteMetadata(prev => !prev)
@@ -123,12 +137,14 @@ export function BatchView({
     setPhase('running')
 
     try {
+      const dateRange = resolveDateFilter(dateFilter)
       const queueRes = await runBatchQueue({
         filePath: inputField === 'file' ? filePath.trim() : undefined,
         lines: inputField === 'text' ? lines : undefined,
         choice,
         outputDir,
-        since: dateFilter === 'all' ? undefined : dateFilter,
+        since: dateRange.since,
+        until: dateRange.until,
         limit,
         resume,
         writeMetadata,
@@ -144,7 +160,7 @@ export function BatchView({
             return next
           })
         },
-        onAccountProgress: (item, progress) => {
+        onAccountProgress: (_item, progress) => {
           setCurrentProgressText(progress.statusText)
         },
         onAccountComplete: (item, idx) => {
@@ -183,6 +199,14 @@ export function BatchView({
 
   useInput((input, key) => {
     if (key.escape) {
+      if (focusSection === 'custom-limit' || focusSection === 'custom-date') {
+        setFocusSection('options')
+        return
+      }
+      if (focusSection === 'options') {
+        setFocusSection('input')
+        return
+      }
       if (phase === 'running') {
         abortControllerRef.current?.abort()
         setPhase('input')
@@ -206,25 +230,71 @@ export function BatchView({
     }
 
     if (phase === 'input') {
-      if (input === 'c' || input === 'C') {
-        cycleChoice()
+      if (focusSection === 'custom-limit' || focusSection === 'custom-date') {
+        // Let TextInput handle editing inside mini modal
         return
       }
-      if (input === 'l' || input === 'L') {
-        cycleLimit()
-        return
+
+      // Allow Ctrl shortcuts from anywhere
+      if (key.ctrl) {
+        if (input === 'l' || input === 'L') {
+          setCustomLimitText(limit ? String(limit) : '24')
+          setFocusSection('custom-limit')
+          return
+        }
+        if (input === 'd' || input === 'D') {
+          setCustomDateText(dateFilter !== 'all' ? dateFilter : '2021')
+          setFocusSection('custom-date')
+          return
+        }
+        if (input === 'c' || input === 'C') {
+          cycleChoice()
+          return
+        }
+        if (input === 'm' || input === 'M') {
+          toggleMetadata()
+          return
+        }
+        if (input === 'r' || input === 'R') {
+          toggleResume()
+          return
+        }
       }
-      if (input === 'd' || input === 'D') {
-        cycleDate()
-        return
-      }
-      if (input === 'm' || input === 'M') {
-        toggleMetadata()
-        return
-      }
-      if (input === 'r' || input === 'R') {
-        toggleResume()
-        return
+
+      if (focusSection === 'input') {
+        if (key.downArrow) {
+          setFocusSection('options')
+          return
+        }
+      } else if (focusSection === 'options') {
+        if (key.upArrow) {
+          setFocusSection('input')
+          return
+        }
+        if (key.return) {
+          startQueue()
+          return
+        }
+        if (input === 'c' || input === 'C') {
+          cycleChoice()
+          return
+        }
+        if (input === 'l' || input === 'L') {
+          cycleLimit()
+          return
+        }
+        if (input === 'd' || input === 'D') {
+          cycleDate()
+          return
+        }
+        if (input === 'm' || input === 'M') {
+          toggleMetadata()
+          return
+        }
+        if (input === 'r' || input === 'R') {
+          toggleResume()
+          return
+        }
       }
     }
   }, {isActive: Boolean(process.stdin.isTTY)})
@@ -237,45 +307,42 @@ export function BatchView({
   return (
     <Box flexDirection="column" alignItems="center">
       {phase === 'input' && (
-        <Panel title="Batch Multi-Account Queue Manager" width={Math.max(64, boxWidth)}>
+        <Panel title="Batch Queue" width={Math.max(60, boxWidth)}>
           <Box flexDirection="column" paddingY={1}>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              Queue multiple creator profiles with automatic anti-ban cooldown between downloads.
-            </Text>
-            <Gap />
-
-            <Box marginBottom={1}>
+            <Box marginBottom={1} justifyContent="center">
               <Text bold color={inputField === 'text' ? theme.primary : theme.gray}>
-                {inputField === 'text' ? '● Paste Links / Usernames' : '○ Paste Links / Usernames'}
+                {inputField === 'text' ? '● Links / Handles' : '○ Links / Handles'}
               </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>{'   (Tab to switch)   '}</Text>
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>{'   ·   '}</Text>
               <Text bold color={inputField === 'file' ? theme.primary : theme.gray}>
-                {inputField === 'file' ? '● Load Batch File (.txt)' : '○ Load Batch File (.txt)'}
+                {inputField === 'file' ? '● File (.txt)' : '○ File (.txt)'}
               </Text>
             </Box>
 
             {inputField === 'text' ? (
-              <FramedInput title="Enter links or @handles separated by commas or spaces" width={Math.max(60, boxWidth - 4)}>
+              <FramedInput title="Links or @handles" width={Math.max(56, boxWidth - 4)}>
                 <TextInput
                   value={rawText}
                   onChange={setRawText}
                   onSubmit={startQueue}
-                  placeholder="e.g. instagram.com/user1, @user2, tiktok.com/@user3"
-                  width={Math.max(54, boxWidth - 10)}
+                  placeholder="@user1, @user2, tiktok.com/@user3…"
+                  width={Math.max(50, boxWidth - 10)}
+                  focus={focusSection === 'input'}
                   onTab={() => setInputField('file')}
-                  onArrowDown={() => setInputField('file')}
+                  onArrowDown={() => setFocusSection('options')}
                 />
               </FramedInput>
             ) : (
-              <FramedInput title="Enter path to .txt batch file" width={Math.max(60, boxWidth - 4)}>
+              <FramedInput title="Batch file (.txt)" width={Math.max(56, boxWidth - 4)}>
                 <TextInput
                   value={filePath}
                   onChange={setFilePath}
                   onSubmit={startQueue}
-                  placeholder="e.g. targets.txt or C:\path\to\creators.txt"
-                  width={Math.max(54, boxWidth - 10)}
+                  placeholder="e.g. creators.txt or C:\path\creators.txt"
+                  width={Math.max(50, boxWidth - 10)}
+                  focus={focusSection === 'input'}
                   onTab={() => setInputField('text')}
-                  onArrowUp={() => setInputField('text')}
+                  onArrowDown={() => setFocusSection('options')}
                 />
               </FramedInput>
             )}
@@ -286,30 +353,79 @@ export function BatchView({
               </Box>
             ) : null}
 
-            <Gap />
-            <Text bold color={theme.primary}>
-              Batch Queue Options:
-            </Text>
-            <Box justifyContent="space-between" marginTop={1}>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [c] Target: <Text color={theme.primary} bold>{choice.toUpperCase()}</Text>
-              </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [l] Limit: <Text color={theme.primary} bold>{limit ? `${limit} posts` : 'ALL'}</Text>
-              </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [d] Date: <Text color={theme.primary} bold>{dateFilter === 'all' ? 'ALL TIME' : dateFilter.toUpperCase()}</Text>
-              </Text>
+            <Box
+              flexDirection="column"
+              marginTop={1}
+              borderStyle="round"
+              borderColor={focusSection === 'options' || focusSection === 'custom-limit' || focusSection === 'custom-date' ? theme.primary : theme.gray}
+              borderDimColor={focusSection === 'input'}
+              paddingX={1}
+            >
+              {focusSection === 'custom-limit' ? (
+                <Box flexDirection="column">
+                  <Text bold color={theme.primary}>Set post limit (e.g. 24, all):</Text>
+                  <Box marginTop={1}>
+                    <TextInput
+                      value={customLimitText}
+                      onChange={setCustomLimitText}
+                      onSubmit={(val) => {
+                        const parsed = parseLimit(val)
+                        setLimit(parsed)
+                        setFocusSection('options')
+                      }}
+                      width={24}
+                    />
+                  </Box>
+                  <Text color={theme.gray} dimColor={theme.dimSecondary}>↵ confirm · esc cancel</Text>
+                </Box>
+              ) : focusSection === 'custom-date' ? (
+                <Box flexDirection="column">
+                  <Text bold color={theme.primary}>Set date or year (e.g. 2021, 2022, 7d):</Text>
+                  <Box marginTop={1}>
+                    <TextInput
+                      value={customDateText}
+                      onChange={setCustomDateText}
+                      onSubmit={(val) => {
+                        const trimmed = val.trim()
+                        setDateFilter(trimmed ? trimmed : 'all')
+                        setFocusSection('options')
+                      }}
+                      width={24}
+                    />
+                  </Box>
+                  <Text color={theme.gray} dimColor={theme.dimSecondary}>↵ confirm · esc cancel</Text>
+                </Box>
+              ) : (
+                <>
+                  <Box justifyContent="space-between">
+                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                      [c] Media: <Text color={theme.primary} bold>{choice.toUpperCase()}</Text>
+                    </Text>
+                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                      [l] Posts: <Text color={theme.primary} bold>{limit ? `${limit}` : 'ALL'}</Text>
+                    </Text>
+                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                      [d] Date: <Text color={theme.primary} bold>{dateFilter.toUpperCase()}</Text>
+                    </Text>
+                  </Box>
+                  <Box justifyContent="space-between" marginTop={1}>
+                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                      [m] Meta: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
+                    </Text>
+                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                      [r] Resume: <Text color={theme.primary} bold>{resume ? 'ON' : 'OFF'}</Text>
+                    </Text>
+                    <Text color={theme.primary} bold>
+                      [↵] Start Queue
+                    </Text>
+                  </Box>
+                </>
+              )}
             </Box>
-            <Box justifyContent="space-between" marginTop={1}>
+
+            <Box marginTop={1} justifyContent="center">
               <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [m] Sidecars: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
-              </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [r] Resume Checkpoint: <Text color={theme.primary} bold>{resume ? 'ON' : 'OFF'}</Text>
-              </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                [↵] Start Queue
+                {focusSection === 'input' ? 'Press ↓ to adjust options · ↵ to start queue' : 'Hotkeys [c] [l] [d] [m] [r] · ↑ to edit text · ↵ to start'}
               </Text>
             </Box>
           </Box>
@@ -317,18 +433,18 @@ export function BatchView({
       )}
 
       {phase === 'running' && (
-        <Panel title="Batch Queue Running (Anti-Ban Hardened)" width={Math.max(64, boxWidth)}>
+        <Panel title="Batch Queue Running" width={Math.max(60, boxWidth)}>
           <Box flexDirection="column" paddingY={1}>
             <Box justifyContent="space-between" marginBottom={1}>
               <Text color={theme.primary} bold>
                 Account {currentIndex + 1} of {queueItems.length} ({percent}%)
               </Text>
               <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                {isCooldown ? '⏳ Anti-ban cooldown active' : '▶ Downloading'}
+                {isCooldown ? '⏳ Cooldown active' : '▶ Downloading'}
               </Text>
             </Box>
 
-            <ProgressBar percent={percent} width={58} />
+            <ProgressBar percent={percent} width={54} />
 
             <Gap />
             {currentItem ? (
@@ -378,7 +494,7 @@ export function BatchView({
       )}
 
       {phase === 'done' && result && (
-        <Panel title="Batch Queue Completed" width={Math.max(64, boxWidth)}>
+        <Panel title="Batch Queue Completed" width={Math.max(60, boxWidth)}>
           <Box flexDirection="column" paddingY={1}>
             <Text bold color={theme.primary}>
               ✓ Successfully processed {result.total} profile(s)
@@ -394,7 +510,7 @@ export function BatchView({
               • Total media downloaded: {result.totalDownloaded}
             </Text>
             <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              • Total items skipped (already archived): {result.totalSkipped}
+              • Total items skipped: {result.totalSkipped}
             </Text>
 
             <Gap />

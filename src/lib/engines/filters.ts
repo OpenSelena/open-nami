@@ -57,6 +57,19 @@ export function parseDateBoundary(
 
   // Pure numeric string
   if (/^\d+$/.test(trimmed)) {
+    // 4-digit year: YYYY (e.g. 2021, 2022)
+    if (trimmed.length === 4) {
+      const year = parseInt(trimmed, 10)
+      if (year >= 1990 && year <= 2100) {
+        const date = boundary === 'until'
+          ? new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999))
+          : new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0))
+        if (!isNaN(date.getTime())) {
+          return Math.floor(date.getTime() / 1000)
+        }
+      }
+    }
+
     // 8-digit compact date: YYYYMMDD
     if (trimmed.length === 8) {
       const year = parseInt(trimmed.slice(0, 4), 10)
@@ -73,6 +86,18 @@ export function parseDateBoundary(
       return Math.floor(num / 1000)
     }
     return num
+  }
+
+  // Year + Month string: YYYY-MM (e.g. "2021-05")
+  if (/^\d{4}-\d{2}$/.test(trimmed)) {
+    const year = parseInt(trimmed.slice(0, 4), 10)
+    const month = parseInt(trimmed.slice(5, 7), 10)
+    const date = boundary === 'until'
+      ? new Date(Date.UTC(year, month, 0, 23, 59, 59, 999))
+      : new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0))
+    if (!isNaN(date.getTime())) {
+      return Math.floor(date.getTime() / 1000)
+    }
   }
 
   // Standard date strings: YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss
@@ -93,8 +118,43 @@ export function parseDateBoundary(
   return undefined
 }
 
+/**
+ * Resolves a high-level user date filter (e.g. '2021', '2021..2022', '7d', '24h', 'all')
+ * into concrete since and until boundaries.
+ */
+export function resolveDateFilter(input: string | undefined): {since?: string; until?: string} {
+  if (!input) return {}
+  const trimmed = input.trim()
+  if (!trimmed || trimmed.toLowerCase() === 'all' || trimmed.toLowerCase() === 'none') return {}
+
+  if (trimmed.includes('..') || /\s+-\s+/.test(trimmed)) {
+    const parts = trimmed.split(/\.\.|\s+-\s+/)
+    return {
+      since: parts[0]?.trim(),
+      until: parts[1]?.trim(),
+    }
+  }
+
+  // 4-digit year or year-month: bound both since and until to that year/month
+  if (/^\d{4}$/.test(trimmed) || /^\d{4}-\d{2}$/.test(trimmed)) {
+    return {
+      since: trimmed,
+      until: trimmed,
+    }
+  }
+
+  return {
+    since: trimmed,
+    until: undefined,
+  }
+}
+
 export function parseLimit(input: string | number | undefined): number | undefined {
   if (input === undefined || input === null) return undefined
+  if (typeof input === 'string') {
+    const trimmed = input.trim().toLowerCase()
+    if (!trimmed || trimmed === 'all' || trimmed === 'none' || trimmed === '0') return undefined
+  }
   const num = typeof input === 'number' ? input : parseInt(String(input).trim(), 10)
   if (isNaN(num) || num <= 0) return undefined
   return Math.floor(num)

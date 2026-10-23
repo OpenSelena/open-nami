@@ -2,9 +2,11 @@ import React, {useState, useEffect, useCallback} from 'react'
 import {Box, Text, useInput} from 'ink'
 import SelectInput, {type ItemProps, type IndicatorProps} from 'ink-select-input'
 import {Panel} from '../panel.js'
+import {TextInput} from '../text-input.js'
 import {useTheme, type Theme} from '../../theme.js'
 import {loadCheckpoint} from '../../lib/engines/checkpoint.js'
 import {resolveDefaultDownloadDir} from '../../lib/engines/dispatcher.js'
+import {resolveDateFilter, parseLimit} from '../../lib/engines/filters.js'
 import type {ParsedProfile} from '../../lib/parser.js'
 import type {MediaTarget} from '../../lib/engines/types.js'
 
@@ -30,6 +32,7 @@ export interface PickingOptions {
   choice: MediaTarget
   limit?: number
   since?: string
+  until?: string
   writeMetadata?: boolean
   resume?: boolean
 }
@@ -40,6 +43,7 @@ export type PickingViewProps = {
   outputDir?: string
   initialLimit?: number
   initialSince?: string | number | Date
+  initialUntil?: string | number | Date
   initialWriteMetadata?: boolean
   initialResume?: boolean
   onSelect: (options: PickingOptions) => void
@@ -67,6 +71,9 @@ export function getPickingOptions(platform: ParsedProfile['platform']): Array<{l
   return items
 }
 
+const DATE_PRESETS = ['all', '24h', '7d', '30d', '2024', '2023', '2022', '2021', 'custom']
+const LIMIT_PRESETS: Array<number | 'custom' | undefined> = [undefined, 10, 24, 50, 100, 'custom']
+
 export function PickingView({
   contentWidth,
   profile,
@@ -84,15 +91,20 @@ export function PickingView({
   const items = getPickingOptions(profile.platform)
 
   const [limit, setLimit] = useState<number | undefined>(initialLimit)
-  const [dateFilter, setDateFilter] = useState<'all' | '24h' | '7d' | '30d'>(() => {
-    if (typeof initialSince === 'string' && (initialSince === '24h' || initialSince === '7d' || initialSince === '30d')) {
-      return initialSince
+  const [dateFilter, setDateFilter] = useState<string>(() => {
+    if (typeof initialSince === 'string' && initialSince.trim()) {
+      return initialSince.trim()
     }
     return 'all'
   })
   const [writeMetadata, setWriteMetadata] = useState(initialWriteMetadata)
   const [resume, setResume] = useState(initialResume)
   const [hasCheckpoint, setHasCheckpoint] = useState(false)
+
+  // Custom input editing state
+  const [editingModal, setEditingModal] = useState<'limit' | 'date' | null>(null)
+  const [customLimitText, setCustomLimitText] = useState('')
+  const [customDateText, setCustomDateText] = useState('')
 
   const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir)
 
@@ -110,23 +122,28 @@ export function PickingView({
   }, [targetDir])
 
   const cycleLimit = useCallback(() => {
-    setLimit(prev => {
-      if (!prev) return 10
-      if (prev === 10) return 25
-      if (prev === 25) return 50
-      if (prev === 50) return 100
-      return undefined
-    })
-  }, [])
+    const curIdx = LIMIT_PRESETS.findIndex(p => p === limit)
+    const nextIdx = (curIdx + 1) % LIMIT_PRESETS.length
+    const nextVal = LIMIT_PRESETS[nextIdx]
+    if (nextVal === 'custom') {
+      setCustomLimitText(limit ? String(limit) : '24')
+      setEditingModal('limit')
+    } else {
+      setLimit(nextVal)
+    }
+  }, [limit])
 
   const cycleDate = useCallback(() => {
-    setDateFilter(prev => {
-      if (prev === 'all') return '24h'
-      if (prev === '24h') return '7d'
-      if (prev === '7d') return '30d'
-      return 'all'
-    })
-  }, [])
+    const curIdx = DATE_PRESETS.indexOf(dateFilter)
+    const nextIdx = (curIdx + 1) % DATE_PRESETS.length
+    const nextVal = DATE_PRESETS[nextIdx]
+    if (nextVal === 'custom') {
+      setCustomDateText(dateFilter !== 'all' ? dateFilter : '2021')
+      setEditingModal('date')
+    } else {
+      setDateFilter(nextVal)
+    }
+  }, [dateFilter])
 
   const toggleMetadata = useCallback(() => {
     setWriteMetadata(prev => !prev)
@@ -136,7 +153,14 @@ export function PickingView({
     setResume(prev => !prev)
   }, [])
 
-  useInput((input) => {
+  useInput((input, key) => {
+    if (editingModal) {
+      if (key.escape) {
+        setEditingModal(null)
+      }
+      return
+    }
+
     if (input === 'l' || input === 'L') {
       cycleLimit()
       return
@@ -156,10 +180,13 @@ export function PickingView({
   }, {isActive: Boolean(process.stdin.isTTY)})
 
   const handleItemSelect = (selectedChoice: MediaTarget) => {
+    if (editingModal) return
+    const dateRange = resolveDateFilter(dateFilter)
     onSelect({
       choice: selectedChoice,
       limit,
-      since: dateFilter === 'all' ? undefined : dateFilter,
+      since: dateRange.since,
+      until: dateRange.until,
       writeMetadata,
       resume,
     })
@@ -178,10 +205,7 @@ export function PickingView({
         </Text>
         <Gap />
         <Text color={theme.gray} dimColor={theme.dimSecondary}>
-          Choose media category to download.
-        </Text>
-        <Text color={theme.gray} dimColor={theme.dimSecondary}>
-          Use hotkeys [l], [d], [m], [r] to adjust options.
+          Select media type. Hotkeys [l], [d], [m], [r] adjust options.
         </Text>
 
         {hasCheckpoint ? (
@@ -194,42 +218,82 @@ export function PickingView({
       </Box>
 
       <Panel title="Download" width={38}>
-        <SelectInput
-          indicatorComponent={ChoiceIndicator}
-          itemComponent={ChoiceItem}
-          items={items.map((item, index) => ({
-            key: String(index),
-            label: item.label,
-            value: item.value,
-          }))}
-          onSelect={(item) => handleItemSelect(item.value)}
-          onHighlight={(item) => onHighlight?.(item.value)}
-        />
+        {!editingModal && (
+          <SelectInput
+            indicatorComponent={ChoiceIndicator}
+            itemComponent={ChoiceItem}
+            items={items.map((item, index) => ({
+              key: String(index),
+              label: item.label,
+              value: item.value,
+            }))}
+            onSelect={(item) => handleItemSelect(item.value)}
+            onHighlight={(item) => onHighlight?.(item.value)}
+          />
+        )}
 
         <Box
           flexDirection="column"
           marginTop={1}
           borderStyle="round"
-          borderColor={theme.gray}
-          borderDimColor
+          borderColor={editingModal ? theme.primary : theme.gray}
+          borderDimColor={!editingModal}
           paddingX={1}
         >
-          <Box justifyContent="space-between">
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [l] Limit: <Text color={theme.primary} bold>{limit ? `${limit}` : 'ALL'}</Text>
-            </Text>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [d] Date: <Text color={theme.primary} bold>{dateFilter === 'all' ? 'ALL' : dateFilter.toUpperCase()}</Text>
-            </Text>
-          </Box>
-          <Box justifyContent="space-between">
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [m] Sidecars: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
-            </Text>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [r] Resume: <Text color={theme.primary} bold>{resume ? 'ON' : 'OFF'}</Text>
-            </Text>
-          </Box>
+          {editingModal === 'limit' ? (
+            <Box flexDirection="column">
+              <Text bold color={theme.primary}>Set post limit (e.g. 24, all):</Text>
+              <Box marginTop={1}>
+                <TextInput
+                  value={customLimitText}
+                  onChange={setCustomLimitText}
+                  onSubmit={(val) => {
+                    const parsed = parseLimit(val)
+                    setLimit(parsed)
+                    setEditingModal(null)
+                  }}
+                  width={24}
+                />
+              </Box>
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>↵ confirm · esc cancel</Text>
+            </Box>
+          ) : editingModal === 'date' ? (
+            <Box flexDirection="column">
+              <Text bold color={theme.primary}>Set date or year (e.g. 2021, 7d):</Text>
+              <Box marginTop={1}>
+                <TextInput
+                  value={customDateText}
+                  onChange={setCustomDateText}
+                  onSubmit={(val) => {
+                    const trimmed = val.trim()
+                    setDateFilter(trimmed ? trimmed : 'all')
+                    setEditingModal(null)
+                  }}
+                  width={24}
+                />
+              </Box>
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>↵ confirm · esc cancel</Text>
+            </Box>
+          ) : (
+            <>
+              <Box justifyContent="space-between">
+                <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                  [l] Posts: <Text color={theme.primary} bold>{limit ? `${limit}` : 'ALL'}</Text>
+                </Text>
+                <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                  [d] Date: <Text color={theme.primary} bold>{dateFilter.toUpperCase()}</Text>
+                </Text>
+              </Box>
+              <Box justifyContent="space-between">
+                <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                  [m] Meta: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
+                </Text>
+                <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                  [r] Resume: <Text color={theme.primary} bold>{resume ? 'ON' : 'OFF'}</Text>
+                </Text>
+              </Box>
+            </>
+          )}
         </Box>
       </Panel>
     </Box>
