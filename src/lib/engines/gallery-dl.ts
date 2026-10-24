@@ -21,6 +21,7 @@ export interface GalleryDlOptions {
   targetDir: string
   subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All'
   cookiePath?: string | null
+  cookiesFromBrowser?: string
   signal?: AbortSignal
   writeMetadata?: boolean
   onProgress?: (progress: EngineProgress) => void
@@ -33,9 +34,10 @@ export function buildGalleryDlArgs(options: {
   cleanUrl: string
   username: string
   cookiePath?: string | null
+  cookiesFromBrowser?: string
   writeMetadata?: boolean
 }): string[] {
-  const {destDir, subDir, platform, cleanUrl, username, cookiePath, writeMetadata} = options
+  const {destDir, subDir, platform, cleanUrl, username, cookiePath, cookiesFromBrowser, writeMetadata} = options
   const args = [
     '-D', destDir,
     '-o', `user-agent=${UA}`,
@@ -82,6 +84,10 @@ export function buildGalleryDlArgs(options: {
     args.push('--cookies', cookiePath)
   }
 
+  if (cookiesFromBrowser && cookiesFromBrowser !== 'none') {
+    args.push('--cookies-from-browser', cookiesFromBrowser)
+  }
+
   // End of options prevents CLI flag injection from untrusted URLs
   args.push('--', targetUrl)
   return args
@@ -99,6 +105,7 @@ export async function runGalleryDl(options: GalleryDlOptions): Promise<{success:
     cleanUrl: profile.cleanUrl,
     username: profile.username,
     cookiePath,
+    cookiesFromBrowser: options.cookiesFromBrowser,
     writeMetadata: options.writeMetadata,
   })
 

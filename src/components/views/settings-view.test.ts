@@ -7,7 +7,10 @@ import {
   formatDoctorEngines,
   formatDoctorStorage,
   formatDoctorCookies,
+  resolveBrowserOptions,
+  cycleBrowserOption,
 } from './settings-view.js'
+import type {DetectedBrowser} from '../../lib/cookies/browser-bridge.js'
 import {runDoctor, type DoctorReport} from '../../lib/diagnostics/doctor.js'
 import type {Theme} from '../../theme.js'
 
@@ -200,4 +203,57 @@ test('runDoctor integrates cleanly with formatters for SettingsView presentation
 
   assert.equal(typeof cookies.count, 'number')
   assert.ok(typeof cookies.text === 'string')
+})
+
+test('resolveBrowserOptions includes none and installed browsers', () => {
+  const mockBrowsers: DetectedBrowser[] = [
+    {id: 'chrome', name: 'Google Chrome', profileDir: 'C:/chrome', available: true},
+    {id: 'edge', name: 'Microsoft Edge', profileDir: 'C:/edge', available: true},
+    {id: 'brave', name: 'Brave Browser', profileDir: 'C:/brave', available: false},
+  ]
+  const options = resolveBrowserOptions(mockBrowsers)
+  assert.deepEqual(options, ['none', 'chrome', 'edge'])
+})
+
+test('resolveBrowserOptions returns none when no browsers are installed', () => {
+  const mockBrowsers: DetectedBrowser[] = [
+    {id: 'chrome', name: 'Google Chrome', profileDir: 'C:/chrome', available: false},
+  ]
+  const options = resolveBrowserOptions(mockBrowsers)
+  assert.deepEqual(options, ['none'])
+})
+
+test('cycleBrowserOption cycles forward and wraps around', () => {
+  const options = ['none', 'chrome', 'edge']
+  assert.equal(cycleBrowserOption('none', options, true), 'chrome')
+  assert.equal(cycleBrowserOption('chrome', options, true), 'edge')
+  assert.equal(cycleBrowserOption('edge', options, true), 'none')
+})
+
+test('cycleBrowserOption cycles backward and wraps around', () => {
+  const options = ['none', 'chrome', 'edge']
+  assert.equal(cycleBrowserOption('none', options, false), 'edge')
+  assert.equal(cycleBrowserOption('edge', options, false), 'chrome')
+  assert.equal(cycleBrowserOption('chrome', options, false), 'none')
+})
+
+test('cycleBrowserOption handles current value not in options', () => {
+  const options = ['none', 'chrome']
+  assert.equal(cycleBrowserOption('unknown', options, true), 'chrome')
+})
+
+test('SettingsView accepts browsers prop for deterministic browser bridge testing', () => {
+  const mockBrowsers: DetectedBrowser[] = [
+    {id: 'firefox', name: 'Mozilla Firefox', profileDir: 'C:/firefox', available: true},
+  ]
+  const el = React.createElement(SettingsView, {
+    boxWidth: 60,
+    theme: testTheme,
+    gapComponent: () => null,
+    onSave: () => {},
+    onCancel: () => {},
+    browsers: mockBrowsers,
+  })
+  assert.equal(el.type, SettingsView)
+  assert.equal(el.props.browsers, mockBrowsers)
 })

@@ -13,6 +13,7 @@ export interface YtDlpOptions {
   profile: ParsedProfile
   targetDir: string
   cookiePath?: string | null
+  cookiesFromBrowser?: string
   signal?: AbortSignal
   writeMetadata?: boolean
   onProgress?: (progress: EngineProgress) => void
@@ -23,9 +24,10 @@ export function buildYtDlpArgs(options: {
   platform: ParsedProfile['platform']
   cleanUrl: string
   cookiePath?: string | null
+  cookiesFromBrowser?: string
   writeMetadata?: boolean
 }): string[] {
-  const {destDir, platform, cleanUrl, cookiePath, writeMetadata} = options
+  const {destDir, platform, cleanUrl, cookiePath, cookiesFromBrowser, writeMetadata} = options
   const args = [
     '-o', path.join(destDir, '%(title).150B [%(id)s].%(ext)s'),
     '--windows-filenames',
@@ -56,6 +58,10 @@ export function buildYtDlpArgs(options: {
     args.push('--cookies', cookiePath)
   }
 
+  if (cookiesFromBrowser && cookiesFromBrowser !== 'none') {
+    args.push('--cookies-from-browser', cookiesFromBrowser)
+  }
+
   // End of options prevents CLI flag injection from untrusted URLs
   args.push('--', cleanUrl)
   return args
@@ -71,6 +77,7 @@ export async function runYtDlp(options: YtDlpOptions): Promise<{success: boolean
     platform: profile.platform,
     cleanUrl: profile.cleanUrl,
     cookiePath,
+    cookiesFromBrowser: options.cookiesFromBrowser,
     writeMetadata: options.writeMetadata,
   })
 

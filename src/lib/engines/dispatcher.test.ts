@@ -159,6 +159,52 @@ test('buildGalleryDlArgs includes anti-ban jitter and safe 429 backoff for TikTo
   assert.equal(xVideoArgs[xVideoArgs.indexOf('--sleep-request') + 1], '0.8-1.5')
 })
 
+test('buildGalleryDlArgs appends --cookies-from-browser when configured', async () => {
+  const {buildGalleryDlArgs} = await import('./gallery-dl.js')
+
+  const argsWithBrowser = buildGalleryDlArgs({
+    destDir: 'X:/target',
+    subDir: 'Photos',
+    platform: 'instagram',
+    cleanUrl: 'https://www.instagram.com/creator',
+    username: 'creator',
+    cookiesFromBrowser: 'chrome',
+  })
+  assert.ok(argsWithBrowser.includes('--cookies-from-browser'))
+  assert.equal(argsWithBrowser[argsWithBrowser.indexOf('--cookies-from-browser') + 1], 'chrome')
+
+  const argsWithNone = buildGalleryDlArgs({
+    destDir: 'X:/target',
+    subDir: 'Photos',
+    platform: 'instagram',
+    cleanUrl: 'https://www.instagram.com/creator',
+    username: 'creator',
+    cookiesFromBrowser: 'none',
+  })
+  assert.equal(argsWithNone.includes('--cookies-from-browser'), false)
+})
+
+test('buildYtDlpArgs appends --cookies-from-browser when configured', async () => {
+  const {buildYtDlpArgs} = await import('./yt-dlp.js')
+
+  const argsWithBrowser = buildYtDlpArgs({
+    destDir: 'X:/target',
+    platform: 'tiktok',
+    cleanUrl: 'https://www.tiktok.com/@creator',
+    cookiesFromBrowser: 'edge',
+  })
+  assert.ok(argsWithBrowser.includes('--cookies-from-browser'))
+  assert.equal(argsWithBrowser[argsWithBrowser.indexOf('--cookies-from-browser') + 1], 'edge')
+
+  const argsWithNone = buildYtDlpArgs({
+    destDir: 'X:/target',
+    platform: 'tiktok',
+    cleanUrl: 'https://www.tiktok.com/@creator',
+    cookiesFromBrowser: 'none',
+  })
+  assert.equal(argsWithNone.includes('--cookies-from-browser'), false)
+})
+
 test('dispatchDownload fails over to gallery-dl when native extractor throws or returns 0 items', async () => {
   const {dispatchDownload} = await import('./dispatcher.js')
   const fsPromises = await import('node:fs/promises')

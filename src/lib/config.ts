@@ -5,6 +5,7 @@ import os from 'node:os'
 export interface AppConfig {
   theme?: 'auto' | 'light' | 'dark'
   cookiesDir?: string
+  cookiesFromBrowser?: 'chrome' | 'edge' | 'brave' | 'firefox' | 'none'
   downloadDir?: string
   writeMetadata?: boolean
   defaultLimit?: number
@@ -23,9 +24,16 @@ export function loadConfig(configPath = getDefaultConfigPath()): AppConfig {
     const raw = fs.readFileSync(configPath, 'utf8')
     const parsed = JSON.parse(raw)
     if (parsed && typeof parsed === 'object') {
+      const rawBrowser = typeof parsed.cookiesFromBrowser === 'string' ? parsed.cookiesFromBrowser.trim().toLowerCase() : undefined
+      const validBrowsers: Array<NonNullable<AppConfig['cookiesFromBrowser']>> = ['chrome', 'edge', 'brave', 'firefox', 'none']
+      const cookiesFromBrowser = rawBrowser && (validBrowsers as string[]).includes(rawBrowser)
+        ? (rawBrowser as NonNullable<AppConfig['cookiesFromBrowser']>)
+        : undefined
+
       return {
         theme: typeof parsed.theme === 'string' ? parsed.theme : undefined,
         cookiesDir: typeof parsed.cookiesDir === 'string' ? parsed.cookiesDir.trim() : undefined,
+        cookiesFromBrowser,
         downloadDir: typeof parsed.downloadDir === 'string' ? parsed.downloadDir.trim() : undefined,
         writeMetadata: typeof parsed.writeMetadata === 'boolean' ? parsed.writeMetadata : undefined,
         defaultLimit: typeof parsed.defaultLimit === 'number' ? parsed.defaultLimit : undefined,

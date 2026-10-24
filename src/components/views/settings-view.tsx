@@ -7,6 +7,7 @@ import {FramedInput} from '../framed-input.js'
 import {TextInput} from '../text-input.js'
 import {loadConfig, saveConfig, type AppConfig} from '../../lib/config.js'
 import {detectAvailableCookies} from '../../lib/cookies.js'
+import {listDetectedBrowsers, type DetectedBrowser} from '../../lib/cookies/browser-bridge.js'
 import {runDoctor, type DoctorReport, type DoctorOptions} from '../../lib/diagnostics/doctor.js'
 import type {Theme} from '../../theme.js'
 
@@ -17,7 +18,22 @@ function expandDir(dir: string): string {
   return dir
 }
 
-export type SettingsField = 'cookies' | 'download' | 'metadata' | 'limit'
+export type SettingsField = 'cookies' | 'browser' | 'download' | 'metadata' | 'limit'
+
+export function resolveBrowserOptions(detected: DetectedBrowser[]): string[] {
+  const available = detected.filter(b => b.available !== false)
+  return ['none', ...available.map(b => b.id)]
+}
+
+export function cycleBrowserOption(current: string, options: string[], forward = true): string {
+  if (options.length === 0) return 'none'
+  const idx = options.indexOf(current)
+  const currentIndex = idx === -1 ? 0 : idx
+  const nextIdx = forward
+    ? (currentIndex + 1) % options.length
+    : (currentIndex - 1 + options.length) % options.length
+  return options[nextIdx]!
+}
 
 export type SettingsViewProps = {
   boxWidth: number
@@ -29,6 +45,7 @@ export type SettingsViewProps = {
   onCancel: () => void
   doctorChecker?: ((options: DoctorOptions) => Promise<DoctorReport>) | ((bin: 'gallery-dl' | 'yt-dlp' | 'ffmpeg') => Promise<boolean>)
   initialReport?: DoctorReport | null
+  browsers?: DetectedBrowser[]
 }
 
 export type DoctorCardProps = {
@@ -172,6 +189,7 @@ export function SettingsView({
   onCancel,
   doctorChecker,
   initialReport,
+  browsers: browsersProp,
 }: SettingsViewProps) {
   const initialConfig = useMemo(() => loadConfig(), [])
   const [internalFocus, setInternalFocus] = useState<SettingsField>('cookies')
@@ -185,7 +203,18 @@ export function SettingsView({
     [onFocusChange],
   )
 
+  const detectedBrowsers = useMemo(() => {
+    return browsersProp ?? listDetectedBrowsers()
+  }, [browsersProp])
+
+  const browserOptions = useMemo(() => {
+    return resolveBrowserOptions(detectedBrowsers)
+  }, [detectedBrowsers])
+
   const [cookiesDir, setCookiesDir] = useState(initialConfig.cookiesDir ?? '')
+  const [cookiesFromBrowser, setCookiesFromBrowser] = useState<AppConfig['cookiesFromBrowser']>(
+    initialConfig.cookiesFromBrowser ?? 'none',
+  )
   const [downloadDir, setDownloadDir] = useState(initialConfig.downloadDir ?? '')
   const [writeMetadata, setWriteMetadata] = useState(Boolean(initialConfig.writeMetadata))
   const [defaultLimit, setDefaultLimit] = useState<number | undefined>(initialConfig.defaultLimit)
@@ -236,6 +265,7 @@ export function SettingsView({
     const nextConfig: AppConfig = {
       ...existing,
       cookiesDir: cookiesDir.trim() ? cookiesDir.trim() : undefined,
+      cookiesFromBrowser,
       downloadDir: downloadDir.trim() ? downloadDir.trim() : undefined,
       writeMetadata,
       defaultLimit,
@@ -243,7 +273,16 @@ export function SettingsView({
     saveConfig(nextConfig)
     setSaved(true)
     onSave()
-  }, [cookiesDir, downloadDir, writeMetadata, defaultLimit, onSave])
+  }, [cookiesDir, cookiesFromBrowser, downloadDir, writeMetadata, defaultLimit, onSave])
+
+  const browserFeedback = useMemo(() => {
+    if (!cookiesFromBrowser || cookiesFromBrowser === 'none') {
+      return 'manual cookie files only'
+    }
+    const found = detectedBrowsers.find(b => b.id === cookiesFromBrowser)
+    const browserName = found ? found.name : cookiesFromBrowser
+    return `live session cookies from ${browserName}`
+  }, [cookiesFromBrowser, detectedBrowsers])
 
   const cookieFeedback = useMemo(() => {
     const dir = cookiesDir.trim()
@@ -285,11 +324,18 @@ export function SettingsView({
   }, [downloadDir])
 
   const cycleFocus = useCallback((forward = true) => {
-    const fields: SettingsField[] = ['cookies', 'download', 'metadata', 'limit']
+    const fields: SettingsField[] = ['cookies', 'browser', 'download', 'metadata', 'limit']
     const idx = fields.indexOf(focusedField)
     const nextIdx = forward ? (idx + 1) % fields.length : (idx - 1 + fields.length) % fields.length
     setField(fields[nextIdx])
   }, [focusedField, setField])
+
+  const cycleBrowser = useCallback((forward = true) => {
+    setCookiesFromBrowser(prev => {
+      const next = cycleBrowserOption(prev ?? 'none', browserOptions, forward)
+      return next as AppConfig['cookiesFromBrowser']
+    })
+  }, [browserOptions])
 
   const cycleLimit = useCallback(() => {
     setDefaultLimit(prev => {
@@ -307,6 +353,21 @@ export function SettingsView({
     if (key.ctrl && (input === 's' || input === 'S')) {
       handleSave()
       return
+    }
+
+    if (focusedField === 'browser') {
+      if (input === ' ' || key.return) {
+        cycleBrowser(true)
+        return
+      }
+      if (key.tab || key.downArrow) {
+        cycleFocus(true)
+        return
+      }
+      if (key.upArrow) {
+        cycleFocus(false)
+        return
+      }
     }
 
     if (focusedField === 'metadata') {
@@ -349,7 +410,7 @@ export function SettingsView({
         <TextInput
           value={cookiesDir}
           onChange={setCookiesDir}
-          onSubmit={() => setField('download')}
+          onSubmit={() => setField('browser')}
           focus={focusedField === 'cookies'}
           onTab={() => cycleFocus(true)}
           onArrowDown={() => cycleFocus(true)}
@@ -360,6 +421,27 @@ export function SettingsView({
       </FramedInput>
       <Text color={cookieFeedback.ok ? theme.primary : theme.gray} dimColor={!cookieFeedback.ok && theme.dimSecondary}>
         {cookieFeedback.text}
+      </Text>
+
+      <Gap />
+
+      <Box
+        width={boxWidth}
+        borderStyle="round"
+        borderColor={focusedField === 'browser' ? theme.primary : theme.gray}
+        borderDimColor={focusedField !== 'browser'}
+        paddingX={2}
+        justifyContent="space-between"
+      >
+        <Text color={focusedField === 'browser' ? theme.primary : theme.gray} bold={focusedField === 'browser'}>
+          {focusedField === 'browser' ? '● ' : '○ '}Browser Cookie Bridge
+        </Text>
+        <Text color={cookiesFromBrowser && cookiesFromBrowser !== 'none' ? theme.primary : theme.gray} bold>
+          {`[${(cookiesFromBrowser ?? 'none').toUpperCase()}]`}
+        </Text>
+      </Box>
+      <Text color={theme.gray} dimColor={theme.dimSecondary}>
+        {browserFeedback}
       </Text>
 
       <Gap />

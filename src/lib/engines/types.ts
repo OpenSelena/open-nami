@@ -34,6 +34,7 @@ export interface DispatchOptions {
   limit?: number
   resume?: boolean
   writeMetadata?: boolean
+  cookiesFromBrowser?: string
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void
   runnerOverrides?: {

@@ -48,3 +48,24 @@ test('loadConfig handles corrupt JSON gracefully', async () => {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('saveConfig persists cookiesFromBrowser and loadConfig retrieves it', async () => {
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-config-test-'))
+  const testConfigPath = path.join(tmpDir, 'config.json')
+
+  try {
+    saveConfig({cookiesFromBrowser: 'chrome'}, testConfigPath)
+    let loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'chrome')
+
+    saveConfig({cookiesFromBrowser: 'none'}, testConfigPath)
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'none')
+
+    await fsPromises.writeFile(testConfigPath, JSON.stringify({cookiesFromBrowser: 'invalid-browser'}))
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, undefined)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})

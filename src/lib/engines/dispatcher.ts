@@ -1,5 +1,6 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
+import {loadConfig} from '../config.js'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
 import {getExtractor} from './extractors/index.js'
 import {downloadMediaStream} from './downloader.js'
@@ -43,6 +44,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   const {profile, choice, onProgress} = options
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
   await fs.mkdir(targetDir, {recursive: true})
+
+  const cookiesFromBrowser = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser
 
   defaultTaskManager.events.emit('job:start', { profile, choice, outputDir: targetDir })
 
@@ -181,6 +184,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         targetDir,
         subDir,
         cookiePath: cookieCopy?.filePath,
+        cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
         onProgress: handleProgress,
@@ -191,6 +195,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         profile,
         targetDir,
         cookiePath: cookieCopy?.filePath,
+        cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
         onProgress: handleProgress,

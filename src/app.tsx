@@ -11,7 +11,7 @@ import {PickingView, getPickingOptions, type PickingOptions} from './components/
 import {DownloadingView} from './components/views/downloading-view.js'
 import {CompletionView} from './components/views/completion-view.js'
 import {ErrorView} from './components/views/error-view.js'
-import {SettingsView} from './components/views/settings-view.js'
+import {SettingsView, type SettingsField} from './components/views/settings-view.js'
 import {WatcherView} from './components/views/watcher-view.js'
 import {BatchView} from './components/views/batch-view.js'
 import {ThemeProvider, useTheme, nextThemeMode, type ThemeMode} from './theme.js'
@@ -202,7 +202,7 @@ function InnerApp({
 
   const [urlInput, setUrlInput] = useState(initialInput ?? '')
   const [clipboardUrl, setClipboardUrl] = useState<string | undefined>(undefined)
-  const [settingsFocus, setSettingsFocus] = useState<'cookies' | 'download' | 'metadata' | 'limit'>('cookies')
+  const [settingsFocus, setSettingsFocus] = useState<SettingsField>('cookies')
   const [batchClickTargets, setBatchClickTargets] = useState<ClickTarget[]>([])
   const [watcherClickTargets, setWatcherClickTargets] = useState<ClickTarget[]>([])
 
