@@ -11,6 +11,7 @@ export * from './instagram.js'
 export * from './x.js'
 export * from './tiktok.js'
 export * from './facebook.js'
+export * from '../core/plugin.js'
 
 export function getExtractor(platform: SupportedPlatform): Extractor {
   switch (platform) {
