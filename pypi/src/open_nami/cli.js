@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.8",
+      version: "1.2.9",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -40593,7 +40593,7 @@ function getPickingOptions(platform2) {
   return items;
 }
 function PickingView({
-  contentWidth,
+  contentWidth: _contentWidth,
   profile,
   outputDir,
   initialLimit,
@@ -40632,8 +40632,8 @@ function PickingView({
       resume: initialResume
     });
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { width: contentWidth, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", flexGrow: 1, flexBasis: 0, paddingTop: 1, paddingRight: 3, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: "100%", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", marginBottom: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.primary, children: [
         "@",
         profile.username
@@ -40648,7 +40648,7 @@ function PickingView({
       /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select what to download from this profile." }),
       hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: "Download", width: 38, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: "Download", width: 44, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { width: "100%", alignItems: "center", justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       SelectInput_default,
       {
         indicatorComponent: ChoiceIndicator,
@@ -40661,7 +40661,7 @@ function PickingView({
         onSelect: (item) => handleItemSelect(item.value),
         onHighlight: (item) => onHighlight?.(item.value)
       }
-    ) })
+    ) }) })
   ] });
 }
 

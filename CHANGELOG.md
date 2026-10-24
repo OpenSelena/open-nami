@@ -4,6 +4,14 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.9] - 2026-10-24
+
+### Enhanced
+- **Centered Media Picker Layout**:
+  - Replaced the asymmetric 2-column layout in the single-profile picker with a clean, vertically centered stack.
+  - Aligned profile username, platform URL, and guidance prompt along the vertical center axis.
+  - Centered the `Download` panel and its media selection items right down the middle of the screen.
+
 ## [1.2.8] - 2026-10-24
 
 ### Removed

@@ -70,7 +70,7 @@ export function getPickingOptions(platform: ParsedProfile['platform']): Array<{l
 }
 
 export function PickingView({
-  contentWidth,
+  contentWidth: _contentWidth,
   profile,
   outputDir,
   initialLimit,
@@ -113,15 +113,14 @@ export function PickingView({
   }
 
   return (
-    <Box width={contentWidth}>
-      <Box flexDirection="column" flexGrow={1} flexBasis={0} paddingTop={1} paddingRight={3}>
+    <Box flexDirection="column" alignItems="center" width="100%">
+      <Box flexDirection="column" alignItems="center" marginBottom={1}>
         <Text bold color={theme.primary}>
           @{profile.username}
         </Text>
         <Gap />
         <Text color={theme.gray} dimColor={theme.dimSecondary}>
-          ▸ {platformName}
-          {profile.cleanUrl ? ` · ${profile.cleanUrl}` : ''}
+          ▸ {platformName}{profile.cleanUrl ? ` · ${profile.cleanUrl}` : ''}
         </Text>
         <Gap />
         <Text color={theme.gray} dimColor={theme.dimSecondary}>
@@ -137,18 +136,20 @@ export function PickingView({
         ) : null}
       </Box>
 
-      <Panel title="Download" width={38}>
-        <SelectInput
-          indicatorComponent={ChoiceIndicator}
-          itemComponent={ChoiceItem}
-          items={items.map((item, index) => ({
-            key: String(index),
-            label: item.label,
-            value: item.value,
-          }))}
-          onSelect={(item) => handleItemSelect(item.value)}
-          onHighlight={(item) => onHighlight?.(item.value)}
-        />
+      <Panel title="Download" width={44}>
+        <Box width="100%" alignItems="center" justifyContent="center">
+          <SelectInput
+            indicatorComponent={ChoiceIndicator}
+            itemComponent={ChoiceItem}
+            items={items.map((item, index) => ({
+              key: String(index),
+              label: item.label,
+              value: item.value,
+            }))}
+            onSelect={(item) => handleItemSelect(item.value)}
+            onHighlight={(item) => onHighlight?.(item.value)}
+          />
+        </Box>
       </Panel>
     </Box>
   )
