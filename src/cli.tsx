@@ -163,6 +163,7 @@ async function main() {
   let themeMode: any = 'auto'
   let isWatchMode = false
   let batchFile: string | undefined
+  let cliPlatform: 'instagram' | 'tiktok' | 'facebook' | 'x' | undefined
   let since: string | undefined
   let until: string | undefined
   let limit: number | undefined
@@ -213,6 +214,16 @@ async function main() {
       batchFile = args[++i]
     } else if (arg.startsWith('--batch=')) {
       batchFile = arg.slice('--batch='.length)
+    } else if (arg === '-p' || arg === '--platform') {
+      const val = args[++i]?.toLowerCase()
+      if (val === 'instagram' || val === 'tiktok' || val === 'facebook' || val === 'x') {
+        cliPlatform = val
+      }
+    } else if (arg.startsWith('--platform=')) {
+      const val = arg.slice('--platform='.length).toLowerCase()
+      if (val === 'instagram' || val === 'tiktok' || val === 'facebook' || val === 'x') {
+        cliPlatform = val
+      }
     } else if (!arg.startsWith('-') && !initialInput) {
       initialInput = arg
     }
@@ -279,6 +290,7 @@ async function main() {
       const result = await runBatchQueue({
         filePath: batchFile,
         choice,
+        defaultPlatform: cliPlatform || 'instagram',
         outputDir,
         since,
         until,

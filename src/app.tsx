@@ -201,6 +201,7 @@ function InnerApp({
   const [urlInput, setUrlInput] = useState(initialInput ?? '')
   const [clipboardUrl, setClipboardUrl] = useState<string | undefined>(undefined)
   const [settingsFocus, setSettingsFocus] = useState<'cookies' | 'download' | 'metadata' | 'limit'>('cookies')
+  const [batchClickTargets, setBatchClickTargets] = useState<ClickTarget[]>([])
 
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80
   const boxWidth = Math.max(14, Math.min(64, columns - 6))
@@ -399,8 +400,11 @@ function InnerApp({
     }
 
     if (key.escape) {
-      if (phase.name === 'settings' || phase.name === 'watcher' || phase.name === 'batch') {
+      if (phase.name === 'settings' || phase.name === 'watcher') {
         setPhase({name: 'input'})
+        return
+      }
+      if (phase.name === 'batch') {
         return
       }
       if (phase.name === 'platform') {
@@ -505,6 +509,10 @@ function InnerApp({
       targets.push({match: 'Download Directory', padX: 2, padY: 1, action: () => setSettingsFocus('download')})
     }
 
+    if (phase.name === 'batch') {
+      targets.push(...batchClickTargets)
+    }
+
     for (const [key, label] of hints) {
       const action = hintAction(key)
       if (action) targets.push({match: `${key} ${label}`, action})
@@ -526,6 +534,7 @@ function InnerApp({
     handlePlatformSelect,
     handleModeSelect,
     resetToInput,
+    batchClickTargets,
   ])
 
   useMouseClick(
@@ -672,6 +681,7 @@ function InnerApp({
           defaultChoice={initialChoice}
           defaultLimit={effectiveLimit}
           defaultWriteMetadata={effectiveWriteMetadata}
+          onRegisterClickTargets={setBatchClickTargets}
         />
       )}
 

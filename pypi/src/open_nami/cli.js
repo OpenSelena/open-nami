@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.4",
+      version: "1.2.5",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -41856,13 +41856,19 @@ async function runBatchQueue(options) {
   const choice = options.choice || "all";
   const minDelay = options.minDelayMs ?? 2e3;
   const maxDelay = options.maxDelayMs ?? 5e3;
-  const items = rawEntries.map((raw) => ({
-    raw,
-    profile: parseProfileInput(raw),
-    status: "pending",
-    downloaded: 0,
-    skipped: 0
-  }));
+  const items = rawEntries.map((raw) => {
+    let profile = parseProfileInput(raw);
+    if (options.defaultPlatform && profile.platform === "unknown" && profile.username) {
+      profile = buildCanonicalProfile(options.defaultPlatform, profile.username, raw);
+    }
+    return {
+      raw,
+      profile,
+      status: "pending",
+      downloaded: 0,
+      skipped: 0
+    };
+  });
   let totalDownloaded = 0;
   let totalSkipped = 0;
   let succeeded = 0;
@@ -41882,10 +41888,15 @@ async function runBatchQueue(options) {
     }
     options.onAccountStart?.(item, i, items.length);
     try {
+      const targetDir = resolveDefaultDownloadDir(
+        item.profile.platform,
+        item.profile.username,
+        options.outputDir
+      );
       const res = await dispatchDownload({
         profile: item.profile,
         choice,
-        outputDir: options.outputDir,
+        outputDir: targetDir,
         since: options.since,
         until: options.until,
         limit: options.limit,
@@ -41933,8 +41944,11 @@ async function runBatchQueue(options) {
 
 // src/components/views/batch-view.tsx
 var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+var PLATFORMS = ["instagram", "tiktok", "facebook", "x"];
+var CHOICES = ["all", "photos", "videos", "stories", "highlights"];
 var DATE_PRESETS2 = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
 var LIMIT_PRESETS2 = [void 0, 10, 24, 50, 100, "custom"];
+var OPTION_CONTROLS = ["platform", "choice", "limit", "date", "meta", "resume", "start"];
 function BatchView({
   onBack,
   outputDir,
@@ -41943,16 +41957,18 @@ function BatchView({
   gapComponent: Gap2,
   defaultChoice = "all",
   defaultLimit,
-  defaultWriteMetadata = false
+  defaultWriteMetadata = false,
+  onRegisterClickTargets
 }) {
   const [phase, setPhase] = (0, import_react47.useState)("input");
   const [inputField, setInputField] = (0, import_react47.useState)("text");
   const [rawText, setRawText] = (0, import_react47.useState)("");
   const [filePath, setFilePath] = (0, import_react47.useState)("");
   const [errorMessage, setErrorMessage] = (0, import_react47.useState)(null);
-  const [focusSection, setFocusSection] = (0, import_react47.useState)("input");
+  const [focusedControl, setFocusedControl] = (0, import_react47.useState)("input");
   const [customLimitText, setCustomLimitText] = (0, import_react47.useState)("");
   const [customDateText, setCustomDateText] = (0, import_react47.useState)("");
+  const [defaultPlatform, setDefaultPlatform] = (0, import_react47.useState)("instagram");
   const [choice, setChoice] = (0, import_react47.useState)(defaultChoice);
   const [limit, setLimit] = (0, import_react47.useState)(defaultLimit);
   const [dateFilter, setDateFilter] = (0, import_react47.useState)("all");
@@ -41964,11 +41980,16 @@ function BatchView({
   const [isCooldown, setIsCooldown] = (0, import_react47.useState)(false);
   const [result, setResult] = (0, import_react47.useState)(null);
   const abortControllerRef = (0, import_react47.useRef)(null);
+  const cyclePlatform = (0, import_react47.useCallback)(() => {
+    setDefaultPlatform((prev) => {
+      const idx = PLATFORMS.indexOf(prev);
+      return PLATFORMS[(idx + 1) % PLATFORMS.length];
+    });
+  }, []);
   const cycleChoice = (0, import_react47.useCallback)(() => {
     setChoice((prev) => {
-      if (prev === "all") return "photos";
-      if (prev === "photos") return "videos";
-      return "all";
+      const idx = CHOICES.indexOf(prev);
+      return CHOICES[(idx + 1) % CHOICES.length];
     });
   }, []);
   const cycleLimit = (0, import_react47.useCallback)(() => {
@@ -41977,7 +41998,7 @@ function BatchView({
     const nextVal = LIMIT_PRESETS2[nextIdx];
     if (nextVal === "custom") {
       setCustomLimitText(limit ? String(limit) : "24");
-      setFocusSection("custom-limit");
+      setFocusedControl("custom-limit");
     } else {
       setLimit(nextVal);
     }
@@ -41987,8 +42008,8 @@ function BatchView({
     const nextIdx = (curIdx + 1) % DATE_PRESETS2.length;
     const nextVal = DATE_PRESETS2[nextIdx];
     if (nextVal === "custom") {
-      setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
-      setFocusSection("custom-date");
+      setCustomDateText(dateFilter !== "all" ? dateFilter : "2024");
+      setFocusedControl("custom-date");
     } else {
       setDateFilter(nextVal);
     }
@@ -42013,7 +42034,11 @@ function BatchView({
         return;
       }
     } else {
-      lines = rawText.split(/[\n,;]+/).map((s) => s.trim()).filter(Boolean);
+      lines = Array.from(
+        new Set(
+          rawText.split(/[\r\n,;\s]+/).map((s) => s.trim()).filter(Boolean)
+        )
+      );
       if (lines.length === 0) {
         setErrorMessage("Please enter at least one profile URL or username");
         return;
@@ -42028,6 +42053,7 @@ function BatchView({
         filePath: inputField === "file" ? filePath.trim() : void 0,
         lines: inputField === "text" ? lines : void 0,
         choice,
+        defaultPlatform,
         outputDir,
         since: dateRange.since,
         until: dateRange.until,
@@ -42038,7 +42064,7 @@ function BatchView({
         onAccountStart: (item, idx) => {
           setIsCooldown(false);
           setCurrentIndex(idx);
-          setCurrentProgressText(`Probing @${item.profile.username || item.raw}\u2026`);
+          setCurrentProgressText(`Probing @${item.profile.username || item.raw} on ${item.profile.platform}\u2026`);
           setQueueItems((prev) => {
             const next = [...prev];
             if (next[idx]) next[idx] = { ...item };
@@ -42080,15 +42106,18 @@ function BatchView({
       setErrorMessage(msg);
       setPhase("input");
     }
-  }, [inputField, filePath, rawText, choice, outputDir, dateFilter, limit, resume, writeMetadata]);
+  }, [inputField, filePath, rawText, choice, defaultPlatform, outputDir, dateFilter, limit, resume, writeMetadata]);
   use_input_default((input, key) => {
+    if (key.ctrl && (input === "c" || input === "C")) {
+      return;
+    }
     if (key.escape) {
-      if (focusSection === "custom-limit" || focusSection === "custom-date") {
-        setFocusSection("options");
+      if (focusedControl === "custom-limit" || focusedControl === "custom-date") {
+        setFocusedControl("start");
         return;
       }
-      if (focusSection === "options") {
-        setFocusSection("input");
+      if (focusedControl !== "input" && phase === "input") {
+        setFocusedControl("input");
         return;
       }
       if (phase === "running") {
@@ -42111,46 +42140,78 @@ function BatchView({
       }
       return;
     }
+    if (phase === "running") {
+      return;
+    }
     if (phase === "input") {
-      if (focusSection === "custom-limit" || focusSection === "custom-date") {
+      if (focusedControl === "custom-limit" || focusedControl === "custom-date") {
         return;
       }
-      if (key.ctrl) {
-        if (input === "l" || input === "L") {
-          setCustomLimitText(limit ? String(limit) : "24");
-          setFocusSection("custom-limit");
-          return;
-        }
-        if (input === "d" || input === "D") {
-          setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
-          setFocusSection("custom-date");
-          return;
-        }
-        if (input === "c" || input === "C") {
-          cycleChoice();
-          return;
-        }
-        if (input === "m" || input === "M") {
-          toggleMetadata();
-          return;
-        }
-        if (input === "r" || input === "R") {
-          toggleResume();
-          return;
-        }
-      }
-      if (focusSection === "input") {
+      if (focusedControl === "input") {
         if (key.downArrow) {
-          setFocusSection("options");
+          setFocusedControl("platform");
           return;
         }
-      } else if (focusSection === "options") {
         if (key.upArrow) {
-          setFocusSection("input");
+          setFocusedControl("tabs");
           return;
         }
-        if (key.return) {
-          startQueue();
+        return;
+      }
+      if (focusedControl === "tabs") {
+        if (key.leftArrow || key.rightArrow || input === " " || key.return) {
+          setInputField((prev) => prev === "text" ? "file" : "text");
+          return;
+        }
+        if (key.downArrow || key.tab) {
+          setFocusedControl("input");
+          return;
+        }
+        return;
+      }
+      if (OPTION_CONTROLS.includes(focusedControl)) {
+        if (key.upArrow) {
+          setFocusedControl("input");
+          return;
+        }
+        if (key.rightArrow || key.tab && !key.shift) {
+          const idx = OPTION_CONTROLS.indexOf(focusedControl);
+          setFocusedControl(OPTION_CONTROLS[(idx + 1) % OPTION_CONTROLS.length]);
+          return;
+        }
+        if (key.leftArrow || key.tab && key.shift) {
+          const idx = OPTION_CONTROLS.indexOf(focusedControl);
+          setFocusedControl(OPTION_CONTROLS[(idx - 1 + OPTION_CONTROLS.length) % OPTION_CONTROLS.length]);
+          return;
+        }
+        if (input === " " || key.return) {
+          switch (focusedControl) {
+            case "platform":
+              cyclePlatform();
+              break;
+            case "choice":
+              cycleChoice();
+              break;
+            case "limit":
+              cycleLimit();
+              break;
+            case "date":
+              cycleDate();
+              break;
+            case "meta":
+              toggleMetadata();
+              break;
+            case "resume":
+              toggleResume();
+              break;
+            case "start":
+              startQueue();
+              break;
+          }
+          return;
+        }
+        if (input === "p" || input === "P") {
+          cyclePlatform();
           return;
         }
         if (input === "c" || input === "C") {
@@ -42176,6 +42237,172 @@ function BatchView({
       }
     }
   }, { isActive: Boolean(process.stdin.isTTY) });
+  (0, import_react47.useEffect)(() => {
+    if (!onRegisterClickTargets) return;
+    const targets = [];
+    if (phase === "input") {
+      targets.push({
+        match: "Links / Handles",
+        padX: 2,
+        action: () => {
+          setInputField("text");
+          setFocusedControl("input");
+        }
+      });
+      targets.push({
+        match: "File (.txt)",
+        padX: 2,
+        action: () => {
+          setInputField("file");
+          setFocusedControl("input");
+        }
+      });
+      targets.push({
+        match: "Links or @handles",
+        padX: 2,
+        action: () => setFocusedControl("input")
+      });
+      targets.push({
+        match: "Batch file (.txt)",
+        padX: 2,
+        action: () => setFocusedControl("input")
+      });
+      targets.push({
+        match: "Platform:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("platform");
+          cyclePlatform();
+        }
+      });
+      targets.push({
+        match: "Media:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("choice");
+          cycleChoice();
+        }
+      });
+      targets.push({
+        match: "Posts:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("limit");
+          cycleLimit();
+        }
+      });
+      targets.push({
+        match: "Date:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("date");
+          cycleDate();
+        }
+      });
+      targets.push({
+        match: "Meta:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("meta");
+          toggleMetadata();
+        }
+      });
+      targets.push({
+        match: "Resume:",
+        padX: 2,
+        action: () => {
+          setFocusedControl("resume");
+          toggleResume();
+        }
+      });
+      targets.push({
+        match: "Start Queue",
+        padX: 3,
+        action: () => {
+          setFocusedControl("start");
+          startQueue();
+        }
+      });
+      targets.push({
+        match: "tab switch field",
+        action: () => setInputField((prev) => prev === "text" ? "file" : "text")
+      });
+      targets.push({
+        match: "c target",
+        action: cycleChoice
+      });
+      targets.push({
+        match: "m sidecar",
+        action: toggleMetadata
+      });
+      targets.push({
+        match: "l limit",
+        action: cycleLimit
+      });
+      targets.push({
+        match: "d date",
+        action: cycleDate
+      });
+      targets.push({
+        match: "r resume",
+        action: toggleResume
+      });
+      targets.push({
+        match: "\u21B5 start",
+        action: startQueue
+      });
+    }
+    if (phase === "running") {
+      targets.push({
+        match: "Stop queue and return",
+        padX: 2,
+        action: () => {
+          abortControllerRef.current?.abort();
+          setPhase("input");
+        }
+      });
+      targets.push({
+        match: "Stop queue",
+        padX: 2,
+        action: () => {
+          abortControllerRef.current?.abort();
+          setPhase("input");
+        }
+      });
+    }
+    if (phase === "done") {
+      targets.push({
+        match: "Open Downloads Folder",
+        padX: 2,
+        action: () => {
+          const target = outputDir || resolveDefaultDownloadDir("instagram", "batch");
+          revealInFileManager(target);
+        }
+      });
+      targets.push({
+        match: "Return to Start",
+        padX: 2,
+        action: () => setPhase("input")
+      });
+    }
+    onRegisterClickTargets(targets);
+    return () => {
+      onRegisterClickTargets([]);
+    };
+  }, [
+    phase,
+    inputField,
+    focusedControl,
+    onRegisterClickTargets,
+    cyclePlatform,
+    cycleChoice,
+    cycleLimit,
+    cycleDate,
+    toggleMetadata,
+    toggleResume,
+    startQueue,
+    outputDir
+  ]);
   const currentItem = queueItems[currentIndex];
   const completedCount = queueItems.filter((i) => i.status === "success" || i.status === "failed").length;
   const totalCount = queueItems.length > 0 ? queueItems.length : 1;
@@ -42183,9 +42410,25 @@ function BatchView({
   return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
     phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { marginBottom: 1, justifyContent: "center", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "text" ? theme.primary : theme.gray, children: inputField === "text" ? "\u25CF Links / Handles" : "\u25CB Links / Handles" }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          Text,
+          {
+            bold: true,
+            color: inputField === "text" ? theme.primary : theme.gray,
+            inverse: focusedControl === "tabs" && inputField === "text",
+            children: inputField === "text" ? "\u25CF Links / Handles" : "\u25CB Links / Handles"
+          }
+        ),
         /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "   \xB7   " }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: inputField === "file" ? theme.primary : theme.gray, children: inputField === "file" ? "\u25CF File (.txt)" : "\u25CB File (.txt)" })
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+          Text,
+          {
+            bold: true,
+            color: inputField === "file" ? theme.primary : theme.gray,
+            inverse: focusedControl === "tabs" && inputField === "file",
+            children: inputField === "file" ? "\u25CF File (.txt)" : "\u25CB File (.txt)"
+          }
+        )
       ] }),
       inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Links or @handles", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         TextInput,
@@ -42195,9 +42438,10 @@ function BatchView({
           onSubmit: startQueue,
           placeholder: "@user1, @user2, tiktok.com/@user3\u2026",
           width: Math.max(50, boxWidth - 10),
-          focus: focusSection === "input",
-          onTab: () => setInputField("file"),
-          onArrowDown: () => setFocusSection("options")
+          focus: focusedControl === "input",
+          onArrowDown: () => setFocusedControl("start"),
+          onArrowUp: () => setFocusedControl("tabs"),
+          onTab: () => setFocusedControl("start")
         }
       ) }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Batch file (.txt)", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         TextInput,
@@ -42207,9 +42451,10 @@ function BatchView({
           onSubmit: startQueue,
           placeholder: "e.g. creators.txt or C:\\path\\creators.txt",
           width: Math.max(50, boxWidth - 10),
-          focus: focusSection === "input",
-          onTab: () => setInputField("text"),
-          onArrowDown: () => setFocusSection("options")
+          focus: focusedControl === "input",
+          onArrowDown: () => setFocusedControl("start"),
+          onArrowUp: () => setFocusedControl("tabs"),
+          onTab: () => setFocusedControl("start")
         }
       ) }),
       errorMessage ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: "red", children: [
@@ -42222,10 +42467,10 @@ function BatchView({
           flexDirection: "column",
           marginTop: 1,
           borderStyle: "round",
-          borderColor: focusSection === "options" || focusSection === "custom-limit" || focusSection === "custom-date" ? theme.primary : theme.gray,
-          borderDimColor: focusSection === "input",
+          borderColor: focusedControl !== "input" && focusedControl !== "tabs" ? theme.primary : theme.gray,
+          borderDimColor: focusedControl === "input" || focusedControl === "tabs",
           paddingX: 1,
-          children: focusSection === "custom-limit" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
+          children: focusedControl === "custom-limit" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set post limit (e.g. 24, all):" }),
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
               TextInput,
@@ -42235,14 +42480,14 @@ function BatchView({
                 onSubmit: (val) => {
                   const parsed = parseLimit(val);
                   setLimit(parsed);
-                  setFocusSection("options");
+                  setFocusedControl("start");
                 },
                 width: 24
               }
             ) }),
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
-          ] }) : focusSection === "custom-date" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set date or year (e.g. 2021, 2022, 7d):" }),
+          ] }) : focusedControl === "custom-date" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set date or year (e.g. 2024, 7d):" }),
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
               TextInput,
               {
@@ -42251,7 +42496,7 @@ function BatchView({
                 onSubmit: (val) => {
                   const trimmed = val.trim();
                   setDateFilter(trimmed ? trimmed : "all");
-                  setFocusSection("options");
+                  setFocusedControl("start");
                 },
                 width: 24
               }
@@ -42260,33 +42505,99 @@ function BatchView({
           ] }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(import_jsx_runtime17.Fragment, { children: [
             /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", children: [
               /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[c] Media: ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: choice.toUpperCase() })
+                "[p] Platform:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "platform",
+                    children: defaultPlatform.toUpperCase()
+                  }
+                )
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[l] Posts: ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit}` : "ALL" })
+                "[c] Media:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "choice",
+                    children: choice === "all" ? "EVERYTHING" : choice.toUpperCase()
+                  }
+                )
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[d] Date: ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter.toUpperCase() })
+                "[l] Posts:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "limit",
+                    children: limit ? `${limit}` : "ALL"
+                  }
+                )
               ] })
             ] }),
             /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
               /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[m] Meta: ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+                "[d] Date:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "date",
+                    children: dateFilter.toUpperCase()
+                  }
+                )
               ] }),
               /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[r] Resume: ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
+                "[m] Meta:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "meta",
+                    children: writeMetadata ? "ON" : "OFF"
+                  }
+                )
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.primary, bold: true, children: "[\u21B5] Start Queue" })
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+                "[r] Resume:",
+                " ",
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    color: theme.primary,
+                    bold: true,
+                    inverse: focusedControl === "resume",
+                    children: resume ? "ON" : "OFF"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                Text,
+                {
+                  color: theme.primary,
+                  bold: true,
+                  inverse: focusedControl === "start",
+                  children: "[\u21B5] Start Queue"
+                }
+              )
             ] })
           ] })
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: focusSection === "input" ? "Press \u2193 to adjust options \xB7 \u21B5 to start queue" : "Hotkeys [c] [l] [d] [m] [r] \xB7 \u2191 to edit text \xB7 \u21B5 to start" }) })
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: focusedControl === "input" ? "Type handles or URLs \xB7 \u21B5 to start \xB7 \u2193 to customize options" : focusedControl === "tabs" ? "Space to switch mode \xB7 \u2193 to edit input" : "\u2190/\u2192/Tab choose option \xB7 Space/Enter toggle \xB7 \u21B5 start queue \xB7 \u2191 edit input" }) })
     ] }) }),
     phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginBottom: 1, children: [
@@ -42526,6 +42837,7 @@ function InnerApp({
   const [urlInput, setUrlInput] = (0, import_react48.useState)(initialInput ?? "");
   const [clipboardUrl, setClipboardUrl] = (0, import_react48.useState)(void 0);
   const [settingsFocus, setSettingsFocus] = (0, import_react48.useState)("cookies");
+  const [batchClickTargets, setBatchClickTargets] = (0, import_react48.useState)([]);
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
@@ -42695,8 +43007,11 @@ function InnerApp({
       return;
     }
     if (key.escape) {
-      if (phase.name === "settings" || phase.name === "watcher" || phase.name === "batch") {
+      if (phase.name === "settings" || phase.name === "watcher") {
         setPhase({ name: "input" });
+        return;
+      }
+      if (phase.name === "batch") {
         return;
       }
       if (phase.name === "platform") {
@@ -42790,6 +43105,9 @@ function InnerApp({
       targets.push({ match: "Cookies Folder", padX: 2, padY: 1, action: () => setSettingsFocus("cookies") });
       targets.push({ match: "Download Directory", padX: 2, padY: 1, action: () => setSettingsFocus("download") });
     }
+    if (phase.name === "batch") {
+      targets.push(...batchClickTargets);
+    }
     for (const [key, label] of hints) {
       const action = hintAction(key);
       if (action) targets.push({ match: `${key} ${label}`, action });
@@ -42809,7 +43127,8 @@ function InnerApp({
     handleInputSubmit,
     handlePlatformSelect,
     handleModeSelect,
-    resetToInput
+    resetToInput,
+    batchClickTargets
   ]);
   useMouseClick(
     (x, y) => {
@@ -42950,7 +43269,8 @@ function InnerApp({
         gapComponent: Gap,
         defaultChoice: initialChoice,
         defaultLimit: effectiveLimit,
-        defaultWriteMetadata: effectiveWriteMetadata
+        defaultWriteMetadata: effectiveWriteMetadata,
+        onRegisterClickTargets: setBatchClickTargets
       }
     ),
     hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(import_jsx_runtime18.Fragment, { children: [
@@ -43303,6 +43623,7 @@ async function main() {
   let themeMode = "auto";
   let isWatchMode = false;
   let batchFile;
+  let cliPlatform;
   let since;
   let until;
   let limit;
@@ -43352,6 +43673,16 @@ async function main() {
       batchFile = args[++i];
     } else if (arg.startsWith("--batch=")) {
       batchFile = arg.slice("--batch=".length);
+    } else if (arg === "-p" || arg === "--platform") {
+      const val = args[++i]?.toLowerCase();
+      if (val === "instagram" || val === "tiktok" || val === "facebook" || val === "x") {
+        cliPlatform = val;
+      }
+    } else if (arg.startsWith("--platform=")) {
+      const val = arg.slice("--platform=".length).toLowerCase();
+      if (val === "instagram" || val === "tiktok" || val === "facebook" || val === "x") {
+        cliPlatform = val;
+      }
     } else if (!arg.startsWith("-") && !initialInput) {
       initialInput = arg;
     }
@@ -43415,6 +43746,7 @@ async function main() {
       const result = await runBatchQueue({
         filePath: batchFile,
         choice,
+        defaultPlatform: cliPlatform || "instagram",
         outputDir,
         since,
         until,

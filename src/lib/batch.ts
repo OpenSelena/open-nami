@@ -1,6 +1,6 @@
 import fsPromises from 'node:fs/promises'
-import {parseProfileInput, type ParsedProfile} from './parser.js'
-import {dispatchDownload} from './engines/dispatcher.js'
+import {parseProfileInput, buildCanonicalProfile, type ParsedProfile, type SupportedPlatform} from './parser.js'
+import {dispatchDownload, resolveDefaultDownloadDir} from './engines/dispatcher.js'
 import {sleep} from './engines/extractors/http.js'
 import type {MediaTarget, EngineProgress, DispatchRunnerResult} from './engines/types.js'
 
@@ -17,6 +17,7 @@ export interface BatchQueueOptions {
   filePath?: string
   lines?: string[]
   choice?: MediaTarget
+  defaultPlatform?: SupportedPlatform
   outputDir?: string
   since?: string
   until?: string
@@ -93,13 +94,20 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
   const minDelay = options.minDelayMs ?? 2000
   const maxDelay = options.maxDelayMs ?? 5000
 
-  const items: BatchItem[] = rawEntries.map(raw => ({
-    raw,
-    profile: parseProfileInput(raw),
-    status: 'pending',
-    downloaded: 0,
-    skipped: 0,
-  }))
+  const items: BatchItem[] = rawEntries.map(raw => {
+    let profile = parseProfileInput(raw)
+    // If the input was a bare username or unknown platform, but a defaultPlatform was specified, resolve it!
+    if (options.defaultPlatform && profile.platform === 'unknown' && profile.username) {
+      profile = buildCanonicalProfile(options.defaultPlatform, profile.username, raw)
+    }
+    return {
+      raw,
+      profile,
+      status: 'pending',
+      downloaded: 0,
+      skipped: 0,
+    }
+  })
 
   let totalDownloaded = 0
   let totalSkipped = 0
@@ -125,10 +133,16 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
     options.onAccountStart?.(item, i, items.length)
 
     try {
+      const targetDir = resolveDefaultDownloadDir(
+        item.profile.platform,
+        item.profile.username,
+        options.outputDir,
+      )
+
       const res = await dispatchDownload({
         profile: item.profile,
         choice,
-        outputDir: options.outputDir,
+        outputDir: targetDir,
         since: options.since,
         until: options.until,
         limit: options.limit,
