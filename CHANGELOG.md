@@ -4,6 +4,13 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-10-25
+
+### Fixed
+- **FFmpeg Detection in Doctor Diagnostics**:
+  - Resolved `nami --doctor` reporting ffmpeg as missing when installed.
+  - Corrected execution flag from `--version` to `-version`, matching FFmpeg CLI syntax and enabling clean detection of system and WinGet-installed FFmpeg binaries.
+
 ## [1.4.0] - 2026-10-25
 
 ### Added & Modernized

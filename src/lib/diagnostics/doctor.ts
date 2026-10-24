@@ -22,14 +22,15 @@ export interface DoctorOptions {
 }
 
 async function defaultCheckBinary(bin: 'gallery-dl' | 'yt-dlp' | 'ffmpeg'): Promise<boolean> {
+  const versionFlag = bin === 'ffmpeg' ? '-version' : '--version'
   try {
-    await execFileAsync(bin, ['--version'], { timeout: 3000 })
+    await execFileAsync(bin, [versionFlag], { timeout: 3000 })
     return true
   } catch {
     if (bin === 'gallery-dl' || bin === 'yt-dlp') {
       try {
         const resolved = resolveEngineCommand(bin)
-        await execFileAsync(resolved.command, [...resolved.baseArgs, '--version'], { timeout: 3000 })
+        await execFileAsync(resolved.command, [...resolved.baseArgs, versionFlag], { timeout: 3000 })
         return true
       } catch {
         return false

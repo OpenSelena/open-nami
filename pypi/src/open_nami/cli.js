@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.4.0",
+      version: "1.4.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -43893,14 +43893,15 @@ import fs19 from "fs";
 import path16 from "path";
 var execFileAsync = promisify(execFile);
 async function defaultCheckBinary(bin) {
+  const versionFlag = bin === "ffmpeg" ? "-version" : "--version";
   try {
-    await execFileAsync(bin, ["--version"], { timeout: 3e3 });
+    await execFileAsync(bin, [versionFlag], { timeout: 3e3 });
     return true;
   } catch {
     if (bin === "gallery-dl" || bin === "yt-dlp") {
       try {
         const resolved = resolveEngineCommand(bin);
-        await execFileAsync(resolved.command, [...resolved.baseArgs, "--version"], { timeout: 3e3 });
+        await execFileAsync(resolved.command, [...resolved.baseArgs, versionFlag], { timeout: 3e3 });
         return true;
       } catch {
         return false;
