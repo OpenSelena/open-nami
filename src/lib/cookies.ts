@@ -4,6 +4,7 @@ import path from 'node:path'
 import os from 'node:os'
 import {loadConfig} from './config.js'
 import type {Platform} from './parser.js'
+export * from './cookies/browser-bridge.js'
 
 export interface ResolvedCookie {
   filePath: string

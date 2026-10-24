@@ -2,7 +2,8 @@ node_modules/
 dist/
 **/dist/
 *.egg-info/
-cookies/
+/cookies/
+!src/lib/cookies/
 *.cookies.txt
 *cookie*.txt
 downloads/
