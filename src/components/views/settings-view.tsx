@@ -7,7 +7,11 @@ import {FramedInput} from '../framed-input.js'
 import {TextInput} from '../text-input.js'
 import {loadConfig, saveConfig, type AppConfig} from '../../lib/config.js'
 import {detectAvailableCookies} from '../../lib/cookies.js'
-import {listDetectedBrowsers, type DetectedBrowser} from '../../lib/cookies/browser-bridge.js'
+import {
+  listDetectedBrowsers,
+  detectSystemDefaultBrowser,
+  type DetectedBrowser,
+} from '../../lib/cookies/browser-bridge.js'
 import {runDoctor, type DoctorReport, type DoctorOptions} from '../../lib/diagnostics/doctor.js'
 import type {Theme} from '../../theme.js'
 
@@ -22,11 +26,30 @@ export type SettingsField = 'cookies' | 'browser' | 'download' | 'metadata' | 'l
 
 export function resolveBrowserOptions(detected: DetectedBrowser[]): string[] {
   const available = detected.filter(b => b.available !== false)
-  return ['none', ...available.map(b => b.id)]
+  return ['auto', 'none', ...available.map(b => b.id)]
+}
+
+export function formatBrowserFeedback(
+  cookiesFromBrowser: string | undefined,
+  detectedBrowsers: DetectedBrowser[] = [],
+  defaultBrowser?: DetectedBrowser | null,
+): string {
+  if (cookiesFromBrowser === 'auto') {
+    if (defaultBrowser) {
+      return `system default: ${defaultBrowser.name} (auto-extract session cookies)`
+    }
+    return 'system default: none detected (falls back to cookie files)'
+  }
+  if (!cookiesFromBrowser || cookiesFromBrowser === 'none') {
+    return 'manual cookie files only'
+  }
+  const found = detectedBrowsers.find(b => b.id === cookiesFromBrowser)
+  const browserName = found ? found.name : cookiesFromBrowser
+  return `live session cookies from ${browserName}`
 }
 
 export function cycleBrowserOption(current: string, options: string[], forward = true): string {
-  if (options.length === 0) return 'none'
+  if (options.length === 0) return 'auto'
   const idx = options.indexOf(current)
   const currentIndex = idx === -1 ? 0 : idx
   const nextIdx = forward
@@ -46,6 +69,8 @@ export type SettingsViewProps = {
   doctorChecker?: ((options: DoctorOptions) => Promise<DoctorReport>) | ((bin: 'gallery-dl' | 'yt-dlp' | 'ffmpeg') => Promise<boolean>)
   initialReport?: DoctorReport | null
   browsers?: DetectedBrowser[]
+  defaultBrowser?: DetectedBrowser | null
+  initialConfig?: AppConfig
 }
 
 export type DoctorCardProps = {
@@ -190,8 +215,10 @@ export function SettingsView({
   doctorChecker,
   initialReport,
   browsers: browsersProp,
+  defaultBrowser: defaultBrowserProp,
+  initialConfig: initialConfigProp,
 }: SettingsViewProps) {
-  const initialConfig = useMemo(() => loadConfig(), [])
+  const initialConfig = useMemo(() => initialConfigProp ?? loadConfig(), [initialConfigProp])
   const [internalFocus, setInternalFocus] = useState<SettingsField>('cookies')
   const focusedField = controlledFocus ?? internalFocus
 
@@ -203,6 +230,10 @@ export function SettingsView({
     [onFocusChange],
   )
 
+  const defaultBrowser = useMemo(() => {
+    return defaultBrowserProp !== undefined ? defaultBrowserProp : detectSystemDefaultBrowser()
+  }, [defaultBrowserProp])
+
   const detectedBrowsers = useMemo(() => {
     return browsersProp ?? listDetectedBrowsers()
   }, [browsersProp])
@@ -213,7 +244,7 @@ export function SettingsView({
 
   const [cookiesDir, setCookiesDir] = useState(initialConfig.cookiesDir ?? '')
   const [cookiesFromBrowser, setCookiesFromBrowser] = useState<AppConfig['cookiesFromBrowser']>(
-    initialConfig.cookiesFromBrowser ?? 'none',
+    initialConfig.cookiesFromBrowser ?? 'auto',
   )
   const [downloadDir, setDownloadDir] = useState(initialConfig.downloadDir ?? '')
   const [writeMetadata, setWriteMetadata] = useState(Boolean(initialConfig.writeMetadata))
@@ -276,13 +307,8 @@ export function SettingsView({
   }, [cookiesDir, cookiesFromBrowser, downloadDir, writeMetadata, defaultLimit, onSave])
 
   const browserFeedback = useMemo(() => {
-    if (!cookiesFromBrowser || cookiesFromBrowser === 'none') {
-      return 'manual cookie files only'
-    }
-    const found = detectedBrowsers.find(b => b.id === cookiesFromBrowser)
-    const browserName = found ? found.name : cookiesFromBrowser
-    return `live session cookies from ${browserName}`
-  }, [cookiesFromBrowser, detectedBrowsers])
+    return formatBrowserFeedback(cookiesFromBrowser, detectedBrowsers, defaultBrowser)
+  }, [cookiesFromBrowser, detectedBrowsers, defaultBrowser])
 
   const cookieFeedback = useMemo(() => {
     const dir = cookiesDir.trim()
@@ -332,7 +358,7 @@ export function SettingsView({
 
   const cycleBrowser = useCallback((forward = true) => {
     setCookiesFromBrowser(prev => {
-      const next = cycleBrowserOption(prev ?? 'none', browserOptions, forward)
+      const next = cycleBrowserOption(prev ?? 'auto', browserOptions, forward)
       return next as AppConfig['cookiesFromBrowser']
     })
   }, [browserOptions])
@@ -437,7 +463,7 @@ export function SettingsView({
           {focusedField === 'browser' ? '● ' : '○ '}Browser Cookie Bridge
         </Text>
         <Text color={cookiesFromBrowser && cookiesFromBrowser !== 'none' ? theme.primary : theme.gray} bold>
-          {`[${(cookiesFromBrowser ?? 'none').toUpperCase()}]`}
+          {`[${(cookiesFromBrowser ?? 'auto').toUpperCase()}]`}
         </Text>
       </Box>
       <Text color={theme.gray} dimColor={theme.dimSecondary}>

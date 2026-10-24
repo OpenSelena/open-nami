@@ -1,12 +1,15 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import React from 'react'
+import {PassThrough} from 'node:stream'
+import {render} from 'ink'
 import {
   SettingsView,
   DoctorCard,
   formatDoctorEngines,
   formatDoctorStorage,
   formatDoctorCookies,
+  formatBrowserFeedback,
   resolveBrowserOptions,
   cycleBrowserOption,
 } from './settings-view.js'
@@ -205,47 +208,89 @@ test('runDoctor integrates cleanly with formatters for SettingsView presentation
   assert.ok(typeof cookies.text === 'string')
 })
 
-test('resolveBrowserOptions includes none and installed browsers', () => {
+test('resolveBrowserOptions includes auto, none, and installed browsers in order', () => {
   const mockBrowsers: DetectedBrowser[] = [
     {id: 'chrome', name: 'Google Chrome', profileDir: 'C:/chrome', available: true},
     {id: 'edge', name: 'Microsoft Edge', profileDir: 'C:/edge', available: true},
     {id: 'brave', name: 'Brave Browser', profileDir: 'C:/brave', available: false},
   ]
   const options = resolveBrowserOptions(mockBrowsers)
-  assert.deepEqual(options, ['none', 'chrome', 'edge'])
+  assert.deepEqual(options, ['auto', 'none', 'chrome', 'edge'])
 })
 
-test('resolveBrowserOptions returns none when no browsers are installed', () => {
+test('resolveBrowserOptions returns auto and none when no browsers are installed', () => {
   const mockBrowsers: DetectedBrowser[] = [
     {id: 'chrome', name: 'Google Chrome', profileDir: 'C:/chrome', available: false},
   ]
   const options = resolveBrowserOptions(mockBrowsers)
-  assert.deepEqual(options, ['none'])
+  assert.deepEqual(options, ['auto', 'none'])
 })
 
-test('cycleBrowserOption cycles forward and wraps around', () => {
-  const options = ['none', 'chrome', 'edge']
+test('cycleBrowserOption cycles forward and wraps around with auto', () => {
+  const options = ['auto', 'none', 'chrome', 'edge']
+  assert.equal(cycleBrowserOption('auto', options, true), 'none')
   assert.equal(cycleBrowserOption('none', options, true), 'chrome')
   assert.equal(cycleBrowserOption('chrome', options, true), 'edge')
-  assert.equal(cycleBrowserOption('edge', options, true), 'none')
+  assert.equal(cycleBrowserOption('edge', options, true), 'auto')
 })
 
-test('cycleBrowserOption cycles backward and wraps around', () => {
-  const options = ['none', 'chrome', 'edge']
-  assert.equal(cycleBrowserOption('none', options, false), 'edge')
+test('cycleBrowserOption cycles backward and wraps around with auto', () => {
+  const options = ['auto', 'none', 'chrome', 'edge']
+  assert.equal(cycleBrowserOption('auto', options, false), 'edge')
   assert.equal(cycleBrowserOption('edge', options, false), 'chrome')
   assert.equal(cycleBrowserOption('chrome', options, false), 'none')
+  assert.equal(cycleBrowserOption('none', options, false), 'auto')
 })
 
 test('cycleBrowserOption handles current value not in options', () => {
-  const options = ['none', 'chrome']
-  assert.equal(cycleBrowserOption('unknown', options, true), 'chrome')
+  const options = ['auto', 'none', 'chrome']
+  assert.equal(cycleBrowserOption('unknown', options, true), 'none')
 })
 
-test('SettingsView accepts browsers prop for deterministic browser bridge testing', () => {
+test('formatBrowserFeedback formats auto with detected default browser', () => {
+  const helium: DetectedBrowser = {
+    id: 'helium',
+    name: 'Helium',
+    profileDir: 'C:/Users/mint/AppData/Local/imput/Helium/User Data',
+    available: true,
+  }
+  const feedback = formatBrowserFeedback('auto', [], helium)
+  assert.equal(feedback, 'system default: Helium (auto-extract session cookies)')
+
+  const chrome: DetectedBrowser = {
+    id: 'chrome',
+    name: 'Google Chrome',
+    profileDir: 'C:/Users/mint/AppData/Local/Google/Chrome/User Data',
+    available: true,
+  }
+  const chromeFeedback = formatBrowserFeedback('auto', [], chrome)
+  assert.equal(chromeFeedback, 'system default: Google Chrome (auto-extract session cookies)')
+})
+
+test('formatBrowserFeedback formats auto when no default browser detected', () => {
+  const feedback = formatBrowserFeedback('auto', [], null)
+  assert.equal(feedback, 'system default: none detected (falls back to cookie files)')
+})
+
+test('formatBrowserFeedback formats manual browser and none', () => {
+  const mockBrowsers: DetectedBrowser[] = [
+    {id: 'chrome', name: 'Google Chrome', profileDir: 'C:/chrome', available: true},
+  ]
+  assert.equal(formatBrowserFeedback('none', mockBrowsers, null), 'manual cookie files only')
+  assert.equal(formatBrowserFeedback(undefined, mockBrowsers, null), 'manual cookie files only')
+  assert.equal(formatBrowserFeedback('chrome', mockBrowsers, null), 'live session cookies from Google Chrome')
+})
+
+test('SettingsView accepts browsers and defaultBrowser props for deterministic injection', () => {
   const mockBrowsers: DetectedBrowser[] = [
     {id: 'firefox', name: 'Mozilla Firefox', profileDir: 'C:/firefox', available: true},
   ]
+  const mockDefault: DetectedBrowser = {
+    id: 'helium',
+    name: 'Helium',
+    profileDir: 'C:/helium',
+    available: true,
+  }
   const el = React.createElement(SettingsView, {
     boxWidth: 60,
     theme: testTheme,
@@ -253,7 +298,143 @@ test('SettingsView accepts browsers prop for deterministic browser bridge testin
     onSave: () => {},
     onCancel: () => {},
     browsers: mockBrowsers,
+    defaultBrowser: mockDefault,
   })
   assert.equal(el.type, SettingsView)
   assert.equal(el.props.browsers, mockBrowsers)
+  assert.equal(el.props.defaultBrowser, mockDefault)
+})
+
+function createMockStdout() {
+  let output = ''
+  const stream = new PassThrough()
+  stream.on('data', chunk => {
+    output += chunk.toString()
+  })
+  return {
+    stream: Object.assign(stream, {columns: 100, rows: 40}),
+    getOutput: () => output,
+  }
+}
+
+test('SettingsView renders [AUTO] and default browser feedback for Helium', async () => {
+  const mockDefault: DetectedBrowser = {
+    id: 'helium',
+    name: 'Helium',
+    profileDir: 'C:/Users/mint/AppData/Local/imput/Helium/User Data',
+    available: true,
+  }
+
+  const initialReport: DoctorReport = {
+    nodeVersion: 'v20.18.0',
+    binaries: {'gallery-dl': true, 'yt-dlp': true, ffmpeg: true},
+    cookies: {instagram: false, tiktok: false, facebook: false, x: false},
+    storageOk: true,
+  }
+
+  const {stream, getOutput} = createMockStdout()
+  const instance = render(
+    React.createElement(SettingsView, {
+      boxWidth: 70,
+      theme: testTheme,
+      gapComponent: () => null,
+      onSave: () => {},
+      onCancel: () => {},
+      defaultBrowser: mockDefault,
+      initialConfig: {cookiesFromBrowser: 'auto'},
+      initialReport,
+    }),
+    {stdout: stream as any, debug: true},
+  )
+
+  try {
+    await instance.waitUntilRenderFlush()
+    const frame = getOutput()
+    assert.ok(frame.includes('[AUTO]'), `Expected [AUTO] in rendered output: ${frame}`)
+    assert.ok(
+      frame.includes('system default: Helium (auto-extract session cookies)'),
+      `Expected Helium feedback in rendered output: ${frame}`,
+    )
+  } finally {
+    instance.unmount()
+  }
+})
+
+test('SettingsView renders [AUTO] and default browser feedback for Chrome', async () => {
+  const mockDefault: DetectedBrowser = {
+    id: 'chrome',
+    name: 'Google Chrome',
+    profileDir: 'C:/Users/mint/AppData/Local/Google/Chrome/User Data',
+    available: true,
+  }
+
+  const initialReport: DoctorReport = {
+    nodeVersion: 'v20.18.0',
+    binaries: {'gallery-dl': true, 'yt-dlp': true, ffmpeg: true},
+    cookies: {instagram: false, tiktok: false, facebook: false, x: false},
+    storageOk: true,
+  }
+
+  const {stream, getOutput} = createMockStdout()
+  const instance = render(
+    React.createElement(SettingsView, {
+      boxWidth: 70,
+      theme: testTheme,
+      gapComponent: () => null,
+      onSave: () => {},
+      onCancel: () => {},
+      defaultBrowser: mockDefault,
+      initialConfig: {cookiesFromBrowser: 'auto'},
+      initialReport,
+    }),
+    {stdout: stream as any, debug: true},
+  )
+
+  try {
+    await instance.waitUntilRenderFlush()
+    const frame = getOutput()
+    assert.ok(frame.includes('[AUTO]'), `Expected [AUTO] in rendered output: ${frame}`)
+    assert.ok(
+      frame.includes('system default: Google Chrome (auto-extract session cookies)'),
+      `Expected Chrome feedback in rendered output: ${frame}`,
+    )
+  } finally {
+    instance.unmount()
+  }
+})
+
+test('SettingsView renders fallback message when no default browser is detected', async () => {
+  const initialReport: DoctorReport = {
+    nodeVersion: 'v20.18.0',
+    binaries: {'gallery-dl': true, 'yt-dlp': true, ffmpeg: true},
+    cookies: {instagram: false, tiktok: false, facebook: false, x: false},
+    storageOk: true,
+  }
+
+  const {stream, getOutput} = createMockStdout()
+  const instance = render(
+    React.createElement(SettingsView, {
+      boxWidth: 70,
+      theme: testTheme,
+      gapComponent: () => null,
+      onSave: () => {},
+      onCancel: () => {},
+      defaultBrowser: null,
+      initialConfig: {cookiesFromBrowser: 'auto'},
+      initialReport,
+    }),
+    {stdout: stream as any, debug: true},
+  )
+
+  try {
+    await instance.waitUntilRenderFlush()
+    const frame = getOutput()
+    assert.ok(frame.includes('[AUTO]'), `Expected [AUTO] in rendered output: ${frame}`)
+    assert.ok(
+      frame.includes('system default: none detected (falls back to cookie files)'),
+      `Expected fallback feedback in rendered output: ${frame}`,
+    )
+  } finally {
+    instance.unmount()
+  }
 })
