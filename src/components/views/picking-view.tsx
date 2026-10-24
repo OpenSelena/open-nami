@@ -97,7 +97,7 @@ export function getPickingOptions(platform: ParsedProfile['platform']): PickingO
 }
 
 export function PickingView({
-  contentWidth: _contentWidth,
+  contentWidth,
   profile,
   outputDir,
   initialLimit,
@@ -108,7 +108,7 @@ export function PickingView({
   onSelect,
   onHighlight,
   theme,
-  gapComponent: _Gap,
+  gapComponent: Gap,
 }: PickingViewProps) {
   const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1)
   const items = getPickingOptions(profile.platform)
@@ -139,39 +139,27 @@ export function PickingView({
     })
   }
 
+  const boxWidth = Math.min(48, Math.max(44, (contentWidth || 80) - 8))
+
   return (
     <Box flexDirection="column" alignItems="center" width="100%">
-      <Box flexDirection="column" width={56}>
-        <Box>
-          <Text color={theme.primary}>▎ </Text>
-          <Text bold color={theme.primary}>
-            @{profile.username}
-          </Text>
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>
-            {` · ${platformName}`}
-          </Text>
-        </Box>
-        {profile.cleanUrl ? (
-          <Box>
-            <Text color={theme.primary}>▎ </Text>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              {profile.cleanUrl}
-            </Text>
-          </Box>
-        ) : null}
-        <Box>
-          <Text color={theme.primary}>▎</Text>
-        </Box>
-        <Box>
-          <Text color={theme.primary}>▎ </Text>
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>
-            Select target media:
-          </Text>
-        </Box>
-        <Box>
-          <Text color={theme.primary}>▎</Text>
-        </Box>
+      {/* Centered Profile Header & Prompt */}
+      <Box flexDirection="column" alignItems="center" marginBottom={1}>
+        <Text bold color={theme.primary}>
+          @{profile.username}
+        </Text>
+        <Gap />
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>
+          ▸ {platformName}{profile.cleanUrl ? ` · ${profile.cleanUrl}` : ''}
+        </Text>
+        <Gap />
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>
+          Select target media:
+        </Text>
+      </Box>
 
+      {/* Centered Modern Accent Options Block */}
+      <Box flexDirection="column" width={boxWidth}>
         <SelectInput
           indicatorComponent={ChoiceIndicator}
           itemComponent={ChoiceItem as any}
@@ -186,17 +174,12 @@ export function PickingView({
         />
 
         {hasCheckpoint ? (
-          <>
-            <Box>
-              <Text color={theme.primary}>▎</Text>
-            </Box>
-            <Box>
-              <Text color={theme.primary}>▎ </Text>
-              <Text color={theme.primary} bold>
-                ⚡ Checkpoint found (cursor saved)
-              </Text>
-            </Box>
-          </>
+          <Box marginTop={1}>
+            <Text color={theme.primary}>▎ </Text>
+            <Text color={theme.primary} bold>
+              ⚡ Checkpoint found (cursor saved)
+            </Text>
+          </Box>
         ) : null}
       </Box>
     </Box>

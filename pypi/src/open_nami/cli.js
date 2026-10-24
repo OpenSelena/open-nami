@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.3.0",
+      version: "1.3.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -40616,7 +40616,7 @@ function getPickingOptions(platform2) {
   return items;
 }
 function PickingView({
-  contentWidth: _contentWidth,
+  contentWidth,
   profile,
   outputDir,
   initialLimit,
@@ -40627,7 +40627,7 @@ function PickingView({
   onSelect,
   onHighlight,
   theme,
-  gapComponent: _Gap
+  gapComponent: Gap2
 }) {
   const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
   const items = getPickingOptions(profile.platform);
@@ -40655,48 +40655,44 @@ function PickingView({
       resume: initialResume
     });
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: "100%", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", width: 56, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+  const boxWidth = Math.min(48, Math.max(44, (contentWidth || 80) - 8));
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: "100%", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", marginBottom: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.primary, children: [
         "@",
         profile.username
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` \xB7 ${platformName}` })
-    ] }),
-    profile.cleanUrl ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: profile.cleanUrl })
-    ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        "\u25B8 ",
+        platformName,
+        profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select target media:" })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-      SelectInput_default,
-      {
-        indicatorComponent: ChoiceIndicator,
-        itemComponent: ChoiceItem,
-        items: items.map((item, index) => ({
-          key: String(index),
-          label: item.label,
-          value: item.value,
-          description: item.description
-        })),
-        onSelect: (item) => handleItemSelect(item.value),
-        onHighlight: (item) => onHighlight?.(item.value)
-      }
-    ),
-    hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", width: boxWidth, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+        SelectInput_default,
+        {
+          indicatorComponent: ChoiceIndicator,
+          itemComponent: ChoiceItem,
+          items: items.map((item, index) => ({
+            key: String(index),
+            label: item.label,
+            value: item.value,
+            description: item.description
+          })),
+          onSelect: (item) => handleItemSelect(item.value),
+          onHighlight: (item) => onHighlight?.(item.value)
+        }
+      ),
+      hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { marginTop: 1, children: [
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
         /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" })
-      ] })
-    ] }) : null
-  ] }) });
+      ] }) : null
+    ] })
+  ] });
 }
 
 // src/components/views/platform-view.tsx

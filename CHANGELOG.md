@@ -4,6 +4,15 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.1] - 2026-10-24
+
+### Enhanced & Centered
+- **Harmonious Centered Picker Layout**:
+  - Centered profile header (`@username` and canonical platform URL) along the terminal's central axis.
+  - Centered the "Select target media:" guidance prompt.
+  - Kept the modern Nordic vertical accent bar (`▎`), illuminated category badges (`[PHOTOS]`, `[VIDEOS]`, `[STORIES]`, `[HIGHLIGHTS]`, `[EVERYTHING]`), and descriptions, centered squarely in the middle of the screen without awkward left-skew.
+  - Fully dynamic width scaling based on terminal width with responsive padding.
+
 ## [1.3.0] - 2026-10-24
 
 ### Changed & Modernized
