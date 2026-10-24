@@ -202,6 +202,7 @@ function InnerApp({
   const [clipboardUrl, setClipboardUrl] = useState<string | undefined>(undefined)
   const [settingsFocus, setSettingsFocus] = useState<'cookies' | 'download' | 'metadata' | 'limit'>('cookies')
   const [batchClickTargets, setBatchClickTargets] = useState<ClickTarget[]>([])
+  const [watcherClickTargets, setWatcherClickTargets] = useState<ClickTarget[]>([])
 
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80
   const boxWidth = Math.max(14, Math.min(64, columns - 6))
@@ -379,8 +380,11 @@ function InnerApp({
     if (key.ctrl && (input === 'w' || input === 'W')) {
       if (phase.name === 'watcher') {
         setPhase({name: 'input'})
-      } else if (phase.name === 'input') {
+        return
+      }
+      if (phase.name === 'input' && urlInput.length === 0) {
         setPhase({name: 'watcher'})
+        return
       }
       return
     }
@@ -513,6 +517,10 @@ function InnerApp({
       targets.push(...batchClickTargets)
     }
 
+    if (phase.name === 'watcher') {
+      targets.push(...watcherClickTargets)
+    }
+
     for (const [key, label] of hints) {
       const action = hintAction(key)
       if (action) targets.push({match: `${key} ${label}`, action})
@@ -535,6 +543,7 @@ function InnerApp({
     handleModeSelect,
     resetToInput,
     batchClickTargets,
+    watcherClickTargets,
   ])
 
   useMouseClick(
@@ -667,6 +676,7 @@ function InnerApp({
           gapComponent={Gap}
           defaultChoice={initialChoice}
           defaultWriteMetadata={effectiveWriteMetadata}
+          onRegisterClickTargets={setWatcherClickTargets}
         />
       )}
 

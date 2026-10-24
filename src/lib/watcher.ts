@@ -1,14 +1,16 @@
 import {readClipboard} from './clipboard.js'
 import {parseProfileInput} from './parser.js'
-import {dispatchDownload} from './engines/dispatcher.js'
+import {dispatchDownload, resolveDefaultDownloadDir} from './engines/dispatcher.js'
 import type {ParsedProfile} from './parser.js'
 import type {MediaTarget, EngineResult} from './engines/types.js'
 
 export interface WatcherOptions {
   choice?: MediaTarget
+  getChoice?: () => MediaTarget
   outputDir?: string
   intervalMs?: number
   writeMetadata?: boolean
+  getWriteMetadata?: () => boolean
   signal?: AbortSignal
   readClipboardFn?: () => string
   dispatchFn?: typeof dispatchDownload
@@ -84,9 +86,9 @@ export function startClipboardWatcher(options: WatcherOptions = {}): {
             try {
               const res = await dispatch({
                 profile: parsed,
-                choice,
-                outputDir: options.outputDir,
-                writeMetadata: options.writeMetadata,
+                choice: options.getChoice ? options.getChoice() : (options.choice || 'all'),
+                outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
+                writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : (options.writeMetadata ?? false),
                 signal: options.signal,
                 onProgress: (p) => {
                   if (p.statusText) {

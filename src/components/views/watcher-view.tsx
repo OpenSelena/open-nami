@@ -6,6 +6,7 @@ import {ProgressBar} from '../progress-bar.js'
 import {startClipboardWatcher} from '../../lib/watcher.js'
 import {resolveDefaultDownloadDir} from '../../lib/engines/dispatcher.js'
 import {revealInFileManager} from '../../lib/reveal.js'
+import type {ClickTarget} from '../../lib/click-map.js'
 import type {ParsedProfile} from '../../lib/parser.js'
 import type {MediaTarget, EngineResult} from '../../lib/engines/types.js'
 import type {Theme} from '../../theme.js'
@@ -26,7 +27,10 @@ export interface WatcherViewProps {
   gapComponent: React.ComponentType<{lines?: number}>
   defaultChoice?: MediaTarget
   defaultWriteMetadata?: boolean
+  onRegisterClickTargets?: (targets: ClickTarget[]) => void
 }
+
+const CHOICES: MediaTarget[] = ['all', 'photos', 'videos', 'stories', 'highlights']
 
 export function WatcherView({
   onBack,
@@ -35,9 +39,11 @@ export function WatcherView({
   gapComponent: Gap,
   defaultChoice = 'all',
   defaultWriteMetadata = false,
+  onRegisterClickTargets,
 }: WatcherViewProps) {
   const [mediaChoice, setMediaChoice] = useState<MediaTarget>(defaultChoice)
   const [writeMetadata, setWriteMetadata] = useState(defaultWriteMetadata)
+  const [focusedIndex, setFocusedIndex] = useState<number>(0)
   const [history, setHistory] = useState<DetectedItem[]>([])
   const [activeJob, setActiveJob] = useState<DetectedItem | null>(null)
   const [stats, setStats] = useState({detected: 0, downloaded: 0, skipped: 0})
@@ -58,8 +64,10 @@ export function WatcherView({
   useEffect(() => {
     const watcher = startClipboardWatcher({
       choice: mediaChoiceRef.current,
+      getChoice: () => mediaChoiceRef.current,
       outputDir,
       writeMetadata: writeMetadataRef.current,
+      getWriteMetadata: () => writeMetadataRef.current,
       onDetected: (profile) => {
         setStats(prev => ({...prev, detected: prev.detected + 1}))
         const newItem: DetectedItem = {
@@ -119,9 +127,9 @@ export function WatcherView({
 
   const cycleChoice = useCallback(() => {
     setMediaChoice(prev => {
-      if (prev === 'all') return 'photos'
-      if (prev === 'photos') return 'videos'
-      return 'all'
+      const idx = CHOICES.indexOf(prev)
+      const nextChoice = CHOICES[(idx + 1) % CHOICES.length] || 'all'
+      return nextChoice
     })
   }, [])
 
@@ -134,20 +142,57 @@ export function WatcherView({
     revealInFileManager(target)
   }, [outputDir])
 
+  // Register mouse click targets
+  useEffect(() => {
+    if (!onRegisterClickTargets) return
+
+    const targets: ClickTarget[] = [
+      {match: 'Target:', padX: 1, action: () => { setFocusedIndex(0); cycleChoice(); }},
+      {match: 'Sidecars:', padX: 1, action: () => { setFocusedIndex(1); toggleMetadata(); }},
+      {match: 'Open Folder', padX: 1, action: () => { setFocusedIndex(2); openFolder(); }},
+      {match: 'c target', padX: 1, action: () => { setFocusedIndex(0); cycleChoice(); }},
+      {match: 'm sidecar', padX: 1, action: () => { setFocusedIndex(1); toggleMetadata(); }},
+      {match: 'o open dir', padX: 1, action: () => { setFocusedIndex(2); openFolder(); }},
+      {match: 'esc back', padX: 1, action: onBack},
+    ]
+
+    onRegisterClickTargets(targets)
+  }, [onRegisterClickTargets, cycleChoice, toggleMetadata, openFolder, onBack, mediaChoice, writeMetadata])
+
   useInput((input, key) => {
     if (key.escape) {
       onBack()
       return
     }
+
+    if (key.leftArrow) {
+      setFocusedIndex(prev => (prev === 0 ? 2 : prev - 1))
+      return
+    }
+    if (key.rightArrow || key.tab) {
+      setFocusedIndex(prev => (prev === 2 ? 0 : prev + 1))
+      return
+    }
+
+    if (key.return || input === ' ') {
+      if (focusedIndex === 0) cycleChoice()
+      else if (focusedIndex === 1) toggleMetadata()
+      else if (focusedIndex === 2) openFolder()
+      return
+    }
+
     if (input === 'c' || input === 'C') {
+      setFocusedIndex(0)
       cycleChoice()
       return
     }
     if (input === 'm' || input === 'M') {
+      setFocusedIndex(1)
       toggleMetadata()
       return
     }
     if (input === 'o' || input === 'O') {
+      setFocusedIndex(2)
       openFolder()
       return
     }
@@ -171,12 +216,14 @@ export function WatcherView({
           <ProgressBar indeterminate width={58} tick={pulseTick} />
 
           <Gap />
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>
-            Listening for Instagram, TikTok, Facebook, or X profile links in clipboard.
-          </Text>
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>
-            Simply copy any profile link in your browser and Open Nami will download it!
-          </Text>
+          <Box flexDirection="column">
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              Auto-monitoring clipboard for profile links (Instagram, TikTok, FB, X).
+            </Text>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              Copy any profile link in your browser: Open Nami downloads it in background.
+            </Text>
+          </Box>
 
           <Gap />
           <Box
@@ -229,15 +276,36 @@ export function WatcherView({
 
           <Gap />
           <Box justifyContent="space-between">
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [c] Target: <Text color={theme.primary} bold>{mediaChoice.toUpperCase()}</Text>
-            </Text>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [m] Sidecars: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
-            </Text>
-            <Text color={theme.gray} dimColor={theme.dimSecondary}>
-              [o] Open Folder
-            </Text>
+            <Box
+              borderStyle="round"
+              borderColor={focusedIndex === 0 ? theme.primary : theme.gray}
+              borderDimColor={focusedIndex !== 0}
+              paddingX={1}
+            >
+              <Text color={focusedIndex === 0 ? theme.primary : theme.gray} bold={focusedIndex === 0}>
+                [c] Target: <Text color={theme.primary} bold>{mediaChoice === 'all' ? 'EVERYTHING' : mediaChoice.toUpperCase()}</Text>
+              </Text>
+            </Box>
+            <Box
+              borderStyle="round"
+              borderColor={focusedIndex === 1 ? theme.primary : theme.gray}
+              borderDimColor={focusedIndex !== 1}
+              paddingX={1}
+            >
+              <Text color={focusedIndex === 1 ? theme.primary : theme.gray} bold={focusedIndex === 1}>
+                [m] Sidecars: <Text color={theme.primary} bold>{writeMetadata ? 'ON' : 'OFF'}</Text>
+              </Text>
+            </Box>
+            <Box
+              borderStyle="round"
+              borderColor={focusedIndex === 2 ? theme.primary : theme.gray}
+              borderDimColor={focusedIndex !== 2}
+              paddingX={1}
+            >
+              <Text color={focusedIndex === 2 ? theme.primary : theme.gray} bold={focusedIndex === 2}>
+                [o] Open Folder
+              </Text>
+            </Box>
           </Box>
 
           <Box marginTop={1} justifyContent="center">

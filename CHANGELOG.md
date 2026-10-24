@@ -4,6 +4,16 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.7] - 2026-10-24
+
+### Fixed & Enhanced
+- **Clipboard Watcher Radar Usability & Button Polish**:
+  - Registered full mouse click targets for all Watcher options (`[c] Target`, `[m] Sidecars`, `[o] Open Folder`) and footer action hints.
+  - Added full media target cycling across `EVERYTHING`, `PHOTOS`, `VIDEOS`, `STORIES`, and `HIGHLIGHTS`.
+  - Added real-time dynamic option updates so changing target or sidecar toggles applies immediately to ongoing clipboard detection.
+  - Styled options as distinct pill buttons with active focus borders and keyboard navigation (`Tab` / `←` / `→` / `Enter`).
+  - Isolated `Ctrl+W` in main input field to allow readline word deletion (`word-rubout`) when text is present without accidentally opening Watcher.
+
 ## [1.2.6] - 2026-10-24
 
 ### Fixed & Enhanced

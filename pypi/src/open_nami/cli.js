@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.6",
+      version: "1.2.7",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -41543,9 +41543,9 @@ function startClipboardWatcher(options = {}) {
             try {
               const res = await dispatch({
                 profile: parsed,
-                choice,
-                outputDir: options.outputDir,
-                writeMetadata: options.writeMetadata,
+                choice: options.getChoice ? options.getChoice() : options.choice || "all",
+                outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
+                writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : options.writeMetadata ?? false,
                 signal: options.signal,
                 onProgress: (p) => {
                   if (p.statusText) {
@@ -41635,16 +41635,19 @@ function revealInFileManager(targetPath) {
 
 // src/components/views/watcher-view.tsx
 var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
+var CHOICES = ["all", "photos", "videos", "stories", "highlights"];
 function WatcherView({
   onBack,
   outputDir,
   theme,
   gapComponent: Gap2,
   defaultChoice = "all",
-  defaultWriteMetadata = false
+  defaultWriteMetadata = false,
+  onRegisterClickTargets
 }) {
   const [mediaChoice, setMediaChoice] = (0, import_react46.useState)(defaultChoice);
   const [writeMetadata, setWriteMetadata] = (0, import_react46.useState)(defaultWriteMetadata);
+  const [focusedIndex, setFocusedIndex] = (0, import_react46.useState)(0);
   const [history, setHistory] = (0, import_react46.useState)([]);
   const [activeJob, setActiveJob] = (0, import_react46.useState)(null);
   const [stats, setStats] = (0, import_react46.useState)({ detected: 0, downloaded: 0, skipped: 0 });
@@ -41662,8 +41665,10 @@ function WatcherView({
   (0, import_react46.useEffect)(() => {
     const watcher = startClipboardWatcher({
       choice: mediaChoiceRef.current,
+      getChoice: () => mediaChoiceRef.current,
       outputDir,
       writeMetadata: writeMetadataRef.current,
+      getWriteMetadata: () => writeMetadataRef.current,
       onDetected: (profile) => {
         setStats((prev) => ({ ...prev, detected: prev.detected + 1 }));
         const newItem = {
@@ -41719,9 +41724,9 @@ function WatcherView({
   }, [outputDir]);
   const cycleChoice = (0, import_react46.useCallback)(() => {
     setMediaChoice((prev) => {
-      if (prev === "all") return "photos";
-      if (prev === "photos") return "videos";
-      return "all";
+      const idx = CHOICES.indexOf(prev);
+      const nextChoice = CHOICES[(idx + 1) % CHOICES.length] || "all";
+      return nextChoice;
     });
   }, []);
   const toggleMetadata = (0, import_react46.useCallback)(() => {
@@ -41731,20 +41736,68 @@ function WatcherView({
     const target = outputDir || resolveDefaultDownloadDir("instagram", "watcher");
     revealInFileManager(target);
   }, [outputDir]);
+  (0, import_react46.useEffect)(() => {
+    if (!onRegisterClickTargets) return;
+    const targets = [
+      { match: "Target:", padX: 1, action: () => {
+        setFocusedIndex(0);
+        cycleChoice();
+      } },
+      { match: "Sidecars:", padX: 1, action: () => {
+        setFocusedIndex(1);
+        toggleMetadata();
+      } },
+      { match: "Open Folder", padX: 1, action: () => {
+        setFocusedIndex(2);
+        openFolder();
+      } },
+      { match: "c target", padX: 1, action: () => {
+        setFocusedIndex(0);
+        cycleChoice();
+      } },
+      { match: "m sidecar", padX: 1, action: () => {
+        setFocusedIndex(1);
+        toggleMetadata();
+      } },
+      { match: "o open dir", padX: 1, action: () => {
+        setFocusedIndex(2);
+        openFolder();
+      } },
+      { match: "esc back", padX: 1, action: onBack }
+    ];
+    onRegisterClickTargets(targets);
+  }, [onRegisterClickTargets, cycleChoice, toggleMetadata, openFolder, onBack, mediaChoice, writeMetadata]);
   use_input_default((input, key) => {
     if (key.escape) {
       onBack();
       return;
     }
+    if (key.leftArrow) {
+      setFocusedIndex((prev) => prev === 0 ? 2 : prev - 1);
+      return;
+    }
+    if (key.rightArrow || key.tab) {
+      setFocusedIndex((prev) => prev === 2 ? 0 : prev + 1);
+      return;
+    }
+    if (key.return || input === " ") {
+      if (focusedIndex === 0) cycleChoice();
+      else if (focusedIndex === 1) toggleMetadata();
+      else if (focusedIndex === 2) openFolder();
+      return;
+    }
     if (input === "c" || input === "C") {
+      setFocusedIndex(0);
       cycleChoice();
       return;
     }
     if (input === "m" || input === "M") {
+      setFocusedIndex(1);
       toggleMetadata();
       return;
     }
     if (input === "o" || input === "O") {
+      setFocusedIndex(2);
       openFolder();
       return;
     }
@@ -41760,8 +41813,10 @@ function WatcherView({
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(ProgressBar, { indeterminate: true, width: 58, tick: pulseTick }),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Listening for Instagram, TikTok, Facebook, or X profile links in clipboard." }),
-    /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Simply copy any profile link in your browser and Open Nami will download it!" }),
+    /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Auto-monitoring clipboard for profile links (Instagram, TikTok, FB, X)." }),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Copy any profile link in your browser: Open Nami downloads it in background." })
+    ] }),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
       Box_default,
@@ -41797,15 +41852,42 @@ function WatcherView({
     ] }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Box_default, { justifyContent: "space-between", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-        "[c] Target: ",
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: mediaChoice.toUpperCase() })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-        "[m] Sidecars: ",
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[o] Open Folder" })
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        Box_default,
+        {
+          borderStyle: "round",
+          borderColor: focusedIndex === 0 ? theme.primary : theme.gray,
+          borderDimColor: focusedIndex !== 0,
+          paddingX: 1,
+          children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: focusedIndex === 0 ? theme.primary : theme.gray, bold: focusedIndex === 0, children: [
+            "[c] Target: ",
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: mediaChoice === "all" ? "EVERYTHING" : mediaChoice.toUpperCase() })
+          ] })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        Box_default,
+        {
+          borderStyle: "round",
+          borderColor: focusedIndex === 1 ? theme.primary : theme.gray,
+          borderDimColor: focusedIndex !== 1,
+          paddingX: 1,
+          children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: focusedIndex === 1 ? theme.primary : theme.gray, bold: focusedIndex === 1, children: [
+            "[m] Sidecars: ",
+            /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
+          ] })
+        }
+      ),
+      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        Box_default,
+        {
+          borderStyle: "round",
+          borderColor: focusedIndex === 2 ? theme.primary : theme.gray,
+          borderDimColor: focusedIndex !== 2,
+          paddingX: 1,
+          children: /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Text, { color: focusedIndex === 2 ? theme.primary : theme.gray, bold: focusedIndex === 2, children: "[o] Open Folder" })
+        }
+      )
     ] }),
     /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       "Session Stats: ",
@@ -41945,7 +42027,7 @@ async function runBatchQueue(options) {
 // src/components/views/batch-view.tsx
 var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
 var PLATFORMS = ["instagram", "tiktok", "facebook", "x"];
-var CHOICES = ["all", "photos", "videos", "stories", "highlights"];
+var CHOICES2 = ["all", "photos", "videos", "stories", "highlights"];
 var DATE_PRESETS2 = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
 var LIMIT_PRESETS2 = [void 0, 10, 24, 50, 100, "custom"];
 function BatchView({
@@ -41987,8 +42069,8 @@ function BatchView({
   }, []);
   const cycleChoice = (0, import_react47.useCallback)(() => {
     setChoice((prev) => {
-      const idx = CHOICES.indexOf(prev);
-      return CHOICES[(idx + 1) % CHOICES.length];
+      const idx = CHOICES2.indexOf(prev);
+      return CHOICES2[(idx + 1) % CHOICES2.length];
     });
   }, []);
   const cycleLimit = (0, import_react47.useCallback)(() => {
@@ -42982,6 +43064,7 @@ function InnerApp({
   const [clipboardUrl, setClipboardUrl] = (0, import_react48.useState)(void 0);
   const [settingsFocus, setSettingsFocus] = (0, import_react48.useState)("cookies");
   const [batchClickTargets, setBatchClickTargets] = (0, import_react48.useState)([]);
+  const [watcherClickTargets, setWatcherClickTargets] = (0, import_react48.useState)([]);
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
@@ -43133,8 +43216,11 @@ function InnerApp({
     if (key.ctrl && (input === "w" || input === "W")) {
       if (phase.name === "watcher") {
         setPhase({ name: "input" });
-      } else if (phase.name === "input") {
+        return;
+      }
+      if (phase.name === "input" && urlInput.length === 0) {
         setPhase({ name: "watcher" });
+        return;
       }
       return;
     }
@@ -43252,6 +43338,9 @@ function InnerApp({
     if (phase.name === "batch") {
       targets.push(...batchClickTargets);
     }
+    if (phase.name === "watcher") {
+      targets.push(...watcherClickTargets);
+    }
     for (const [key, label] of hints) {
       const action = hintAction(key);
       if (action) targets.push({ match: `${key} ${label}`, action });
@@ -43272,7 +43361,8 @@ function InnerApp({
     handlePlatformSelect,
     handleModeSelect,
     resetToInput,
-    batchClickTargets
+    batchClickTargets,
+    watcherClickTargets
   ]);
   useMouseClick(
     (x, y) => {
@@ -43399,7 +43489,8 @@ function InnerApp({
         theme,
         gapComponent: Gap,
         defaultChoice: initialChoice,
-        defaultWriteMetadata: effectiveWriteMetadata
+        defaultWriteMetadata: effectiveWriteMetadata,
+        onRegisterClickTargets: setWatcherClickTargets
       }
     ),
     phase.name === "batch" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
