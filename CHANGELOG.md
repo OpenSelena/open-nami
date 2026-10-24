@@ -4,6 +4,20 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2026-10-25
+
+### Added & Automated
+- **Cross-Platform System Default Browser Detection**:
+  - Implemented `detectSystemDefaultBrowser()` across Windows (Registry UserChoice & shell command), macOS (LaunchServices LSHandlers), and Linux (XDG settings).
+  - Automatically identifies system default browsers, including Chromium forks like Helium (`imput\Helium`), Google Chrome, Microsoft Edge, Brave, Mozilla Firefox, Opera, and Vivaldi.
+- **Automated Engine Cookie Argument Resolution**:
+  - Implemented `resolveBrowserCookieArg()` mapping detected default browsers into valid `--cookies-from-browser` parameters.
+  - Automatically targets custom user profile directories for Chromium forks (e.g. `chrome:<profileDir>`) so engines read cookies without manual path entry.
+- **Automated Default in Settings TUI**:
+  - Browser Cookie Bridge in `SettingsView` (`^s`) now defaults to `[AUTO]`.
+  - Dynamically displays detected system default browser and feedback in the Nordic settings frame.
+  - Defaults `cookiesFromBrowser` in `AppConfig` to `'auto'` for seamless zero-config onboarding.
+
 ## [1.5.1] - 2026-10-25
 
 ### Fixed

@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.5.1",
+      version: "1.6.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -749,9 +749,21 @@ function loadConfig(configPath = getDefaultConfigPath()) {
     const raw = fs.readFileSync(configPath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object") {
-      const rawBrowser = typeof parsed.cookiesFromBrowser === "string" ? parsed.cookiesFromBrowser.trim().toLowerCase() : void 0;
-      const validBrowsers = ["chrome", "edge", "brave", "firefox", "none"];
-      const cookiesFromBrowser = rawBrowser && validBrowsers.includes(rawBrowser) ? rawBrowser : void 0;
+      let cookiesFromBrowser = "auto";
+      if (typeof parsed.cookiesFromBrowser === "string") {
+        const trimmed = parsed.cookiesFromBrowser.trim();
+        const lower = trimmed.toLowerCase();
+        if (lower === "none") {
+          cookiesFromBrowser = "none";
+        } else if (lower === "auto" || trimmed === "") {
+          cookiesFromBrowser = "auto";
+        } else {
+          const knownBrowsers = ["chrome", "edge", "brave", "firefox", "helium", "opera", "vivaldi"];
+          cookiesFromBrowser = knownBrowsers.includes(lower) ? lower : trimmed;
+        }
+      } else {
+        cookiesFromBrowser = "auto";
+      }
       return {
         theme: typeof parsed.theme === "string" ? parsed.theme : void 0,
         cookiesDir: typeof parsed.cookiesDir === "string" ? parsed.cookiesDir.trim() : void 0,
@@ -784,9 +796,10 @@ import path4 from "path";
 import os3 from "os";
 
 // src/lib/cookies/browser-bridge.ts
+import { execSync } from "child_process";
 import fs2 from "fs";
-import path3 from "path";
 import os2 from "os";
+import path3 from "path";
 function listDetectedBrowsers() {
   const isWin = process.platform === "win32";
   const isMac = process.platform === "darwin";
@@ -795,30 +808,91 @@ function listDetectedBrowsers() {
     {
       id: "chrome",
       name: "Google Chrome",
-      winDir: path3.join(process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"), "Google", "Chrome", "User Data"),
+      winDir: path3.join(
+        process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+        "Google",
+        "Chrome",
+        "User Data"
+      ),
       macDir: path3.join(home, "Library", "Application Support", "Google", "Chrome"),
-      linuxDir: path3.join(home, ".config", "google-chrome")
+      linuxDir: path3.join(home, ".config", "google-chrome"),
+      engine: "chrome"
     },
     {
       id: "edge",
       name: "Microsoft Edge",
-      winDir: path3.join(process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"), "Microsoft", "Edge", "User Data"),
+      winDir: path3.join(
+        process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+        "Microsoft",
+        "Edge",
+        "User Data"
+      ),
       macDir: path3.join(home, "Library", "Application Support", "Microsoft Edge"),
-      linuxDir: path3.join(home, ".config", "microsoft-edge")
+      linuxDir: path3.join(home, ".config", "microsoft-edge"),
+      engine: "edge"
     },
     {
       id: "brave",
       name: "Brave Browser",
-      winDir: path3.join(process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"), "BraveSoftware", "Brave-Browser", "User Data"),
+      winDir: path3.join(
+        process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+        "BraveSoftware",
+        "Brave-Browser",
+        "User Data"
+      ),
       macDir: path3.join(home, "Library", "Application Support", "BraveSoftware", "Brave-Browser"),
-      linuxDir: path3.join(home, ".config", "BraveSoftware", "Brave-Browser")
+      linuxDir: path3.join(home, ".config", "BraveSoftware", "Brave-Browser"),
+      engine: "brave"
     },
     {
       id: "firefox",
       name: "Mozilla Firefox",
-      winDir: path3.join(process.env.APPDATA || path3.join(home, "AppData", "Roaming"), "Mozilla", "Firefox", "Profiles"),
+      winDir: path3.join(
+        process.env.APPDATA || path3.join(home, "AppData", "Roaming"),
+        "Mozilla",
+        "Firefox",
+        "Profiles"
+      ),
       macDir: path3.join(home, "Library", "Application Support", "Firefox", "Profiles"),
-      linuxDir: path3.join(home, ".mozilla", "firefox")
+      linuxDir: path3.join(home, ".mozilla", "firefox"),
+      engine: "firefox"
+    },
+    {
+      id: "helium",
+      name: "Helium",
+      winDir: path3.join(
+        process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+        "imput",
+        "Helium",
+        "User Data"
+      ),
+      macDir: path3.join(home, "Library", "Application Support", "net.imput.Helium"),
+      linuxDir: path3.join(home, ".config", "helium"),
+      engine: "chrome"
+    },
+    {
+      id: "opera",
+      name: "Opera",
+      winDir: path3.join(
+        process.env.APPDATA || path3.join(home, "AppData", "Roaming"),
+        "Opera Software",
+        "Opera Stable"
+      ),
+      macDir: path3.join(home, "Library", "Application Support", "com.operasoftware.Opera"),
+      linuxDir: path3.join(home, ".config", "opera"),
+      engine: "opera"
+    },
+    {
+      id: "vivaldi",
+      name: "Vivaldi",
+      winDir: path3.join(
+        process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+        "Vivaldi",
+        "User Data"
+      ),
+      macDir: path3.join(home, "Library", "Application Support", "Vivaldi"),
+      linuxDir: path3.join(home, ".config", "vivaldi"),
+      engine: "vivaldi"
     }
   ];
   return candidates.map((c) => {
@@ -827,9 +901,312 @@ function listDetectedBrowsers() {
       id: c.id,
       name: c.name,
       profileDir,
-      available: fs2.existsSync(profileDir)
+      available: fs2.existsSync(profileDir),
+      engine: c.engine
     };
   });
+}
+function parseWindowsDefaultBrowserProgId(rawOutput) {
+  if (!rawOutput) return null;
+  const lines = rawOutput.split(/\r?\n/);
+  const pattern = /^\s*ProgId\s+REG_\w+\s+(\S.*)$/i;
+  for (const line of lines) {
+    const match = line.match(pattern);
+    if (match && match[1]) {
+      const progId = match[1].trim();
+      if (progId) return progId;
+    }
+  }
+  return null;
+}
+function mapProgIdToBrowserId(progId, commandOutput) {
+  const p = (progId || "").trim();
+  const pLower = p.toLowerCase();
+  const cmd = (commandOutput || "").toLowerCase();
+  const isWin = process.platform === "win32";
+  const isMac = process.platform === "darwin";
+  const home = os2.homedir();
+  const heliumDir = isWin ? path3.join(
+    process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
+    "imput",
+    "Helium",
+    "User Data"
+  ) : isMac ? path3.join(home, "Library", "Application Support", "net.imput.Helium") : path3.join(home, ".config", "helium");
+  if (pLower.includes("helium") || cmd.includes("helium")) {
+    return {
+      id: "helium",
+      name: "Helium",
+      engine: "chrome",
+      profileDir: heliumDir
+    };
+  }
+  if (pLower.startsWith("chromehtml") || pLower.includes("chrome") || cmd.includes("chrome.exe")) {
+    return {
+      id: "chrome",
+      name: "Google Chrome",
+      engine: "chrome"
+    };
+  }
+  if (pLower.startsWith("msedge") || pLower.includes("edge") || pLower.startsWith("appxq0fevzme2pys62n3e0fbqsw5cj08ege9") || cmd.includes("msedge.exe")) {
+    return {
+      id: "edge",
+      name: "Microsoft Edge",
+      engine: "edge"
+    };
+  }
+  if (pLower.startsWith("brave") || pLower.includes("brave") || cmd.includes("brave.exe")) {
+    return {
+      id: "brave",
+      name: "Brave Browser",
+      engine: "brave"
+    };
+  }
+  if (pLower.startsWith("firefox") || pLower.includes("firefox") || cmd.includes("firefox.exe")) {
+    return {
+      id: "firefox",
+      name: "Mozilla Firefox",
+      engine: "firefox"
+    };
+  }
+  if (pLower.startsWith("opera") || pLower.includes("opera") || cmd.includes("opera.exe")) {
+    return {
+      id: "opera",
+      name: "Opera",
+      engine: "opera"
+    };
+  }
+  if (pLower.startsWith("vivaldi") || pLower.includes("vivaldi") || cmd.includes("vivaldi.exe")) {
+    return {
+      id: "vivaldi",
+      name: "Vivaldi",
+      engine: "vivaldi"
+    };
+  }
+  return {
+    id: pLower || "chromium",
+    name: p || "Chromium",
+    engine: "chromium"
+  };
+}
+function parseMacDefaultBrowserBundleId(rawOutput) {
+  if (!rawOutput) return null;
+  const blocks = rawOutput.split(/[{}]/);
+  let httpBundle = null;
+  for (const block of blocks) {
+    const isHttps = /LSHandlerURLScheme\s*=\s*https\b/i.test(block);
+    const isHttp = /LSHandlerURLScheme\s*=\s*http\b/i.test(block);
+    if (!isHttps && !isHttp) continue;
+    const roleMatch = block.match(/LSHandlerRole(?:All|Viewer)\s*=\s*["']?([^"';\s]+)["']?/i);
+    if (roleMatch && roleMatch[1]) {
+      const bundleId = roleMatch[1].trim();
+      if (isHttps) {
+        return bundleId;
+      }
+      if (!httpBundle) {
+        httpBundle = bundleId;
+      }
+    }
+  }
+  return httpBundle;
+}
+function mapBundleIdToBrowserId(bundleId) {
+  const lower = bundleId.toLowerCase();
+  if (lower.includes("helium")) {
+    const home = os2.homedir();
+    return {
+      id: "helium",
+      name: "Helium",
+      engine: "chrome",
+      profileDir: path3.join(home, "Library", "Application Support", "net.imput.Helium")
+    };
+  }
+  if (lower.includes("chrome")) {
+    return { id: "chrome", name: "Google Chrome", engine: "chrome" };
+  }
+  if (lower.includes("edge")) {
+    return { id: "edge", name: "Microsoft Edge", engine: "edge" };
+  }
+  if (lower.includes("brave")) {
+    return { id: "brave", name: "Brave Browser", engine: "brave" };
+  }
+  if (lower.includes("firefox")) {
+    return { id: "firefox", name: "Mozilla Firefox", engine: "firefox" };
+  }
+  if (lower.includes("opera")) {
+    return { id: "opera", name: "Opera", engine: "opera" };
+  }
+  if (lower.includes("vivaldi")) {
+    return { id: "vivaldi", name: "Vivaldi", engine: "vivaldi" };
+  }
+  if (lower.includes("safari")) {
+    return { id: "safari", name: "Safari", engine: "safari" };
+  }
+  return { id: lower, name: bundleId, engine: "chromium" };
+}
+function parseLinuxDefaultBrowserDesktop(rawOutput) {
+  if (!rawOutput) return null;
+  const lines = rawOutput.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith("ERROR:") && !trimmed.includes("not found")) {
+      return trimmed;
+    }
+  }
+  return null;
+}
+function mapLinuxDesktopToBrowserId(desktopFile) {
+  const lower = desktopFile.toLowerCase();
+  if (lower.includes("helium")) {
+    const home = os2.homedir();
+    return {
+      id: "helium",
+      name: "Helium",
+      engine: "chrome",
+      profileDir: path3.join(home, ".config", "helium")
+    };
+  }
+  if (lower.includes("chrome")) {
+    return { id: "chrome", name: "Google Chrome", engine: "chrome" };
+  }
+  if (lower.includes("edge")) {
+    return { id: "edge", name: "Microsoft Edge", engine: "edge" };
+  }
+  if (lower.includes("brave")) {
+    return { id: "brave", name: "Brave Browser", engine: "brave" };
+  }
+  if (lower.includes("firefox")) {
+    return { id: "firefox", name: "Mozilla Firefox", engine: "firefox" };
+  }
+  if (lower.includes("opera")) {
+    return { id: "opera", name: "Opera", engine: "opera" };
+  }
+  if (lower.includes("vivaldi")) {
+    return { id: "vivaldi", name: "Vivaldi", engine: "vivaldi" };
+  }
+  return { id: lower.replace(/\.desktop$/, ""), name: desktopFile, engine: "chromium" };
+}
+function queryWindows(execute) {
+  let out = execute(
+    'reg query "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice" /v ProgId'
+  );
+  let progId = parseWindowsDefaultBrowserProgId(out);
+  if (!progId) {
+    out = execute(
+      'reg query "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\http\\UserChoice" /v ProgId'
+    );
+    progId = parseWindowsDefaultBrowserProgId(out);
+  }
+  if (progId) {
+    const cmdOut = execute(`reg query "HKCR\\${progId}\\shell\\open\\command"`);
+    return mapProgIdToBrowserId(progId, cmdOut);
+  }
+  return null;
+}
+function queryMac(execute) {
+  const out = execute(
+    "defaults read com.apple.LaunchServices/com.apple.launchservices.secure LSHandlers"
+  );
+  const bundleId = parseMacDefaultBrowserBundleId(out);
+  if (bundleId) {
+    return mapBundleIdToBrowserId(bundleId);
+  }
+  return null;
+}
+function queryLinux(execute) {
+  let out = execute("xdg-settings get default-web-browser");
+  let desktop = parseLinuxDefaultBrowserDesktop(out);
+  if (!desktop) {
+    out = execute("xdg-mime query default x-scheme-handler/https");
+    desktop = parseLinuxDefaultBrowserDesktop(out);
+  }
+  if (!desktop) {
+    out = execute("xdg-mime query default x-scheme-handler/http");
+    desktop = parseLinuxDefaultBrowserDesktop(out);
+  }
+  if (desktop) {
+    return mapLinuxDesktopToBrowserId(desktop);
+  }
+  return null;
+}
+function detectSystemDefaultBrowser(execFn, platformOverride) {
+  const platform = platformOverride ?? process.platform;
+  const execute = execFn ?? ((cmd) => {
+    try {
+      return execSync(cmd, {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "ignore"],
+        timeout: 2500
+      });
+    } catch {
+      return "";
+    }
+  });
+  let detectedInfo = null;
+  if (platform === "win32") {
+    detectedInfo = queryWindows(execute);
+  } else if (platform === "darwin") {
+    detectedInfo = queryMac(execute);
+  } else if (platform === "linux") {
+    detectedInfo = queryLinux(execute);
+  }
+  if (!detectedInfo && execFn && !platformOverride) {
+    if (platform !== "win32") detectedInfo = queryWindows(execute);
+    if (!detectedInfo && platform !== "darwin") detectedInfo = queryMac(execute);
+    if (!detectedInfo && platform !== "linux") detectedInfo = queryLinux(execute);
+  }
+  const allBrowsers = listDetectedBrowsers();
+  if (detectedInfo) {
+    const matched = allBrowsers.find((b) => b.id === detectedInfo.id);
+    if (matched) {
+      if (detectedInfo.profileDir) {
+        return {
+          ...matched,
+          profileDir: detectedInfo.profileDir,
+          available: fs2.existsSync(detectedInfo.profileDir)
+        };
+      }
+      return matched;
+    }
+    const profDir = detectedInfo.profileDir || "";
+    return {
+      id: detectedInfo.id,
+      name: detectedInfo.name || detectedInfo.id,
+      profileDir: profDir,
+      available: profDir ? fs2.existsSync(profDir) : false,
+      engine: detectedInfo.engine
+    };
+  }
+  const availableFallback = allBrowsers.find((b) => b.available);
+  return availableFallback || null;
+}
+function resolveBrowserCookieArg(browser) {
+  if (!browser) {
+    return null;
+  }
+  if (typeof browser === "string") {
+    const trimmed = browser.trim();
+    if (!trimmed || trimmed.toLowerCase() === "none") {
+      return null;
+    }
+    if (trimmed.toLowerCase() === "helium") {
+      const detectedHelium = listDetectedBrowsers().find((b) => b.id === "helium");
+      const profileDir = detectedHelium?.profileDir;
+      return profileDir ? `chrome:${profileDir}` : "chrome";
+    }
+    if (trimmed.toLowerCase() === "auto") {
+      const defaultBrowser = detectSystemDefaultBrowser();
+      return resolveBrowserCookieArg(defaultBrowser);
+    }
+    return trimmed;
+  }
+  if (!browser.id || browser.id.toLowerCase() === "none") {
+    return null;
+  }
+  if (browser.id.toLowerCase() === "helium") {
+    const profileDir = browser.profileDir || listDetectedBrowsers().find((b) => b.id === "helium")?.profileDir;
+    return profileDir ? `chrome:${profileDir}` : "chrome";
+  }
+  return browser.id;
 }
 
 // src/lib/cookies.ts
@@ -4471,7 +4848,9 @@ async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
   await fs13.mkdir(targetDir, { recursive: true });
-  const cookiesFromBrowser = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser;
+  const rawBrowserPref = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser ?? "auto";
+  const resolvedBrowserArg = resolveBrowserCookieArg(rawBrowserPref);
+  const cookiesFromBrowser = resolvedBrowserArg ?? void 0;
   defaultTaskManager.events.emit("job:start", { profile, choice, outputDir: targetDir });
   const masterCookie = findCookieFile(profile.platform);
   const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
@@ -4594,25 +4973,31 @@ async function dispatchDownload(options) {
       }
     };
     const runNative = options.runnerOverrides?.nativeRunner ?? defaultRunNative;
-    const runGdl = options.runnerOverrides?.gdlRunner ?? ((subDir) => runGalleryDl({
-      profile,
-      targetDir,
-      subDir,
-      cookiePath: cookieCopy?.filePath,
-      cookiesFromBrowser,
-      signal: options.signal,
-      writeMetadata: options.writeMetadata,
-      onProgress: handleProgress
-    }));
-    const runYt = options.runnerOverrides?.ytRunner ?? (() => runYtDlp({
-      profile,
-      targetDir,
-      cookiePath: cookieCopy?.filePath,
-      cookiesFromBrowser,
-      signal: options.signal,
-      writeMetadata: options.writeMetadata,
-      onProgress: handleProgress
-    }));
+    const runGdl = (subDir) => {
+      const runnerOpts = {
+        profile,
+        targetDir,
+        subDir,
+        cookiePath: cookieCopy?.filePath,
+        cookiesFromBrowser,
+        signal: options.signal,
+        writeMetadata: options.writeMetadata,
+        onProgress: handleProgress
+      };
+      return options.runnerOverrides?.gdlRunner ? options.runnerOverrides.gdlRunner(subDir, runnerOpts) : runGalleryDl(runnerOpts);
+    };
+    const runYt = () => {
+      const runnerOpts = {
+        profile,
+        targetDir,
+        cookiePath: cookieCopy?.filePath,
+        cookiesFromBrowser,
+        signal: options.signal,
+        writeMetadata: options.writeMetadata,
+        onProgress: handleProgress
+      };
+      return options.runnerOverrides?.ytRunner ? options.runnerOverrides.ytRunner(runnerOpts) : runYtDlp(runnerOpts);
+    };
     for (const job of jobs) {
       if (options.signal?.aborted) break;
       if (globalLimit !== void 0 && totalDownloaded >= globalLimit) break;
@@ -5223,10 +5608,24 @@ function expandDir(dir) {
 }
 function resolveBrowserOptions(detected) {
   const available = detected.filter((b) => b.available !== false);
-  return ["none", ...available.map((b) => b.id)];
+  return ["auto", "none", ...available.map((b) => b.id)];
+}
+function formatBrowserFeedback(cookiesFromBrowser, detectedBrowsers = [], defaultBrowser) {
+  if (cookiesFromBrowser === "auto") {
+    if (defaultBrowser) {
+      return `system default: ${defaultBrowser.name} (auto-extract session cookies)`;
+    }
+    return "system default: none detected (falls back to cookie files)";
+  }
+  if (!cookiesFromBrowser || cookiesFromBrowser === "none") {
+    return "manual cookie files only";
+  }
+  const found = detectedBrowsers.find((b) => b.id === cookiesFromBrowser);
+  const browserName = found ? found.name : cookiesFromBrowser;
+  return `live session cookies from ${browserName}`;
 }
 function cycleBrowserOption(current, options, forward = true) {
-  if (options.length === 0) return "none";
+  if (options.length === 0) return "auto";
   const idx = options.indexOf(current);
   const currentIndex = idx === -1 ? 0 : idx;
   const nextIdx = forward ? (currentIndex + 1) % options.length : (currentIndex - 1 + options.length) % options.length;
@@ -5357,9 +5756,11 @@ function SettingsView({
   onCancel,
   doctorChecker,
   initialReport,
-  browsers: browsersProp
+  browsers: browsersProp,
+  defaultBrowser: defaultBrowserProp,
+  initialConfig: initialConfigProp
 }) {
-  const initialConfig = useMemo2(() => loadConfig(), []);
+  const initialConfig = useMemo2(() => initialConfigProp ?? loadConfig(), [initialConfigProp]);
   const [internalFocus, setInternalFocus] = useState6("cookies");
   const focusedField = controlledFocus ?? internalFocus;
   const setField = useCallback(
@@ -5369,6 +5770,9 @@ function SettingsView({
     },
     [onFocusChange]
   );
+  const defaultBrowser = useMemo2(() => {
+    return defaultBrowserProp !== void 0 ? defaultBrowserProp : detectSystemDefaultBrowser();
+  }, [defaultBrowserProp]);
   const detectedBrowsers = useMemo2(() => {
     return browsersProp ?? listDetectedBrowsers();
   }, [browsersProp]);
@@ -5377,7 +5781,7 @@ function SettingsView({
   }, [detectedBrowsers]);
   const [cookiesDir, setCookiesDir] = useState6(initialConfig.cookiesDir ?? "");
   const [cookiesFromBrowser, setCookiesFromBrowser] = useState6(
-    initialConfig.cookiesFromBrowser ?? "none"
+    initialConfig.cookiesFromBrowser ?? "auto"
   );
   const [downloadDir, setDownloadDir] = useState6(initialConfig.downloadDir ?? "");
   const [writeMetadata, setWriteMetadata] = useState6(Boolean(initialConfig.writeMetadata));
@@ -5433,13 +5837,8 @@ function SettingsView({
     onSave();
   }, [cookiesDir, cookiesFromBrowser, downloadDir, writeMetadata, defaultLimit, onSave]);
   const browserFeedback = useMemo2(() => {
-    if (!cookiesFromBrowser || cookiesFromBrowser === "none") {
-      return "manual cookie files only";
-    }
-    const found = detectedBrowsers.find((b) => b.id === cookiesFromBrowser);
-    const browserName = found ? found.name : cookiesFromBrowser;
-    return `live session cookies from ${browserName}`;
-  }, [cookiesFromBrowser, detectedBrowsers]);
+    return formatBrowserFeedback(cookiesFromBrowser, detectedBrowsers, defaultBrowser);
+  }, [cookiesFromBrowser, detectedBrowsers, defaultBrowser]);
   const cookieFeedback = useMemo2(() => {
     const dir = cookiesDir.trim();
     if (!dir) {
@@ -5483,7 +5882,7 @@ function SettingsView({
   }, [focusedField, setField]);
   const cycleBrowser = useCallback((forward = true) => {
     setCookiesFromBrowser((prev) => {
-      const next = cycleBrowserOption(prev ?? "none", browserOptions, forward);
+      const next = cycleBrowserOption(prev ?? "auto", browserOptions, forward);
       return next;
     });
   }, [browserOptions]);
@@ -5584,7 +5983,7 @@ function SettingsView({
             focusedField === "browser" ? "\u25CF " : "\u25CB ",
             "Browser Cookie Bridge"
           ] }),
-          /* @__PURE__ */ jsx15(Text14, { color: cookiesFromBrowser && cookiesFromBrowser !== "none" ? theme.primary : theme.gray, bold: true, children: `[${(cookiesFromBrowser ?? "none").toUpperCase()}]` })
+          /* @__PURE__ */ jsx15(Text14, { color: cookiesFromBrowser && cookiesFromBrowser !== "none" ? theme.primary : theme.gray, bold: true, children: `[${(cookiesFromBrowser ?? "auto").toUpperCase()}]` })
         ]
       }
     ),
