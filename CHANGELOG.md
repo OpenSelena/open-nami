@@ -4,6 +4,13 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2026-10-25
+
+### Fixed & Cleaned
+- **ChoiceIndicator Vertical Bar Removal**:
+  - Removed redundant vertical accent bar (`▎`) from `ChoiceIndicator` across `PlatformView` and `PickingView`.
+  - Re-aligned platform selection and media picking menus with clean cursor indicators (`❯ ` on focus, `  ` on idle), eliminating visual collisions with panel borders.
+
 ## [1.6.0] - 2026-10-25
 
 ### Added & Automated

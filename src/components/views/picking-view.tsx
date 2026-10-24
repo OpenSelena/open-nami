@@ -11,7 +11,6 @@ export function ChoiceIndicator({isSelected}: IndicatorProps) {
   const theme = useTheme()
   return (
     <Box>
-      <Text color={theme.primary}>▎ </Text>
       <Text color={theme.primary} bold>
         {isSelected ? '❯ ' : '  '}
       </Text>
@@ -175,7 +174,6 @@ export function PickingView({
 
         {hasCheckpoint ? (
           <Box marginTop={1}>
-            <Text color={theme.primary}>▎ </Text>
             <Text color={theme.primary} bold>
               ⚡ Checkpoint found (cursor saved)
             </Text>

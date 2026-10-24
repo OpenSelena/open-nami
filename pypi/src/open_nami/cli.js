@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.6.0",
+      version: "1.6.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -5121,10 +5121,7 @@ async function dispatchDownload(options) {
 import { jsx as jsx8, jsxs as jsxs6 } from "react/jsx-runtime";
 function ChoiceIndicator({ isSelected }) {
   const theme = useTheme();
-  return /* @__PURE__ */ jsxs6(Box6, { children: [
-    /* @__PURE__ */ jsx8(Text7, { color: theme.primary, children: "\u258E " }),
-    /* @__PURE__ */ jsx8(Text7, { color: theme.primary, bold: true, children: isSelected ? "\u276F " : "  " })
-  ] });
+  return /* @__PURE__ */ jsx8(Box6, { children: /* @__PURE__ */ jsx8(Text7, { color: theme.primary, bold: true, children: isSelected ? "\u276F " : "  " }) });
 }
 function ChoiceItem({
   isSelected,
@@ -5237,10 +5234,7 @@ function PickingView({
           onHighlight: (item) => onHighlight?.(item.value)
         }
       ),
-      hasCheckpoint ? /* @__PURE__ */ jsxs6(Box6, { marginTop: 1, children: [
-        /* @__PURE__ */ jsx8(Text7, { color: theme.primary, children: "\u258E " }),
-        /* @__PURE__ */ jsx8(Text7, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" })
-      ] }) : null
+      hasCheckpoint ? /* @__PURE__ */ jsx8(Box6, { marginTop: 1, children: /* @__PURE__ */ jsx8(Text7, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
     ] })
   ] });
 }
