@@ -167,13 +167,14 @@ export function parseWindowsDefaultBrowserProgId(rawOutput: string): string | nu
 export function mapProgIdToBrowserId(
   progId: string,
   commandOutput?: string,
+  platformOverride: string = 'win32',
 ): BrowserIdentity {
   const p = (progId || '').trim()
   const pLower = p.toLowerCase()
   const cmd = (commandOutput || '').toLowerCase()
 
-  const isWin = process.platform === 'win32'
-  const isMac = process.platform === 'darwin'
+  const isWin = platformOverride === 'win32'
+  const isMac = platformOverride === 'darwin'
   const home = os.homedir()
   const heliumDir = isWin
     ? path.join(
@@ -378,7 +379,7 @@ export function mapLinuxDesktopToBrowserId(desktopFile: string): BrowserIdentity
   return { id: lower.replace(/\.desktop$/, ''), name: desktopFile, engine: 'chromium' }
 }
 
-function queryWindows(execute: (cmd: string) => string): BrowserIdentity | null {
+function queryWindows(execute: (cmd: string) => string, platformOverride?: string): BrowserIdentity | null {
   let out = execute(
     'reg query "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice" /v ProgId',
   )
@@ -391,7 +392,7 @@ function queryWindows(execute: (cmd: string) => string): BrowserIdentity | null 
   }
   if (progId) {
     const cmdOut = execute(`reg query "HKCR\\${progId}\\shell\\open\\command"`)
-    return mapProgIdToBrowserId(progId, cmdOut)
+    return mapProgIdToBrowserId(progId, cmdOut, platformOverride ?? 'win32')
   }
   return null
 }
@@ -451,7 +452,7 @@ export function detectSystemDefaultBrowser(
   let detectedInfo: BrowserIdentity | null = null
 
   if (platform === 'win32') {
-    detectedInfo = queryWindows(execute)
+    detectedInfo = queryWindows(execute, platform)
   } else if (platform === 'darwin') {
     detectedInfo = queryMac(execute)
   } else if (platform === 'linux') {
@@ -460,7 +461,7 @@ export function detectSystemDefaultBrowser(
 
   // If mock execFn was supplied without explicit platform override, probe other OS commands
   if (!detectedInfo && execFn && !platformOverride) {
-    if (platform !== 'win32') detectedInfo = queryWindows(execute)
+    if (platform !== 'win32') detectedInfo = queryWindows(execute, 'win32')
     if (!detectedInfo && platform !== 'darwin') detectedInfo = queryMac(execute)
     if (!detectedInfo && platform !== 'linux') detectedInfo = queryLinux(execute)
   }

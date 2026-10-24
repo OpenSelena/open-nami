@@ -919,12 +919,12 @@ function parseWindowsDefaultBrowserProgId(rawOutput) {
   }
   return null;
 }
-function mapProgIdToBrowserId(progId, commandOutput) {
+function mapProgIdToBrowserId(progId, commandOutput, platformOverride = "win32") {
   const p = (progId || "").trim();
   const pLower = p.toLowerCase();
   const cmd = (commandOutput || "").toLowerCase();
-  const isWin = process.platform === "win32";
-  const isMac = process.platform === "darwin";
+  const isWin = platformOverride === "win32";
+  const isMac = platformOverride === "darwin";
   const home = os2.homedir();
   const heliumDir = isWin ? path3.join(
     process.env.LOCALAPPDATA || path3.join(home, "AppData", "Local"),
@@ -1085,7 +1085,7 @@ function mapLinuxDesktopToBrowserId(desktopFile) {
   }
   return { id: lower.replace(/\.desktop$/, ""), name: desktopFile, engine: "chromium" };
 }
-function queryWindows(execute) {
+function queryWindows(execute, platformOverride) {
   let out = execute(
     'reg query "HKCU\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice" /v ProgId'
   );
@@ -1098,7 +1098,7 @@ function queryWindows(execute) {
   }
   if (progId) {
     const cmdOut = execute(`reg query "HKCR\\${progId}\\shell\\open\\command"`);
-    return mapProgIdToBrowserId(progId, cmdOut);
+    return mapProgIdToBrowserId(progId, cmdOut, platformOverride ?? "win32");
   }
   return null;
 }
@@ -1143,14 +1143,14 @@ function detectSystemDefaultBrowser(execFn, platformOverride) {
   });
   let detectedInfo = null;
   if (platform === "win32") {
-    detectedInfo = queryWindows(execute);
+    detectedInfo = queryWindows(execute, platform);
   } else if (platform === "darwin") {
     detectedInfo = queryMac(execute);
   } else if (platform === "linux") {
     detectedInfo = queryLinux(execute);
   }
   if (!detectedInfo && execFn && !platformOverride) {
-    if (platform !== "win32") detectedInfo = queryWindows(execute);
+    if (platform !== "win32") detectedInfo = queryWindows(execute, "win32");
     if (!detectedInfo && platform !== "darwin") detectedInfo = queryMac(execute);
     if (!detectedInfo && platform !== "linux") detectedInfo = queryLinux(execute);
   }

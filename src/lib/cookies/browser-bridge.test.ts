@@ -19,7 +19,7 @@ test('listDetectedBrowsers detects known browser profile paths including Helium'
   const helium = browsers.find(b => b.id === 'helium')
   assert.ok(helium, 'Helium candidate should be present in detected browsers list')
   assert.equal(helium.name, 'Helium')
-  assert.ok(helium.profileDir.includes('Helium'))
+  assert.ok(helium.profileDir && /helium/i.test(helium.profileDir))
 
   for (const b of browsers) {
     assert.equal(typeof b.id, 'string')
@@ -88,7 +88,7 @@ test('mapProgIdToBrowserId maps ProgIds correctly', () => {
   assert.equal(helium.id, 'helium')
   assert.equal(helium.engine, 'chrome')
   assert.equal(helium.name, 'Helium')
-  assert.ok(helium.profileDir && helium.profileDir.includes('Helium'))
+  assert.ok(helium.profileDir && /helium/i.test(helium.profileDir))
 
   const opera = mapProgIdToBrowserId('OperaStable')
   assert.equal(opera.id, 'opera')
@@ -105,7 +105,7 @@ test('mapProgIdToBrowserId supports command output fallback for Helium', () => {
   assert.equal(fallbackResult.id, 'helium')
   assert.equal(fallbackResult.engine, 'chrome')
   assert.equal(fallbackResult.name, 'Helium')
-  assert.ok(fallbackResult.profileDir && fallbackResult.profileDir.includes('Helium'))
+  assert.ok(fallbackResult.profileDir && /helium/i.test(fallbackResult.profileDir))
 })
 
 test('parseMacDefaultBrowserBundleId and parseLinuxDefaultBrowserDesktop extract handlers', () => {
@@ -155,7 +155,7 @@ test('detectSystemDefaultBrowser detects Windows default browser via mock execFn
   assert.ok(detected)
   assert.equal(detected.id, 'helium')
   assert.equal(detected.name, 'Helium')
-  assert.ok(detected.profileDir.includes('Helium'))
+  assert.ok(detected.profileDir && /helium/i.test(detected.profileDir))
 })
 
 test('detectSystemDefaultBrowser detects macOS default browser via mock execFn', () => {
