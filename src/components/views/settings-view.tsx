@@ -1,4 +1,4 @@
-import React, {useState, useMemo, useCallback} from 'react'
+import React, {useState, useMemo, useCallback, useEffect} from 'react'
 import {Box, Text, useInput} from 'ink'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -7,6 +7,7 @@ import {FramedInput} from '../framed-input.js'
 import {TextInput} from '../text-input.js'
 import {loadConfig, saveConfig, type AppConfig} from '../../lib/config.js'
 import {detectAvailableCookies} from '../../lib/cookies.js'
+import {runDoctor, type DoctorReport, type DoctorOptions} from '../../lib/diagnostics/doctor.js'
 import type {Theme} from '../../theme.js'
 
 function expandDir(dir: string): string {
@@ -26,6 +27,137 @@ export type SettingsViewProps = {
   onFocusChange?: (field: SettingsField) => void
   onSave: () => void
   onCancel: () => void
+  doctorChecker?: ((options: DoctorOptions) => Promise<DoctorReport>) | ((bin: 'gallery-dl' | 'yt-dlp' | 'ffmpeg') => Promise<boolean>)
+  initialReport?: DoctorReport | null
+}
+
+export type DoctorCardProps = {
+  boxWidth: number
+  theme: Theme
+  report: DoctorReport | null
+}
+
+export function formatDoctorStorage(storageOk: boolean): {ok: boolean; text: string} {
+  return {
+    ok: storageOk,
+    text: storageOk ? '✓ SQLite ready' : '✗ SQLite unavailable',
+  }
+}
+
+export function formatDoctorCookies(cookies: Record<string, boolean>): {
+  count: number
+  platforms: string[]
+  text: string
+} {
+  const platforms = Object.entries(cookies)
+    .filter(([_, ok]) => ok)
+    .map(([name]) => name)
+  const count = platforms.length
+  const text = count > 0 ? `✓ ${count} (${platforms.join(', ')})` : 'none detected'
+  return {count, platforms, text}
+}
+
+export function formatDoctorEngines(
+  binaries: Record<'gallery-dl' | 'yt-dlp' | 'ffmpeg', boolean>,
+): Array<{name: 'gallery-dl' | 'yt-dlp' | 'ffmpeg'; ok: boolean; symbol: string; label: string}> {
+  const engines: Array<'gallery-dl' | 'yt-dlp' | 'ffmpeg'> = ['gallery-dl', 'yt-dlp', 'ffmpeg']
+  return engines.map(name => {
+    const ok = Boolean(binaries[name])
+    return {
+      name,
+      ok,
+      symbol: ok ? '✓' : '✗',
+      label: `${ok ? '✓' : '✗'} ${name}`,
+    }
+  })
+}
+
+export function DoctorCard({boxWidth, theme, report}: DoctorCardProps) {
+  const cookieSummary = report ? formatDoctorCookies(report.cookies) : {count: 0, platforms: [], text: ''}
+  const storageSummary = report ? formatDoctorStorage(report.storageOk) : {ok: false, text: ''}
+
+  return (
+    <Box
+      width={boxWidth}
+      borderStyle="round"
+      borderColor={theme.gray}
+      borderDimColor={theme.dimSecondary}
+      paddingX={2}
+      flexDirection="column"
+    >
+      <Box justifyContent="space-between">
+        <Text color={theme.primary} bold>
+          System Diagnostics
+        </Text>
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>
+          {report ? report.nodeVersion : 'checking…'}
+        </Text>
+      </Box>
+
+      {report ? (
+        <>
+          <Box marginTop={0}>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              Engines:{' '}
+            </Text>
+            <Text
+              color={report.binaries['gallery-dl'] ? 'green' : 'red'}
+              dimColor={!report.binaries['gallery-dl'] && theme.dimSecondary}
+            >
+              {report.binaries['gallery-dl'] ? '✓' : '✗'} gallery-dl
+            </Text>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              {' '}·{' '}
+            </Text>
+            <Text
+              color={report.binaries['yt-dlp'] ? 'green' : 'red'}
+              dimColor={!report.binaries['yt-dlp'] && theme.dimSecondary}
+            >
+              {report.binaries['yt-dlp'] ? '✓' : '✗'} yt-dlp
+            </Text>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              {' '}·{' '}
+            </Text>
+            <Text
+              color={report.binaries.ffmpeg ? 'green' : 'red'}
+              dimColor={!report.binaries.ffmpeg && theme.dimSecondary}
+            >
+              {report.binaries.ffmpeg ? '✓' : '✗'} ffmpeg
+            </Text>
+          </Box>
+
+          <Box justifyContent="space-between" marginTop={0}>
+            <Box>
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                Storage:{' '}
+              </Text>
+              <Text
+                color={storageSummary.ok ? 'green' : 'red'}
+                dimColor={!storageSummary.ok && theme.dimSecondary}
+              >
+                {storageSummary.text}
+              </Text>
+            </Box>
+            <Box>
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                Cookies:{' '}
+              </Text>
+              <Text
+                color={cookieSummary.count > 0 ? theme.primary : theme.gray}
+                dimColor={cookieSummary.count === 0 && theme.dimSecondary}
+              >
+                {cookieSummary.text}
+              </Text>
+            </Box>
+          </Box>
+        </>
+      ) : (
+        <Text color={theme.gray} dimColor={theme.dimSecondary}>
+          checking system engines and storage…
+        </Text>
+      )}
+    </Box>
+  )
 }
 
 const LIMIT_OPTIONS = [undefined, 10, 25, 50, 100]
@@ -38,6 +170,8 @@ export function SettingsView({
   onFocusChange,
   onSave,
   onCancel,
+  doctorChecker,
+  initialReport,
 }: SettingsViewProps) {
   const initialConfig = useMemo(() => loadConfig(), [])
   const [internalFocus, setInternalFocus] = useState<SettingsField>('cookies')
@@ -56,6 +190,46 @@ export function SettingsView({
   const [writeMetadata, setWriteMetadata] = useState(Boolean(initialConfig.writeMetadata))
   const [defaultLimit, setDefaultLimit] = useState<number | undefined>(initialConfig.defaultLimit)
   const [saved, setSaved] = useState(false)
+  const [doctorReport, setDoctorReport] = useState<DoctorReport | null>(initialReport ?? null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    const fetchReport = async () => {
+      try {
+        const options: DoctorOptions = {
+          cookiesDir: cookiesDir.trim() ? expandDir(cookiesDir.trim()) : undefined,
+        }
+        let report: DoctorReport
+        if (doctorChecker) {
+          const res = await (doctorChecker as any)(options)
+          if (res && typeof res === 'object' && 'binaries' in res) {
+            report = res
+          } else {
+            report = await runDoctor({
+              ...options,
+              binaryChecker: doctorChecker as any,
+            })
+          }
+        } else {
+          report = await runDoctor(options)
+        }
+        if (!cancelled) {
+          setDoctorReport(report)
+        }
+      } catch {
+        // preserve existing report on failure
+      }
+    }
+
+    if (initialReport === undefined || doctorChecker !== undefined) {
+      fetchReport()
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [cookiesDir, doctorChecker, initialReport])
 
   const handleSave = useCallback(() => {
     const existing = loadConfig()
@@ -245,6 +419,10 @@ export function SettingsView({
           {defaultLimit ? `[${defaultLimit} posts]` : '[ALL]'}
         </Text>
       </Box>
+
+      <Gap />
+
+      <DoctorCard boxWidth={boxWidth} theme={theme} report={doctorReport} />
 
       <Gap />
       <Text color={theme.gray} dimColor={theme.dimSecondary}>
