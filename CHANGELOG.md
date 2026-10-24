@@ -4,6 +4,14 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-10-25
+
+### Fixed
+- **MediaLedger Disk Persistence on Node.js 20**:
+  - `node:sqlite` was introduced in Node.js 22.5.0; on Node 20 runtimes, `MediaLedger` gracefully falls back to JSON file storage.
+  - Implemented automatic disk serialization (`loadFallbackDisk` and `flushFallbackDisk`) so ledger records and pagination checkpoints persist across database re-opens on Node 20 as well.
+  - Added unit test covering fallback persistence across process restarts.
+
 ## [1.5.0] - 2026-10-25
 
 ### Added & Synchronized

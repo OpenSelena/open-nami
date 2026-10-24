@@ -9,7 +9,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.5.0",
+      version: "1.5.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -4071,12 +4071,15 @@ var MediaLedger = class {
     checkpoints: /* @__PURE__ */ new Map()
   };
   isFallback = false;
+  resolvedPath;
   constructor(dbPath, forceFallback = false) {
+    const resolvedPath = dbPath ?? (forceFallback ? ":memory:" : path10.join(os5.homedir(), ".open-nami", "nami.db"));
+    this.resolvedPath = resolvedPath;
     if (forceFallback) {
       this.isFallback = true;
+      this.loadFallbackDisk();
       return;
     }
-    const resolvedPath = dbPath || path10.join(os5.homedir(), ".open-nami", "nami.db");
     try {
       if (resolvedPath !== ":memory:") {
         fs10.mkdirSync(path10.dirname(resolvedPath), { recursive: true });
@@ -4086,6 +4089,41 @@ var MediaLedger = class {
       this.initTables();
     } catch {
       this.isFallback = true;
+      this.loadFallbackDisk();
+    }
+  }
+  loadFallbackDisk() {
+    if (this.resolvedPath === ":memory:") return;
+    try {
+      if (fs10.existsSync(this.resolvedPath)) {
+        const raw = fs10.readFileSync(this.resolvedPath, "utf8");
+        const data = JSON.parse(raw);
+        if (data && typeof data === "object") {
+          if (data.media && typeof data.media === "object") {
+            for (const [k, v] of Object.entries(data.media)) {
+              this.inMemoryFallback.media.set(k, v);
+            }
+          }
+          if (data.checkpoints && typeof data.checkpoints === "object") {
+            for (const [k, v] of Object.entries(data.checkpoints)) {
+              this.inMemoryFallback.checkpoints.set(k, v);
+            }
+          }
+        }
+      }
+    } catch {
+    }
+  }
+  flushFallbackDisk() {
+    if (this.resolvedPath === ":memory:") return;
+    try {
+      fs10.mkdirSync(path10.dirname(this.resolvedPath), { recursive: true });
+      const data = {
+        media: Object.fromEntries(this.inMemoryFallback.media),
+        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints)
+      };
+      fs10.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), "utf8");
+    } catch {
     }
   }
   initTables() {
@@ -4121,6 +4159,7 @@ var MediaLedger = class {
   recordMedia(media) {
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.media.set(media.id, media);
+      this.flushFallbackDisk();
       return;
     }
     const stmt = this.db.prepare(`
@@ -4141,6 +4180,7 @@ var MediaLedger = class {
     const key = `${checkpoint.platform}:${checkpoint.username.toLowerCase()}`;
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.checkpoints.set(key, checkpoint);
+      this.flushFallbackDisk();
       return;
     }
     const stmt = this.db.prepare(`
@@ -4178,6 +4218,7 @@ var MediaLedger = class {
     const key = `${platform}:${username.toLowerCase()}`;
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.checkpoints.delete(key);
+      this.flushFallbackDisk();
       return;
     }
     const stmt = this.db.prepare("DELETE FROM checkpoints WHERE key = ?");

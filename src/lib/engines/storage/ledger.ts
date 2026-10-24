@@ -30,13 +30,16 @@ export class MediaLedger {
     checkpoints: new Map<string, CheckpointRecord>(),
   }
   private isFallback = false
+  private resolvedPath: string
 
   constructor(dbPath?: string, forceFallback = false) {
+    const resolvedPath = dbPath ?? (forceFallback ? ':memory:' : path.join(os.homedir(), '.open-nami', 'nami.db'))
+    this.resolvedPath = resolvedPath
     if (forceFallback) {
       this.isFallback = true
+      this.loadFallbackDisk()
       return
     }
-    const resolvedPath = dbPath || path.join(os.homedir(), '.open-nami', 'nami.db')
     try {
       if (resolvedPath !== ':memory:') {
         fs.mkdirSync(path.dirname(resolvedPath), { recursive: true })
@@ -46,7 +49,42 @@ export class MediaLedger {
       this.initTables()
     } catch {
       this.isFallback = true
+      this.loadFallbackDisk()
     }
+  }
+
+  private loadFallbackDisk(): void {
+    if (this.resolvedPath === ':memory:') return
+    try {
+      if (fs.existsSync(this.resolvedPath)) {
+        const raw = fs.readFileSync(this.resolvedPath, 'utf8')
+        const data = JSON.parse(raw)
+        if (data && typeof data === 'object') {
+          if (data.media && typeof data.media === 'object') {
+            for (const [k, v] of Object.entries(data.media)) {
+              this.inMemoryFallback.media.set(k, v as MediaRecord)
+            }
+          }
+          if (data.checkpoints && typeof data.checkpoints === 'object') {
+            for (const [k, v] of Object.entries(data.checkpoints)) {
+              this.inMemoryFallback.checkpoints.set(k, v as CheckpointRecord)
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+
+  private flushFallbackDisk(): void {
+    if (this.resolvedPath === ':memory:') return
+    try {
+      fs.mkdirSync(path.dirname(this.resolvedPath), { recursive: true })
+      const data = {
+        media: Object.fromEntries(this.inMemoryFallback.media),
+        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints),
+      }
+      fs.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), 'utf8')
+    } catch {}
   }
 
   private initTables(): void {
@@ -84,6 +122,7 @@ export class MediaLedger {
   recordMedia(media: MediaRecord): void {
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.media.set(media.id, media)
+      this.flushFallbackDisk()
       return
     }
     const stmt = this.db.prepare(`
@@ -105,6 +144,7 @@ export class MediaLedger {
     const key = `${checkpoint.platform}:${checkpoint.username.toLowerCase()}`
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.checkpoints.set(key, checkpoint)
+      this.flushFallbackDisk()
       return
     }
     const stmt = this.db.prepare(`
@@ -144,6 +184,7 @@ export class MediaLedger {
     const key = `${platform}:${username.toLowerCase()}`
     if (this.isFallback || !this.db) {
       this.inMemoryFallback.checkpoints.delete(key)
+      this.flushFallbackDisk()
       return
     }
     const stmt = this.db.prepare('DELETE FROM checkpoints WHERE key = ?')

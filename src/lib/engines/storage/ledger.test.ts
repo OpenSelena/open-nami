@@ -109,3 +109,48 @@ test('MediaLedger in-memory fallback handles records and checkpoints', () => {
   fallbackLedger.close()
 })
 
+test('MediaLedger fallback persists across re-opens with file path', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nami-ledger-fallback-test-'))
+  const dbFile = path.join(tmpDir, 'fallback-ledger.json')
+
+  try {
+    const l1 = new MediaLedger(dbFile, true)
+    l1.recordMedia({
+      id: 'fallback_persist_1',
+      platform: 'x',
+      author: 'elonmusk',
+      url: 'https://x.com/post/1',
+      filename: 'post1.jpg',
+      filePath: path.join(tmpDir, 'post1.jpg'),
+      downloadedAt: '2026-10-24T00:00:00Z',
+    })
+    l1.saveCheckpoint({
+      platform: 'x',
+      username: 'ElonMusk',
+      targetDir: tmpDir,
+      cursors: { since_id: '12345' },
+      updatedAt: '2026-10-24T00:00:00Z',
+    })
+    l1.close()
+
+    const l2 = new MediaLedger(dbFile, true)
+    assert.equal(l2.hasMedia('fallback_persist_1'), true)
+    assert.equal(l2.hasMedia('non_existent'), false)
+
+    const cp = l2.getCheckpoint('x', 'elonmusk')
+    assert.ok(cp)
+    assert.equal(cp.username, 'ElonMusk')
+    assert.equal(cp.cursors.since_id, '12345')
+
+    l2.clearCheckpoint('x', 'elonmusk')
+    assert.equal(l2.getCheckpoint('x', 'elonmusk'), null)
+    l2.close()
+
+    const l3 = new MediaLedger(dbFile, true)
+    assert.equal(l3.getCheckpoint('x', 'elonmusk'), null)
+    l3.close()
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  }
+})
+
