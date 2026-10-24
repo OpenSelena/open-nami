@@ -28,6 +28,7 @@ import {clickTargetAt, findFrameRow, frameRowSpan, type ClickTarget} from './lib
 import {useMouseClick} from './lib/use-mouse-click.js'
 import {formatEngineError} from './lib/format.js'
 import {loadConfig} from './lib/config.js'
+import {useEngineEvents} from './lib/engines/core/use-engine-events.js'
 import type {MediaTarget, EngineProgress, EngineResult} from './lib/engines/types.js'
 
 export const TAGLINE = 'grab any profile. paste. download. done.'
@@ -193,6 +194,7 @@ function InnerApp({
   const theme = useTheme()
   const {exit} = useApp()
   const {stdout} = useStdout()
+  const engineEvents = useEngineEvents()
 
   const config = useMemo(() => loadConfig(), [])
   const effectiveLimit = limit ?? config.defaultLimit
@@ -639,7 +641,7 @@ function InnerApp({
         <DownloadingView
           profile={phase.profile}
           choice={phase.choice}
-          progress={phase.progress}
+          progress={engineEvents.progress ?? phase.progress}
           outputDir={resolveDefaultDownloadDir(phase.profile.platform, phase.profile.username, outputDir)}
           writeMetadata={effectiveWriteMetadata}
           limit={effectiveLimit}

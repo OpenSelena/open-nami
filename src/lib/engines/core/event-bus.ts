@@ -28,6 +28,10 @@ export class EngineEventBus {
     return () => this.emitter.off(event, listener as (...args: any[]) => void)
   }
 
+  off<K extends keyof EngineEventMap>(event: K, listener: (payload: EngineEventMap[K]) => void): void {
+    this.emitter.off(event, listener as (...args: any[]) => void)
+  }
+
   once<K extends keyof EngineEventMap>(event: K, listener: (payload: EngineEventMap[K]) => void): void {
     this.emitter.once(event, listener as (...args: any[]) => void)
   }
