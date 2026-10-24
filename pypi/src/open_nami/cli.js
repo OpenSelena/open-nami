@@ -10434,10 +10434,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path13, index, value) {
-        if (index >= path13.length) return value;
-        var key = path13[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path13, index + 1, value);
+      function copyWithSetImpl(obj, path17, index, value) {
+        if (index >= path17.length) return value;
+        var key = path17[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path17, index + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10464,11 +10464,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path13, index) {
-        var key = path13[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index + 1 === path13.length)
+      function copyWithDeleteImpl(obj, path17, index) {
+        var key = path17[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index + 1 === path17.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path13, index + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path17, index + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23745,29 +23745,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path13, value) {
+      overrideHookState = function(fiber, id, path17, value) {
         id = findHook(fiber, id);
-        null !== id && (path13 = copyWithSetImpl(id.memoizedState, path13, 0, value), id.memoizedState = path13, id.baseState = path13, fiber.memoizedProps = assign({}, fiber.memoizedProps), path13 = enqueueConcurrentRenderForLane(fiber, 2), null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2));
+        null !== id && (path17 = copyWithSetImpl(id.memoizedState, path17, 0, value), id.memoizedState = path17, id.baseState = path17, fiber.memoizedProps = assign({}, fiber.memoizedProps), path17 = enqueueConcurrentRenderForLane(fiber, 2), null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path13) {
+      overrideHookStateDeletePath = function(fiber, id, path17) {
         id = findHook(fiber, id);
-        null !== id && (path13 = copyWithDeleteImpl(id.memoizedState, path13, 0), id.memoizedState = path13, id.baseState = path13, fiber.memoizedProps = assign({}, fiber.memoizedProps), path13 = enqueueConcurrentRenderForLane(fiber, 2), null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2));
+        null !== id && (path17 = copyWithDeleteImpl(id.memoizedState, path17, 0), id.memoizedState = path17, id.baseState = path17, fiber.memoizedProps = assign({}, fiber.memoizedProps), path17 = enqueueConcurrentRenderForLane(fiber, 2), null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path13, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path13, 0, value);
+      overrideProps = function(fiber, path17, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path17, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path13 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2);
+        path17 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path13) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path13, 0);
+      overridePropsDeletePath = function(fiber, path17) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path17, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path13 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2);
+        path17 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.3.1",
+      version: "1.4.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -26556,7 +26556,7 @@ var require_package = __commonJS({
 });
 
 // src/cli.tsx
-import { createRequire } from "module";
+import { createRequire as createRequire2 } from "module";
 
 // node_modules/ink/build/render.js
 import { Stream } from "stream";
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs16 = await import("fs");
-  const content = fs16.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs20 = await import("fs");
+  const content = fs20.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -33772,8 +33772,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path13) => {
-  return path13?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path17) => {
+  return path17?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -36930,16 +36930,14 @@ async function clearCheckpoint(destDir) {
 }
 
 // src/lib/engines/dispatcher.ts
-import path10 from "path";
-import os7 from "os";
-import fs12 from "fs/promises";
-import fsSync from "fs";
+import path13 from "path";
+import fs15 from "fs/promises";
 
 // src/lib/cookies.ts
-import fs4 from "fs";
+import fs5 from "fs";
 import fsPromises2 from "fs/promises";
-import path3 from "path";
-import os4 from "os";
+import path4 from "path";
+import os5 from "os";
 
 // src/lib/config.ts
 import fs3 from "fs";
@@ -36981,22 +36979,27 @@ function saveConfig(config, configPath = getDefaultConfigPath()) {
   }
 }
 
+// src/lib/cookies/browser-bridge.ts
+import fs4 from "fs";
+import path3 from "path";
+import os4 from "os";
+
 // src/lib/cookies.ts
 var CANDIDATE_DIRS = [
-  path3.join(os4.homedir(), ".open-nami", "cookies"),
-  path3.join(os4.homedir(), ".nami", "cookies"),
-  path3.join(process.cwd(), "cookies")
+  path4.join(os5.homedir(), ".open-nami", "cookies"),
+  path4.join(os5.homedir(), ".nami", "cookies"),
+  path4.join(process.cwd(), "cookies")
 ];
 function getCandidateDirs(customDir) {
   const dirs = [];
   const configured = loadConfig().cookiesDir;
   const custom = customDir || process.env.OPEN_NAMI_COOKIES_DIR || process.env.NAMI_COOKIES_DIR || configured;
   if (custom && custom.trim()) {
-    dirs.push(path3.resolve(custom.trim()));
+    dirs.push(path4.resolve(custom.trim()));
   }
-  const seen = new Set(dirs.map((d) => path3.normalize(d).toLowerCase()));
+  const seen = new Set(dirs.map((d) => path4.normalize(d).toLowerCase()));
   for (const dir of CANDIDATE_DIRS) {
-    const norm = path3.normalize(dir).toLowerCase();
+    const norm = path4.normalize(dir).toLowerCase();
     if (!seen.has(norm)) {
       seen.add(norm);
       dirs.push(dir);
@@ -37016,12 +37019,12 @@ function findCookieFile(platform2, customDir) {
   const filenames = domainNames[platform2] || [];
   const candidateDirs = getCandidateDirs(customDir);
   for (const dir of candidateDirs) {
-    if (!fs4.existsSync(dir)) continue;
+    if (!fs5.existsSync(dir)) continue;
     for (const file of filenames) {
-      const fullPath = path3.join(dir, file);
-      if (fs4.existsSync(fullPath)) {
+      const fullPath = path4.join(dir, file);
+      if (fs5.existsSync(fullPath)) {
         try {
-          const stats = fs4.statSync(fullPath);
+          const stats = fs5.statSync(fullPath);
           if (stats.size > 20) {
             return fullPath;
           }
@@ -37037,14 +37040,14 @@ function detectAvailableCookies(customDir) {
   return platforms.filter((p) => Boolean(findCookieFile(p, customDir)));
 }
 async function createSafeCookieCopy(masterPath) {
-  const userTempDir = path3.join(os4.homedir(), ".open-nami", "temp");
+  const userTempDir = path4.join(os5.homedir(), ".open-nami", "temp");
   let targetDir = userTempDir;
   try {
     await fsPromises2.mkdir(userTempDir, { recursive: true, mode: 448 });
   } catch {
-    targetDir = os4.tmpdir();
+    targetDir = os5.tmpdir();
   }
-  const tempPath = path3.join(targetDir, `nami_cookie_${Date.now()}_${Math.random().toString(36).slice(2)}.txt`);
+  const tempPath = path4.join(targetDir, `nami_cookie_${Date.now()}_${Math.random().toString(36).slice(2)}.txt`);
   await fsPromises2.copyFile(masterPath, tempPath);
   await fsPromises2.chmod(tempPath, 384).catch(() => {
   });
@@ -37058,141 +37061,6 @@ async function createSafeCookieCopy(masterPath) {
       }
     }
   };
-}
-
-// src/lib/known-folders.ts
-import { execFileSync as execFileSync2 } from "child_process";
-import fs5 from "fs";
-import os5 from "os";
-import path4 from "path";
-var KNOWN_FOLDER_DOWNLOADS_GUID = "{374DE290-123F-4565-9164-39C4925E467B}";
-var USER_SHELL_FOLDERS_REG_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
-function expandWindowsEnv(str, env3 = process.env, homeDir) {
-  return str.replace(/%([^%]+)%/g, (original, name) => {
-    if (homeDir && name.toLowerCase() === "userprofile") {
-      return homeDir;
-    }
-    const key = Object.keys(env3).find((k) => k.toLowerCase() === name.toLowerCase());
-    if (key && env3[key] !== void 0) {
-      return env3[key];
-    }
-    return original;
-  });
-}
-function parseWindowsRegistryOutput(output, targetKey = KNOWN_FOLDER_DOWNLOADS_GUID) {
-  const lines = output.split(/\r?\n/);
-  const escaped = targetKey.replace(/[{}]/g, "\\$&");
-  const pattern = new RegExp(`^\\s*${escaped}\\s+REG_\\w+\\s+(.*)$`, "i");
-  for (const line of lines) {
-    const match = line.match(pattern);
-    if (match && match[1]) {
-      const rawPath = match[1].trim();
-      if (rawPath) return rawPath;
-    }
-  }
-  return void 0;
-}
-function parseLinuxUserDirsOutput(content) {
-  const lines = content.split(/\r?\n/);
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("#")) continue;
-    const match = trimmed.match(/^XDG_DOWNLOAD_DIR=["']?([^"']+)["']?$/);
-    if (match && match[1]) {
-      return match[1].trim();
-    }
-  }
-  return void 0;
-}
-function isPathDriveAccessible(filePath, fsExists = fs5.existsSync, platform2 = process.platform) {
-  try {
-    if (fsExists(filePath)) {
-      return true;
-    }
-    if (platform2 === "win32") {
-      const match = filePath.match(/^([a-zA-Z]:[\\/])/i);
-      const driveRoot = match ? match[1] : path4.win32.parse(path4.win32.resolve(filePath)).root;
-      return fsExists(driveRoot);
-    }
-    const normalized = filePath.replace(/\\/g, "/");
-    const mountMatch = normalized.match(/^(\/(?:media(?:\/[^/]+)?|mnt|run\/media(?:\/[^/]+)?)\/[^/]+)/);
-    if (mountMatch) {
-      return fsExists(mountMatch[1]);
-    }
-    let curr = path4.posix.dirname(normalized);
-    while (curr && curr !== "/") {
-      if (fsExists(curr)) return true;
-      curr = path4.posix.dirname(curr);
-    }
-    return fsExists("/");
-  } catch {
-    return false;
-  }
-}
-function resolveWindowsDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os5.homedir();
-  const env3 = options.env ?? process.env;
-  const runQuery = options.regQueryFn ?? ((key, value) => {
-    try {
-      return execFileSync2("reg", ["query", key, "/v", value], {
-        encoding: "utf8",
-        stdio: ["pipe", "pipe", "ignore"]
-      });
-    } catch {
-      return "";
-    }
-  });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs5.existsSync, "win32"));
-  let raw = parseWindowsRegistryOutput(
-    runQuery(USER_SHELL_FOLDERS_REG_KEY, KNOWN_FOLDER_DOWNLOADS_GUID),
-    KNOWN_FOLDER_DOWNLOADS_GUID
-  );
-  if (!raw) {
-    raw = parseWindowsRegistryOutput(runQuery(USER_SHELL_FOLDERS_REG_KEY, "Downloads"), "Downloads");
-  }
-  if (raw) {
-    const expanded = expandWindowsEnv(raw, env3, homeDir);
-    if (checkAccessible(expanded)) {
-      return path4.win32.resolve(expanded);
-    }
-  }
-  return void 0;
-}
-function resolveLinuxDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os5.homedir();
-  const env3 = options.env ?? process.env;
-  const readFn = options.readFileFn ?? ((p) => {
-    try {
-      return fs5.readFileSync(p, "utf8");
-    } catch {
-      return "";
-    }
-  });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs5.existsSync, "linux"));
-  const configHome = env3.XDG_CONFIG_HOME || path4.join(homeDir, ".config");
-  const userDirsFile = path4.join(configHome, "user-dirs.dirs");
-  const content = readFn(userDirsFile);
-  if (!content) return void 0;
-  const raw = parseLinuxUserDirsOutput(content);
-  if (!raw) return void 0;
-  const expanded = raw.replace(/\$HOME/g, homeDir).replace(/\$\{HOME\}/g, homeDir);
-  if (checkAccessible(expanded)) {
-    return path4.posix.resolve(expanded);
-  }
-  return void 0;
-}
-function resolvePlatformDownloadsDir(options = {}) {
-  const platform2 = options.platform ?? process.platform;
-  const homeDir = options.homeDir ?? os5.homedir();
-  const defaultFallback = path4.join(homeDir, "Downloads");
-  if (platform2 === "win32") {
-    const resolved = resolveWindowsDownloadsDir(options);
-    if (resolved) return resolved;
-  } else if (platform2 === "linux") {
-    const resolved = resolveLinuxDownloadsDir(options);
-    if (resolved) return resolved;
-  }
-  return defaultFallback;
 }
 
 // src/lib/engines/extractors/instagram.ts
@@ -37579,8 +37447,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs16 = user.friendship_status;
-      const isFollowing = fs16 ? Boolean(fs16.following) : Boolean(user.followed_by_viewer);
+      const fs20 = user.friendship_status;
+      const isFollowing = fs20 ? Boolean(fs20.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -39147,6 +39015,30 @@ var FacebookExtractor = class {
   }
 };
 
+// src/lib/engines/core/plugin.ts
+var ExtractorPluginRegistry = class {
+  plugins = /* @__PURE__ */ new Map();
+  register(plugin) {
+    this.plugins.set(plugin.platform, plugin);
+  }
+  get(platform2) {
+    return this.plugins.get(platform2);
+  }
+  has(platform2) {
+    return this.plugins.has(platform2);
+  }
+  list() {
+    return Array.from(this.plugins.values());
+  }
+  findByUrl(url) {
+    return this.list().find((plugin) => plugin.canHandle(url));
+  }
+  clear() {
+    this.plugins.clear();
+  }
+};
+var defaultPluginRegistry = new ExtractorPluginRegistry();
+
 // src/lib/engines/extractors/index.ts
 function getExtractor(platform2) {
   switch (platform2) {
@@ -40275,6 +40167,399 @@ async function runYtDlp(options) {
   });
 }
 
+// src/lib/engines/core/task-manager.ts
+import path12 from "path";
+import os9 from "os";
+import fs14 from "fs/promises";
+import fsSync from "fs";
+
+// src/lib/engines/core/event-bus.ts
+import { EventEmitter as EventEmitter3 } from "events";
+var EngineEventBus = class {
+  emitter = new EventEmitter3();
+  constructor() {
+    this.emitter.setMaxListeners(50);
+  }
+  on(event, listener) {
+    this.emitter.on(event, listener);
+    return () => this.emitter.off(event, listener);
+  }
+  once(event, listener) {
+    this.emitter.once(event, listener);
+  }
+  emit(event, payload) {
+    return this.emitter.emit(event, payload);
+  }
+  removeAllListeners(event) {
+    if (event !== void 0) {
+      this.emitter.removeAllListeners(event);
+    } else {
+      this.emitter.removeAllListeners();
+    }
+  }
+};
+
+// src/lib/engines/storage/ledger.ts
+import fs12 from "fs";
+import path10 from "path";
+import os7 from "os";
+import { createRequire } from "module";
+var require2 = createRequire(import.meta.url);
+var MediaLedger = class {
+  db = null;
+  inMemoryFallback = {
+    media: /* @__PURE__ */ new Map(),
+    checkpoints: /* @__PURE__ */ new Map()
+  };
+  isFallback = false;
+  constructor(dbPath, forceFallback = false) {
+    if (forceFallback) {
+      this.isFallback = true;
+      return;
+    }
+    const resolvedPath = dbPath || path10.join(os7.homedir(), ".open-nami", "nami.db");
+    try {
+      if (resolvedPath !== ":memory:") {
+        fs12.mkdirSync(path10.dirname(resolvedPath), { recursive: true });
+      }
+      const { DatabaseSync } = require2("node:sqlite");
+      this.db = new DatabaseSync(resolvedPath);
+      this.initTables();
+    } catch {
+      this.isFallback = true;
+    }
+  }
+  initTables() {
+    if (!this.db) return;
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS media_ledger (
+        id TEXT PRIMARY KEY,
+        platform TEXT,
+        author TEXT,
+        url TEXT,
+        filename TEXT,
+        file_path TEXT,
+        downloaded_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS checkpoints (
+        key TEXT PRIMARY KEY,
+        platform TEXT,
+        username TEXT,
+        target_dir TEXT,
+        cursors_json TEXT,
+        updated_at TEXT
+      );
+    `);
+  }
+  hasMedia(id) {
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.media.has(id);
+    }
+    const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ?");
+    const row = stmt.get(id);
+    return Boolean(row);
+  }
+  recordMedia(media) {
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.media.set(media.id, media);
+      return;
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO media_ledger (id, platform, author, url, filename, file_path, downloaded_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      media.id,
+      media.platform,
+      media.author,
+      media.url,
+      media.filename,
+      media.filePath,
+      media.downloadedAt
+    );
+  }
+  saveCheckpoint(checkpoint) {
+    const key = `${checkpoint.platform}:${checkpoint.username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.checkpoints.set(key, checkpoint);
+      return;
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO checkpoints (key, platform, username, target_dir, cursors_json, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      key,
+      checkpoint.platform,
+      checkpoint.username,
+      checkpoint.targetDir,
+      JSON.stringify(checkpoint.cursors),
+      checkpoint.updatedAt
+    );
+  }
+  getCheckpoint(platform2, username) {
+    const key = `${platform2}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.checkpoints.get(key) || null;
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, target_dir, cursors_json, updated_at FROM checkpoints WHERE key = ?"
+    );
+    const row = stmt.get(key);
+    if (!row) return null;
+    return {
+      platform: row.platform,
+      username: row.username,
+      targetDir: row.target_dir,
+      cursors: JSON.parse(row.cursors_json || "{}"),
+      updatedAt: row.updated_at
+    };
+  }
+  clearCheckpoint(platform2, username) {
+    const key = `${platform2}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.checkpoints.delete(key);
+      return;
+    }
+    const stmt = this.db.prepare("DELETE FROM checkpoints WHERE key = ?");
+    stmt.run(key);
+  }
+  close() {
+    if (this.db) {
+      try {
+        this.db.close();
+      } catch {
+      }
+      this.db = null;
+    }
+  }
+};
+
+// src/lib/known-folders.ts
+import { execFileSync as execFileSync2 } from "child_process";
+import fs13 from "fs";
+import os8 from "os";
+import path11 from "path";
+var KNOWN_FOLDER_DOWNLOADS_GUID = "{374DE290-123F-4565-9164-39C4925E467B}";
+var USER_SHELL_FOLDERS_REG_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
+function expandWindowsEnv(str, env3 = process.env, homeDir) {
+  return str.replace(/%([^%]+)%/g, (original, name) => {
+    if (homeDir && name.toLowerCase() === "userprofile") {
+      return homeDir;
+    }
+    const key = Object.keys(env3).find((k) => k.toLowerCase() === name.toLowerCase());
+    if (key && env3[key] !== void 0) {
+      return env3[key];
+    }
+    return original;
+  });
+}
+function parseWindowsRegistryOutput(output, targetKey = KNOWN_FOLDER_DOWNLOADS_GUID) {
+  const lines = output.split(/\r?\n/);
+  const escaped = targetKey.replace(/[{}]/g, "\\$&");
+  const pattern = new RegExp(`^\\s*${escaped}\\s+REG_\\w+\\s+(.*)$`, "i");
+  for (const line of lines) {
+    const match = line.match(pattern);
+    if (match && match[1]) {
+      const rawPath = match[1].trim();
+      if (rawPath) return rawPath;
+    }
+  }
+  return void 0;
+}
+function parseLinuxUserDirsOutput(content) {
+  const lines = content.split(/\r?\n/);
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#")) continue;
+    const match = trimmed.match(/^XDG_DOWNLOAD_DIR=["']?([^"']+)["']?$/);
+    if (match && match[1]) {
+      return match[1].trim();
+    }
+  }
+  return void 0;
+}
+function isPathDriveAccessible(filePath, fsExists = fs13.existsSync, platform2 = process.platform) {
+  try {
+    if (fsExists(filePath)) {
+      return true;
+    }
+    if (platform2 === "win32") {
+      const match = filePath.match(/^([a-zA-Z]:[\\/])/i);
+      const driveRoot = match ? match[1] : path11.win32.parse(path11.win32.resolve(filePath)).root;
+      return fsExists(driveRoot);
+    }
+    const normalized = filePath.replace(/\\/g, "/");
+    const mountMatch = normalized.match(/^(\/(?:media(?:\/[^/]+)?|mnt|run\/media(?:\/[^/]+)?)\/[^/]+)/);
+    if (mountMatch) {
+      return fsExists(mountMatch[1]);
+    }
+    let curr = path11.posix.dirname(normalized);
+    while (curr && curr !== "/") {
+      if (fsExists(curr)) return true;
+      curr = path11.posix.dirname(curr);
+    }
+    return fsExists("/");
+  } catch {
+    return false;
+  }
+}
+function resolveWindowsDownloadsDir(options = {}) {
+  const homeDir = options.homeDir ?? os8.homedir();
+  const env3 = options.env ?? process.env;
+  const runQuery = options.regQueryFn ?? ((key, value) => {
+    try {
+      return execFileSync2("reg", ["query", key, "/v", value], {
+        encoding: "utf8",
+        stdio: ["pipe", "pipe", "ignore"]
+      });
+    } catch {
+      return "";
+    }
+  });
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs13.existsSync, "win32"));
+  let raw = parseWindowsRegistryOutput(
+    runQuery(USER_SHELL_FOLDERS_REG_KEY, KNOWN_FOLDER_DOWNLOADS_GUID),
+    KNOWN_FOLDER_DOWNLOADS_GUID
+  );
+  if (!raw) {
+    raw = parseWindowsRegistryOutput(runQuery(USER_SHELL_FOLDERS_REG_KEY, "Downloads"), "Downloads");
+  }
+  if (raw) {
+    const expanded = expandWindowsEnv(raw, env3, homeDir);
+    if (checkAccessible(expanded)) {
+      return path11.win32.resolve(expanded);
+    }
+  }
+  return void 0;
+}
+function resolveLinuxDownloadsDir(options = {}) {
+  const homeDir = options.homeDir ?? os8.homedir();
+  const env3 = options.env ?? process.env;
+  const readFn = options.readFileFn ?? ((p) => {
+    try {
+      return fs13.readFileSync(p, "utf8");
+    } catch {
+      return "";
+    }
+  });
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs13.existsSync, "linux"));
+  const configHome = env3.XDG_CONFIG_HOME || path11.join(homeDir, ".config");
+  const userDirsFile = path11.join(configHome, "user-dirs.dirs");
+  const content = readFn(userDirsFile);
+  if (!content) return void 0;
+  const raw = parseLinuxUserDirsOutput(content);
+  if (!raw) return void 0;
+  const expanded = raw.replace(/\$HOME/g, homeDir).replace(/\$\{HOME\}/g, homeDir);
+  if (checkAccessible(expanded)) {
+    return path11.posix.resolve(expanded);
+  }
+  return void 0;
+}
+function resolvePlatformDownloadsDir(options = {}) {
+  const platform2 = options.platform ?? process.platform;
+  const homeDir = options.homeDir ?? os8.homedir();
+  const defaultFallback = path11.join(homeDir, "Downloads");
+  if (platform2 === "win32") {
+    const resolved = resolveWindowsDownloadsDir(options);
+    if (resolved) return resolved;
+  } else if (platform2 === "linux") {
+    const resolved = resolveLinuxDownloadsDir(options);
+    if (resolved) return resolved;
+  }
+  return defaultFallback;
+}
+
+// src/lib/engines/core/task-manager.ts
+function expandPath(dir) {
+  if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
+    return path12.join(os9.homedir(), dir.slice(1));
+  }
+  return dir;
+}
+function resolveDownloadBaseDir(customBaseDir) {
+  if (customBaseDir && customBaseDir.trim()) {
+    return path12.resolve(expandPath(customBaseDir.trim()));
+  }
+  const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
+  if (envDir && envDir.trim()) {
+    return path12.resolve(expandPath(envDir.trim()));
+  }
+  const configDir = loadConfig().downloadDir;
+  if (configDir && configDir.trim()) {
+    return path12.resolve(expandPath(configDir.trim()));
+  }
+  if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
+    const raw = process.env.NAMI_BASE_DIR.trim();
+    return path12.resolve(expandPath(raw.endsWith("downloads") ? raw : path12.join(raw, "downloads")));
+  }
+  return path12.join(resolvePlatformDownloadsDir(), "Open Nami");
+}
+function resolveDefaultDownloadDir(platform2, username, baseDir) {
+  const root = resolveDownloadBaseDir(baseDir);
+  return path12.join(root, platform2, username);
+}
+async function cleanupEmptyCategoryDirs(targetDir) {
+  const candidateDirs = ["All", "Stories", "Highlights", "Photos", "Videos"];
+  for (const dirName of candidateDirs) {
+    const fullPath = path12.join(targetDir, dirName);
+    try {
+      if (!fsSync.existsSync(fullPath)) continue;
+      const entries = await fs14.readdir(fullPath);
+      const nonArchiveEntries = entries.filter(
+        (e) => e !== ".open-nami-archive.json" && e !== "archive.txt" && e !== "archive_yt-dlp.txt" && e !== "archive_gallery-dl.sqlite3"
+      );
+      if (nonArchiveEntries.length === 0) {
+        for (const entry of entries) {
+          try {
+            await fs14.unlink(path12.join(fullPath, entry));
+          } catch {
+          }
+        }
+        await fs14.rmdir(fullPath).catch(() => {
+        });
+      }
+    } catch {
+    }
+  }
+}
+var TaskManager = class {
+  events;
+  ledger;
+  plugins;
+  constructor(eventBus, ledger, plugins) {
+    this.events = eventBus || new EngineEventBus();
+    this.ledger = ledger || new MediaLedger();
+    this.plugins = plugins || defaultPluginRegistry;
+  }
+  async execute(options) {
+    const { profile, choice } = options;
+    const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
+    this.events.emit("job:start", { profile, choice, outputDir: targetDir });
+    let downloadedCount = 0;
+    let skippedCount = 0;
+    const errors = [];
+    if (options.runnerOverrides?.nativeRunner) {
+      const subDir = choice === "all" ? "All" : choice.charAt(0).toUpperCase() + choice.slice(1);
+      const runRes = await options.runnerOverrides.nativeRunner(subDir);
+      downloadedCount += runRes.downloaded;
+      skippedCount += runRes.skipped;
+      if (!runRes.success) errors.push(runRes.error || "Execution failed");
+    }
+    await cleanupEmptyCategoryDirs(targetDir);
+    const result = {
+      success: errors.length === 0,
+      downloadedCount,
+      skippedCount,
+      errors,
+      outputDir: targetDir
+    };
+    this.events.emit("job:complete", { result });
+    return result;
+  }
+};
+var defaultTaskManager = new TaskManager();
+
 // src/lib/engines/dispatcher.ts
 var REFERER_MAP = {
   tiktok: "https://www.tiktok.com/",
@@ -40282,67 +40567,38 @@ var REFERER_MAP = {
   x: "https://x.com/",
   facebook: "https://www.facebook.com/"
 };
-function expandPath(dir) {
-  if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path10.join(os7.homedir(), dir.slice(1));
-  }
-  return dir;
-}
-function resolveDownloadBaseDir(customBaseDir) {
-  if (customBaseDir && customBaseDir.trim()) {
-    return path10.resolve(expandPath(customBaseDir.trim()));
-  }
-  const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
-  if (envDir && envDir.trim()) {
-    return path10.resolve(expandPath(envDir.trim()));
-  }
-  const configDir = loadConfig().downloadDir;
-  if (configDir && configDir.trim()) {
-    return path10.resolve(expandPath(configDir.trim()));
-  }
-  if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
-    const raw = process.env.NAMI_BASE_DIR.trim();
-    return path10.resolve(expandPath(raw.endsWith("downloads") ? raw : path10.join(raw, "downloads")));
-  }
-  return path10.join(resolvePlatformDownloadsDir(), "Open Nami");
-}
-function resolveDefaultDownloadDir(platform2, username, baseDir) {
-  const root = resolveDownloadBaseDir(baseDir);
-  return path10.join(root, platform2, username);
-}
-async function cleanupEmptyCategoryDirs(targetDir) {
-  const candidateDirs = ["All", "Stories", "Highlights", "Photos", "Videos"];
-  for (const dirName of candidateDirs) {
-    const fullPath = path10.join(targetDir, dirName);
-    try {
-      if (!fsSync.existsSync(fullPath)) continue;
-      const entries = await fs12.readdir(fullPath);
-      const nonArchiveEntries = entries.filter(
-        (e) => e !== ".open-nami-archive.json" && e !== "archive.txt" && e !== "archive_yt-dlp.txt" && e !== "archive_gallery-dl.sqlite3"
-      );
-      if (nonArchiveEntries.length === 0) {
-        for (const entry of entries) {
-          try {
-            await fs12.unlink(path10.join(fullPath, entry));
-          } catch {
-          }
-        }
-        await fs12.rmdir(fullPath).catch(() => {
-        });
-      }
-    } catch {
-    }
-  }
-}
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
-  await fs12.mkdir(targetDir, { recursive: true });
+  await fs15.mkdir(targetDir, { recursive: true });
+  defaultTaskManager.events.emit("job:start", { profile, choice, outputDir: targetDir });
   const masterCookie = findCookieFile(profile.platform);
   const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
   let totalDownloaded = 0;
   let totalSkipped = 0;
   const errors = [];
+  const recordError = (err) => {
+    errors.push(err);
+    defaultTaskManager.events.emit("job:error", { error: err });
+  };
+  const handleProgress = (progress) => {
+    defaultTaskManager.events.emit("job:progress", progress);
+    if (progress.currentFile && progress.statusText?.startsWith("Saved:")) {
+      try {
+        defaultTaskManager.ledger.recordMedia({
+          id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
+          platform: profile.platform,
+          author: profile.username,
+          url: profile.cleanUrl || "",
+          filename: progress.currentFile,
+          filePath: path13.join(targetDir, progress.currentFile),
+          downloadedAt: (/* @__PURE__ */ new Date()).toISOString()
+        });
+      } catch {
+      }
+    }
+    onProgress?.(progress);
+  };
   try {
     const jobs = [];
     if (choice === "photos") {
@@ -40366,7 +40622,7 @@ async function dispatchDownload(options) {
     const savedCheckpoint = options.resume ? await loadCheckpoint(targetDir) : null;
     const currentCursors = savedCheckpoint?.cursors ? { ...savedCheckpoint.cursors } : {};
     const defaultRunNative = async (subDir) => {
-      const dest = subDir === "All" ? targetDir : path10.join(targetDir, subDir);
+      const dest = subDir === "All" ? targetDir : path13.join(targetDir, subDir);
       const remainingLimit = globalLimit !== void 0 ? Math.max(0, globalLimit - totalDownloaded) : void 0;
       if (remainingLimit === 0) {
         return { success: true, downloaded: 0, skipped: 0 };
@@ -40408,8 +40664,8 @@ async function dispatchDownload(options) {
           jobName: `${profile.username} ${subDir}`,
           destDir: dest,
           destDirMap: subDir === "All" ? {
-            photo: path10.join(targetDir, "Photos"),
-            video: path10.join(targetDir, "Videos")
+            photo: path13.join(targetDir, "Photos"),
+            video: path13.join(targetDir, "Videos")
           } : void 0,
           cookiePath: cookieCopy?.filePath,
           referer: REFERER_MAP[profile.platform],
@@ -40418,7 +40674,7 @@ async function dispatchDownload(options) {
           writeMetadata: options.writeMetadata,
           defaultPlatform: profile.platform,
           defaultAuthor: profile.username,
-          onProgress
+          onProgress: handleProgress
         });
         return {
           success: res.errors.length === 0,
@@ -40432,7 +40688,7 @@ async function dispatchDownload(options) {
           success: false,
           downloaded: 0,
           skipped: 0,
-          error: errMsg
+          error: errMsg || "Execution failed"
         };
       }
     };
@@ -40444,7 +40700,7 @@ async function dispatchDownload(options) {
       cookiePath: cookieCopy?.filePath,
       signal: options.signal,
       writeMetadata: options.writeMetadata,
-      onProgress
+      onProgress: handleProgress
     }));
     const runYt = options.runnerOverrides?.ytRunner ?? (() => runYtDlp({
       profile,
@@ -40452,7 +40708,7 @@ async function dispatchDownload(options) {
       cookiePath: cookieCopy?.filePath,
       signal: options.signal,
       writeMetadata: options.writeMetadata,
-      onProgress
+      onProgress: handleProgress
     }));
     for (const job of jobs) {
       if (options.signal?.aborted) break;
@@ -40460,7 +40716,7 @@ async function dispatchDownload(options) {
       if (job.type === "all") {
         let res = await runNative("All");
         if ((!res.success || res.downloaded === 0 && res.skipped === 0) && !options.signal?.aborted) {
-          onProgress?.({
+          handleProgress({
             job: "Photos",
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -40469,8 +40725,8 @@ async function dispatchDownload(options) {
           const gdlPhotos = await runGdl("Photos");
           totalDownloaded += gdlPhotos.downloaded;
           totalSkipped += gdlPhotos.skipped;
-          if (!gdlPhotos.success && gdlPhotos.error) errors.push(`[Photos] ${gdlPhotos.error}`);
-          onProgress?.({
+          if (!gdlPhotos.success) recordError(gdlPhotos.error ? `[Photos] ${gdlPhotos.error}` : "[Photos] Execution failed");
+          handleProgress({
             job: "Videos",
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -40480,9 +40736,9 @@ async function dispatchDownload(options) {
           if (ytVideos.downloaded > 0 || ytVideos.skipped > 0 || ytVideos.success) {
             totalDownloaded += ytVideos.downloaded;
             totalSkipped += ytVideos.skipped;
-            if (!ytVideos.success && ytVideos.error) errors.push(`[Videos] ${ytVideos.error}`);
+            if (!ytVideos.success) recordError(ytVideos.error ? `[Videos] ${ytVideos.error}` : "[Videos] Execution failed");
           } else if (!options.signal?.aborted) {
-            onProgress?.({
+            handleProgress({
               job: "Videos",
               downloadedCount: totalDownloaded,
               skippedCount: totalSkipped,
@@ -40491,19 +40747,19 @@ async function dispatchDownload(options) {
             const gdlVideos = await runGdl("Videos");
             totalDownloaded += gdlVideos.downloaded;
             totalSkipped += gdlVideos.skipped;
-            if (!gdlVideos.success && gdlVideos.error) errors.push(`[Videos] ${gdlVideos.error}`);
+            if (!gdlVideos.success) recordError(gdlVideos.error ? `[Videos] ${gdlVideos.error}` : "[Videos] Execution failed");
           }
         } else {
           totalDownloaded += res.downloaded;
           totalSkipped += res.skipped;
-          if (!res.success && res.error) errors.push(`[All] ${res.error}`);
+          if (!res.success) recordError(res.error ? `[All] ${res.error}` : "[All] Execution failed");
         }
       } else if (job.type === "photos" || job.type === "stories" || job.type === "highlights") {
         const subDir = job.type === "photos" ? "Photos" : job.type === "stories" ? "Stories" : "Highlights";
         let res = await runNative(subDir);
         const isAuthError = Boolean(res.error && (res.error.includes("cookie") || res.error.includes("authenticated session") || res.error.includes("Settings (^s)")));
         if (!isAuthError && (!res.success || res.downloaded === 0 && res.skipped === 0) && !options.signal?.aborted) {
-          onProgress?.({
+          handleProgress({
             job: subDir,
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -40516,14 +40772,14 @@ async function dispatchDownload(options) {
         }
         totalDownloaded += res.downloaded;
         totalSkipped += res.skipped;
-        if (!res.success && res.error) errors.push(`[${subDir}] ${res.error}`);
+        if (!res.success) recordError(res.error ? `[${subDir}] ${res.error}` : `[${subDir}] Execution failed`);
       } else if (job.type === "videos") {
         let res = await runNative("Videos");
         if (res.downloaded > 0 || res.skipped > 0) {
           totalDownloaded += res.downloaded;
           totalSkipped += res.skipped;
         } else if (!options.signal?.aborted) {
-          onProgress?.({
+          handleProgress({
             job: "Videos",
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -40533,9 +40789,9 @@ async function dispatchDownload(options) {
           if (fbRes.downloaded > 0 || fbRes.skipped > 0 || fbRes.success) {
             totalDownloaded += fbRes.downloaded;
             totalSkipped += fbRes.skipped;
-            if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`);
+            if (!fbRes.success) recordError(fbRes.error ? `[Videos] ${fbRes.error}` : "[Videos] Execution failed");
           } else if (!options.signal?.aborted) {
-            onProgress?.({
+            handleProgress({
               job: "Videos",
               downloadedCount: totalDownloaded,
               skippedCount: totalSkipped,
@@ -40544,7 +40800,7 @@ async function dispatchDownload(options) {
             const gdlRes = await runGdl("Videos");
             totalDownloaded += gdlRes.downloaded;
             totalSkipped += gdlRes.skipped;
-            if (!gdlRes.success && gdlRes.error) errors.push(`[Videos] ${gdlRes.error}`);
+            if (!gdlRes.success) recordError(gdlRes.error ? `[Videos] ${gdlRes.error}` : "[Videos] Execution failed");
           }
         }
       }
@@ -40553,13 +40809,19 @@ async function dispatchDownload(options) {
     if (errors.length === 0 && !options.signal?.aborted) {
       await clearCheckpoint(targetDir);
     }
-    return {
+    const engineResult = {
       success: errors.length === 0 || totalDownloaded > 0,
       downloadedCount: totalDownloaded,
       skippedCount: totalSkipped,
       errors,
       outputDir: targetDir
     };
+    defaultTaskManager.events.emit("job:complete", { result: engineResult });
+    return engineResult;
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    defaultTaskManager.events.emit("job:error", { error: errMsg || "Execution failed" });
+    throw err;
   } finally {
     if (cookieCopy) {
       await cookieCopy.cleanup();
@@ -40758,7 +41020,7 @@ function ProbingView({
 
 // src/components/views/downloading-view.tsx
 var import_react44 = __toESM(require_react(), 1);
-import os8 from "os";
+import os10 from "os";
 
 // src/components/progress-bar.tsx
 var import_react43 = __toESM(require_react(), 1);
@@ -40891,13 +41153,13 @@ function DownloadingView({
     activeBadges.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: activeBadges.join(" \xB7 ") }) : null,
     outputDir ? /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       "saving to ",
-      shortenPath(outputDir, os8.homedir(), 54)
+      shortenPath(outputDir, os10.homedir(), 54)
     ] }) : null
   ] });
 }
 
 // src/components/views/completion-view.tsx
-import os9 from "os";
+import os11 from "os";
 var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
 var DONE_LABEL = "\u21B5 download another";
 function CompletionView({
@@ -40917,7 +41179,7 @@ function CompletionView({
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "\u2713 profile downloaded! " }),
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.primary, children: "saved to:" })
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(result.outputDir, os9.homedir(), 60) }),
+    /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(result.outputDir, os11.homedir(), 60) }),
     /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isZero ? "no photos or videos available" : `${result.downloadedCount} media item${plural} downloaded${skipText}` }),
     /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(Text, { bold: true, color: theme.primary, children: "[o]" }),
@@ -40960,13 +41222,13 @@ function ErrorView({ message, hint, columns, theme }) {
 
 // src/components/views/settings-view.tsx
 var import_react45 = __toESM(require_react(), 1);
-import fs13 from "fs";
-import path11 from "path";
-import os10 from "os";
+import fs16 from "fs";
+import path14 from "path";
+import os12 from "os";
 var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
 function expandDir(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path11.join(os10.homedir(), dir.slice(1));
+    return path14.join(os12.homedir(), dir.slice(1));
   }
   return dir;
 }
@@ -41018,7 +41280,7 @@ function SettingsView({
       };
     }
     const expanded = expandDir(dir);
-    if (!fs13.existsSync(expanded)) {
+    if (!fs16.existsSync(expanded)) {
       return {
         ok: false,
         text: "directory does not exist yet"
@@ -41041,7 +41303,7 @@ function SettingsView({
     if (!dir) {
       return "default: platform Downloads / Open Nami";
     }
-    return `target: ${path11.resolve(expandDir(dir))}`;
+    return `target: ${path14.resolve(expandDir(dir))}`;
   }, [downloadDir]);
   const cycleFocus = (0, import_react45.useCallback)((forward = true) => {
     const fields = ["cookies", "download", "metadata", "limit"];
@@ -41469,9 +41731,9 @@ function startClipboardWatcher(options = {}) {
 }
 
 // src/lib/reveal.ts
-import fs14 from "fs";
+import fs17 from "fs";
 import { spawn as spawn4 } from "child_process";
-import path12 from "path";
+import path15 from "path";
 function buildOpenBrowserCommand(url, platform2 = process.platform) {
   try {
     const parsed = new URL(url.trim());
@@ -41498,12 +41760,12 @@ function openBrowser(url) {
   }
 }
 function getRevealCommand(targetPath, platform2 = process.platform, isDirectory) {
-  const pathModule = platform2 === "win32" ? path12.win32 : platform2 === "darwin" ? path12.posix : path12;
+  const pathModule = platform2 === "win32" ? path15.win32 : platform2 === "darwin" ? path15.posix : path15;
   const resolved = pathModule.resolve(targetPath);
   const isDir = isDirectory !== void 0 ? isDirectory : (() => {
     try {
-      if (fs14.existsSync(resolved)) {
-        return fs14.statSync(resolved).isDirectory();
+      if (fs17.existsSync(resolved)) {
+        return fs17.statSync(resolved).isDirectory();
       }
     } catch {
     }
@@ -41798,7 +42060,7 @@ function WatcherView({
 
 // src/components/views/batch-view.tsx
 var import_react47 = __toESM(require_react(), 1);
-import fs15 from "fs";
+import fs18 from "fs";
 
 // src/lib/batch.ts
 import fsPromises5 from "fs/promises";
@@ -42005,7 +42267,7 @@ function BatchView({
         setErrorMessage("Please enter a valid batch file path");
         return;
       }
-      if (!fs15.existsSync(trimmed)) {
+      if (!fs18.existsSync(trimmed)) {
         setErrorMessage(`File not found: ${trimmed}`);
         return;
       }
@@ -43623,12 +43885,72 @@ function generateCompletion(shell) {
   }
 }
 
+// src/lib/diagnostics/doctor.ts
+import { execFile } from "child_process";
+import { promisify } from "util";
+import os13 from "os";
+import fs19 from "fs";
+import path16 from "path";
+var execFileAsync = promisify(execFile);
+async function defaultCheckBinary(bin) {
+  try {
+    await execFileAsync(bin, ["--version"], { timeout: 3e3 });
+    return true;
+  } catch {
+    if (bin === "gallery-dl" || bin === "yt-dlp") {
+      try {
+        const resolved = resolveEngineCommand(bin);
+        await execFileAsync(resolved.command, [...resolved.baseArgs, "--version"], { timeout: 3e3 });
+        return true;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  }
+}
+async function runDoctor(options = {}) {
+  const check2 = options.binaryChecker ?? defaultCheckBinary;
+  const [gdl, ytdlp, ffmpeg] = await Promise.all([
+    check2("gallery-dl"),
+    check2("yt-dlp"),
+    check2("ffmpeg")
+  ]);
+  const availableCookies = detectAvailableCookies(options.cookiesDir);
+  const cookieStatus = {
+    instagram: availableCookies.includes("instagram"),
+    tiktok: availableCookies.includes("tiktok"),
+    facebook: availableCookies.includes("facebook"),
+    x: availableCookies.includes("x")
+  };
+  let storageOk = false;
+  try {
+    const testDir = options.storageDir || path16.join(os13.homedir(), ".open-nami");
+    fs19.mkdirSync(testDir, { recursive: true });
+    const testFile = path16.join(testDir, `.doctor_test_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+    fs19.writeFileSync(testFile, "ok");
+    fs19.unlinkSync(testFile);
+    storageOk = true;
+  } catch {
+  }
+  return {
+    nodeVersion: process.version,
+    binaries: {
+      "gallery-dl": gdl,
+      "yt-dlp": ytdlp,
+      ffmpeg
+    },
+    cookies: cookieStatus,
+    storageOk
+  };
+}
+
 // src/cli.tsx
 var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
 var resolveVersion = () => {
   try {
     if (typeof import.meta !== "undefined" && import.meta?.url) {
-      return createRequire(import.meta.url)("../package.json").version;
+      return createRequire2(import.meta.url)("../package.json").version;
     }
   } catch {
   }
@@ -43652,6 +43974,7 @@ var HELP = `
   Options:
     -h, --help           Show this help message
     -v, --version        Show version
+    --doctor             Run environment & dependency diagnostics
     -o, --output         Set custom output directory
     -w, --watch          Watch clipboard for profile links and auto-download
     -b, --batch <file>   Download multiple profiles listed in a text file (one URL/user per line)
@@ -43696,6 +44019,24 @@ async function main() {
   }
   if (args.includes("-v") || args.includes("--version")) {
     console.log(`open-nami v${VERSION}`);
+    process.exit(0);
+  }
+  if (args.includes("--doctor")) {
+    const report = await runDoctor();
+    console.log(`
+  \x1B[36mOpen Nami Doctor\x1B[0m (v${VERSION})
+`);
+    console.log(`  \x1B[1mRuntime:\x1B[0m Node.js ${report.nodeVersion}`);
+    console.log(`  \x1B[1mStorage:\x1B[0m ${report.storageOk ? "\x1B[32m\u2713 Ready\x1B[0m" : "\x1B[31m\u2717 Inaccessible\x1B[0m"}`);
+    console.log(`  \x1B[1mEngines:\x1B[0m`);
+    for (const [bin, ok] of Object.entries(report.binaries)) {
+      console.log(`    ${ok ? "\x1B[32m\u2713\x1B[0m" : "\x1B[31m\u2717\x1B[0m"} ${bin}`);
+    }
+    console.log(`  \x1B[1mCookies:\x1B[0m`);
+    for (const [platform2, ok] of Object.entries(report.cookies)) {
+      console.log(`    ${ok ? "\x1B[32m\u2713\x1B[0m" : "\x1B[90m\u25CB\x1B[0m"} ${platform2}`);
+    }
+    console.log();
     process.exit(0);
   }
   const completionIdx = args.findIndex((arg) => arg === "--completion" || arg.startsWith("--completion="));

@@ -4,6 +4,25 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-10-25
+
+### Added & Modernized
+- **Decoupled Core Event-Driven Architecture**:
+  - Implemented `EngineEventBus` with typed lifecycle event streams (`job:start`, `job:progress`, `job:complete`, `job:error`, `item:download:*`, `rate_limit:encountered`).
+  - Implemented decoupled `TaskManager` orchestrating download execution independently of the presentation layer.
+- **Pluggable Extractor Engine SDK**:
+  - Introduced formalized `IExtractorPlugin` and `ExtractorPluginRegistry` with standardized session health verification and asynchronous media streaming interfaces.
+- **Persistent SQLite Media Ledger & Checkpoint Store**:
+  - Implemented `MediaLedger` using Node.js built-in `node:sqlite` (`DatabaseSync`) for global cross-profile deduplication indexing and crash-resilient pagination checkpoints.
+  - Transparent in-memory/JSON fallback when SQLite or specific filesystem paths are unavailable.
+  - Enforced case-insensitive username normalization across checkpoint keys.
+- **Browser Cookie Auto-Bridge**:
+  - Implemented `listDetectedBrowsers()` to automatically locate profile directories for Google Chrome, Microsoft Edge, Brave Browser, and Mozilla Firefox across Windows, macOS, and Linux.
+- **System Health Doctor CLI (`--doctor`)**:
+  - Added `open-nami --doctor` command to inspect Node.js runtime, storage write permissions, external scraper engines (`gallery-dl`, `yt-dlp`, `ffmpeg`), and platform session cookies.
+- **UI Invariance**:
+  - 100% preservation of all existing terminal UI views, centered Nordic accent bar, and interactive keybindings.
+
 ## [1.3.1] - 2026-10-24
 
 ### Enhanced & Centered
