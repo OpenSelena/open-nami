@@ -4,6 +4,24 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-10-25
+
+### Added & Synchronized
+- **Reactive Engine EventBus Hook (`useEngineEvents`)**:
+  - Connected React 19 / Ink 7 root App state machine directly to `EngineEventBus`.
+  - Downloads initiated from interactive TUI, batch queue, or watcher daemon now trigger real-time reactive updates.
+- **In-TUI System Doctor Diagnostics Card**:
+  - Integrated real-time health checks into the interactive Settings screen (`^s`).
+  - Displays engine binary status (`gallery-dl`, `yt-dlp`, `ffmpeg`), SQLite storage readiness, and recognized cookies.
+- **Interactive Browser Cookie Bridge Selector**:
+  - Added browser selection setting in `SettingsView` cycling through installed browsers (Chrome, Edge, Brave, Firefox).
+  - Automatically forwards `--cookies-from-browser <browser>` to `gallery-dl` and `yt-dlp` execution runners.
+- **SQLite Media Ledger Indexing Badge**:
+  - Added subtle `✓ indexed in media ledger` badge on the completion card confirming persistent deduplication.
+- **Nordic Aesthetic & Centered Layout Preservation**:
+  - Kept 100% of the centered Nordic aesthetic, round borders, color palette, and keyboard workflows.
+  - Replaced legacy em dashes in completion scan summaries with colons.
+
 ## [1.4.1] - 2026-10-25
 
 ### Fixed
