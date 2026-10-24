@@ -4,6 +4,14 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.8] - 2026-10-24
+
+### Removed
+- **Removed Cluttered Filter Box from Single-Profile Download Picker**:
+  - Completely stripped the unwanted `[l] Posts`, `[d] Date`, `[m] Meta`, and `[r] Resume` options box from the standard download menu.
+  - Restored Open Nami's original clean, minimalistic picking experience: select media type (`Photos`, `Videos`, `Stories`, `Highlights`, `Everything`) and press Enter.
+  - Advanced filtering remains available where it belongs: via CLI flags (`--limit`, `--since`, `--write-metadata`, `--resume`) and in Batch Queue mode (`^b`).
+
 ## [1.2.7] - 2026-10-24
 
 ### Fixed & Enhanced

@@ -3,6 +3,6 @@ Open Nami - Fast terminal social media profile downloader and TUI.
 Bulk download photos, videos, stories, and highlights from Instagram, TikTok, Facebook, and X.
 """
 
-__version__ = "1.2.7"
+__version__ = "1.2.8"
 __author__ = "OpenSelena"
 __license__ = "MIT"

@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.7",
+      version: "1.2.8",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -40592,14 +40592,13 @@ function getPickingOptions(platform2) {
   });
   return items;
 }
-var DATE_PRESETS = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
-var LIMIT_PRESETS = [void 0, 10, 24, 50, 100, "custom"];
 function PickingView({
   contentWidth,
   profile,
   outputDir,
   initialLimit,
   initialSince,
+  initialUntil,
   initialWriteMetadata = false,
   initialResume = true,
   onSelect,
@@ -40609,26 +40608,13 @@ function PickingView({
 }) {
   const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
   const items = getPickingOptions(profile.platform);
-  const [limit, setLimit] = (0, import_react42.useState)(initialLimit);
-  const [dateFilter, setDateFilter] = (0, import_react42.useState)(() => {
-    if (typeof initialSince === "string" && initialSince.trim()) {
-      return initialSince.trim();
-    }
-    return "all";
-  });
-  const [writeMetadata, setWriteMetadata] = (0, import_react42.useState)(initialWriteMetadata);
-  const [resume, setResume] = (0, import_react42.useState)(initialResume);
   const [hasCheckpoint, setHasCheckpoint] = (0, import_react42.useState)(false);
-  const [editingModal, setEditingModal] = (0, import_react42.useState)(null);
-  const [customLimitText, setCustomLimitText] = (0, import_react42.useState)("");
-  const [customDateText, setCustomDateText] = (0, import_react42.useState)("");
   const targetDir = resolveDefaultDownloadDir(profile.platform, profile.username, outputDir);
   (0, import_react42.useEffect)(() => {
     let isMounted = true;
     loadCheckpoint(targetDir).then((cp) => {
       if (isMounted && cp && !cp.completed && Object.keys(cp.cursors || {}).length > 0) {
         setHasCheckpoint(true);
-        setResume(true);
       }
     }).catch(() => {
     });
@@ -40636,68 +40622,14 @@ function PickingView({
       isMounted = false;
     };
   }, [targetDir]);
-  const cycleLimit = (0, import_react42.useCallback)(() => {
-    const curIdx = LIMIT_PRESETS.findIndex((p) => p === limit);
-    const nextIdx = (curIdx + 1) % LIMIT_PRESETS.length;
-    const nextVal = LIMIT_PRESETS[nextIdx];
-    if (nextVal === "custom") {
-      setCustomLimitText(limit ? String(limit) : "24");
-      setEditingModal("limit");
-    } else {
-      setLimit(nextVal);
-    }
-  }, [limit]);
-  const cycleDate = (0, import_react42.useCallback)(() => {
-    const curIdx = DATE_PRESETS.indexOf(dateFilter);
-    const nextIdx = (curIdx + 1) % DATE_PRESETS.length;
-    const nextVal = DATE_PRESETS[nextIdx];
-    if (nextVal === "custom") {
-      setCustomDateText(dateFilter !== "all" ? dateFilter : "2021");
-      setEditingModal("date");
-    } else {
-      setDateFilter(nextVal);
-    }
-  }, [dateFilter]);
-  const toggleMetadata = (0, import_react42.useCallback)(() => {
-    setWriteMetadata((prev) => !prev);
-  }, []);
-  const toggleResume = (0, import_react42.useCallback)(() => {
-    setResume((prev) => !prev);
-  }, []);
-  use_input_default((input, key) => {
-    if (editingModal) {
-      if (key.escape) {
-        setEditingModal(null);
-      }
-      return;
-    }
-    if (input === "l" || input === "L") {
-      cycleLimit();
-      return;
-    }
-    if (input === "d" || input === "D") {
-      cycleDate();
-      return;
-    }
-    if (input === "m" || input === "M") {
-      toggleMetadata();
-      return;
-    }
-    if (input === "r" || input === "R") {
-      toggleResume();
-      return;
-    }
-  }, { isActive: Boolean(process.stdin.isTTY) });
   const handleItemSelect = (selectedChoice) => {
-    if (editingModal) return;
-    const dateRange = resolveDateFilter(dateFilter);
     onSelect({
       choice: selectedChoice,
-      limit,
-      since: dateRange.since,
-      until: dateRange.until,
-      writeMetadata,
-      resume
+      limit: initialLimit,
+      since: typeof initialSince === "string" ? initialSince : void 0,
+      until: typeof initialUntil === "string" ? initialUntil : void 0,
+      writeMetadata: initialWriteMetadata,
+      resume: initialResume
     });
   };
   return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { width: contentWidth, children: [
@@ -40713,90 +40645,23 @@ function PickingView({
         profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select media type. Hotkeys [l], [d], [m], [r] adjust options." }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select what to download from this profile." }),
       hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Panel, { title: "Download", width: 38, children: [
-      !editingModal && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-        SelectInput_default,
-        {
-          indicatorComponent: ChoiceIndicator,
-          itemComponent: ChoiceItem,
-          items: items.map((item, index) => ({
-            key: String(index),
-            label: item.label,
-            value: item.value
-          })),
-          onSelect: (item) => handleItemSelect(item.value),
-          onHighlight: (item) => onHighlight?.(item.value)
-        }
-      ),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-        Box_default,
-        {
-          flexDirection: "column",
-          marginTop: 1,
-          borderStyle: "round",
-          borderColor: editingModal ? theme.primary : theme.gray,
-          borderDimColor: !editingModal,
-          paddingX: 1,
-          children: editingModal === "limit" ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, color: theme.primary, children: "Set post limit (e.g. 24, all):" }),
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-              TextInput,
-              {
-                value: customLimitText,
-                onChange: setCustomLimitText,
-                onSubmit: (val) => {
-                  const parsed = parseLimit(val);
-                  setLimit(parsed);
-                  setEditingModal(null);
-                },
-                width: 24
-              }
-            ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
-          ] }) : editingModal === "date" ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, color: theme.primary, children: "Set date or year (e.g. 2021, 7d):" }),
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
-              TextInput,
-              {
-                value: customDateText,
-                onChange: setCustomDateText,
-                onSubmit: (val) => {
-                  const trimmed = val.trim();
-                  setDateFilter(trimmed ? trimmed : "all");
-                  setEditingModal(null);
-                },
-                width: 24
-              }
-            ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
-          ] }) : /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[l] Posts: ",
-                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: limit ? `${limit}` : "ALL" })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[d] Date: ",
-                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: dateFilter.toUpperCase() })
-              ] })
-            ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { justifyContent: "space-between", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[m] Meta: ",
-                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: writeMetadata ? "ON" : "OFF" })
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[r] Resume: ",
-                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: resume ? "ON" : "OFF" })
-              ] })
-            ] })
-          ] })
-        }
-      )
-    ] })
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: "Download", width: 38, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+      SelectInput_default,
+      {
+        indicatorComponent: ChoiceIndicator,
+        itemComponent: ChoiceItem,
+        items: items.map((item, index) => ({
+          key: String(index),
+          label: item.label,
+          value: item.value
+        })),
+        onSelect: (item) => handleItemSelect(item.value),
+        onHighlight: (item) => onHighlight?.(item.value)
+      }
+    ) })
   ] });
 }
 
@@ -42028,8 +41893,8 @@ async function runBatchQueue(options) {
 var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
 var PLATFORMS = ["instagram", "tiktok", "facebook", "x"];
 var CHOICES2 = ["all", "photos", "videos", "stories", "highlights"];
-var DATE_PRESETS2 = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
-var LIMIT_PRESETS2 = [void 0, 10, 24, 50, 100, "custom"];
+var DATE_PRESETS = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
+var LIMIT_PRESETS = [void 0, 10, 24, 50, 100, "custom"];
 function BatchView({
   onBack,
   outputDir,
@@ -42074,9 +41939,9 @@ function BatchView({
     });
   }, []);
   const cycleLimit = (0, import_react47.useCallback)(() => {
-    const curIdx = LIMIT_PRESETS2.findIndex((p) => p === limit);
-    const nextIdx = (curIdx + 1) % LIMIT_PRESETS2.length;
-    const nextVal = LIMIT_PRESETS2[nextIdx];
+    const curIdx = LIMIT_PRESETS.findIndex((p) => p === limit);
+    const nextIdx = (curIdx + 1) % LIMIT_PRESETS.length;
+    const nextVal = LIMIT_PRESETS[nextIdx];
     if (nextVal === "custom") {
       setCustomLimitText(limit ? String(limit) : "24");
       setFocusedControl("custom-limit");
@@ -42085,9 +41950,9 @@ function BatchView({
     }
   }, [limit]);
   const cycleDate = (0, import_react47.useCallback)(() => {
-    const curIdx = DATE_PRESETS2.indexOf(dateFilter);
-    const nextIdx = (curIdx + 1) % DATE_PRESETS2.length;
-    const nextVal = DATE_PRESETS2[nextIdx];
+    const curIdx = DATE_PRESETS.indexOf(dateFilter);
+    const nextIdx = (curIdx + 1) % DATE_PRESETS.length;
+    const nextVal = DATE_PRESETS[nextIdx];
     if (nextVal === "custom") {
       setCustomDateText(dateFilter !== "all" ? dateFilter : "2024");
       setFocusedControl("custom-date");
