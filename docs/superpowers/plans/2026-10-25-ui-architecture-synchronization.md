@@ -67,17 +67,17 @@
 
 ---
 
-### Task 4: Media Ledger Indexing Status & Full System Verification
+### Task 4: Media Ledger Indexing Status & Full System Verification [COMPLETED]
 
 **Deliverable**:
 - `src/components/views/completion-view.tsx`
-- `src/components/views/completion-view.test.tsx`
+- `src/components/views/completion-view.test.ts`
 - Complete test suite and production build verification
 
 **Steps**:
-1. Update `CompletionView` to display a subtle SQLite Media Ledger indicator: `✓ indexed in media ledger`.
-2. Update and write unit tests for `CompletionView`.
-3. Run `npm test` across all test files (target: 100% passing).
-4. Run `npm run typecheck` (target: 0 diagnostics).
-5. Run `npm run build` (target: clean bundle).
-6. Commit: `feat(ui): display media ledger indexing status in completion view`.
+1. [x] Update `CompletionView` to display a subtle SQLite Media Ledger indicator: `✓ indexed in media ledger`.
+2. [x] Update and write unit tests for `CompletionView` in `completion-view.test.ts`.
+3. [x] Run `npm test` across all test files (100% passing: 251/251).
+4. [x] Run `npm run typecheck` (0 diagnostics).
+5. [x] Run `npm run build` (clean bundle: 298.90 KB).
+6. [x] Commit: `feat(ui): display media ledger indexing status in completion view`.
