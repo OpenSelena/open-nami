@@ -36,7 +36,6 @@ const PLATFORMS: SupportedPlatform[] = ['instagram', 'tiktok', 'facebook', 'x']
 const CHOICES: MediaTarget[] = ['all', 'photos', 'videos', 'stories', 'highlights']
 const DATE_PRESETS = ['all', '24h', '7d', '30d', '2024', '2023', '2022', '2021', 'custom']
 const LIMIT_PRESETS: Array<number | 'custom' | undefined> = [undefined, 10, 24, 50, 100, 'custom']
-const OPTION_CONTROLS: OptionControl[] = ['platform', 'choice', 'limit', 'date', 'meta', 'resume', 'start']
 
 export function BatchView({
   onBack,
@@ -219,7 +218,7 @@ export function BatchView({
   }, [inputField, filePath, rawText, choice, defaultPlatform, outputDir, dateFilter, limit, resume, writeMetadata])
 
   useInput((input, key) => {
-    // 1. Allow Ctrl+C to exit globally
+    // 1. Never intercept Ctrl+C so global exit works
     if (key.ctrl && (input === 'c' || input === 'C')) {
       return
     }
@@ -292,43 +291,68 @@ export function BatchView({
         return
       }
 
-      if (OPTION_CONTROLS.includes(focusedControl as OptionControl)) {
-        if (key.upArrow) {
-          setFocusedControl('input')
-          return
-        }
-
-        if (key.rightArrow || (key.tab && !key.shift)) {
-          const idx = OPTION_CONTROLS.indexOf(focusedControl as OptionControl)
-          setFocusedControl(OPTION_CONTROLS[(idx + 1) % OPTION_CONTROLS.length]!)
-          return
-        }
-        if (key.leftArrow || (key.tab && key.shift)) {
-          const idx = OPTION_CONTROLS.indexOf(focusedControl as OptionControl)
-          setFocusedControl(OPTION_CONTROLS[(idx - 1 + OPTION_CONTROLS.length) % OPTION_CONTROLS.length]!)
-          return
-        }
-
-        if (input === ' ' || key.return) {
-          switch (focusedControl) {
-            case 'platform': cyclePlatform(); break
-            case 'choice': cycleChoice(); break
-            case 'limit': cycleLimit(); break
-            case 'date': cycleDate(); break
-            case 'meta': toggleMetadata(); break
-            case 'resume': toggleResume(); break
-            case 'start': startQueue(); break
-          }
-          return
-        }
-
-        if (input === 'p' || input === 'P') { cyclePlatform(); return }
-        if (input === 'c' || input === 'C') { cycleChoice(); return }
-        if (input === 'l' || input === 'L') { cycleLimit(); return }
-        if (input === 'd' || input === 'D') { cycleDate(); return }
-        if (input === 'm' || input === 'M') { toggleMetadata(); return }
-        if (input === 'r' || input === 'R') { toggleResume(); return }
+      // Option navigation & activation
+      if (focusedControl === 'platform') {
+        if (key.rightArrow) { setFocusedControl('choice'); return }
+        if (key.downArrow) { setFocusedControl('limit'); return }
+        if (key.upArrow) { setFocusedControl('input'); return }
+        if (key.tab && !key.shift) { setFocusedControl('choice'); return }
+        if (key.tab && key.shift) { setFocusedControl('input'); return }
+      } else if (focusedControl === 'choice') {
+        if (key.leftArrow) { setFocusedControl('platform'); return }
+        if (key.downArrow) { setFocusedControl('date'); return }
+        if (key.upArrow) { setFocusedControl('input'); return }
+        if (key.tab && !key.shift) { setFocusedControl('limit'); return }
+        if (key.tab && key.shift) { setFocusedControl('platform'); return }
+      } else if (focusedControl === 'limit') {
+        if (key.upArrow) { setFocusedControl('platform'); return }
+        if (key.rightArrow) { setFocusedControl('date'); return }
+        if (key.downArrow) { setFocusedControl('meta'); return }
+        if (key.tab && !key.shift) { setFocusedControl('date'); return }
+        if (key.tab && key.shift) { setFocusedControl('choice'); return }
+      } else if (focusedControl === 'date') {
+        if (key.upArrow) { setFocusedControl('choice'); return }
+        if (key.leftArrow) { setFocusedControl('limit'); return }
+        if (key.downArrow) { setFocusedControl('resume'); return }
+        if (key.tab && !key.shift) { setFocusedControl('meta'); return }
+        if (key.tab && key.shift) { setFocusedControl('limit'); return }
+      } else if (focusedControl === 'meta') {
+        if (key.upArrow) { setFocusedControl('limit'); return }
+        if (key.rightArrow) { setFocusedControl('resume'); return }
+        if (key.downArrow) { setFocusedControl('start'); return }
+        if (key.tab && !key.shift) { setFocusedControl('resume'); return }
+        if (key.tab && key.shift) { setFocusedControl('date'); return }
+      } else if (focusedControl === 'resume') {
+        if (key.upArrow) { setFocusedControl('date'); return }
+        if (key.leftArrow) { setFocusedControl('meta'); return }
+        if (key.downArrow) { setFocusedControl('start'); return }
+        if (key.tab && !key.shift) { setFocusedControl('start'); return }
+        if (key.tab && key.shift) { setFocusedControl('meta'); return }
+      } else if (focusedControl === 'start') {
+        if (key.upArrow) { setFocusedControl('meta'); return }
+        if (key.downArrow || (key.tab && !key.shift)) { setFocusedControl('tabs'); return }
+        if (key.tab && key.shift) { setFocusedControl('resume'); return }
       }
+
+      if (input === ' ' || key.return) {
+        switch (focusedControl) {
+          case 'platform': cyclePlatform(); break
+          case 'choice': cycleChoice(); break
+          case 'limit': cycleLimit(); break
+          case 'date': cycleDate(); break
+          case 'meta': toggleMetadata(); break
+          case 'resume': toggleResume(); break
+          case 'start': startQueue(); break
+        }
+        return
+      }
+
+      if (input === 'p' || input === 'P') { cyclePlatform(); return }
+      if (input === 'c' || input === 'C') { cycleChoice(); return }
+      if (input === 'l' || input === 'L') { cycleLimit(); return }
+      if (input === 'd' || input === 'D') { cycleDate(); return }
+      if (input === 'm' || input === 'M') { toggleMetadata(); return }
+      if (input === 'r' || input === 'R') { toggleResume(); return }
     }
   }, {isActive: Boolean(process.stdin.isTTY)})
 
@@ -342,6 +366,7 @@ export function BatchView({
       targets.push({
         match: 'Links / Handles',
         padX: 2,
+        padY: 0,
         action: () => {
           setInputField('text')
           setFocusedControl('input')
@@ -350,26 +375,25 @@ export function BatchView({
       targets.push({
         match: 'File (.txt)',
         padX: 2,
+        padY: 0,
         action: () => {
           setInputField('file')
           setFocusedControl('input')
         },
       })
 
+      // Download button on FramedInput
       targets.push({
-        match: 'Links or @handles',
+        match: 'download',
         padX: 2,
-        action: () => setFocusedControl('input'),
-      })
-      targets.push({
-        match: 'Batch file (.txt)',
-        padX: 2,
-        action: () => setFocusedControl('input'),
+        padY: 1,
+        action: startQueue,
       })
 
       targets.push({
         match: 'Platform:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('platform')
           cyclePlatform()
@@ -378,6 +402,7 @@ export function BatchView({
       targets.push({
         match: 'Media:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('choice')
           cycleChoice()
@@ -386,6 +411,7 @@ export function BatchView({
       targets.push({
         match: 'Posts:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('limit')
           cycleLimit()
@@ -394,6 +420,7 @@ export function BatchView({
       targets.push({
         match: 'Date:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('date')
           cycleDate()
@@ -402,6 +429,7 @@ export function BatchView({
       targets.push({
         match: 'Meta:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('meta')
           toggleMetadata()
@@ -410,14 +438,16 @@ export function BatchView({
       targets.push({
         match: 'Resume:',
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl('resume')
           toggleResume()
         },
       })
       targets.push({
-        match: 'Start Queue',
+        match: 'Start Batch Queue',
         padX: 3,
+        padY: 0,
         action: () => {
           setFocusedControl('start')
           startQueue()
@@ -509,6 +539,11 @@ export function BatchView({
     outputDir,
   ])
 
+  const panelWidth = Math.max(64, boxWidth)
+  const inputFrameWidth = panelWidth - 18
+  const innerContentWidth = panelWidth - 6
+  const colWidth = Math.floor((innerContentWidth - 4) / 2)
+
   const currentItem = queueItems[currentIndex]
   const completedCount = queueItems.filter(i => i.status === 'success' || i.status === 'failed').length
   const totalCount = queueItems.length > 0 ? queueItems.length : 1
@@ -517,52 +552,65 @@ export function BatchView({
   return (
     <Box flexDirection="column" alignItems="center">
       {phase === 'input' && (
-        <Panel title="Batch Queue" width={Math.max(60, boxWidth)}>
-          <Box flexDirection="column" paddingY={1}>
+        <Panel title="Batch Queue" width={panelWidth}>
+          <Box flexDirection="column" alignItems="center" paddingY={1}>
+            {/* Mode selection buttons */}
             <Box marginBottom={1} justifyContent="center">
-              <Text
-                bold
-                color={inputField === 'text' ? theme.primary : theme.gray}
-                inverse={focusedControl === 'tabs' && inputField === 'text'}
-              >
-                {inputField === 'text' ? '● Links / Handles' : '○ Links / Handles'}
-              </Text>
-              <Text color={theme.gray} dimColor={theme.dimSecondary}>{'   ·   '}</Text>
-              <Text
-                bold
-                color={inputField === 'file' ? theme.primary : theme.gray}
-                inverse={focusedControl === 'tabs' && inputField === 'file'}
-              >
-                {inputField === 'file' ? '● File (.txt)' : '○ File (.txt)'}
-              </Text>
+              <Box marginRight={2}>
+                <Text
+                  bold
+                  color={inputField === 'text' ? theme.primary : theme.gray}
+                  inverse={inputField === 'text'}
+                >
+                  {'  Links / Handles  '}
+                </Text>
+              </Box>
+              <Box>
+                <Text
+                  bold
+                  color={inputField === 'file' ? theme.primary : theme.gray}
+                  inverse={inputField === 'file'}
+                >
+                  {'  File (.txt)  '}
+                </Text>
+              </Box>
             </Box>
 
+            {/* Input field with right-side download button */}
             {inputField === 'text' ? (
-              <FramedInput title="Links or @handles" width={Math.max(56, boxWidth - 4)}>
+              <FramedInput
+                title="Links or @handles"
+                width={inputFrameWidth}
+                button="download"
+              >
                 <TextInput
                   value={rawText}
                   onChange={setRawText}
                   onSubmit={startQueue}
                   placeholder="@user1, @user2, tiktok.com/@user3…"
-                  width={Math.max(50, boxWidth - 10)}
+                  width={inputFrameWidth - 4}
                   focus={focusedControl === 'input'}
-                  onArrowDown={() => setFocusedControl('start')}
+                  onArrowDown={() => setFocusedControl('platform')}
                   onArrowUp={() => setFocusedControl('tabs')}
-                  onTab={() => setFocusedControl('start')}
+                  onTab={() => setFocusedControl('platform')}
                 />
               </FramedInput>
             ) : (
-              <FramedInput title="Batch file (.txt)" width={Math.max(56, boxWidth - 4)}>
+              <FramedInput
+                title="Batch file (.txt)"
+                width={inputFrameWidth}
+                button="download"
+              >
                 <TextInput
                   value={filePath}
                   onChange={setFilePath}
                   onSubmit={startQueue}
                   placeholder="e.g. creators.txt or C:\path\creators.txt"
-                  width={Math.max(50, boxWidth - 10)}
+                  width={inputFrameWidth - 4}
                   focus={focusedControl === 'input'}
-                  onArrowDown={() => setFocusedControl('start')}
+                  onArrowDown={() => setFocusedControl('platform')}
                   onArrowUp={() => setFocusedControl('tabs')}
-                  onTab={() => setFocusedControl('start')}
+                  onTab={() => setFocusedControl('platform')}
                 />
               </FramedInput>
             )}
@@ -573,12 +621,14 @@ export function BatchView({
               </Box>
             ) : null}
 
+            {/* 6 Options in clean 2-column grid */}
             <Box
               flexDirection="column"
+              width={innerContentWidth}
               marginTop={1}
               borderStyle="round"
-              borderColor={focusedControl !== 'input' && focusedControl !== 'tabs' ? theme.primary : theme.gray}
-              borderDimColor={focusedControl === 'input' || focusedControl === 'tabs'}
+              borderColor={focusedControl !== 'input' && focusedControl !== 'tabs' && focusedControl !== 'start' ? theme.primary : theme.gray}
+              borderDimColor={focusedControl === 'input' || focusedControl === 'tabs' || focusedControl === 'start'}
               paddingX={1}
             >
               {focusedControl === 'custom-limit' ? (
@@ -591,7 +641,7 @@ export function BatchView({
                       onSubmit={(val) => {
                         const parsed = parseLimit(val)
                         setLimit(parsed)
-                        setFocusedControl('start')
+                        setFocusedControl('limit')
                       }}
                       width={24}
                     />
@@ -608,7 +658,7 @@ export function BatchView({
                       onSubmit={(val) => {
                         const trimmed = val.trim()
                         setDateFilter(trimmed ? trimmed : 'all')
-                        setFocusedControl('start')
+                        setFocusedControl('date')
                       }}
                       width={24}
                     />
@@ -617,88 +667,99 @@ export function BatchView({
                 </Box>
               ) : (
                 <>
-                  <Box justifyContent="space-between">
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [p] Platform:{' '}
+                  {/* Row 1: Platform & Media */}
+                  <Box justifyContent="space-between" width="100%">
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[p] Platform: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'platform'}
                       >
-                        {defaultPlatform.toUpperCase()}
+                        {` ${defaultPlatform.toUpperCase()} `}
                       </Text>
-                    </Text>
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [c] Media:{' '}
+                    </Box>
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[c] Media: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'choice'}
                       >
-                        {choice === 'all' ? 'EVERYTHING' : choice.toUpperCase()}
+                        {` ${choice === 'all' ? 'EVERYTHING' : choice.toUpperCase()} `}
                       </Text>
-                    </Text>
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [l] Posts:{' '}
+                    </Box>
+                  </Box>
+
+                  {/* Row 2: Posts limit & Date filter */}
+                  <Box justifyContent="space-between" width="100%" marginTop={1}>
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[l] Posts: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'limit'}
                       >
-                        {limit ? `${limit}` : 'ALL'}
+                        {` ${limit ? String(limit) : 'ALL'} `}
                       </Text>
-                    </Text>
-                  </Box>
-                  <Box justifyContent="space-between" marginTop={1}>
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [d] Date:{' '}
+                    </Box>
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[d] Date: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'date'}
                       >
-                        {dateFilter.toUpperCase()}
+                        {` ${dateFilter.toUpperCase()} `}
                       </Text>
-                    </Text>
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [m] Meta:{' '}
+                    </Box>
+                  </Box>
+
+                  {/* Row 3: Metadata & Resume */}
+                  <Box justifyContent="space-between" width="100%" marginTop={1}>
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[m] Meta: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'meta'}
                       >
-                        {writeMetadata ? 'ON' : 'OFF'}
+                        {` ${writeMetadata ? 'ON' : 'OFF'} `}
                       </Text>
-                    </Text>
-                    <Text color={theme.gray} dimColor={theme.dimSecondary}>
-                      [r] Resume:{' '}
+                    </Box>
+                    <Box width={colWidth}>
+                      <Text color={theme.gray} dimColor={theme.dimSecondary}>[r] Resume: </Text>
                       <Text
-                        color={theme.primary}
                         bold
+                        color={theme.primary}
                         inverse={focusedControl === 'resume'}
                       >
-                        {resume ? 'ON' : 'OFF'}
+                        {` ${resume ? 'ON' : 'OFF'} `}
                       </Text>
-                    </Text>
-                    <Text
-                      color={theme.primary}
-                      bold
-                      inverse={focusedControl === 'start'}
-                    >
-                      [↵] Start Queue
-                    </Text>
+                    </Box>
                   </Box>
                 </>
               )}
             </Box>
 
+            {/* Bottom action button */}
+            <Box justifyContent="center" marginTop={1}>
+              <Text
+                bold
+                color={theme.primary}
+                inverse={focusedControl === 'start'}
+              >
+                {'  ↵ Start Batch Queue  '}
+              </Text>
+            </Box>
+
             <Box marginTop={1} justifyContent="center">
               <Text color={theme.gray} dimColor={theme.dimSecondary}>
                 {focusedControl === 'input'
-                  ? 'Type handles or URLs · ↵ to start · ↓ to customize options'
+                  ? 'Type handles or URLs · ↵ or click download to start'
                   : focusedControl === 'tabs'
                     ? 'Space to switch mode · ↓ to edit input'
-                    : '←/→/Tab choose option · Space/Enter toggle · ↵ start queue · ↑ edit input'}
+                    : '←/→/Tab select · Space/Enter toggle · ↵ start queue · ↑ edit input'}
               </Text>
             </Box>
           </Box>
@@ -706,7 +767,7 @@ export function BatchView({
       )}
 
       {phase === 'running' && (
-        <Panel title="Batch Queue Running" width={Math.max(60, boxWidth)}>
+        <Panel title="Batch Queue Running" width={panelWidth}>
           <Box flexDirection="column" paddingY={1}>
             <Box justifyContent="space-between" marginBottom={1}>
               <Text color={theme.primary} bold>
@@ -717,7 +778,7 @@ export function BatchView({
               </Text>
             </Box>
 
-            <ProgressBar percent={percent} width={54} />
+            <ProgressBar percent={percent} width={panelWidth - 10} />
 
             <Gap />
             {currentItem ? (
@@ -767,7 +828,7 @@ export function BatchView({
       )}
 
       {phase === 'done' && result && (
-        <Panel title="Batch Queue Completed" width={Math.max(60, boxWidth)}>
+        <Panel title="Batch Queue Completed" width={panelWidth}>
           <Box flexDirection="column" paddingY={1}>
             <Text bold color={theme.primary}>
               ✓ Successfully processed {result.total} profile(s)

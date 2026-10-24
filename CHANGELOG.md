@@ -4,6 +4,24 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.6] - 2026-10-24
+
+### Fixed & Enhanced
+- **Batch Queue Interactive Layout Overhaul**:
+  - Redesigned options grid into a balanced 2-column layout (3 rows: Platform/Media, Posts/Date, Meta/Resume) preventing text overlapping or line wrapping on standard terminal widths.
+  - Added signature `download` action button directly attached to the framed input field.
+  - Added dedicated centered `[ ↵ Start Batch Queue ]` action button at the bottom of the options container.
+  - Added styled interactive mode toggles: `[ Links / Handles ]` and `[ File (.txt) ]`.
+  - Added comprehensive mouse click support across all options, inputs, mode switchers, and action triggers.
+
+## [1.2.5] - 2026-10-24
+
+### Fixed & Enhanced
+- **Batch Queue Interactive Controls & Bare Handle Resolution**:
+  - Added default platform context for bare `@username` inputs in batch mode.
+  - Isolated per-account output directories under `platform/username`.
+  - Added keyboard 2D arrow navigation across options and hotkey triggers.
+
 ## [1.2.4] - 2026-10-24
 
 ### Fixed & Enhanced

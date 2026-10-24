@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.5",
+      version: "1.2.6",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -41948,7 +41948,6 @@ var PLATFORMS = ["instagram", "tiktok", "facebook", "x"];
 var CHOICES = ["all", "photos", "videos", "stories", "highlights"];
 var DATE_PRESETS2 = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
 var LIMIT_PRESETS2 = [void 0, 10, 24, 50, 100, "custom"];
-var OPTION_CONTROLS = ["platform", "choice", "limit", "date", "meta", "resume", "start"];
 function BatchView({
   onBack,
   outputDir,
@@ -42169,71 +42168,195 @@ function BatchView({
         }
         return;
       }
-      if (OPTION_CONTROLS.includes(focusedControl)) {
+      if (focusedControl === "platform") {
+        if (key.rightArrow) {
+          setFocusedControl("choice");
+          return;
+        }
+        if (key.downArrow) {
+          setFocusedControl("limit");
+          return;
+        }
         if (key.upArrow) {
           setFocusedControl("input");
           return;
         }
-        if (key.rightArrow || key.tab && !key.shift) {
-          const idx = OPTION_CONTROLS.indexOf(focusedControl);
-          setFocusedControl(OPTION_CONTROLS[(idx + 1) % OPTION_CONTROLS.length]);
+        if (key.tab && !key.shift) {
+          setFocusedControl("choice");
           return;
         }
-        if (key.leftArrow || key.tab && key.shift) {
-          const idx = OPTION_CONTROLS.indexOf(focusedControl);
-          setFocusedControl(OPTION_CONTROLS[(idx - 1 + OPTION_CONTROLS.length) % OPTION_CONTROLS.length]);
+        if (key.tab && key.shift) {
+          setFocusedControl("input");
           return;
         }
-        if (input === " " || key.return) {
-          switch (focusedControl) {
-            case "platform":
-              cyclePlatform();
-              break;
-            case "choice":
-              cycleChoice();
-              break;
-            case "limit":
-              cycleLimit();
-              break;
-            case "date":
-              cycleDate();
-              break;
-            case "meta":
-              toggleMetadata();
-              break;
-            case "resume":
-              toggleResume();
-              break;
-            case "start":
-              startQueue();
-              break;
-          }
+      } else if (focusedControl === "choice") {
+        if (key.leftArrow) {
+          setFocusedControl("platform");
           return;
         }
-        if (input === "p" || input === "P") {
-          cyclePlatform();
+        if (key.downArrow) {
+          setFocusedControl("date");
           return;
         }
-        if (input === "c" || input === "C") {
-          cycleChoice();
+        if (key.upArrow) {
+          setFocusedControl("input");
           return;
         }
-        if (input === "l" || input === "L") {
-          cycleLimit();
+        if (key.tab && !key.shift) {
+          setFocusedControl("limit");
           return;
         }
-        if (input === "d" || input === "D") {
-          cycleDate();
+        if (key.tab && key.shift) {
+          setFocusedControl("platform");
           return;
         }
-        if (input === "m" || input === "M") {
-          toggleMetadata();
+      } else if (focusedControl === "limit") {
+        if (key.upArrow) {
+          setFocusedControl("platform");
           return;
         }
-        if (input === "r" || input === "R") {
-          toggleResume();
+        if (key.rightArrow) {
+          setFocusedControl("date");
           return;
         }
+        if (key.downArrow) {
+          setFocusedControl("meta");
+          return;
+        }
+        if (key.tab && !key.shift) {
+          setFocusedControl("date");
+          return;
+        }
+        if (key.tab && key.shift) {
+          setFocusedControl("choice");
+          return;
+        }
+      } else if (focusedControl === "date") {
+        if (key.upArrow) {
+          setFocusedControl("choice");
+          return;
+        }
+        if (key.leftArrow) {
+          setFocusedControl("limit");
+          return;
+        }
+        if (key.downArrow) {
+          setFocusedControl("resume");
+          return;
+        }
+        if (key.tab && !key.shift) {
+          setFocusedControl("meta");
+          return;
+        }
+        if (key.tab && key.shift) {
+          setFocusedControl("limit");
+          return;
+        }
+      } else if (focusedControl === "meta") {
+        if (key.upArrow) {
+          setFocusedControl("limit");
+          return;
+        }
+        if (key.rightArrow) {
+          setFocusedControl("resume");
+          return;
+        }
+        if (key.downArrow) {
+          setFocusedControl("start");
+          return;
+        }
+        if (key.tab && !key.shift) {
+          setFocusedControl("resume");
+          return;
+        }
+        if (key.tab && key.shift) {
+          setFocusedControl("date");
+          return;
+        }
+      } else if (focusedControl === "resume") {
+        if (key.upArrow) {
+          setFocusedControl("date");
+          return;
+        }
+        if (key.leftArrow) {
+          setFocusedControl("meta");
+          return;
+        }
+        if (key.downArrow) {
+          setFocusedControl("start");
+          return;
+        }
+        if (key.tab && !key.shift) {
+          setFocusedControl("start");
+          return;
+        }
+        if (key.tab && key.shift) {
+          setFocusedControl("meta");
+          return;
+        }
+      } else if (focusedControl === "start") {
+        if (key.upArrow) {
+          setFocusedControl("meta");
+          return;
+        }
+        if (key.downArrow || key.tab && !key.shift) {
+          setFocusedControl("tabs");
+          return;
+        }
+        if (key.tab && key.shift) {
+          setFocusedControl("resume");
+          return;
+        }
+      }
+      if (input === " " || key.return) {
+        switch (focusedControl) {
+          case "platform":
+            cyclePlatform();
+            break;
+          case "choice":
+            cycleChoice();
+            break;
+          case "limit":
+            cycleLimit();
+            break;
+          case "date":
+            cycleDate();
+            break;
+          case "meta":
+            toggleMetadata();
+            break;
+          case "resume":
+            toggleResume();
+            break;
+          case "start":
+            startQueue();
+            break;
+        }
+        return;
+      }
+      if (input === "p" || input === "P") {
+        cyclePlatform();
+        return;
+      }
+      if (input === "c" || input === "C") {
+        cycleChoice();
+        return;
+      }
+      if (input === "l" || input === "L") {
+        cycleLimit();
+        return;
+      }
+      if (input === "d" || input === "D") {
+        cycleDate();
+        return;
+      }
+      if (input === "m" || input === "M") {
+        toggleMetadata();
+        return;
+      }
+      if (input === "r" || input === "R") {
+        toggleResume();
+        return;
       }
     }
   }, { isActive: Boolean(process.stdin.isTTY) });
@@ -42244,6 +42367,7 @@ function BatchView({
       targets.push({
         match: "Links / Handles",
         padX: 2,
+        padY: 0,
         action: () => {
           setInputField("text");
           setFocusedControl("input");
@@ -42252,24 +42376,22 @@ function BatchView({
       targets.push({
         match: "File (.txt)",
         padX: 2,
+        padY: 0,
         action: () => {
           setInputField("file");
           setFocusedControl("input");
         }
       });
       targets.push({
-        match: "Links or @handles",
+        match: "download",
         padX: 2,
-        action: () => setFocusedControl("input")
-      });
-      targets.push({
-        match: "Batch file (.txt)",
-        padX: 2,
-        action: () => setFocusedControl("input")
+        padY: 1,
+        action: startQueue
       });
       targets.push({
         match: "Platform:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("platform");
           cyclePlatform();
@@ -42278,6 +42400,7 @@ function BatchView({
       targets.push({
         match: "Media:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("choice");
           cycleChoice();
@@ -42286,6 +42409,7 @@ function BatchView({
       targets.push({
         match: "Posts:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("limit");
           cycleLimit();
@@ -42294,6 +42418,7 @@ function BatchView({
       targets.push({
         match: "Date:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("date");
           cycleDate();
@@ -42302,6 +42427,7 @@ function BatchView({
       targets.push({
         match: "Meta:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("meta");
           toggleMetadata();
@@ -42310,14 +42436,16 @@ function BatchView({
       targets.push({
         match: "Resume:",
         padX: 2,
+        padY: 0,
         action: () => {
           setFocusedControl("resume");
           toggleResume();
         }
       });
       targets.push({
-        match: "Start Queue",
+        match: "Start Batch Queue",
         padX: 3,
+        padY: 0,
         action: () => {
           setFocusedControl("start");
           startQueue();
@@ -42403,60 +42531,79 @@ function BatchView({
     startQueue,
     outputDir
   ]);
+  const panelWidth = Math.max(64, boxWidth);
+  const inputFrameWidth = panelWidth - 18;
+  const innerContentWidth = panelWidth - 6;
+  const colWidth = Math.floor((innerContentWidth - 4) / 2);
   const currentItem = queueItems[currentIndex];
   const completedCount = queueItems.filter((i) => i.status === "success" || i.status === "failed").length;
   const totalCount = queueItems.length > 0 ? queueItems.length : 1;
   const percent = Math.min(100, Math.floor(completedCount / totalCount * 100));
   return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    phase === "input" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue", width: panelWidth, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { marginBottom: 1, justifyContent: "center", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginRight: 2, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
           Text,
           {
             bold: true,
             color: inputField === "text" ? theme.primary : theme.gray,
-            inverse: focusedControl === "tabs" && inputField === "text",
-            children: inputField === "text" ? "\u25CF Links / Handles" : "\u25CB Links / Handles"
+            inverse: inputField === "text",
+            children: "  Links / Handles  "
           }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "   \xB7   " }),
-        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        ) }),
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
           Text,
           {
             bold: true,
             color: inputField === "file" ? theme.primary : theme.gray,
-            inverse: focusedControl === "tabs" && inputField === "file",
-            children: inputField === "file" ? "\u25CF File (.txt)" : "\u25CB File (.txt)"
+            inverse: inputField === "file",
+            children: "  File (.txt)  "
           }
-        )
+        ) })
       ] }),
-      inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Links or @handles", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
-        TextInput,
+      inputField === "text" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        FramedInput,
         {
-          value: rawText,
-          onChange: setRawText,
-          onSubmit: startQueue,
-          placeholder: "@user1, @user2, tiktok.com/@user3\u2026",
-          width: Math.max(50, boxWidth - 10),
-          focus: focusedControl === "input",
-          onArrowDown: () => setFocusedControl("start"),
-          onArrowUp: () => setFocusedControl("tabs"),
-          onTab: () => setFocusedControl("start")
+          title: "Links or @handles",
+          width: inputFrameWidth,
+          button: "download",
+          children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+            TextInput,
+            {
+              value: rawText,
+              onChange: setRawText,
+              onSubmit: startQueue,
+              placeholder: "@user1, @user2, tiktok.com/@user3\u2026",
+              width: inputFrameWidth - 4,
+              focus: focusedControl === "input",
+              onArrowDown: () => setFocusedControl("platform"),
+              onArrowUp: () => setFocusedControl("tabs"),
+              onTab: () => setFocusedControl("platform")
+            }
+          )
         }
-      ) }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(FramedInput, { title: "Batch file (.txt)", width: Math.max(56, boxWidth - 4), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
-        TextInput,
+      ) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        FramedInput,
         {
-          value: filePath,
-          onChange: setFilePath,
-          onSubmit: startQueue,
-          placeholder: "e.g. creators.txt or C:\\path\\creators.txt",
-          width: Math.max(50, boxWidth - 10),
-          focus: focusedControl === "input",
-          onArrowDown: () => setFocusedControl("start"),
-          onArrowUp: () => setFocusedControl("tabs"),
-          onTab: () => setFocusedControl("start")
+          title: "Batch file (.txt)",
+          width: inputFrameWidth,
+          button: "download",
+          children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+            TextInput,
+            {
+              value: filePath,
+              onChange: setFilePath,
+              onSubmit: startQueue,
+              placeholder: "e.g. creators.txt or C:\\path\\creators.txt",
+              width: inputFrameWidth - 4,
+              focus: focusedControl === "input",
+              onArrowDown: () => setFocusedControl("platform"),
+              onArrowUp: () => setFocusedControl("tabs"),
+              onTab: () => setFocusedControl("platform")
+            }
+          )
         }
-      ) }),
+      ),
       errorMessage ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: "red", children: [
         "\u2717 ",
         errorMessage
@@ -42465,10 +42612,11 @@ function BatchView({
         Box_default,
         {
           flexDirection: "column",
+          width: innerContentWidth,
           marginTop: 1,
           borderStyle: "round",
-          borderColor: focusedControl !== "input" && focusedControl !== "tabs" ? theme.primary : theme.gray,
-          borderDimColor: focusedControl === "input" || focusedControl === "tabs",
+          borderColor: focusedControl !== "input" && focusedControl !== "tabs" && focusedControl !== "start" ? theme.primary : theme.gray,
+          borderDimColor: focusedControl === "input" || focusedControl === "tabs" || focusedControl === "start",
           paddingX: 1,
           children: focusedControl === "custom-limit" ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", children: [
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { bold: true, color: theme.primary, children: "Set post limit (e.g. 24, all):" }),
@@ -42480,7 +42628,7 @@ function BatchView({
                 onSubmit: (val) => {
                   const parsed = parseLimit(val);
                   setLimit(parsed);
-                  setFocusedControl("start");
+                  setFocusedControl("limit");
                 },
                 width: 24
               }
@@ -42496,110 +42644,106 @@ function BatchView({
                 onSubmit: (val) => {
                   const trimmed = val.trim();
                   setDateFilter(trimmed ? trimmed : "all");
-                  setFocusedControl("start");
+                  setFocusedControl("date");
                 },
                 width: 24
               }
             ) }),
             /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "\u21B5 confirm \xB7 esc cancel" })
           ] }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(import_jsx_runtime17.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[p] Platform:",
-                " ",
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", width: "100%", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[p] Platform: " }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   Text,
                   {
-                    color: theme.primary,
                     bold: true,
+                    color: theme.primary,
                     inverse: focusedControl === "platform",
-                    children: defaultPlatform.toUpperCase()
+                    children: ` ${defaultPlatform.toUpperCase()} `
                   }
                 )
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[c] Media:",
-                " ",
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[c] Media: " }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   Text,
                   {
-                    color: theme.primary,
                     bold: true,
+                    color: theme.primary,
                     inverse: focusedControl === "choice",
-                    children: choice === "all" ? "EVERYTHING" : choice.toUpperCase()
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[l] Posts:",
-                " ",
-                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
-                  Text,
-                  {
-                    color: theme.primary,
-                    bold: true,
-                    inverse: focusedControl === "limit",
-                    children: limit ? `${limit}` : "ALL"
+                    children: ` ${choice === "all" ? "EVERYTHING" : choice.toUpperCase()} `
                   }
                 )
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginTop: 1, children: [
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[d] Date:",
-                " ",
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", width: "100%", marginTop: 1, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[l] Posts: " }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   Text,
                   {
-                    color: theme.primary,
                     bold: true,
+                    color: theme.primary,
+                    inverse: focusedControl === "limit",
+                    children: ` ${limit ? String(limit) : "ALL"} `
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[d] Date: " }),
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+                  Text,
+                  {
+                    bold: true,
+                    color: theme.primary,
                     inverse: focusedControl === "date",
-                    children: dateFilter.toUpperCase()
+                    children: ` ${dateFilter.toUpperCase()} `
                   }
                 )
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[m] Meta:",
-                " ",
+              ] })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", width: "100%", marginTop: 1, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[m] Meta: " }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   Text,
                   {
-                    color: theme.primary,
                     bold: true,
+                    color: theme.primary,
                     inverse: focusedControl === "meta",
-                    children: writeMetadata ? "ON" : "OFF"
+                    children: ` ${writeMetadata ? "ON" : "OFF"} `
                   }
                 )
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-                "[r] Resume:",
-                " ",
+              /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { width: colWidth, children: [
+                /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[r] Resume: " }),
                 /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
                   Text,
                   {
-                    color: theme.primary,
                     bold: true,
+                    color: theme.primary,
                     inverse: focusedControl === "resume",
-                    children: resume ? "ON" : "OFF"
+                    children: ` ${resume ? "ON" : "OFF"} `
                   }
                 )
-              ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
-                Text,
-                {
-                  color: theme.primary,
-                  bold: true,
-                  inverse: focusedControl === "start",
-                  children: "[\u21B5] Start Queue"
-                }
-              )
+              ] })
             ] })
           ] })
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: focusedControl === "input" ? "Type handles or URLs \xB7 \u21B5 to start \xB7 \u2193 to customize options" : focusedControl === "tabs" ? "Space to switch mode \xB7 \u2193 to edit input" : "\u2190/\u2192/Tab choose option \xB7 Space/Enter toggle \xB7 \u21B5 start queue \xB7 \u2191 edit input" }) })
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { justifyContent: "center", marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
+        Text,
+        {
+          bold: true,
+          color: theme.primary,
+          inverse: focusedControl === "start",
+          children: "  \u21B5 Start Batch Queue  "
+        }
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Box_default, { marginTop: 1, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: focusedControl === "input" ? "Type handles or URLs \xB7 \u21B5 or click download to start" : focusedControl === "tabs" ? "Space to switch mode \xB7 \u2193 to edit input" : "\u2190/\u2192/Tab select \xB7 Space/Enter toggle \xB7 \u21B5 start queue \xB7 \u2191 edit input" }) })
     ] }) }),
-    phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    phase === "running" && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Running", width: panelWidth, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { justifyContent: "space-between", marginBottom: 1, children: [
         /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { color: theme.primary, bold: true, children: [
           "Account ",
@@ -42612,7 +42756,7 @@ function BatchView({
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: isCooldown ? "\u23F3 Cooldown active" : "\u25B6 Downloading" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ProgressBar, { percent, width: 54 }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(ProgressBar, { percent, width: panelWidth - 10 }),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
       currentItem ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", borderStyle: "round", borderColor: theme.primary, paddingX: 1, paddingY: 1, children: [
         /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { children: [
@@ -42634,7 +42778,7 @@ function BatchView({
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Gap2, {}),
       /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "[esc] Stop queue and return" })
     ] }) }),
-    phase === "done" && result && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Completed", width: Math.max(60, boxWidth), children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+    phase === "done" && result && /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(Panel, { title: "Batch Queue Completed", width: panelWidth, children: /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(Text, { bold: true, color: theme.primary, children: [
         "\u2713 Successfully processed ",
         result.total,
