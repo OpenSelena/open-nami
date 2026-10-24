@@ -500,6 +500,17 @@ function InnerApp({
           match: item.label,
           action: () => handleModeSelect(item.value, phase.profile),
         })
+        const tag = `[${item.value === 'all' ? 'EVERYTHING' : item.value.toUpperCase()}]`
+        targets.push({
+          match: tag,
+          action: () => handleModeSelect(item.value, phase.profile),
+        })
+        if (item.description) {
+          targets.push({
+            match: item.description,
+            action: () => handleModeSelect(item.value, phase.profile),
+          })
+        }
       }
     }
 

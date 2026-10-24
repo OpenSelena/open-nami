@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.2.9",
+      version: "1.3.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -40571,24 +40571,47 @@ async function dispatchDownload(options) {
 var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
 function ChoiceIndicator({ isSelected }) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: isSelected ? "\u276F" : " " }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: isSelected ? "\u276F " : "  " })
+  ] });
 }
-function ChoiceItem({ isSelected, label }) {
+function ChoiceItem({
+  isSelected,
+  label,
+  value,
+  description
+}) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: isSelected, children: label });
+  const rawTag = `[${value === "all" ? "EVERYTHING" : String(value || label).toUpperCase()}]`;
+  const paddedTag = rawTag.padEnd(12, " ");
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+      Text,
+      {
+        color: isSelected ? theme.background : theme.primary,
+        backgroundColor: isSelected ? theme.primary : void 0,
+        bold: isSelected,
+        children: paddedTag
+      }
+    ),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, children: "  " }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: isSelected ? theme.primary : theme.gray, dimColor: !isSelected, bold: isSelected, children: description || label })
+  ] });
 }
 function getPickingOptions(platform2) {
   const items = [
-    { label: "Photos", value: "photos" },
-    { label: "Videos", value: "videos" }
+    { label: "Photos", value: "photos", description: "Feed images and carousels" },
+    { label: "Videos", value: "videos", description: "Reels and timeline clips" }
   ];
   if (platform2 === "instagram") {
-    items.push({ label: "Stories", value: "stories" });
-    items.push({ label: "Highlights", value: "highlights" });
+    items.push({ label: "Stories", value: "stories", description: "Active 24h stories" });
+    items.push({ label: "Highlights", value: "highlights", description: "Saved story archive reels" });
   }
   items.push({
     label: "Everything",
-    value: "all"
+    value: "all",
+    description: "Complete profile download"
   });
   return items;
 }
@@ -40604,7 +40627,7 @@ function PickingView({
   onSelect,
   onHighlight,
   theme,
-  gapComponent: Gap2
+  gapComponent: _Gap
 }) {
   const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1);
   const items = getPickingOptions(profile.platform);
@@ -40632,23 +40655,26 @@ function PickingView({
       resume: initialResume
     });
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: "100%", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", marginBottom: 1, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: "100%", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", width: 56, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
       /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.primary, children: [
         "@",
         profile.username
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-        "\u25B8 ",
-        platformName,
-        profile.cleanUrl ? ` \xB7 ${profile.cleanUrl}` : ""
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select what to download from this profile." }),
-      hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" }) }) : null
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: ` \xB7 ${platformName}` })
     ] }),
-    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: "Download", width: 44, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { width: "100%", alignItems: "center", justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+    profile.cleanUrl ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: profile.cleanUrl })
+    ] }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Select target media:" })
+    ] }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
       SelectInput_default,
       {
         indicatorComponent: ChoiceIndicator,
@@ -40656,13 +40682,21 @@ function PickingView({
         items: items.map((item, index) => ({
           key: String(index),
           label: item.label,
-          value: item.value
+          value: item.value,
+          description: item.description
         })),
         onSelect: (item) => handleItemSelect(item.value),
         onHighlight: (item) => onHighlight?.(item.value)
       }
-    ) }) })
-  ] });
+    ),
+    hasCheckpoint ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E" }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: "\u258E " }),
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, bold: true, children: "\u26A1 Checkpoint found (cursor saved)" })
+      ] })
+    ] }) : null
+  ] }) });
 }
 
 // src/components/views/platform-view.tsx
@@ -43190,6 +43224,17 @@ function InnerApp({
           match: item.label,
           action: () => handleModeSelect(item.value, phase.profile)
         });
+        const tag = `[${item.value === "all" ? "EVERYTHING" : item.value.toUpperCase()}]`;
+        targets.push({
+          match: tag,
+          action: () => handleModeSelect(item.value, phase.profile)
+        });
+        if (item.description) {
+          targets.push({
+            match: item.description,
+            action: () => handleModeSelect(item.value, phase.profile)
+          });
+        }
       }
     }
     if (phase.name === "done") {

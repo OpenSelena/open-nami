@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import {Box, Text} from 'ink'
 import SelectInput, {type ItemProps, type IndicatorProps} from 'ink-select-input'
-import {Panel} from '../panel.js'
 import {useTheme, type Theme} from '../../theme.js'
 import {loadCheckpoint} from '../../lib/engines/checkpoint.js'
 import {resolveDefaultDownloadDir} from '../../lib/engines/dispatcher.js'
@@ -11,18 +10,39 @@ import type {MediaTarget} from '../../lib/engines/types.js'
 export function ChoiceIndicator({isSelected}: IndicatorProps) {
   const theme = useTheme()
   return (
-    <Box marginRight={1}>
-      <Text color={theme.primary}>{isSelected ? '❯' : ' '}</Text>
+    <Box>
+      <Text color={theme.primary}>▎ </Text>
+      <Text color={theme.primary} bold>
+        {isSelected ? '❯ ' : '  '}
+      </Text>
     </Box>
   )
 }
 
-export function ChoiceItem({isSelected, label}: ItemProps) {
+export function ChoiceItem({
+  isSelected,
+  label,
+  value,
+  description,
+}: ItemProps & {value?: MediaTarget; description?: string}) {
   const theme = useTheme()
+  const rawTag = `[${value === 'all' ? 'EVERYTHING' : String(value || label).toUpperCase()}]`
+  const paddedTag = rawTag.padEnd(12, ' ')
+
   return (
-    <Text color={theme.primary} bold={isSelected}>
-      {label}
-    </Text>
+    <Box>
+      <Text
+        color={isSelected ? theme.background : theme.primary}
+        backgroundColor={isSelected ? theme.primary : undefined}
+        bold={isSelected}
+      >
+        {paddedTag}
+      </Text>
+      <Text color={theme.gray}>  </Text>
+      <Text color={isSelected ? theme.primary : theme.gray} dimColor={!isSelected} bold={isSelected}>
+        {description || label}
+      </Text>
+    </Box>
   )
 }
 
@@ -50,20 +70,27 @@ export type PickingViewProps = {
   gapComponent: React.ComponentType<{lines?: number}>
 }
 
-export function getPickingOptions(platform: ParsedProfile['platform']): Array<{label: string; value: MediaTarget}> {
-  const items: Array<{label: string; value: MediaTarget}> = [
-    {label: 'Photos', value: 'photos'},
-    {label: 'Videos', value: 'videos'},
+export interface PickingOption {
+  label: string
+  value: MediaTarget
+  description: string
+}
+
+export function getPickingOptions(platform: ParsedProfile['platform']): PickingOption[] {
+  const items: PickingOption[] = [
+    {label: 'Photos', value: 'photos', description: 'Feed images and carousels'},
+    {label: 'Videos', value: 'videos', description: 'Reels and timeline clips'},
   ]
 
   if (platform === 'instagram') {
-    items.push({label: 'Stories', value: 'stories'})
-    items.push({label: 'Highlights', value: 'highlights'})
+    items.push({label: 'Stories', value: 'stories', description: 'Active 24h stories'})
+    items.push({label: 'Highlights', value: 'highlights', description: 'Saved story archive reels'})
   }
 
   items.push({
     label: 'Everything',
     value: 'all',
+    description: 'Complete profile download',
   })
 
   return items
@@ -81,7 +108,7 @@ export function PickingView({
   onSelect,
   onHighlight,
   theme,
-  gapComponent: Gap,
+  gapComponent: _Gap,
 }: PickingViewProps) {
   const platformName = profile.platform.charAt(0).toUpperCase() + profile.platform.slice(1)
   const items = getPickingOptions(profile.platform)
@@ -114,43 +141,64 @@ export function PickingView({
 
   return (
     <Box flexDirection="column" alignItems="center" width="100%">
-      <Box flexDirection="column" alignItems="center" marginBottom={1}>
-        <Text bold color={theme.primary}>
-          @{profile.username}
-        </Text>
-        <Gap />
-        <Text color={theme.gray} dimColor={theme.dimSecondary}>
-          ▸ {platformName}{profile.cleanUrl ? ` · ${profile.cleanUrl}` : ''}
-        </Text>
-        <Gap />
-        <Text color={theme.gray} dimColor={theme.dimSecondary}>
-          Select what to download from this profile.
-        </Text>
-
-        {hasCheckpoint ? (
-          <Box marginTop={1}>
-            <Text color={theme.primary} bold>
-              ⚡ Checkpoint found (cursor saved)
+      <Box flexDirection="column" width={56}>
+        <Box>
+          <Text color={theme.primary}>▎ </Text>
+          <Text bold color={theme.primary}>
+            @{profile.username}
+          </Text>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>
+            {` · ${platformName}`}
+          </Text>
+        </Box>
+        {profile.cleanUrl ? (
+          <Box>
+            <Text color={theme.primary}>▎ </Text>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              {profile.cleanUrl}
             </Text>
           </Box>
         ) : null}
-      </Box>
-
-      <Panel title="Download" width={44}>
-        <Box width="100%" alignItems="center" justifyContent="center">
-          <SelectInput
-            indicatorComponent={ChoiceIndicator}
-            itemComponent={ChoiceItem}
-            items={items.map((item, index) => ({
-              key: String(index),
-              label: item.label,
-              value: item.value,
-            }))}
-            onSelect={(item) => handleItemSelect(item.value)}
-            onHighlight={(item) => onHighlight?.(item.value)}
-          />
+        <Box>
+          <Text color={theme.primary}>▎</Text>
         </Box>
-      </Panel>
+        <Box>
+          <Text color={theme.primary}>▎ </Text>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>
+            Select target media:
+          </Text>
+        </Box>
+        <Box>
+          <Text color={theme.primary}>▎</Text>
+        </Box>
+
+        <SelectInput
+          indicatorComponent={ChoiceIndicator}
+          itemComponent={ChoiceItem as any}
+          items={items.map((item, index) => ({
+            key: String(index),
+            label: item.label,
+            value: item.value,
+            description: item.description,
+          }))}
+          onSelect={(item) => handleItemSelect(item.value)}
+          onHighlight={(item) => onHighlight?.(item.value)}
+        />
+
+        {hasCheckpoint ? (
+          <>
+            <Box>
+              <Text color={theme.primary}>▎</Text>
+            </Box>
+            <Box>
+              <Text color={theme.primary}>▎ </Text>
+              <Text color={theme.primary} bold>
+                ⚡ Checkpoint found (cursor saved)
+              </Text>
+            </Box>
+          </>
+        ) : null}
+      </Box>
     </Box>
   )
 }
