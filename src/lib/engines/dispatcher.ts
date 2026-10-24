@@ -1,18 +1,29 @@
 import path from 'node:path'
-import os from 'node:os'
 import fs from 'node:fs/promises'
-import fsSync from 'node:fs'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
-import {resolvePlatformDownloadsDir} from '../known-folders.js'
-import {loadConfig} from '../config.js'
 import {getExtractor} from './extractors/index.js'
 import {downloadMediaStream} from './downloader.js'
 import {loadCheckpoint, saveCheckpoint, clearCheckpoint} from './checkpoint.js'
 import {filterMediaStream, parseDateBoundary, parseLimit} from './filters.js'
 import {runGalleryDl} from './gallery-dl.js'
 import {runYtDlp} from './yt-dlp.js'
+import {
+  TaskManager,
+  defaultTaskManager,
+  resolveDownloadBaseDir,
+  resolveDefaultDownloadDir,
+  cleanupEmptyCategoryDirs,
+} from './core/task-manager.js'
 import type {SupportedPlatform} from '../parser.js'
-import type {DispatchOptions, EngineResult} from './types.js'
+import type {DispatchOptions, EngineResult, EngineProgress} from './types.js'
+
+export {
+  TaskManager,
+  defaultTaskManager,
+  resolveDownloadBaseDir,
+  resolveDefaultDownloadDir,
+  cleanupEmptyCategoryDirs,
+}
 
 interface JobRunResult {
   success: boolean
@@ -28,73 +39,12 @@ export const REFERER_MAP: Record<SupportedPlatform, string> = {
   facebook: 'https://www.facebook.com/',
 }
 
-function expandPath(dir: string): string {
-  if (dir.startsWith('~/') || dir.startsWith('~\\') || dir === '~') {
-    return path.join(os.homedir(), dir.slice(1))
-  }
-  return dir
-}
-
-export function resolveDownloadBaseDir(customBaseDir?: string): string {
-  if (customBaseDir && customBaseDir.trim()) {
-    return path.resolve(expandPath(customBaseDir.trim()))
-  }
-  const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR
-  if (envDir && envDir.trim()) {
-    return path.resolve(expandPath(envDir.trim()))
-  }
-  const configDir = loadConfig().downloadDir
-  if (configDir && configDir.trim()) {
-    return path.resolve(expandPath(configDir.trim()))
-  }
-  if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
-    const raw = process.env.NAMI_BASE_DIR.trim()
-    return path.resolve(expandPath(raw.endsWith('downloads') ? raw : path.join(raw, 'downloads')))
-  }
-
-  // Dynamically auto-detect user's platform Downloads folder (like Open Omni)
-  return path.join(resolvePlatformDownloadsDir(), 'Open Nami')
-}
-
-export function resolveDefaultDownloadDir(
-  platform: string,
-  username: string,
-  baseDir?: string,
-): string {
-  const root = resolveDownloadBaseDir(baseDir)
-  return path.join(root, platform, username)
-}
-
-export async function cleanupEmptyCategoryDirs(targetDir: string): Promise<void> {
-  const candidateDirs = ['All', 'Stories', 'Highlights', 'Photos', 'Videos']
-  for (const dirName of candidateDirs) {
-    const fullPath = path.join(targetDir, dirName)
-    try {
-      if (!fsSync.existsSync(fullPath)) continue
-      const entries = await fs.readdir(fullPath)
-      const nonArchiveEntries = entries.filter(
-        e =>
-          e !== '.open-nami-archive.json' &&
-          e !== 'archive.txt' &&
-          e !== 'archive_yt-dlp.txt' &&
-          e !== 'archive_gallery-dl.sqlite3',
-      )
-      if (nonArchiveEntries.length === 0) {
-        for (const entry of entries) {
-          try {
-            await fs.unlink(path.join(fullPath, entry))
-          } catch {}
-        }
-        await fs.rmdir(fullPath).catch(() => {})
-      }
-    } catch {}
-  }
-}
-
 export async function dispatchDownload(options: DispatchOptions): Promise<EngineResult> {
   const {profile, choice, onProgress} = options
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
   await fs.mkdir(targetDir, {recursive: true})
+
+  defaultTaskManager.events.emit('job:start', { profile, choice, outputDir: targetDir })
 
   const masterCookie = findCookieFile(profile.platform)
   const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null
@@ -102,6 +52,29 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   let totalDownloaded = 0
   let totalSkipped = 0
   const errors: string[] = []
+
+  const recordError = (err: string) => {
+    errors.push(err)
+    defaultTaskManager.events.emit('job:error', { error: err })
+  }
+
+  const handleProgress = (progress: EngineProgress) => {
+    defaultTaskManager.events.emit('job:progress', progress)
+    if (progress.currentFile && progress.statusText?.startsWith('Saved:')) {
+      try {
+        defaultTaskManager.ledger.recordMedia({
+          id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
+          platform: profile.platform,
+          author: profile.username,
+          url: profile.cleanUrl || '',
+          filename: progress.currentFile,
+          filePath: path.join(targetDir, progress.currentFile),
+          downloadedAt: new Date().toISOString(),
+        })
+      } catch {}
+    }
+    onProgress?.(progress)
+  }
 
   try {
     const jobs: Array<{type: 'photos' | 'videos' | 'stories' | 'highlights' | 'all'}> = []
@@ -181,7 +154,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           writeMetadata: options.writeMetadata,
           defaultPlatform: profile.platform,
           defaultAuthor: profile.username,
-          onProgress,
+          onProgress: handleProgress,
         })
         return {
           success: res.errors.length === 0,
@@ -195,7 +168,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           success: false,
           downloaded: 0,
           skipped: 0,
-          error: errMsg,
+          error: errMsg || 'Execution failed',
         }
       }
     }
@@ -210,7 +183,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
-        onProgress,
+        onProgress: handleProgress,
       }))
 
     const runYt = options.runnerOverrides?.ytRunner ?? (() =>
@@ -220,7 +193,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         cookiePath: cookieCopy?.filePath,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
-        onProgress,
+        onProgress: handleProgress,
       }))
 
     for (const job of jobs) {
@@ -232,7 +205,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
 
         // Fallback to gallery-dl and yt-dlp if native extractor failed or found 0 items
         if ((!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
-          onProgress?.({
+          handleProgress({
             job: 'Photos',
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -241,9 +214,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           const gdlPhotos = await runGdl('Photos')
           totalDownloaded += gdlPhotos.downloaded
           totalSkipped += gdlPhotos.skipped
-          if (!gdlPhotos.success && gdlPhotos.error) errors.push(`[Photos] ${gdlPhotos.error}`)
+          if (!gdlPhotos.success) recordError(gdlPhotos.error ? `[Photos] ${gdlPhotos.error}` : '[Photos] Execution failed')
 
-          onProgress?.({
+          handleProgress({
             job: 'Videos',
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -253,9 +226,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           if (ytVideos.downloaded > 0 || ytVideos.skipped > 0 || ytVideos.success) {
             totalDownloaded += ytVideos.downloaded
             totalSkipped += ytVideos.skipped
-            if (!ytVideos.success && ytVideos.error) errors.push(`[Videos] ${ytVideos.error}`)
+            if (!ytVideos.success) recordError(ytVideos.error ? `[Videos] ${ytVideos.error}` : '[Videos] Execution failed')
           } else if (!options.signal?.aborted) {
-            onProgress?.({
+            handleProgress({
               job: 'Videos',
               downloadedCount: totalDownloaded,
               skippedCount: totalSkipped,
@@ -264,12 +237,12 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
             const gdlVideos = await runGdl('Videos')
             totalDownloaded += gdlVideos.downloaded
             totalSkipped += gdlVideos.skipped
-            if (!gdlVideos.success && gdlVideos.error) errors.push(`[Videos] ${gdlVideos.error}`)
+            if (!gdlVideos.success) recordError(gdlVideos.error ? `[Videos] ${gdlVideos.error}` : '[Videos] Execution failed')
           }
         } else {
           totalDownloaded += res.downloaded
           totalSkipped += res.skipped
-          if (!res.success && res.error) errors.push(`[All] ${res.error}`)
+          if (!res.success) recordError(res.error ? `[All] ${res.error}` : '[All] Execution failed')
         }
       } else if (job.type === 'photos' || job.type === 'stories' || job.type === 'highlights') {
         const subDir = job.type === 'photos' ? 'Photos' : job.type === 'stories' ? 'Stories' : 'Highlights'
@@ -278,7 +251,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         // Fallback to gallery-dl if native extractor failed or found 0 items (unless error was authentication failure)
         const isAuthError = Boolean(res.error && (res.error.includes('cookie') || res.error.includes('authenticated session') || res.error.includes('Settings (^s)')))
         if (!isAuthError && (!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
-          onProgress?.({
+          handleProgress({
             job: subDir,
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -292,7 +265,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
 
         totalDownloaded += res.downloaded
         totalSkipped += res.skipped
-        if (!res.success && res.error) errors.push(`[${subDir}] ${res.error}`)
+        if (!res.success) recordError(res.error ? `[${subDir}] ${res.error}` : `[${subDir}] Execution failed`)
       } else if (job.type === 'videos') {
         let res = await runNative('Videos')
         if (res.downloaded > 0 || res.skipped > 0) {
@@ -300,7 +273,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           totalSkipped += res.skipped
         } else if (!options.signal?.aborted) {
           // Fallback to yt-dlp first for videos
-          onProgress?.({
+          handleProgress({
             job: 'Videos',
             downloadedCount: totalDownloaded,
             skippedCount: totalSkipped,
@@ -310,10 +283,10 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           if (fbRes.downloaded > 0 || fbRes.skipped > 0 || fbRes.success) {
             totalDownloaded += fbRes.downloaded
             totalSkipped += fbRes.skipped
-            if (!fbRes.success && fbRes.error) errors.push(`[Videos] ${fbRes.error}`)
+            if (!fbRes.success) recordError(fbRes.error ? `[Videos] ${fbRes.error}` : '[Videos] Execution failed')
           } else if (!options.signal?.aborted) {
             // Further fallback to gallery-dl if yt-dlp also yielded nothing
-            onProgress?.({
+            handleProgress({
               job: 'Videos',
               downloadedCount: totalDownloaded,
               skippedCount: totalSkipped,
@@ -322,7 +295,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
             const gdlRes = await runGdl('Videos')
             totalDownloaded += gdlRes.downloaded
             totalSkipped += gdlRes.skipped
-            if (!gdlRes.success && gdlRes.error) errors.push(`[Videos] ${gdlRes.error}`)
+            if (!gdlRes.success) recordError(gdlRes.error ? `[Videos] ${gdlRes.error}` : '[Videos] Execution failed')
           }
         }
       }
@@ -334,13 +307,20 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       await clearCheckpoint(targetDir)
     }
 
-    return {
+    const engineResult: EngineResult = {
       success: errors.length === 0 || totalDownloaded > 0,
       downloadedCount: totalDownloaded,
       skippedCount: totalSkipped,
       errors,
       outputDir: targetDir,
     }
+
+    defaultTaskManager.events.emit('job:complete', { result: engineResult })
+    return engineResult
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err)
+    defaultTaskManager.events.emit('job:error', { error: errMsg || 'Execution failed' })
+    throw err
   } finally {
     if (cookieCopy) {
       await cookieCopy.cleanup()

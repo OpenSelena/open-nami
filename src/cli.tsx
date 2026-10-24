@@ -10,6 +10,7 @@ import {generateCompletion} from './lib/completion.js'
 import {updateYtDlp, updateGalleryDl} from './lib/engines/fetcher.js'
 import {startClipboardWatcher} from './lib/watcher.js'
 import {runBatchQueue} from './lib/batch.js'
+import {runDoctor} from './lib/diagnostics/doctor.js'
 
 export const resolveVersion = (): string => {
   try {
@@ -39,6 +40,7 @@ const HELP = `
   Options:
     -h, --help           Show this help message
     -v, --version        Show version
+    --doctor             Run environment & dependency diagnostics
     -o, --output         Set custom output directory
     -w, --watch          Watch clipboard for profile links and auto-download
     -b, --batch <file>   Download multiple profiles listed in a text file (one URL/user per line)
@@ -87,6 +89,23 @@ async function main() {
 
   if (args.includes('-v') || args.includes('--version')) {
     console.log(`open-nami v${VERSION}`)
+    process.exit(0)
+  }
+
+  if (args.includes('--doctor')) {
+    const report = await runDoctor()
+    console.log(`\n  \x1b[36mOpen Nami Doctor\x1b[0m (v${VERSION})\n`)
+    console.log(`  \x1b[1mRuntime:\x1b[0m Node.js ${report.nodeVersion}`)
+    console.log(`  \x1b[1mStorage:\x1b[0m ${report.storageOk ? '\x1b[32m✓ Ready\x1b[0m' : '\x1b[31m✗ Inaccessible\x1b[0m'}`)
+    console.log(`  \x1b[1mEngines:\x1b[0m`)
+    for (const [bin, ok] of Object.entries(report.binaries)) {
+      console.log(`    ${ok ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m'} ${bin}`)
+    }
+    console.log(`  \x1b[1mCookies:\x1b[0m`)
+    for (const [platform, ok] of Object.entries(report.cookies)) {
+      console.log(`    ${ok ? '\x1b[32m✓\x1b[0m' : '\x1b[90m○\x1b[0m'} ${platform}`)
+    }
+    console.log()
     process.exit(0)
   }
 
