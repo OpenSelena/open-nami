@@ -9,7 +9,7 @@
 - **Constraints**:
   - Preserve Nordic color palette, centered layout, and existing keybindings (`^s`, `^w`, `^b`, `↵`, `esc`).
   - No mandatory native dependencies; use existing `node:sqlite` and standard libraries.
-  - Avoid em dashes (`—`); use commas, colons, parentheses, or periods.
+  - Avoid em dashes (\u2014); use commas, colons, parentheses, or periods.
 
 ---
 

@@ -95,7 +95,7 @@ test('formatCompletionSummary handles zero items scan result', () => {
   assert.equal(summary.headerPrefix, '✓ profile scanned ')
   assert.equal(summary.headerSuffix, ': 0 media items found')
   assert.equal(summary.itemsText, 'no photos or videos available')
-  assert.equal(summary.headerSuffix.includes('—'), false)
+  assert.equal(summary.headerSuffix.includes('\u2014'), false)
 })
 
 test('formatCompletionSummary handles downloaded items with pluralization and skipped text', () => {
@@ -137,7 +137,6 @@ test('CompletionView renders cleanly with 0 items without ledger indicator or em
   assert.equal(renderedText.includes(LEDGER_INDEXED_LABEL), false)
 
   // Strictly check that no em dashes exist anywhere in rendered text
-  assert.equal(renderedText.includes('—'), false)
   assert.equal(renderedText.includes('\u2014'), false)
 })
 
@@ -162,7 +161,6 @@ test('CompletionView renders downloaded items with media ledger indicator', () =
   assert.ok(renderedText.includes(LEDGER_INDEXED_LABEL))
 
   // Strictly check that no em dashes exist anywhere in rendered text
-  assert.equal(renderedText.includes('—'), false)
   assert.equal(renderedText.includes('\u2014'), false)
 })
 
