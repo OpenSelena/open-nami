@@ -54,17 +54,45 @@ test('saveConfig persists cookiesFromBrowser and loadConfig retrieves it', async
   const testConfigPath = path.join(tmpDir, 'config.json')
 
   try {
-    saveConfig({cookiesFromBrowser: 'chrome'}, testConfigPath)
+    // Default to 'auto' when cookiesFromBrowser is omitted from config
+    await fsPromises.writeFile(testConfigPath, JSON.stringify({downloadDir: 'D:/test'}))
     let loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'auto')
+
+    // Persist and load 'auto'
+    saveConfig({cookiesFromBrowser: 'auto'}, testConfigPath)
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'auto')
+
+    // Persist and load 'chrome'
+    saveConfig({cookiesFromBrowser: 'chrome'}, testConfigPath)
+    loaded = loadConfig(testConfigPath)
     assert.equal(loaded.cookiesFromBrowser, 'chrome')
 
+    // Persist and load 'helium'
+    saveConfig({cookiesFromBrowser: 'helium'}, testConfigPath)
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'helium')
+
+    // Normalize uppercase known browsers
+    await fsPromises.writeFile(testConfigPath, JSON.stringify({cookiesFromBrowser: 'HELIUM'}))
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'helium')
+
+    // Explicit 'none' disables extraction
     saveConfig({cookiesFromBrowser: 'none'}, testConfigPath)
     loaded = loadConfig(testConfigPath)
     assert.equal(loaded.cookiesFromBrowser, 'none')
 
-    await fsPromises.writeFile(testConfigPath, JSON.stringify({cookiesFromBrowser: 'invalid-browser'}))
+    // Normalize uppercase 'NONE'
+    await fsPromises.writeFile(testConfigPath, JSON.stringify({cookiesFromBrowser: 'NONE'}))
     loaded = loadConfig(testConfigPath)
-    assert.equal(loaded.cookiesFromBrowser, undefined)
+    assert.equal(loaded.cookiesFromBrowser, 'none')
+
+    // Support custom string browser identifier
+    saveConfig({cookiesFromBrowser: 'custom-browser-fork'}, testConfigPath)
+    loaded = loadConfig(testConfigPath)
+    assert.equal(loaded.cookiesFromBrowser, 'custom-browser-fork')
   } finally {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }

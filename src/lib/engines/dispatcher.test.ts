@@ -544,3 +544,140 @@ test('cleanupEmptyCategoryDirs removes empty categories with only archive files 
   }
 })
 
+test('dispatchDownload resolves cookiesFromBrowser "auto" via resolveBrowserCookieArg and forwards to runners', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const {resolveBrowserCookieArg} = await import('../cookies/browser-bridge.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-auto-'))
+
+  try {
+    let capturedGdlOpts: any = null
+    let capturedYtOpts: any = null
+    const expectedArg = resolveBrowserCookieArg('auto') ?? undefined
+
+    await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'autocookies_user',
+        cleanUrl: 'https://www.instagram.com/autocookies_user/',
+        rawInput: 'autocookies_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      cookiesFromBrowser: 'auto',
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: false, downloaded: 0, skipped: 0, error: 'Fallback needed'}
+        },
+        gdlRunner: async (subDir, runnerOpts) => {
+          capturedGdlOpts = runnerOpts
+          return {success: true, downloaded: 1, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(capturedGdlOpts, 'gdlRunner should have been called')
+    assert.equal(capturedGdlOpts.cookiesFromBrowser, expectedArg)
+
+    await dispatchDownload({
+      profile: {
+        platform: 'tiktok',
+        username: 'autocookies_yt_user',
+        cleanUrl: 'https://www.tiktok.com/@autocookies_yt_user',
+        rawInput: 'autocookies_yt_user',
+      },
+      choice: 'videos',
+      outputDir: tmpDir,
+      cookiesFromBrowser: 'auto',
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: false, downloaded: 0, skipped: 0, error: 'Fallback needed'}
+        },
+        ytRunner: async (runnerOpts) => {
+          capturedYtOpts = runnerOpts
+          return {success: true, downloaded: 1, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(capturedYtOpts, 'ytRunner should have been called')
+    assert.equal(capturedYtOpts.cookiesFromBrowser, expectedArg)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload defaults to "auto" resolution when cookiesFromBrowser is omitted', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const {resolveBrowserCookieArg} = await import('../cookies/browser-bridge.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-default-auto-'))
+
+  try {
+    let capturedGdlOpts: any = null
+    const expectedArg = resolveBrowserCookieArg('auto') ?? undefined
+
+    await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'default_auto_user',
+        cleanUrl: 'https://www.instagram.com/default_auto_user/',
+        rawInput: 'default_auto_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: false, downloaded: 0, skipped: 0, error: 'Fallback needed'}
+        },
+        gdlRunner: async (subDir, runnerOpts) => {
+          capturedGdlOpts = runnerOpts
+          return {success: true, downloaded: 1, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(capturedGdlOpts, 'gdlRunner should have been called')
+    assert.equal(capturedGdlOpts.cookiesFromBrowser, expectedArg)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload passes undefined to runners when cookiesFromBrowser is "none"', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-none-'))
+
+  try {
+    let capturedGdlOpts: any = null
+
+    await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'none_cookies_user',
+        cleanUrl: 'https://www.instagram.com/none_cookies_user/',
+        rawInput: 'none_cookies_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      cookiesFromBrowser: 'none',
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: false, downloaded: 0, skipped: 0, error: 'Fallback needed'}
+        },
+        gdlRunner: async (subDir, runnerOpts) => {
+          capturedGdlOpts = runnerOpts
+          return {success: true, downloaded: 1, skipped: 0}
+        },
+      },
+    })
+
+    assert.ok(capturedGdlOpts, 'gdlRunner should have been called')
+    assert.equal(capturedGdlOpts.cookiesFromBrowser, undefined)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+

@@ -39,8 +39,11 @@ export interface DispatchOptions {
   onProgress?: (progress: EngineProgress) => void
   runnerOverrides?: {
     nativeRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') => Promise<DispatchRunnerResult>
-    gdlRunner?: (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') => Promise<DispatchRunnerResult>
-    ytRunner?: () => Promise<DispatchRunnerResult>
+    gdlRunner?: (
+      subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All',
+      runnerOptions?: any,
+    ) => Promise<DispatchRunnerResult>
+    ytRunner?: (runnerOptions?: any) => Promise<DispatchRunnerResult>
   }
 }
 

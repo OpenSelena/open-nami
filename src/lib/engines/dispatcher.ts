@@ -2,6 +2,7 @@ import path from 'node:path'
 import fs from 'node:fs/promises'
 import {loadConfig} from '../config.js'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
+import {resolveBrowserCookieArg} from '../cookies/browser-bridge.js'
 import {getExtractor} from './extractors/index.js'
 import {downloadMediaStream} from './downloader.js'
 import {loadCheckpoint, saveCheckpoint, clearCheckpoint} from './checkpoint.js'
@@ -45,7 +46,9 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
   await fs.mkdir(targetDir, {recursive: true})
 
-  const cookiesFromBrowser = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser
+  const rawBrowserPref = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser ?? 'auto'
+  const resolvedBrowserArg = resolveBrowserCookieArg(rawBrowserPref)
+  const cookiesFromBrowser = resolvedBrowserArg ?? undefined
 
   defaultTaskManager.events.emit('job:start', { profile, choice, outputDir: targetDir })
 
@@ -178,8 +181,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
 
     const runNative = options.runnerOverrides?.nativeRunner ?? defaultRunNative
 
-    const runGdl = options.runnerOverrides?.gdlRunner ?? ((subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') =>
-      runGalleryDl({
+    const runGdl = (subDir: 'Photos' | 'Videos' | 'Stories' | 'Highlights' | 'All') => {
+      const runnerOpts = {
         profile,
         targetDir,
         subDir,
@@ -188,10 +191,14 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         signal: options.signal,
         writeMetadata: options.writeMetadata,
         onProgress: handleProgress,
-      }))
+      }
+      return options.runnerOverrides?.gdlRunner
+        ? options.runnerOverrides.gdlRunner(subDir, runnerOpts)
+        : runGalleryDl(runnerOpts)
+    }
 
-    const runYt = options.runnerOverrides?.ytRunner ?? (() =>
-      runYtDlp({
+    const runYt = () => {
+      const runnerOpts = {
         profile,
         targetDir,
         cookiePath: cookieCopy?.filePath,
@@ -199,7 +206,11 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         signal: options.signal,
         writeMetadata: options.writeMetadata,
         onProgress: handleProgress,
-      }))
+      }
+      return options.runnerOverrides?.ytRunner
+        ? options.runnerOverrides.ytRunner(runnerOpts)
+        : runYtDlp(runnerOpts)
+    }
 
     for (const job of jobs) {
       if (options.signal?.aborted) break

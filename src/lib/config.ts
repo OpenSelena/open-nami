@@ -5,7 +5,17 @@ import os from 'node:os'
 export interface AppConfig {
   theme?: 'auto' | 'light' | 'dark'
   cookiesDir?: string
-  cookiesFromBrowser?: 'chrome' | 'edge' | 'brave' | 'firefox' | 'none'
+  cookiesFromBrowser?:
+    | 'auto'
+    | 'none'
+    | 'chrome'
+    | 'edge'
+    | 'brave'
+    | 'firefox'
+    | 'helium'
+    | 'opera'
+    | 'vivaldi'
+    | (string & {})
   downloadDir?: string
   writeMetadata?: boolean
   defaultLimit?: number
@@ -24,11 +34,23 @@ export function loadConfig(configPath = getDefaultConfigPath()): AppConfig {
     const raw = fs.readFileSync(configPath, 'utf8')
     const parsed = JSON.parse(raw)
     if (parsed && typeof parsed === 'object') {
-      const rawBrowser = typeof parsed.cookiesFromBrowser === 'string' ? parsed.cookiesFromBrowser.trim().toLowerCase() : undefined
-      const validBrowsers: Array<NonNullable<AppConfig['cookiesFromBrowser']>> = ['chrome', 'edge', 'brave', 'firefox', 'none']
-      const cookiesFromBrowser = rawBrowser && (validBrowsers as string[]).includes(rawBrowser)
-        ? (rawBrowser as NonNullable<AppConfig['cookiesFromBrowser']>)
-        : undefined
+      let cookiesFromBrowser: AppConfig['cookiesFromBrowser'] = 'auto'
+      if (typeof parsed.cookiesFromBrowser === 'string') {
+        const trimmed = parsed.cookiesFromBrowser.trim()
+        const lower = trimmed.toLowerCase()
+        if (lower === 'none') {
+          cookiesFromBrowser = 'none'
+        } else if (lower === 'auto' || trimmed === '') {
+          cookiesFromBrowser = 'auto'
+        } else {
+          const knownBrowsers = ['chrome', 'edge', 'brave', 'firefox', 'helium', 'opera', 'vivaldi']
+          cookiesFromBrowser = (knownBrowsers.includes(lower)
+            ? lower
+            : trimmed) as NonNullable<AppConfig['cookiesFromBrowser']>
+        }
+      } else {
+        cookiesFromBrowser = 'auto'
+      }
 
       return {
         theme: typeof parsed.theme === 'string' ? parsed.theme : undefined,
