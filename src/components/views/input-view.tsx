@@ -74,7 +74,7 @@ export function InputView({
                 : 'cyan'
             }
           >
-            {announcement.level === 'warning' || announcement.level === 'alert' ? '⚠ ' : '📢 '}
+            <Text bold>[{announcement.level === 'warning' ? 'UPDATE' : announcement.level === 'alert' ? 'ALERT' : 'INFO'}] </Text>
             <Text bold>{announcement.title}: </Text>
             {announcement.url ? (
               <Text underline>

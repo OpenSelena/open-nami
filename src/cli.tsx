@@ -115,11 +115,11 @@ async function main() {
       console.log(`    ${ok ? '\x1b[32m✓\x1b[0m' : '\x1b[90m○\x1b[0m'} ${platform}`)
     }
     if (announcement) {
-      const icon = announcement.level === 'warning' || announcement.level === 'alert' ? '⚠' : '📢'
+      const tag = announcement.level === 'warning' ? 'UPDATE' : announcement.level === 'alert' ? 'ALERT' : 'INFO'
       const color = announcement.level === 'warning' || announcement.level === 'alert' ? '\x1b[33m' : '\x1b[36m'
-      console.log(`\n  \x1b[1mNotice:\x1b[0m ${color}${icon} [${announcement.title}]\x1b[0m ${announcement.message}`)
+      console.log(`\n  ${color}[${tag}]\x1b[0m \x1b[1m${announcement.title}:\x1b[0m ${announcement.message}`)
       if (announcement.url) {
-        console.log(`          \x1b[4m${announcement.url}\x1b[0m`)
+        console.log(`         \x1b[4m${announcement.url}\x1b[0m`)
       }
     }
     console.log()
