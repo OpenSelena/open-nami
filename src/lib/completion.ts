@@ -28,7 +28,8 @@ _open_nami_completions() {
     cur="\${COMP_WORDS[COMP_CWORD]}"
     prev="\${COMP_WORDS[COMP_CWORD-1]}"
 
-    local options="--help -h --version -v --update -U --update-ytdlp --update-gallerydl --photos --videos --stories --highlights --all --output -o --theme --completion"
+    local options="--help -h --version -v --doctor --update -U --update-ytdlp --update-gallerydl --photos --videos --stories --highlights --all --output -o --theme --since --until --limit -l --resume --write-metadata --no-track --completion"
+    local subcommands="pull list untrack"
 
     case "$prev" in
         --theme)
@@ -43,10 +44,16 @@ _open_nami_completions() {
             COMPREPLY=($(compgen -d -- "$cur"))
             return 0
             ;;
+        untrack|pull)
+            return 0
+            ;;
     esac
 
     if [[ "$cur" == -* ]]; then
         COMPREPLY=($(compgen -W "$options" -- "$cur"))
+        return 0
+    elif [[ "$COMP_CWORD" -eq 1 ]]; then
+        COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))
         return 0
     fi
 }
@@ -76,9 +83,11 @@ _open_nami() {
         '--stories[Download stories only (Instagram)]' \\
         '--highlights[Download highlights only (Instagram)]' \\
         '--all[Download all available media]' \\
+        '--no-track[Do not add downloaded profile to tracked history registry]' \\
         '(-o --output)'{-o,--output}'[Destination download directory]:output directory:_files -/' \\
         '--theme[Set color theme]:theme:(auto light dark)' \\
-        '--completion[Generate shell autocompletion script]:shell:(bash zsh fish powershell)'
+        '--completion[Generate shell autocompletion script]:shell:(bash zsh fish powershell)' \\
+        '1:subcommand:(pull list untrack)'
 }
 
 if [[ -n "$ZSH_VERSION" ]]; then
@@ -107,9 +116,11 @@ complete -c open-nami -l videos -d "Download videos and reels only"
 complete -c open-nami -l stories -d "Download stories only (Instagram)"
 complete -c open-nami -l highlights -d "Download highlights only (Instagram)"
 complete -c open-nami -l all -d "Download all available media"
+complete -c open-nami -l no-track -d "Do not add downloaded profile to tracked history registry"
 complete -c open-nami -s o -l output -r -a "(__fish_complete_directories)" -d "Destination directory"
 complete -c open-nami -l theme -x -a "auto light dark" -d "Set color theme"
 complete -c open-nami -l completion -x -a "bash zsh fish powershell" -d "Generate shell autocompletion script"
+complete -c open-nami -a "pull list untrack" -d "Subcommand"
 
 for cmd in opennami nami on
     complete -c $cmd -w open-nami
@@ -158,6 +169,7 @@ $completer = {
             [PSCustomObject]@{ Option = '--stories'; Short = $null; Tooltip = 'Download stories only (Instagram)' },
             [PSCustomObject]@{ Option = '--highlights'; Short = $null; Tooltip = 'Download highlights only (Instagram)' },
             [PSCustomObject]@{ Option = '--all'; Short = $null; Tooltip = 'Download all available media' },
+            [PSCustomObject]@{ Option = '--no-track'; Short = $null; Tooltip = 'Do not track profile in history' },
             [PSCustomObject]@{ Option = '--output'; Short = '-o'; Tooltip = 'Destination directory' },
             [PSCustomObject]@{ Option = '--theme'; Short = $null; Tooltip = 'Set color theme (auto, light, dark)' },
             [PSCustomObject]@{ Option = '--completion'; Short = $null; Tooltip = 'Generate shell completion script' }

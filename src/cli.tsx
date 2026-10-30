@@ -13,6 +13,8 @@ import {runBatchQueue} from './lib/batch.js'
 import {runDoctor} from './lib/diagnostics/doctor.js'
 import {checkForUpdate} from './lib/update-check.js'
 import {fetchAnnouncement} from './lib/announcements.js'
+import {MediaLedger, type TrackedProfileRecord} from './lib/engines/storage/ledger.js'
+import {dispatchPull} from './lib/pull.js'
 
 export const resolveVersion = (): string => {
   try {
@@ -35,6 +37,9 @@ const HELP = `
   Usage:
     $ open-nami                          Launch interactive TUI
     $ open-nami <profile-url-or-user>    Open directly to format picker
+    $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
+    $ open-nami list                     List all tracked profiles in registry
+    $ open-nami untrack <username>       Remove creator from tracking without deleting files
     $ open-nami <url> --photos           Download photos directly
     $ open-nami <url> --videos           Download videos directly
     $ open-nami <url> --all              Download all media directly
@@ -78,6 +83,184 @@ const HELP = `
     [o]              Open Downloads folder on completion
     [Esc]            Back / Exit
 `
+
+export function formatTrackedProfilesTable(profiles: TrackedProfileRecord[]): string {
+  if (!profiles || profiles.length === 0) {
+    return 'No tracked profiles found. Download profiles first, or use open-nami <url> to start tracking.'
+  }
+
+  const headers = ['Platform', 'Username', 'Target', 'Media', 'Last Synced', 'Directory']
+  const rows = profiles.map((p) => {
+    const lastSync = p.lastPulledAt
+      ? p.lastPulledAt.slice(0, 16).replace('T', ' ')
+      : 'Never'
+    return [
+      p.platform,
+      `@${p.username}`,
+      p.choice || 'all',
+      String(p.mediaCount || 0),
+      lastSync,
+      p.targetDir || '',
+    ]
+  })
+
+  const colWidths = headers.map((h, i) => {
+    const maxValLen = rows.reduce((max, r) => Math.max(max, (r[i] || '').length), 0)
+    return Math.max(h.length, maxValLen)
+  })
+
+  const pad = (str: string, width: number) => str + ' '.repeat(Math.max(0, width - str.length))
+
+  const headerLine = headers.map((h, i) => pad(h, colWidths[i]!)).join('  ')
+  const dividerLine = colWidths.map((w) => '─'.repeat(w)).join('  ')
+  const rowLines = rows.map((r) => r.map((cell, i) => pad(cell, colWidths[i]!)).join('  '))
+
+  return [
+    `\n  Tracked Profiles (${profiles.length}):\n`,
+    `  ${headerLine}`,
+    `  ${dividerLine}`,
+    ...rowLines.map((l) => `  ${l}`),
+    '',
+  ].join('\n')
+}
+
+export function handleListCommand(ledger?: MediaLedger): string {
+  const ownsLedger = !ledger
+  const activeLedger = ledger || new MediaLedger()
+  try {
+    const profiles = activeLedger.getTrackedProfiles()
+    return formatTrackedProfilesTable(profiles)
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close()
+    }
+  }
+}
+
+export function handleUntrackCommand(
+  username?: string,
+  ledger?: MediaLedger,
+): { success: boolean; message: string } {
+  if (!username || !username.trim()) {
+    return {
+      success: false,
+      message: 'Please provide a username to untrack (e.g. open-nami untrack selenagomez).',
+    }
+  }
+
+  const cleanUser = username.trim().replace(/^@/, '')
+  const ownsLedger = !ledger
+  const activeLedger = ledger || new MediaLedger()
+
+  try {
+    const profiles = activeLedger.getTrackedProfiles()
+    const target = profiles.find(
+      (p) => p.username.toLowerCase() === cleanUser.toLowerCase(),
+    )
+
+    if (!target) {
+      return {
+        success: false,
+        message: `Profile "@${cleanUser}" is not in the tracked registry.`,
+      }
+    }
+
+    activeLedger.untrackProfile(target.platform, target.username)
+    return {
+      success: true,
+      message: `Untracked @${target.username} from registry. Downloaded media files preserved on disk.`,
+    }
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close()
+    }
+  }
+}
+
+export async function handlePullCli(pullArgs: string[], ledger?: MediaLedger): Promise<number> {
+  let target: string | undefined
+  let choice: MediaTarget | undefined
+  let outputDir: string | undefined
+  let platform: any = undefined
+  let earlyExitThreshold: number | undefined
+
+  for (let i = 0; i < pullArgs.length; i++) {
+    const arg = pullArgs[i]
+    if (arg === '--photos') choice = 'photos'
+    else if (arg === '--videos') choice = 'videos'
+    else if (arg === '--stories') choice = 'stories'
+    else if (arg === '--highlights') choice = 'highlights'
+    else if (arg === '--all') choice = 'all'
+    else if (arg === '-o' || arg === '--output') outputDir = pullArgs[++i]
+    else if (arg.startsWith('--output=')) outputDir = arg.slice('--output='.length)
+    else if (arg === '-p' || arg === '--platform') platform = pullArgs[++i]?.toLowerCase()
+    else if (arg.startsWith('--platform=')) platform = arg.slice('--platform='.length).toLowerCase()
+    else if (arg === '--early-exit') {
+      const parsed = parseInt(pullArgs[++i], 10)
+      if (!isNaN(parsed) && parsed > 0) earlyExitThreshold = parsed
+    } else if (arg.startsWith('--early-exit=')) {
+      const parsed = parseInt(arg.slice('--early-exit='.length), 10)
+      if (!isNaN(parsed) && parsed > 0) earlyExitThreshold = parsed
+    } else if (!arg.startsWith('-') && !target) {
+      target = arg
+    }
+  }
+
+  const controller = new AbortController()
+  const sigintHandler = () => {
+    console.log('\n[open-nami] Stopping profile sync…')
+    controller.abort()
+  }
+  process.on('SIGINT', sigintHandler)
+
+  try {
+    console.log(`\n  \x1b[36mOpen Nami\x1b[0m: Profile Synchronization (v${VERSION})`)
+    if (target) {
+      console.log(`  \x1b[90mTarget creator:\x1b[0m @${target.replace(/^@/, '')}`)
+    }
+    if (choice) {
+      console.log(`  \x1b[90mTarget media:\x1b[0m ${choice}`)
+    }
+    console.log()
+
+    const result = await dispatchPull({
+      target,
+      platform,
+      choice,
+      outputDir,
+      earlyExitThreshold,
+      ledger,
+      signal: controller.signal,
+      onProfileStart: (profile, idx, total) => {
+        console.log(`\x1b[36m[${idx + 1}/${total}]\x1b[0m \x1b[1m@${profile.username}\x1b[0m on \x1b[35m${profile.platform}\x1b[0m…`)
+      },
+      onProfileProgress: (progress) => {
+        if (progress.engineProgress?.currentFile) {
+          process.stdout.write(`\r  \x1b[90m→ ${progress.engineProgress.currentFile.slice(0, 60)}\x1b[0m\x1b[K`)
+        }
+      },
+      onProfileComplete: (res) => {
+        process.stdout.write('\r\x1b[K')
+        console.log(`  \x1b[32m✓ @${res.profile.username}:\x1b[0m ${res.downloaded} new items downloaded (${res.skipped} skipped)\n`)
+      },
+      onProfileError: (profile, err) => {
+        process.stdout.write('\r\x1b[K')
+        console.error(`  \x1b[31m✗ @${profile.username}:\x1b[0m ${err.message}\n`)
+      },
+    })
+
+    if (result.total === 0) {
+      console.log('No tracked profiles found to synchronize. Run `open-nami <url>` to download and track a profile.')
+      return 0
+    }
+
+    console.log(`\x1b[1mSync completed:\x1b[0m ${result.succeeded} up-to-date, ${result.failed} failed of ${result.total} total profiles.`)
+    console.log(`\x1b[32mTotal new media:\x1b[0m ${result.totalDownloaded} downloaded (${result.totalSkipped} skipped).`)
+    return result.failed > 0 ? 1 : 0
+  } finally {
+    process.removeListener('SIGINT', sigintHandler)
+  }
+}
 
 const enterAltScreen = () => process.stdout.write('\x1b[?1049h\x1b[H')
 const leaveAltScreen = () => process.stdout.write('\x1b[?1006l\x1b[?1000l\x1b[?1049l')
@@ -192,6 +375,29 @@ async function main() {
     }
 
     process.exit(hasFailure ? 1 : 0)
+  }
+
+  if (args[0] === 'list') {
+    const output = handleListCommand()
+    console.log(output)
+    process.exit(0)
+  }
+
+  if (args[0] === 'untrack') {
+    const targetUser = args[1]
+    const res = handleUntrackCommand(targetUser)
+    if (res.success) {
+      console.log(res.message)
+      process.exit(0)
+    } else {
+      console.error(res.message)
+      process.exit(1)
+    }
+  }
+
+  if (args[0] === 'pull' || args[0] === 'sync') {
+    const exitCode = await handlePullCli(args.slice(1))
+    process.exit(exitCode)
   }
 
   let initialInput: string | undefined
@@ -436,7 +642,17 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error(err)
-  process.exit(1)
-})
+const isTestEnv =
+  process.env.NODE_ENV === 'test' ||
+  process.argv.some((arg) => arg.includes('--test')) ||
+  (process.argv[1] &&
+    (process.argv[1].endsWith('.test.ts') ||
+      process.argv[1].endsWith('.test.js') ||
+      process.argv[1].endsWith('.test.mjs')))
+
+if (!isTestEnv) {
+  main().catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
+}
