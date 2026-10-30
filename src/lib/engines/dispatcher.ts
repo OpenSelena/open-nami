@@ -46,12 +46,15 @@ export const REFERER_MAP: Record<SupportedPlatform, string> = {
 export async function createBrowserCookieCopy(
   platform: string,
   rawBrowserPref: string,
+  baseDir?: string,
 ): Promise<{filePath: string; isTemporary: boolean; cleanup: () => Promise<void>} | null> {
   if (platform === 'unknown' || !rawBrowserPref || rawBrowserPref.toLowerCase() === 'none') {
     return null
   }
+  const rootDir = baseDir || os.tmpdir()
+  let tempCookieDir: string | null = null
   try {
-    const tempCookieDir = await fs.mkdtemp(path.join(os.tmpdir(), 'open-nami-cookies-'))
+    tempCookieDir = await fs.mkdtemp(path.join(rootDir, 'open-nami-cookies-'))
     const tempCookieFile = path.join(
       tempCookieDir,
       `cookie-${platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`,
@@ -61,21 +64,26 @@ export async function createBrowserCookieCopy(
       try {
         await fs.chmod(tempCookieFile, 0o600)
       } catch {}
+      const dirToDelete = tempCookieDir
       return {
         filePath: tempCookieFile,
         isTemporary: true,
         cleanup: async () => {
           try {
-            await fs.rm(tempCookieDir, {recursive: true, force: true})
+            await fs.rm(dirToDelete, {recursive: true, force: true})
           } catch {}
         },
       }
     } else {
+      await fs.rm(tempCookieDir, {recursive: true, force: true})
+    }
+  } catch {
+    if (tempCookieDir) {
       try {
         await fs.rm(tempCookieDir, {recursive: true, force: true})
       } catch {}
     }
-  } catch {}
+  }
   return null
 }
 

@@ -42133,12 +42133,14 @@ var REFERER_MAP = {
   x: "https://x.com/",
   facebook: "https://www.facebook.com/"
 };
-async function createBrowserCookieCopy(platform2, rawBrowserPref) {
+async function createBrowserCookieCopy(platform2, rawBrowserPref, baseDir) {
   if (platform2 === "unknown" || !rawBrowserPref || rawBrowserPref.toLowerCase() === "none") {
     return null;
   }
+  const rootDir = baseDir || os10.tmpdir();
+  let tempCookieDir = null;
   try {
-    const tempCookieDir = await fs16.mkdtemp(path15.join(os10.tmpdir(), "open-nami-cookies-"));
+    tempCookieDir = await fs16.mkdtemp(path15.join(rootDir, "open-nami-cookies-"));
     const tempCookieFile = path15.join(
       tempCookieDir,
       `cookie-${platform2}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`
@@ -42149,23 +42151,27 @@ async function createBrowserCookieCopy(platform2, rawBrowserPref) {
         await fs16.chmod(tempCookieFile, 384);
       } catch {
       }
+      const dirToDelete = tempCookieDir;
       return {
         filePath: tempCookieFile,
         isTemporary: true,
         cleanup: async () => {
           try {
-            await fs16.rm(tempCookieDir, { recursive: true, force: true });
+            await fs16.rm(dirToDelete, { recursive: true, force: true });
           } catch {
           }
         }
       };
     } else {
+      await fs16.rm(tempCookieDir, { recursive: true, force: true });
+    }
+  } catch {
+    if (tempCookieDir) {
       try {
         await fs16.rm(tempCookieDir, { recursive: true, force: true });
       } catch {
       }
     }
-  } catch {
   }
   return null;
 }

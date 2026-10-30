@@ -838,13 +838,17 @@ test('createBrowserCookieCopy creates private temporary directory with secure pe
   const {createBrowserCookieCopy} = await import('./dispatcher.js')
   const fsPromises = await import('node:fs/promises')
 
-  const copy = await createBrowserCookieCopy('instagram', 'mock-non-existent-browser')
-  assert.equal(copy, null)
+  const testTmp = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'test-cookie-isolation-'))
+  try {
+    const copy = await createBrowserCookieCopy('instagram', 'mock-non-existent-browser', testTmp)
+    assert.equal(copy, null)
 
-  const tmpBase = os.tmpdir()
-  const entries = await fsPromises.readdir(tmpBase)
-  const strayDirs = entries.filter(e => e.startsWith('open-nami-cookies-'))
-  assert.equal(strayDirs.length, 0)
+    const entries = await fsPromises.readdir(testTmp)
+    const strayDirs = entries.filter(e => e.startsWith('open-nami-cookies-'))
+    assert.equal(strayDirs.length, 0)
+  } finally {
+    await fsPromises.rm(testTmp, {recursive: true, force: true})
+  }
 })
 
 
