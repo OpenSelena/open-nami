@@ -14,6 +14,7 @@ import {ErrorView} from './components/views/error-view.js'
 import {SettingsView, type SettingsField} from './components/views/settings-view.js'
 import {WatcherView} from './components/views/watcher-view.js'
 import {BatchView} from './components/views/batch-view.js'
+import {PullView} from './components/views/pull-view.js'
 import {ThemeProvider, useTheme, nextThemeMode, type ThemeMode} from './theme.js'
 import {
   parseProfileInput,
@@ -21,7 +22,7 @@ import {
   type ParsedProfile,
   type SupportedPlatform,
 } from './lib/parser.js'
-import {dispatchDownload, resolveDefaultDownloadDir} from './lib/engines/dispatcher.js'
+import {dispatchDownload, resolveDefaultDownloadDir, defaultTaskManager} from './lib/engines/dispatcher.js'
 import {readClipboard} from './lib/clipboard.js'
 import {revealInFileManager, openBrowser} from './lib/reveal.js'
 import {clickTargetAt, findFrameRow, frameRowSpan, type ClickTarget} from './lib/click-map.js'
@@ -60,6 +61,7 @@ type AppPhase =
   | {name: 'settings'}
   | {name: 'watcher'}
   | {name: 'batch'}
+  | {name: 'pull'}
 
 export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
   input: [
@@ -67,6 +69,14 @@ export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
     ['^w', 'watcher'],
     ['^b', 'batch'],
     ['^s', 'settings'],
+    ['^c', 'quit'],
+  ],
+  pull: [
+    ['↑↓', 'navigate'],
+    ['space', 'toggle'],
+    ['d', 'untrack'],
+    ['↵', 'pull'],
+    ['esc', 'back'],
     ['^c', 'quit'],
   ],
   platform: [
@@ -207,6 +217,22 @@ function InnerApp({
   const [settingsFocus, setSettingsFocus] = useState<SettingsField>('cookies')
   const [batchClickTargets, setBatchClickTargets] = useState<ClickTarget[]>([])
   const [watcherClickTargets, setWatcherClickTargets] = useState<ClickTarget[]>([])
+  const [pullClickTargets, setPullClickTargets] = useState<ClickTarget[]>([])
+  const [trackedCount, setTrackedCount] = useState<number>(() => {
+    try {
+      return defaultTaskManager.ledger.getTrackedProfiles().length
+    } catch {
+      return 0
+    }
+  })
+
+  const refreshTrackedCount = useCallback(() => {
+    try {
+      setTrackedCount(defaultTaskManager.ledger.getTrackedProfiles().length)
+    } catch {
+      setTrackedCount(0)
+    }
+  }, [])
 
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80
   const boxWidth = Math.max(14, Math.min(64, columns - 6))
@@ -277,8 +303,9 @@ function InnerApp({
     abortControllerRef.current?.abort()
     abortControllerRef.current = null
     setUrlInput('')
+    refreshTrackedCount()
     setPhase({name: 'input'})
-  }, [])
+  }, [refreshTrackedCount])
 
   const handleModeSelect = useCallback(async (
     choiceOrOptions: MediaTarget | PickingOptions,
@@ -421,14 +448,27 @@ function InnerApp({
       return
     }
 
+    if ((input === 'p' || input === 'P') && !key.ctrl) {
+      if (phase.name === 'pull') {
+        setPhase({name: 'input'})
+        refreshTrackedCount()
+        return
+      }
+      if (phase.name === 'input' && urlInput.trim() === '') {
+        setPhase({name: 'pull'})
+        return
+      }
+    }
+
     if (key.ctrl && input === 'c') {
       exit()
       return
     }
 
     if (key.escape) {
-      if (phase.name === 'settings' || phase.name === 'watcher') {
+      if (phase.name === 'settings' || phase.name === 'watcher' || phase.name === 'pull') {
         setPhase({name: 'input'})
+        refreshTrackedCount()
         return
       }
       if (phase.name === 'batch') {
@@ -476,8 +516,11 @@ function InnerApp({
       if (key === '^w') return () => setPhase(prev => (prev.name === 'watcher' ? {name: 'input'} : {name: 'watcher'}))
       if (key === '^b') return () => setPhase(prev => (prev.name === 'batch' ? {name: 'input'} : {name: 'batch'}))
       if (key === 'esc') {
-        if (phase.name === 'settings' || phase.name === 'platform' || phase.name === 'watcher' || phase.name === 'batch') {
-          return () => setPhase({name: 'input'})
+        if (phase.name === 'settings' || phase.name === 'platform' || phase.name === 'watcher' || phase.name === 'batch' || phase.name === 'pull') {
+          return () => {
+            refreshTrackedCount()
+            setPhase({name: 'input'})
+          }
         }
         return resetToInput
       }
@@ -510,6 +553,10 @@ function InnerApp({
       }
       if (clipboardAccepted) {
         targets.push({match: 'to download it', action: () => handleInputSubmit(urlInput)})
+      }
+      if (trackedCount > 0 && !urlInput) {
+        targets.push({match: 'Pull Updates', action: () => setPhase({name: 'pull'})})
+        targets.push({match: '[p]', action: () => setPhase({name: 'pull'})})
       }
       targets.push({match: 'OpenSelena', padX: 1, action: () => openBrowser('https://github.com/OpenSelena/open-nami')})
     }
@@ -563,6 +610,10 @@ function InnerApp({
       targets.push(...watcherClickTargets)
     }
 
+    if (phase.name === 'pull') {
+      targets.push(...pullClickTargets)
+    }
+
     for (const [key, label] of hints) {
       const action = hintAction(key)
       if (action) targets.push({match: `${key} ${label}`, action})
@@ -586,6 +637,9 @@ function InnerApp({
     resetToInput,
     batchClickTargets,
     watcherClickTargets,
+    pullClickTargets,
+    trackedCount,
+    refreshTrackedCount,
   ])
 
   useMouseClick(
@@ -630,6 +684,7 @@ function InnerApp({
           buttonText={DOWNLOAD_BUTTON}
           gapComponent={Gap}
           announcement={announcement}
+          trackedCount={trackedCount}
         />
       )}
 
@@ -738,6 +793,20 @@ function InnerApp({
           defaultLimit={effectiveLimit}
           defaultWriteMetadata={effectiveWriteMetadata}
           onRegisterClickTargets={setBatchClickTargets}
+        />
+      )}
+
+      {phase.name === 'pull' && (
+        <PullView
+          onBack={() => {
+            refreshTrackedCount()
+            setPhase({name: 'input'})
+          }}
+          outputDir={outputDir}
+          contentWidth={contentWidth}
+          theme={theme}
+          gapComponent={Gap}
+          onRegisterClickTargets={setPullClickTargets}
         />
       )}
 

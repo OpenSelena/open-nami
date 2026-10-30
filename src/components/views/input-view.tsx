@@ -23,6 +23,8 @@ export type InputViewProps = {
   buttonText: string
   gapComponent: React.ComponentType<{lines?: number}>
   announcement?: Announcement | null
+  trackedCount?: number
+  onPullClick?: () => void
 }
 
 export function InputView({
@@ -42,6 +44,7 @@ export function InputView({
   buttonText,
   gapComponent: Gap,
   announcement,
+  trackedCount = 0,
 }: InputViewProps) {
   return (
     <Box flexDirection="column" alignItems="center">
@@ -65,6 +68,13 @@ export function InputView({
       ) : clipboardAccepted ? (
         <Text color={theme.gray} dimColor={theme.dimSecondary}>from your clipboard: ↵ to download it</Text>
       ) : null}
+      {trackedCount > 0 && !urlInput && (
+        <Box marginTop={1}>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>
+            <Text color={theme.primary} bold>[p]</Text> Pull Updates ({trackedCount} tracked)
+          </Text>
+        </Box>
+      )}
       {announcement && (
         <Box marginTop={1} flexDirection="row" alignItems="center">
           <Text

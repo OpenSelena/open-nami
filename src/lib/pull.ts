@@ -42,6 +42,7 @@ export interface PullSummaryResult {
 
 export interface PullOptions {
   target?: string
+  profiles?: TrackedProfileRecord[]
   platform?: SupportedPlatform
   choice?: MediaTarget
   outputDir?: string
@@ -76,7 +77,7 @@ export async function dispatchPull(options: PullOptions = {}): Promise<PullSumma
   const minDelay = options.minDelayMs ?? 2000
   const maxDelay = options.maxDelayMs ?? 3000
 
-  let allTracked = ledger.getTrackedProfiles()
+  let allTracked = options.profiles ? [...options.profiles] : ledger.getTrackedProfiles()
 
   if (options.platform) {
     allTracked = allTracked.filter(p => p.platform === options.platform)

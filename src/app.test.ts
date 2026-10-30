@@ -72,3 +72,15 @@ test('HINTS includes batch shortcuts', () => {
     ['^c', 'quit'],
   ])
 })
+
+test('HINTS includes pull shortcuts', () => {
+  assert.ok(HINTS.pull, 'HINTS must include pull phase')
+  assert.deepEqual(HINTS.pull, [
+    ['↑↓', 'navigate'],
+    ['space', 'toggle'],
+    ['d', 'untrack'],
+    ['↵', 'pull'],
+    ['esc', 'back'],
+    ['^c', 'quit'],
+  ])
+})
