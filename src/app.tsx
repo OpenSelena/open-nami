@@ -538,6 +538,17 @@ function InnerApp({
       if (key === '^s') return () => setPhase(prev => (prev.name === 'settings' ? {name: 'input'} : {name: 'settings'}))
       if (key === '^w') return () => setPhase(prev => (prev.name === 'watcher' ? {name: 'input'} : {name: 'watcher'}))
       if (key === '^b') return () => setPhase(prev => (prev.name === 'batch' ? {name: 'input'} : {name: 'batch'}))
+      if (key === '^h' || key === '^p') {
+        return () => {
+          setPhase(prev => {
+            if (prev.name === 'pull') {
+              refreshTrackedCount()
+              return {name: 'input'}
+            }
+            return {name: 'pull'}
+          })
+        }
+      }
       if (key === 'esc') {
         if (phase.name === 'settings' || phase.name === 'platform' || phase.name === 'watcher' || phase.name === 'batch' || phase.name === 'pull') {
           return () => {
@@ -639,7 +650,10 @@ function InnerApp({
 
     for (const [key, label] of hints) {
       const action = hintAction(key)
-      if (action) targets.push({match: `${key} ${label}`, action})
+      if (action) {
+        targets.push({match: `${key} ${label}`, padX: 1, action})
+        targets.push({match: label, padX: 1, action})
+      }
     }
 
     return targets

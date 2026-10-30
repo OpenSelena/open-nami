@@ -356,6 +356,14 @@ export function PullView({
       }
     }
 
+    if (phase === 'list' && items.length === 0) {
+      targets.push({match: '[Esc] Back', padX: 1, action: onBack})
+    }
+
+    if (phase === 'list' && untrackConfirm) {
+      targets.push({match: '[n / Esc] Cancel', padX: 1, action: () => setUntrackConfirm(null)})
+    }
+
     if (phase === 'done') {
       targets.push({
         match: 'Reveal in folder',
