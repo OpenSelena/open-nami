@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.0",
+      version: "1.9.1",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -26536,7 +26536,7 @@ var require_package = __commonJS({
       },
       repository: {
         type: "git",
-        url: "https://github.com/OpenSelena/open-nami.git"
+        url: "git+https://github.com/OpenSelena/open-nami.git"
       },
       dependencies: {
         ink: "^7.1.1",
