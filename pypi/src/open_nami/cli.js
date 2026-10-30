@@ -10434,10 +10434,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path18, index, value) {
-        if (index >= path18.length) return value;
-        var key = path18[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path18, index + 1, value);
+      function copyWithSetImpl(obj, path19, index, value) {
+        if (index >= path19.length) return value;
+        var key = path19[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path19, index + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10464,11 +10464,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path18, index) {
-        var key = path18[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index + 1 === path18.length)
+      function copyWithDeleteImpl(obj, path19, index) {
+        var key = path19[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index + 1 === path19.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path18, index + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path19, index + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23745,29 +23745,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path18, value) {
+      overrideHookState = function(fiber, id, path19, value) {
         id = findHook(fiber, id);
-        null !== id && (path18 = copyWithSetImpl(id.memoizedState, path18, 0, value), id.memoizedState = path18, id.baseState = path18, fiber.memoizedProps = assign({}, fiber.memoizedProps), path18 = enqueueConcurrentRenderForLane(fiber, 2), null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2));
+        null !== id && (path19 = copyWithSetImpl(id.memoizedState, path19, 0, value), id.memoizedState = path19, id.baseState = path19, fiber.memoizedProps = assign({}, fiber.memoizedProps), path19 = enqueueConcurrentRenderForLane(fiber, 2), null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path18) {
+      overrideHookStateDeletePath = function(fiber, id, path19) {
         id = findHook(fiber, id);
-        null !== id && (path18 = copyWithDeleteImpl(id.memoizedState, path18, 0), id.memoizedState = path18, id.baseState = path18, fiber.memoizedProps = assign({}, fiber.memoizedProps), path18 = enqueueConcurrentRenderForLane(fiber, 2), null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2));
+        null !== id && (path19 = copyWithDeleteImpl(id.memoizedState, path19, 0), id.memoizedState = path19, id.baseState = path19, fiber.memoizedProps = assign({}, fiber.memoizedProps), path19 = enqueueConcurrentRenderForLane(fiber, 2), null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path18, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path18, 0, value);
+      overrideProps = function(fiber, path19, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path19, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path18 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2);
+        path19 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path18) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path18, 0);
+      overridePropsDeletePath = function(fiber, path19) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path19, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path18 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2);
+        path19 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.7.0",
+      version: "1.8.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs21 = await import("fs");
-  const content = fs21.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs22 = await import("fs");
+  const content = fs22.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -33772,8 +33772,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path18) => {
-  return path18?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path19) => {
+  return path19?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -36421,7 +36421,8 @@ function InputView({
   releaseUrl,
   theme,
   buttonText,
-  gapComponent: Gap2
+  gapComponent: Gap2,
+  announcement
 }) {
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FramedInput, { title: "Paste a profile link", width: boxWidth, button: buttonText, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
@@ -36442,6 +36443,24 @@ function InputView({
       "\u2717 ",
       warning
     ] }) : clipboardOffered ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "link in your clipboard: Tab to paste it" }) : clipboardAccepted ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "from your clipboard: \u21B5 to download it" }) : null,
+    announcement && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { marginTop: 1, flexDirection: "row", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+      Text,
+      {
+        color: announcement.level === "warning" || announcement.level === "alert" ? "yellow" : "cyan",
+        children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, children: [
+            "[",
+            announcement.level === "warning" ? "UPDATE" : announcement.level === "alert" ? "ALERT" : "INFO",
+            "] "
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, children: [
+            announcement.title,
+            ": "
+          ] }),
+          announcement.url ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { underline: true, children: terminalLink(announcement.message, announcement.url) }) : announcement.message
+        ]
+      }
+    ) }),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: BRAND_COLOR, underline: true, children: terminalLink(`v${version}`, releaseUrl) }),
@@ -38147,8 +38166,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs21 = user.friendship_status;
-      const isFollowing = fs21 ? Boolean(fs21.following) : Boolean(user.followed_by_viewer);
+      const fs22 = user.friendship_status;
+      const isFollowing = fs22 ? Boolean(fs22.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -41322,6 +41341,15 @@ var REFERER_MAP = {
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
+  if (options.signal?.aborted) {
+    return {
+      success: false,
+      downloadedCount: 0,
+      skippedCount: 0,
+      errors: ["Download aborted"],
+      outputDir: targetDir
+    };
+  }
   await fs15.mkdir(targetDir, { recursive: true });
   const rawBrowserPref = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser ?? "auto";
   const resolvedBrowserArg = resolveBrowserCookieArg(rawBrowserPref);
@@ -44333,6 +44361,135 @@ async function checkForUpdate(options = {}) {
   };
 }
 
+// src/lib/announcements.ts
+import fs21 from "fs";
+import path18 from "path";
+import os16 from "os";
+var DEFAULT_ANNOUNCEMENT_URL = "https://raw.githubusercontent.com/OpenSelena/open-nami/main/announcements.json";
+var DEFAULT_INTERVAL_MS2 = 6 * 60 * 60 * 1e3;
+var DEFAULT_TIMEOUT_MS2 = 2e3;
+function getDefaultAnnouncementCachePath() {
+  if (process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE && process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE.trim()) {
+    return path18.resolve(process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE.trim());
+  }
+  return path18.join(os16.homedir(), ".open-nami", "announcements.json");
+}
+function isAnnouncementEligible(item, currentVersion, dismissedIds = []) {
+  if (!item || typeof item !== "object") return false;
+  const a = item;
+  if (typeof a.id !== "string" || !a.id.trim()) return false;
+  if (typeof a.title !== "string" || !a.title.trim()) return false;
+  if (typeof a.message !== "string" || !a.message.trim()) return false;
+  if (dismissedIds.includes(a.id.trim())) return false;
+  if (typeof a.expiresAt === "string" && a.expiresAt.trim()) {
+    const expiry = Date.parse(a.expiresAt.trim());
+    if (!isNaN(expiry) && Date.now() > expiry) {
+      return false;
+    }
+  }
+  if (typeof a.minVersion === "string" && a.minVersion.trim()) {
+    if (compareSemVer(currentVersion, a.minVersion.trim()) < 0) {
+      return false;
+    }
+  }
+  if (typeof a.maxVersion === "string" && a.maxVersion.trim()) {
+    if (compareSemVer(currentVersion, a.maxVersion.trim()) > 0) {
+      return false;
+    }
+  }
+  return true;
+}
+function parseAnnouncementsPayload(payload, currentVersion, dismissedIds = []) {
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      if (isAnnouncementEligible(item, currentVersion, dismissedIds)) {
+        return item;
+      }
+    }
+    return null;
+  }
+  if (isAnnouncementEligible(payload, currentVersion, dismissedIds)) {
+    return payload;
+  }
+  return null;
+}
+function getCachedAnnouncement(currentVersion, cachePath = getDefaultAnnouncementCachePath()) {
+  try {
+    if (!fs21.existsSync(cachePath)) return null;
+    const raw = fs21.readFileSync(cachePath, "utf8");
+    const parsed = JSON.parse(raw);
+    const dismissedIds = Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds : [];
+    if (parsed.activeAnnouncement && isAnnouncementEligible(parsed.activeAnnouncement, currentVersion, dismissedIds)) {
+      return parsed.activeAnnouncement;
+    }
+  } catch {
+  }
+  return null;
+}
+async function fetchAnnouncement(options = {}) {
+  const currentVersion = options.currentVersion ?? "1.0.0";
+  const cachePath = options.cachePath ?? getDefaultAnnouncementCachePath();
+  const interval = options.checkIntervalMs ?? DEFAULT_INTERVAL_MS2;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS2;
+  const fetcher = options.fetchFn ?? globalThis.fetch;
+  const url = options.announcementUrl ?? process.env.OPEN_NAMI_ANNOUNCEMENT_URL ?? DEFAULT_ANNOUNCEMENT_URL;
+  if (process.env.NO_ANNOUNCEMENTS === "1" || process.env.OPEN_NAMI_NO_ANNOUNCEMENTS === "1") {
+    return null;
+  }
+  let cache3 = {
+    lastChecked: 0,
+    activeAnnouncement: null,
+    dismissedIds: []
+  };
+  if (fs21.existsSync(cachePath)) {
+    try {
+      const raw = fs21.readFileSync(cachePath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === "object") {
+        cache3 = {
+          lastChecked: typeof parsed.lastChecked === "number" ? parsed.lastChecked : 0,
+          activeAnnouncement: parsed.activeAnnouncement ?? null,
+          dismissedIds: Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds : []
+        };
+      }
+    } catch {
+    }
+  }
+  if (!options.force && cache3.lastChecked && Date.now() - cache3.lastChecked < interval) {
+    if (cache3.activeAnnouncement && isAnnouncementEligible(cache3.activeAnnouncement, currentVersion, cache3.dismissedIds)) {
+      return cache3.activeAnnouncement;
+    }
+    return null;
+  }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetcher(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: "application/json",
+        "User-Agent": `open-nami/${currentVersion}`
+      }
+    });
+    clearTimeout(timer);
+    if (!res.ok) {
+      return cache3.activeAnnouncement && isAnnouncementEligible(cache3.activeAnnouncement, currentVersion, cache3.dismissedIds) ? cache3.activeAnnouncement : null;
+    }
+    const json = await res.json();
+    const active = parseAnnouncementsPayload(json, currentVersion, cache3.dismissedIds);
+    cache3.lastChecked = Date.now();
+    cache3.activeAnnouncement = active;
+    try {
+      fs21.mkdirSync(path18.dirname(cachePath), { recursive: true });
+      fs21.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
+    } catch {
+    }
+    return active;
+  } catch {
+    return cache3.activeAnnouncement && isAnnouncementEligible(cache3.activeAnnouncement, currentVersion, cache3.dismissedIds) ? cache3.activeAnnouncement : null;
+  }
+}
+
 // src/lib/engines/core/use-engine-events.ts
 var import_react48 = __toESM(require_react(), 1);
 var INITIAL_ENGINE_EVENT_STATE = {
@@ -44555,11 +44712,17 @@ function InnerApp({
     }
   }, []);
   const [updateInfo, setUpdateInfo] = (0, import_react49.useState)(() => getCachedUpdateInfo(version));
+  const [announcement, setAnnouncement] = (0, import_react49.useState)(() => getCachedAnnouncement(version));
   (0, import_react49.useEffect)(() => {
     let cancelled = false;
     checkForUpdate({ currentVersion: version }).then((info) => {
       if (!cancelled && info.updateAvailable) {
         setUpdateInfo(info);
+      }
+    });
+    fetchAnnouncement({ currentVersion: version }).then((active) => {
+      if (!cancelled && active) {
+        setAnnouncement(active);
       }
     });
     return () => {
@@ -44781,6 +44944,9 @@ function InnerApp({
         const latestUrl = `https://github.com/OpenSelena/open-nami/releases/tag/${latestTag}`;
         targets.push({ match: latestTag, padX: 1, action: () => openBrowser(latestUrl) });
       }
+      if (announcement?.url && announcement.title) {
+        targets.push({ match: announcement.title, padX: 1, action: () => openBrowser(announcement.url) });
+      }
       targets.push({ match: `  ${DOWNLOAD_BUTTON}  `, padY: 1, action: () => handleInputSubmit(urlInput) });
       if (clipboardOffered && clipboardUrl) {
         targets.push({ match: "Tab to paste it", action: () => setUrlInput(clipboardUrl) });
@@ -44893,7 +45059,8 @@ function InnerApp({
         releaseUrl,
         theme,
         buttonText: DOWNLOAD_BUTTON,
-        gapComponent: Gap
+        gapComponent: Gap,
+        announcement
       }
     ),
     phase.name === "platform" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
@@ -45290,9 +45457,10 @@ async function main() {
     process.exit(0);
   }
   if (args.includes("--doctor")) {
-    const [report, updateInfo] = await Promise.all([
+    const [report, updateInfo, announcement] = await Promise.all([
       runDoctor(),
-      checkForUpdate({ currentVersion: VERSION })
+      checkForUpdate({ currentVersion: VERSION }),
+      fetchAnnouncement({ currentVersion: VERSION })
     ]);
     const updateText = updateInfo.updateAvailable && updateInfo.latestVersion ? `\x1B[33m(update available: v${updateInfo.latestVersion})\x1B[0m` : "\x1B[32m(latest)\x1B[0m";
     console.log(`
@@ -45307,6 +45475,15 @@ async function main() {
     console.log(`  \x1B[1mCookies:\x1B[0m`);
     for (const [platform2, ok] of Object.entries(report.cookies)) {
       console.log(`    ${ok ? "\x1B[32m\u2713\x1B[0m" : "\x1B[90m\u25CB\x1B[0m"} ${platform2}`);
+    }
+    if (announcement) {
+      const tag = announcement.level === "warning" ? "UPDATE" : announcement.level === "alert" ? "ALERT" : "INFO";
+      const color = announcement.level === "warning" || announcement.level === "alert" ? "\x1B[33m" : "\x1B[36m";
+      console.log(`
+  ${color}[${tag}]\x1B[0m \x1B[1m${announcement.title}:\x1B[0m ${announcement.message}`);
+      if (announcement.url) {
+        console.log(`         \x1B[4m${announcement.url}\x1B[0m`);
+      }
     }
     console.log();
     process.exit(0);

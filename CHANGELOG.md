@@ -4,6 +4,30 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2026-10-30
+
+### Added
+- **Remote Developer Announcement Broadcast Channel**:
+  - Implemented zero-latency cached announcement broadcasting via `announcements.json` on GitHub.
+  - TUI and CLI notice rendering with clean text badges (`[INFO]`, `[UPDATE]`, `[ALERT]`) and terminal hyperlink support.
+  - Precision targeting with semantic version filtering (`minVersion`, `maxVersion`) and expiration timestamps (`expiresAt`).
+- **Non-Invasive Daily Update & Active Telemetry**:
+  - 24-hour cached update check against the official npm registry with 0ms startup lag.
+  - Automatically measures active user pings through natural npm registry queries without tracking scripts, telemetry bloatware, or PII collection.
+- **Overhauled Zero-Bloat Installer (`install.sh`)**:
+  - Switched to Open Nami's authentic 3-row geometric Unicode block logo (`█▀█ █▀█ █▀▀...`).
+  - Stripped decorative ASCII borders and marketing fluff in favor of Unix checkmarks and in-place line overwrites.
+  - Added piped `/dev/tty` support for one-liner `curl | sh` installations when sudo permissions are required.
+
+### Fixed & Cleaned
+- **Test Suite Storage Isolation & Pre-Abort Mkdir Guard**:
+  - Added pre-abort check in `dispatchDownload()` to exit immediately before `fs.mkdir()` is called.
+  - Shielded user downloads directory (`~/Downloads/Open Nami/`) by redirecting test runner paths to `/tmp/open-nami-test-downloads/`.
+  - Isolated test fixtures with ephemeral temp directories (`mkdtemp`).
+- **Codebase-Wide Anti-Slop Hygiene**:
+  - Stripped redundant code comments, empty headings, and syntax narration.
+  - Replaced inflated marketing copy with direct, factual engineering descriptions.
+
 ## [1.7.0] - 2026-10-30
 
 ### Added & Automated
