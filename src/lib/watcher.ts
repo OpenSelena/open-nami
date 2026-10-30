@@ -83,24 +83,25 @@ export function startClipboardWatcher(options: WatcherOptions = {}): {
             processedUrls.add(parsed.cleanUrl)
             options.onDetected?.(parsed)
 
-            try {
-              const res = await dispatch({
-                profile: parsed,
-                choice: options.getChoice ? options.getChoice() : (options.choice || 'all'),
-                outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
-                writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : (options.writeMetadata ?? false),
-                signal: options.signal,
-                onProgress: (p) => {
-                  if (p.statusText) {
-                    options.onProgress?.(parsed, p.statusText)
-                  }
-                },
+            dispatch({
+              profile: parsed,
+              choice: options.getChoice ? options.getChoice() : (options.choice || 'all'),
+              outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
+              writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : (options.writeMetadata ?? false),
+              signal: options.signal,
+              onProgress: (p) => {
+                if (p.statusText) {
+                  options.onProgress?.(parsed, p.statusText)
+                }
+              },
+            })
+              .then((res) => {
+                options.onComplete?.(parsed, res)
               })
-              options.onComplete?.(parsed, res)
-            } catch (err: unknown) {
-              const error = err instanceof Error ? err : new Error(String(err))
-              options.onError?.(parsed, error)
-            }
+              .catch((err: unknown) => {
+                const error = err instanceof Error ? err : new Error(String(err))
+                options.onError?.(parsed, error)
+              })
           }
         }
       } catch {}

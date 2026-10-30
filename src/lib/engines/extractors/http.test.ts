@@ -29,6 +29,24 @@ test('parseNetscapeCookies parses valid cookies and handles #HttpOnly_', () => {
   assert.equal(igCookies['auth_token'], undefined)
 })
 
+test('parseNetscapeCookies enforces exact domain or dot-separated subdomain boundaries', () => {
+  const content = `
+.instagram.com\tTRUE\t/\tTRUE\t1750000000\tvalid_sub\t1
+instagram.com\tTRUE\t/\tTRUE\t1750000000\tvalid_exact\t2
+api.instagram.com\tTRUE\t/\tTRUE\t1750000000\tvalid_nested\t3
+evil-instagram.com\tTRUE\t/\tTRUE\t1750000000\tevil_prefix\t4
+notinstagram.com\tTRUE\t/\tTRUE\t1750000000\tevil_suffix\t5
+com\tTRUE\t/\tTRUE\t1750000000\ttld_cookie\t6
+`
+  const cookies = parseNetscapeCookies(content, 'instagram.com')
+  assert.equal(cookies['valid_sub'], '1')
+  assert.equal(cookies['valid_exact'], '2')
+  assert.equal(cookies['valid_nested'], '3')
+  assert.equal(cookies['evil_prefix'], undefined)
+  assert.equal(cookies['evil_suffix'], undefined)
+  assert.equal(cookies['tld_cookie'], undefined)
+})
+
 test('formatCookieHeader serializes cookie object', () => {
   const header = formatCookieHeader({
     sessionid: '123',

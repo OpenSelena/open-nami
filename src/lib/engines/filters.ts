@@ -208,8 +208,9 @@ export async function* filterMediaStream(
     }
 
     let shouldEarlyExit = false
+    let isDup = false
     if (filters.isDuplicate) {
-      const isDup = await filters.isDuplicate(item)
+      isDup = Boolean(await filters.isDuplicate(item))
       const currentPostId = item.carouselId || item.id
       if (isDup) {
         if (currentPostId !== lastSeenPostId) {
@@ -228,7 +229,9 @@ export async function* filterMediaStream(
     const {include, stop} = shouldIncludeItem(item, filters)
 
     if (include) {
-      count++
+      if (!isDup) {
+        count++
+      }
       yield item
       if (maxLimit !== undefined && count >= maxLimit) {
         break

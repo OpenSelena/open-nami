@@ -226,3 +226,45 @@ test('dispatchPull filters by specific username target', async () => {
     await fsPromises.rm(tmpDir, { recursive: true, force: true })
   }
 })
+
+test('dispatchPull prioritizes explicit options.outputDir even when original targetDir exists', async () => {
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-pull-outdir-'))
+  const dbFile = path.join(tmpDir, 'test-pull-outdir.db')
+  const ledger = new MediaLedger(dbFile)
+
+  try {
+    const existingDefaultDir = path.join(tmpDir, 'existing_default')
+    const customOutputDir = path.join(tmpDir, 'custom_override_dir')
+    await fsPromises.mkdir(existingDefaultDir, { recursive: true })
+
+    ledger.trackProfile({
+      platform: 'instagram',
+      username: 'outdir_user',
+      profileUrl: 'https://instagram.com/outdir_user',
+      targetDir: existingDefaultDir,
+      choice: 'photos',
+      lastPulledAt: '2026-10-01T00:00:00Z',
+      mediaCount: 1,
+    })
+
+    let capturedOutputDir: string | undefined
+    const summary = await dispatchPull({
+      ledger,
+      outputDir: customOutputDir,
+      minDelayMs: 5,
+      maxDelayMs: 10,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return { success: true, downloaded: 1, skipped: 0 }
+        },
+      },
+    })
+
+    assert.equal(summary.total, 1)
+    assert.ok(summary.items[0]?.targetDir.startsWith(customOutputDir), `Expected targetDir to start with ${customOutputDir}, got ${summary.items[0]?.targetDir}`)
+  } finally {
+    ledger.close()
+    await fsPromises.rm(tmpDir, { recursive: true, force: true })
+  }
+})
+

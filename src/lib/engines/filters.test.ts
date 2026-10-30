@@ -225,3 +225,35 @@ test('filterMediaStream early-exits after N consecutive duplicate items, bypassi
   assert.equal(results[3]?.id, 'new_2')
 })
 
+test('filterMediaStream does not consume limit on duplicate items', async () => {
+  const seenIds = new Set(['dup_1', 'dup_2'])
+
+  async function* feed(): AsyncGenerator<MediaItem> {
+    const ids = ['dup_1', 'dup_2', 'new_1', 'new_2', 'new_3']
+    for (const id of ids) {
+      yield {
+        id,
+        url: `https://example.com/${id}.jpg`,
+        filename: id,
+        extension: 'jpg',
+        type: 'photo',
+      }
+    }
+  }
+
+  const results: MediaItem[] = []
+  for await (const item of filterMediaStream(feed(), {
+    limit: 2,
+    isDuplicate: item => seenIds.has(item.id),
+  })) {
+    results.push(item)
+  }
+
+  // The 2 duplicate items plus the 2 new items should be yielded (limit = 2 new items)
+  const newItems = results.filter(r => !seenIds.has(r.id))
+  assert.equal(newItems.length, 2, 'Should yield 2 new items according to limit')
+  assert.equal(newItems[0]?.id, 'new_1')
+  assert.equal(newItems[1]?.id, 'new_2')
+})
+
+

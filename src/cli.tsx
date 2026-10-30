@@ -87,6 +87,10 @@ const HELP = `
     [Esc]            Back / Exit
 `
 
+export function shouldRunDirectDownload(initialChoice?: MediaTarget, initialInput?: string): boolean {
+  return Boolean(initialChoice && initialInput)
+}
+
 export function formatTrackedProfilesTable(profiles: TrackedProfileRecord[]): string {
   if (!profiles || profiles.length === 0) {
     return 'No tracked profiles found. Download profiles first, or use open-nami <url> to start tracking.'
@@ -650,8 +654,8 @@ async function main() {
 
   const isTTY = Boolean(process.stdout.isTTY)
 
-  // Non-interactive / headless direct execution (scripts, automation, CI)
-  if (!isTTY && initialChoice && initialInput) {
+  // Direct execution (headless or direct terminal flag invocations)
+  if (initialChoice && initialInput) {
     const parsed = parseProfileInput(initialInput)
     if (parsed.platform === 'unknown' || !parsed.cleanUrl) {
       console.error(`open-nami: that doesn't look like a valid profile URL or username: ${initialInput}`)

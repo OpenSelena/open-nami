@@ -35,6 +35,10 @@ export interface TrackedProfileRecord {
   status?: string
 }
 
+export function escapeSqliteLike(input: string): string {
+  return input.replace(/([%_\\])/g, '\\$1')
+}
+
 export class MediaLedger {
   private db: any = null
   private inMemoryFallback = {
@@ -134,9 +138,9 @@ export class MediaLedger {
     if (!this.db) return
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS media_ledger (
-        id TEXT PRIMARY KEY,
-        platform TEXT,
-        author TEXT,
+        id TEXT PRIMARY KEY COLLATE NOCASE,
+        platform TEXT COLLATE NOCASE,
+        author TEXT COLLATE NOCASE,
         url TEXT,
         filename TEXT,
         file_path TEXT,
@@ -194,18 +198,21 @@ export class MediaLedger {
 
   hasMedia(id: string, platform?: string, username?: string): boolean {
     if (this.isFallback || !this.db) {
-      if (this.inMemoryFallback.media.has(id)) return true
-      if (platform && username) {
-        const compound = `${platform.toLowerCase()}:${username.toLowerCase()}:${id}`
-        if (this.inMemoryFallback.media.has(compound)) return true
+      const idLower = id.toLowerCase()
+      for (const [key] of this.inMemoryFallback.media.entries()) {
+        if (key.toLowerCase() === idLower) return true
+        if (platform && username) {
+          const compound = `${platform.toLowerCase()}:${username.toLowerCase()}:${idLower}`
+          if (key.toLowerCase() === compound) return true
+        }
       }
       for (const record of this.inMemoryFallback.media.values()) {
-        if (record.filename && record.filename === id) {
+        if (record.filename && record.filename.toLowerCase() === idLower) {
           if (!platform || record.platform.toLowerCase() === platform.toLowerCase()) {
             return true
           }
         }
-        if (record.id && record.id.includes(id)) {
+        if (record.id && record.id.toLowerCase().includes(idLower)) {
           if (!platform || record.platform.toLowerCase() === platform.toLowerCase()) {
             return true
           }
@@ -214,17 +221,18 @@ export class MediaLedger {
       return false
     }
 
-    const stmt = this.db.prepare('SELECT 1 FROM media_ledger WHERE id = ?')
+    const stmt = this.db.prepare('SELECT 1 FROM media_ledger WHERE id = ? COLLATE NOCASE')
     if (stmt.get(id)) return true
 
     if (platform && username) {
       const compoundKey = `${platform.toLowerCase()}:${username.toLowerCase()}:${id}`
       if (stmt.get(compoundKey)) return true
 
+      const escaped = escapeSqliteLike(id)
       const fileStmt = this.db.prepare(
-        'SELECT 1 FROM media_ledger WHERE (filename = ? OR id LIKE ?) AND platform = ? COLLATE NOCASE'
+        "SELECT 1 FROM media_ledger WHERE (filename = ? COLLATE NOCASE OR id LIKE ? ESCAPE '\\') AND platform = ? COLLATE NOCASE"
       )
-      if (fileStmt.get(id, `%${id}%`, platform)) return true
+      if (fileStmt.get(id, `%${escaped}%`, platform)) return true
     }
     return false
   }

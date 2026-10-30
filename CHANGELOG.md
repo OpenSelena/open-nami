@@ -4,6 +4,31 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.4] - 2026-10-30
+
+### Fixed & Hardened
+- **Security & Sandboxing Hardening**:
+  - RFC-compliant domain boundary match in `parseNetscapeCookies` (`http.ts`), preventing cross-domain cookie leakage to sibling domains or generic TLDs.
+  - Strict ProgId pattern validation (`/^[a-zA-Z0-9_.-]+$/`) in Windows browser bridge (`browser-bridge.ts`), preventing shell command injection.
+  - Private per-user temporary cookie directories via `mkdtemp` with `0o600` permissions (`dispatcher.ts`), preventing local cookie file tampering.
+  - SQL `LIKE` wildcard escaping (`%`, `_`, `\`) with custom escape syntax in media ledger deduplication queries (`ledger.ts`).
+- **Extractor & Pagination Logic Reliability**:
+  - Facebook extractor (`facebook.ts`): derived stable media IDs from URL parameters/slugs, persisted running item counters across pagination, and removed arbitrary `maxPages = 5` cap.
+  - X / Twitter extractor (`x.ts`): evaluated total tweet results instead of media items when deciding pagination continuation, allowing seamless traversal past text-only tweet batches.
+  - TikTok extractor (`tiktok.ts`): applied date range (`since`/`until`) and limit boundaries to initial SSR hydration items, with an `emittedItemIds` deduplication set against overlapping API responses.
+  - Instagram extractor (`instagram.ts`): deferred pagination checkpoint advance until after current page items finish yielding, preventing lost downloads on mid-stream interruption.
+- **Storage, Deduplication & Filter Accuracy**:
+  - Added `COLLATE NOCASE` to `media_ledger (id, platform, author)` and standardized compound ID casing in `dispatcher.ts` and `ledger.ts`.
+  - Prevented skipped duplicate items from consuming limit quotas in `filterMediaStream`.
+  - Ensured explicit `-o` / `--output` directory flag takes precedence over pre-existing tracked directories in `open-nami pull`.
+- **TUI & CLI Interactivity**:
+  - Scoped `d` / `[d] Untrack` key and mouse click in `PullView` directly to the active cursor profile instead of defaulting to bulk untracking.
+  - Delegated batch queue line parsing to `parseBatchContent` in `BatchView`, safely preserving comments and URLs.
+  - Enabled direct headless CLI execution on interactive TTY terminals when format choices are specified.
+  - Converted blocking download execution into non-blocking promises in clipboard `Watcher`.
+  - Protected historical category archives from deletion during empty folder cleanup in `TaskManager`.
+  - Updated Node runtime prerequisite checks in `install.sh` and PyPI bundle script to `>=20`.
+
 ## [1.9.3] - 2026-10-30
 
 ### Fixed

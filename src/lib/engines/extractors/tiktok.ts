@@ -179,6 +179,7 @@ export class TikTokExtractor implements Extractor {
     const secUid = userInfo?.secUid
 
     let found = 0
+    const emittedItemIds = new Set<string>()
 
     // Initial SSR hydration items
     const initialItems = userDetail?.itemList || []
@@ -187,7 +188,12 @@ export class TikTokExtractor implements Extractor {
       for (const item of mediaList) {
         if (subDir === 'Photos' && item.type !== 'photo') continue
         if (subDir === 'Videos' && item.type !== 'video') continue
+        if (emittedItemIds.has(item.id)) continue
 
+        if (options.until !== undefined && item.date && item.date > options.until) continue
+        if (options.since !== undefined && item.date && item.date < options.since) continue
+
+        emittedItemIds.add(item.id)
         found++
         options.onProgress?.({
           stage: subDir,
@@ -195,6 +201,8 @@ export class TikTokExtractor implements Extractor {
           message: `Found item: ${item.filename}`,
         })
         yield item
+
+        if (options.limit !== undefined && found >= options.limit) return
       }
     }
 
@@ -206,6 +214,11 @@ export class TikTokExtractor implements Extractor {
     let cursor = options.initialCursor || '0'
     let hasMore = true
     const visitedCursors = new Set<string>()
+
+    const isTest =
+      process.env.NODE_ENV === 'test' ||
+      Boolean(process.env.NODE_TEST_CONTEXT) ||
+      process.execArgv.some(a => a.includes('test'))
 
     while (hasMore) {
       if (options.signal?.aborted) break
@@ -249,6 +262,7 @@ export class TikTokExtractor implements Extractor {
         for (const item of mediaList) {
           if (subDir === 'Photos' && item.type !== 'photo') continue
           if (subDir === 'Videos' && item.type !== 'video') continue
+          if (emittedItemIds.has(item.id)) continue
 
           if (options.until !== undefined && item.date && item.date > options.until) continue
           if (options.since !== undefined && item.date && item.date < options.since) {
@@ -256,6 +270,7 @@ export class TikTokExtractor implements Extractor {
             break
           }
 
+          emittedItemIds.add(item.id)
           found++
           options.onProgress?.({
             stage: subDir,
@@ -279,7 +294,9 @@ export class TikTokExtractor implements Extractor {
         options.onCheckpoint?.('timeline', '')
       }
 
-      await sleep(1000, 2000, options.signal)
+      if (!isTest) {
+        await sleep(1000, 2000, options.signal)
+      }
     }
   }
 }

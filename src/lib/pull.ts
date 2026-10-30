@@ -122,13 +122,14 @@ export async function dispatchPull(options: PullOptions = {}): Promise<PullSumma
     if (options.signal?.aborted) break
 
     const profileRec = allTracked[i]!
-    let targetDir = profileRec.targetDir
+    let targetDir = options.outputDir
+      ? resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir)
+      : profileRec.targetDir
 
     if (!fs.existsSync(targetDir)) {
-      targetDir = resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir)
       await fsPromises.mkdir(targetDir, { recursive: true })
-      profileRec.targetDir = targetDir
     }
+    profileRec.targetDir = targetDir
 
     options.onProfileStart?.(profileRec, i, allTracked.length)
 

@@ -221,7 +221,7 @@ export function parseWindowsDefaultBrowserProgId(rawOutput: string): string | nu
     const match = line.match(pattern)
     if (match && match[1]) {
       const progId = match[1].trim()
-      if (progId) return progId
+      if (/^[a-zA-Z0-9_.-]+$/.test(progId)) return progId
     }
   }
   return null

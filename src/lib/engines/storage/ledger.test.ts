@@ -282,4 +282,47 @@ test('MediaLedger fallback tracks and persists profiles across re-opens', () => 
   }
 })
 
+test('MediaLedger hasMedia escapes LIKE wildcards in id and avoids false positives', () => {
+  const ledger = new MediaLedger(':memory:')
+
+  ledger.recordMedia({
+    id: 'instagram:alice:photo_100.jpg',
+    platform: 'instagram',
+    author: 'alice',
+    url: 'https://example.com/photo_100.jpg',
+    filename: 'photo_100.jpg',
+    filePath: '/tmp/photo_100.jpg',
+    downloadedAt: new Date().toISOString(),
+  })
+
+  // 'photo%100' and 'photoX100' should NOT match 'photo_100'
+  assert.equal(ledger.hasMedia('photoX100', 'instagram', 'alice'), false)
+  assert.equal(ledger.hasMedia('photo%100', 'instagram', 'alice'), false)
+  // exact substring with underscore must match
+  assert.equal(ledger.hasMedia('photo_100', 'instagram', 'alice'), true)
+
+  ledger.close()
+})
+
+test('MediaLedger hasMedia supports case-insensitive author and compound id matching', () => {
+  const ledger = new MediaLedger(':memory:')
+
+  ledger.recordMedia({
+    id: 'INSTAGRAM:ALICE:PHOTO1.JPG',
+    platform: 'Instagram',
+    author: 'Alice',
+    url: 'https://example.com/photo1.jpg',
+    filename: 'photo1.jpg',
+    filePath: '/tmp/photo1.jpg',
+    downloadedAt: new Date().toISOString(),
+  })
+
+  // should match regardless of case
+  assert.equal(ledger.hasMedia('photo1.jpg', 'instagram', 'alice'), true)
+  assert.equal(ledger.hasMedia('INSTAGRAM:ALICE:PHOTO1.JPG'), true)
+  assert.equal(ledger.hasMedia('instagram:alice:photo1.jpg'), true)
+
+  ledger.close()
+})
+
 

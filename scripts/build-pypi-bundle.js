@@ -5,7 +5,7 @@ console.log('Building standalone ESM bundle for PyPI...')
 await build({
   entry: ['src/cli.tsx'],
   format: 'esm',
-  target: 'node18',
+  target: 'node20',
   platform: 'node',
   clean: false,
   outDir: 'pypi/src/open_nami',

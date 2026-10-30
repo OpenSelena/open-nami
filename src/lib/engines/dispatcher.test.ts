@@ -563,6 +563,27 @@ test('cleanupEmptyCategoryDirs removes empty categories with only archive files 
   }
 })
 
+test('cleanupEmptyCategoryDirs preserves category folders containing non-empty historical archives', async () => {
+  const {cleanupEmptyCategoryDirs} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const fsSync = await import('node:fs')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-cleanup-hist-'))
+
+  try {
+    const historicalStories = path.join(tmpDir, 'Stories')
+    await fsPromises.mkdir(historicalStories, {recursive: true})
+    await fsPromises.writeFile(path.join(historicalStories, '.open-nami-archive.json'), '["story_101", "story_102"]')
+
+    await cleanupEmptyCategoryDirs(tmpDir)
+
+    assert.equal(fsSync.existsSync(historicalStories), true, 'Folder with historical archive records must be preserved')
+    assert.equal(fsSync.existsSync(path.join(historicalStories, '.open-nami-archive.json')), true)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+
 test('dispatchDownload resolves cookiesFromBrowser "auto" via resolveBrowserCookieArg and forwards to runners', async () => {
   const {dispatchDownload} = await import('./dispatcher.js')
   const {resolveBrowserCookieArg} = await import('../cookies/browser-bridge.js')
@@ -811,6 +832,19 @@ test('dispatchDownload early-exits when earlyExitThreshold is met in ledger', as
   } finally {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }
+})
+
+test('createBrowserCookieCopy creates private temporary directory with secure permissions and cleans up', async () => {
+  const {createBrowserCookieCopy} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+
+  const copy = await createBrowserCookieCopy('instagram', 'mock-non-existent-browser')
+  assert.equal(copy, null)
+
+  const tmpBase = os.tmpdir()
+  const entries = await fsPromises.readdir(tmpBase)
+  const strayDirs = entries.filter(e => e.startsWith('open-nami-cookies-'))
+  assert.equal(strayDirs.length, 0)
 })
 
 

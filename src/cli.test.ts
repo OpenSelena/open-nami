@@ -166,3 +166,13 @@ test('handlePullCli handles empty registry with code 0', async () => {
     await fsPromises.rm(tmpDir, { recursive: true, force: true })
   }
 })
+
+test('shouldRunDirectDownload returns true when target and choice are passed regardless of TTY', async () => {
+  const {shouldRunDirectDownload} = await import('./cli.js')
+  assert.equal(shouldRunDirectDownload('photos', 'https://instagram.com/user'), true)
+  assert.equal(shouldRunDirectDownload('videos', 'user'), true)
+  assert.equal(shouldRunDirectDownload('all', 'user'), true)
+  assert.equal(shouldRunDirectDownload(undefined, 'https://instagram.com/user'), false)
+  assert.equal(shouldRunDirectDownload('photos', undefined), false)
+})
+

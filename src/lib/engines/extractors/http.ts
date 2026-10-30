@@ -37,7 +37,11 @@ export function parseNetscapeCookies(content: string, filterDomain?: string): Re
       if (filterDomain) {
         const cleanDomain = filterDomain.toLowerCase().replace(/^\./, '')
         const lineDomain = domain.replace(/^\./, '')
-        if (!lineDomain.endsWith(cleanDomain) && !cleanDomain.endsWith(lineDomain)) {
+        const isMatch =
+          lineDomain === cleanDomain ||
+          lineDomain.endsWith(`.${cleanDomain}`) ||
+          (cleanDomain.endsWith(`.${lineDomain}`) && lineDomain.includes('.'))
+        if (!isMatch) {
           continue
         }
       }

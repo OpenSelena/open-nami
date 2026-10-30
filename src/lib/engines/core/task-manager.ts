@@ -34,12 +34,37 @@ export async function cleanupEmptyCategoryDirs(targetDir: string): Promise<void>
           e !== 'archive_gallery-dl.sqlite3',
       )
       if (nonArchiveEntries.length === 0) {
+        let hasArchiveIds = false
         for (const entry of entries) {
-          try {
-            await fs.unlink(path.join(fullPath, entry))
-          } catch {}
+          const entryPath = path.join(fullPath, entry)
+          if (entry === '.open-nami-archive.json') {
+            try {
+              const raw = await fs.readFile(entryPath, 'utf-8')
+              const parsed = JSON.parse(raw)
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                hasArchiveIds = true
+                break
+              }
+            } catch {}
+          } else if (entry === 'archive.txt' || entry === 'archive_yt-dlp.txt') {
+            try {
+              const raw = await fs.readFile(entryPath, 'utf-8')
+              if (raw.trim().length > 0) {
+                hasArchiveIds = true
+                break
+              }
+            } catch {}
+          }
         }
-        await fs.rmdir(fullPath).catch(() => {})
+
+        if (!hasArchiveIds) {
+          for (const entry of entries) {
+            try {
+              await fs.unlink(path.join(fullPath, entry))
+            } catch {}
+          }
+          await fs.rmdir(fullPath).catch(() => {})
+        }
       }
     } catch {}
   }

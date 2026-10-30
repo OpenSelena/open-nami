@@ -270,10 +270,7 @@ export function PullView({
     }
 
     if (input === 'd' || input === 'D') {
-      const selected = items.filter((p) => p.selected)
-      if (selected.length > 1) {
-        setUntrackConfirm({type: 'bulk', profiles: selected.map((s) => s.profile)})
-      } else if (items[cursor]) {
+      if (items[cursor]) {
         setUntrackConfirm({type: 'single', profile: items[cursor]!.profile})
       }
       return
@@ -315,10 +312,7 @@ export function PullView({
       targets.push({
         match: '[d] Untrack',
         action: () => {
-          const selected = items.filter((p) => p.selected)
-          if (selected.length > 1) {
-            setUntrackConfirm({type: 'bulk', profiles: selected.map((s) => s.profile)})
-          } else if (items[cursor]) {
+          if (items[cursor]) {
             setUntrackConfirm({type: 'single', profile: items[cursor]!.profile})
           }
         },

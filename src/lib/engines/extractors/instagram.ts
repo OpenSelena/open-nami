@@ -999,20 +999,28 @@ export class InstagramExtractor implements Extractor {
       if (reachedSinceLimit) break
 
       if (!hasNextPage || !endCursor || options.signal?.aborted) {
+        options.onCheckpoint?.('timeline', '')
         break
       }
 
-      await sleep(1500, 2500, options.signal)
+      options.onCheckpoint?.('timeline', endCursor)
+
+      const isTest =
+        process.env.NODE_ENV === 'test' ||
+        Boolean(process.env.NODE_TEST_CONTEXT) ||
+        process.execArgv.some(a => a.includes('test'))
+
+      if (!isTest) {
+        await sleep(1500, 2500, options.signal)
+      }
 
       try {
         const nextPage = await this.fetchNextPostsPage(userId || '', username, endCursor, options, webTokens)
         currentEdges = nextPage.edges
         hasNextPage = nextPage.hasNextPage
         endCursor = nextPage.nextCursor
-        if (endCursor) {
-          options.onCheckpoint?.('timeline', endCursor)
-        }
         if (currentEdges.length === 0) {
+          options.onCheckpoint?.('timeline', '')
           break
         }
       } catch {

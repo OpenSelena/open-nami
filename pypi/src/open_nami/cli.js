@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.3",
+      version: "1.9.4",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -37245,7 +37245,7 @@ function parseWindowsDefaultBrowserProgId(rawOutput) {
     const match = line.match(pattern);
     if (match && match[1]) {
       const progId = match[1].trim();
-      if (progId) return progId;
+      if (/^[a-zA-Z0-9_.-]+$/.test(progId)) return progId;
     }
   }
   return null;
@@ -37847,7 +37847,8 @@ function parseNetscapeCookies(content, filterDomain) {
       if (filterDomain) {
         const cleanDomain = filterDomain.toLowerCase().replace(/^\./, "");
         const lineDomain = domain.replace(/^\./, "");
-        if (!lineDomain.endsWith(cleanDomain) && !cleanDomain.endsWith(lineDomain)) {
+        const isMatch = lineDomain === cleanDomain || lineDomain.endsWith(`.${cleanDomain}`) || cleanDomain.endsWith(`.${lineDomain}`) && lineDomain.includes(".");
+        if (!isMatch) {
           continue;
         }
       }
@@ -38823,18 +38824,21 @@ var InstagramExtractor = class {
       }
       if (reachedSinceLimit) break;
       if (!hasNextPage || !endCursor || options.signal?.aborted) {
+        options.onCheckpoint?.("timeline", "");
         break;
       }
-      await sleep(1500, 2500, options.signal);
+      options.onCheckpoint?.("timeline", endCursor);
+      const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test"));
+      if (!isTest) {
+        await sleep(1500, 2500, options.signal);
+      }
       try {
         const nextPage = await this.fetchNextPostsPage(userId || "", username, endCursor, options, webTokens);
         currentEdges = nextPage.edges;
         hasNextPage = nextPage.hasNextPage;
         endCursor = nextPage.nextCursor;
-        if (endCursor) {
-          options.onCheckpoint?.("timeline", endCursor);
-        }
         if (currentEdges.length === 0) {
+          options.onCheckpoint?.("timeline", "");
           break;
         }
       } catch {
@@ -39171,6 +39175,7 @@ var XExtractor = class {
       const instructions = res?.data?.user?.result?.timeline_v2?.timeline?.instructions || [];
       let newCursor;
       let pageItemCount = 0;
+      let pageTweetCount = 0;
       for (const inst of instructions) {
         const entries = inst.entries || (inst.entry ? [inst.entry] : []);
         for (const entry of entries) {
@@ -39180,6 +39185,7 @@ var XExtractor = class {
           }
           const tweetContent = entry.content?.itemContent?.tweet_results?.result;
           if (tweetContent) {
+            pageTweetCount++;
             if (shouldSkipTweetReply(tweetContent, userId, isLikes ? "likes" : "timeline")) {
               continue;
             }
@@ -39210,13 +39216,16 @@ var XExtractor = class {
           }
         }
       }
-      if (!newCursor || newCursor === cursor || pageItemCount === 0) {
+      const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test"));
+      if (!newCursor || newCursor === cursor || pageTweetCount === 0 && pageItemCount === 0) {
         hasMore = false;
         options.onCheckpoint?.("timeline", "");
       } else {
         cursor = newCursor;
         options.onCheckpoint?.("timeline", cursor);
-        await sleep(1500, 2500, options.signal);
+        if (!isTest) {
+          await sleep(1500, 2500, options.signal);
+        }
       }
     }
   }
@@ -39382,12 +39391,17 @@ var TikTokExtractor = class {
     const userInfo = userDetail?.userInfo?.user;
     const secUid = userInfo?.secUid;
     let found = 0;
+    const emittedItemIds = /* @__PURE__ */ new Set();
     const initialItems = userDetail?.itemList || [];
     for (const rawItem of initialItems) {
       const mediaList = parseTikTokItem(rawItem, cleanUsername);
       for (const item of mediaList) {
         if (subDir === "Photos" && item.type !== "photo") continue;
         if (subDir === "Videos" && item.type !== "video") continue;
+        if (emittedItemIds.has(item.id)) continue;
+        if (options.until !== void 0 && item.date && item.date > options.until) continue;
+        if (options.since !== void 0 && item.date && item.date < options.since) continue;
+        emittedItemIds.add(item.id);
         found++;
         options.onProgress?.({
           stage: subDir,
@@ -39395,6 +39409,7 @@ var TikTokExtractor = class {
           message: `Found item: ${item.filename}`
         });
         yield item;
+        if (options.limit !== void 0 && found >= options.limit) return;
       }
     }
     if (!secUid) {
@@ -39403,6 +39418,7 @@ var TikTokExtractor = class {
     let cursor = options.initialCursor || "0";
     let hasMore = true;
     const visitedCursors = /* @__PURE__ */ new Set();
+    const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test"));
     while (hasMore) {
       if (options.signal?.aborted) break;
       if (visitedCursors.has(cursor)) break;
@@ -39441,11 +39457,13 @@ var TikTokExtractor = class {
         for (const item of mediaList) {
           if (subDir === "Photos" && item.type !== "photo") continue;
           if (subDir === "Videos" && item.type !== "video") continue;
+          if (emittedItemIds.has(item.id)) continue;
           if (options.until !== void 0 && item.date && item.date > options.until) continue;
           if (options.since !== void 0 && item.date && item.date < options.since) {
             reachedSinceLimit = true;
             break;
           }
+          emittedItemIds.add(item.id);
           found++;
           options.onProgress?.({
             stage: subDir,
@@ -39465,7 +39483,9 @@ var TikTokExtractor = class {
       } else {
         options.onCheckpoint?.("timeline", "");
       }
-      await sleep(1e3, 2e3, options.signal);
+      if (!isTest) {
+        await sleep(1e3, 2e3, options.signal);
+      }
     }
   }
 };
@@ -39491,7 +39511,26 @@ function decodeEscapedUrl(raw) {
     });
   }
 }
-function extractFacebookMediaFromHtml(html, username) {
+function deriveFacebookMediaId(url, type, index) {
+  try {
+    const parsed = new URL(url);
+    const fbid = parsed.searchParams.get("fbid");
+    if (fbid) {
+      return { id: `fb_${type}_${fbid}`, filenameSuffix: `${type}_${fbid}` };
+    }
+    const pathname = parsed.pathname;
+    const basename = pathname.substring(pathname.lastIndexOf("/") + 1).replace(/\.[^.]+$/, "");
+    if (basename && !/^(image|photo|video|media)$/i.test(basename)) {
+      const clean = basename.replace(/[^a-zA-Z0-9_-]/g, "_");
+      if (clean.length >= 3) {
+        return { id: `fb_${type}_${clean}`, filenameSuffix: `${type}_${clean}` };
+      }
+    }
+  } catch {
+  }
+  return { id: `fb_${type}_${index}`, filenameSuffix: `${type}_${index}` };
+}
+function extractFacebookMediaFromHtml(html, username, counters = { photoIndex: 1, videoIndex: 1 }) {
   const items = [];
   const seenUrls = /* @__PURE__ */ new Set();
   const videoPatterns = [
@@ -39501,7 +39540,6 @@ function extractFacebookMediaFromHtml(html, username) {
     /"playable_url":"([^"]+)"/g,
     /<video[^>]+src=["'](https?:[^"']+)["']/gi
   ];
-  let videoIndex = 1;
   for (const regex2 of videoPatterns) {
     let vMatch;
     while ((vMatch = regex2.exec(html)) !== null) {
@@ -39509,33 +39547,34 @@ function extractFacebookMediaFromHtml(html, username) {
       const videoUrl = decodeEscapedUrl(rawUrl).replace(/&amp;/g, "&");
       if (videoUrl.startsWith("http") && !seenUrls.has(videoUrl)) {
         seenUrls.add(videoUrl);
+        const meta = deriveFacebookMediaId(videoUrl, "video", counters.videoIndex);
         items.push({
-          id: `fb_video_${videoIndex}`,
+          id: meta.id,
           url: videoUrl,
-          filename: `${username}_video_${videoIndex}`,
+          filename: `${username}_${meta.filenameSuffix}`,
           extension: "mp4",
           type: "video"
         });
-        videoIndex++;
+        counters.videoIndex++;
       }
     }
   }
   const photoRegex = /,"(?:image|viewer_image|full_size_image|display_image)":\{"uri":"([^"]+)"/g;
   let match;
-  let photoIndex = 1;
   while ((match = photoRegex.exec(html)) !== null) {
     const rawUrl = match[1];
     const photoUrl = decodeEscapedUrl(rawUrl).replace(/&amp;/g, "&");
     if (!seenUrls.has(photoUrl)) {
       seenUrls.add(photoUrl);
+      const meta = deriveFacebookMediaId(photoUrl, "photo", counters.photoIndex);
       items.push({
-        id: `fb_photo_${photoIndex}`,
+        id: meta.id,
         url: photoUrl,
-        filename: `${username}_photo_${photoIndex}`,
+        filename: `${username}_${meta.filenameSuffix}`,
         extension: "jpg",
         type: "photo"
       });
-      photoIndex++;
+      counters.photoIndex++;
     }
   }
   const mbasicImgRegex = /<img[^>]+src=["'](https:\/\/[^"'\s]*scontent[^"'\s]*\.(?:jpg|png|webp)[^"'\s]*)["']/gi;
@@ -39545,14 +39584,15 @@ function extractFacebookMediaFromHtml(html, username) {
     const photoUrl = decodeEscapedUrl(rawUrl).replace(/&amp;/g, "&");
     if (!seenUrls.has(photoUrl)) {
       seenUrls.add(photoUrl);
+      const meta = deriveFacebookMediaId(photoUrl, "photo", counters.photoIndex);
       items.push({
-        id: `fb_photo_${photoIndex}`,
+        id: meta.id,
         url: photoUrl,
-        filename: `${username}_photo_${photoIndex}`,
+        filename: `${username}_${meta.filenameSuffix}`,
         extension: "jpg",
         type: "photo"
       });
-      photoIndex++;
+      counters.photoIndex++;
     }
   }
   if (items.length === 0) {
@@ -39562,14 +39602,15 @@ function extractFacebookMediaFromHtml(html, username) {
       const cleanUrl = sMatch[0].replace(/\\/g, "").replace(/&amp;/g, "&");
       if (!seenUrls.has(cleanUrl)) {
         seenUrls.add(cleanUrl);
+        const meta = deriveFacebookMediaId(cleanUrl, "photo", counters.photoIndex);
         items.push({
-          id: `fb_photo_${photoIndex}`,
+          id: meta.id,
           url: cleanUrl,
-          filename: `${username}_photo_${photoIndex}`,
+          filename: `${username}_${meta.filenameSuffix}`,
           extension: "jpg",
           type: "photo"
         });
-        photoIndex++;
+        counters.photoIndex++;
       }
     }
   }
@@ -39644,8 +39685,10 @@ var FacebookExtractor = class {
       found: 0,
       message: `Fetching Facebook profile @${username}...`
     });
+    const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test"));
     const pathsToScrape = subDir === "All" ? ["photos", "videos"] : [subDir === "Photos" ? "photos" : "videos"];
     const seenUrls = /* @__PURE__ */ new Set();
+    const counters = { photoIndex: 1, videoIndex: 1 };
     let found = 0;
     for (const targetPath of pathsToScrape) {
       if (options.signal?.aborted) break;
@@ -39715,9 +39758,9 @@ var FacebookExtractor = class {
         }
       }
       let page = 1;
-      const maxPages = 5;
+      const maxPages = options.limit ? Math.max(10, Math.ceil(options.limit / 5) + 5) : 500;
       while (true) {
-        const items = extractFacebookMediaFromHtml(html, username);
+        const items = extractFacebookMediaFromHtml(html, username, counters);
         let pageNewCount = 0;
         for (const item of items) {
           if (subDir === "Photos" && item.type !== "photo") continue;
@@ -39743,7 +39786,9 @@ var FacebookExtractor = class {
         if (pageNewCount === 0 && page > 1) {
           break;
         }
-        await sleep(1e3, 2e3, options.signal);
+        if (!isTest) {
+          await sleep(1e3, 2e3, options.signal);
+        }
         try {
           currentUrl = nextUrl;
           html = await this.httpClient.fetchText(currentUrl, {
@@ -40286,8 +40331,9 @@ async function* filterMediaStream(items, filters) {
       break;
     }
     let shouldEarlyExit = false;
+    let isDup = false;
     if (filters.isDuplicate) {
-      const isDup = await filters.isDuplicate(item);
+      isDup = Boolean(await filters.isDuplicate(item));
       const currentPostId = item.carouselId || item.id;
       if (isDup) {
         if (currentPostId !== lastSeenPostId) {
@@ -40304,7 +40350,9 @@ async function* filterMediaStream(items, filters) {
     }
     const { include, stop } = shouldIncludeItem(item, filters);
     if (include) {
-      count++;
+      if (!isDup) {
+        count++;
+      }
       yield item;
       if (maxLimit !== void 0 && count >= maxLimit) {
         break;
@@ -41554,6 +41602,9 @@ import path13 from "path";
 import os9 from "os";
 import { createRequire as createRequire2 } from "module";
 var require3 = createRequire2(import.meta.url);
+function escapeSqliteLike(input) {
+  return input.replace(/([%_\\])/g, "\\$1");
+}
 var MediaLedger = class {
   db = null;
   inMemoryFallback = {
@@ -41645,9 +41696,9 @@ var MediaLedger = class {
     if (!this.db) return;
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS media_ledger (
-        id TEXT PRIMARY KEY,
-        platform TEXT,
-        author TEXT,
+        id TEXT PRIMARY KEY COLLATE NOCASE,
+        platform TEXT COLLATE NOCASE,
+        author TEXT COLLATE NOCASE,
         url TEXT,
         filename TEXT,
         file_path TEXT,
@@ -41697,18 +41748,21 @@ var MediaLedger = class {
   }
   hasMedia(id, platform2, username) {
     if (this.isFallback || !this.db) {
-      if (this.inMemoryFallback.media.has(id)) return true;
-      if (platform2 && username) {
-        const compound = `${platform2.toLowerCase()}:${username.toLowerCase()}:${id}`;
-        if (this.inMemoryFallback.media.has(compound)) return true;
+      const idLower = id.toLowerCase();
+      for (const [key] of this.inMemoryFallback.media.entries()) {
+        if (key.toLowerCase() === idLower) return true;
+        if (platform2 && username) {
+          const compound = `${platform2.toLowerCase()}:${username.toLowerCase()}:${idLower}`;
+          if (key.toLowerCase() === compound) return true;
+        }
       }
       for (const record of this.inMemoryFallback.media.values()) {
-        if (record.filename && record.filename === id) {
+        if (record.filename && record.filename.toLowerCase() === idLower) {
           if (!platform2 || record.platform.toLowerCase() === platform2.toLowerCase()) {
             return true;
           }
         }
-        if (record.id && record.id.includes(id)) {
+        if (record.id && record.id.toLowerCase().includes(idLower)) {
           if (!platform2 || record.platform.toLowerCase() === platform2.toLowerCase()) {
             return true;
           }
@@ -41716,15 +41770,16 @@ var MediaLedger = class {
       }
       return false;
     }
-    const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ?");
+    const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ? COLLATE NOCASE");
     if (stmt.get(id)) return true;
     if (platform2 && username) {
       const compoundKey = `${platform2.toLowerCase()}:${username.toLowerCase()}:${id}`;
       if (stmt.get(compoundKey)) return true;
+      const escaped = escapeSqliteLike(id);
       const fileStmt = this.db.prepare(
-        "SELECT 1 FROM media_ledger WHERE (filename = ? OR id LIKE ?) AND platform = ? COLLATE NOCASE"
+        "SELECT 1 FROM media_ledger WHERE (filename = ? COLLATE NOCASE OR id LIKE ? ESCAPE '\\') AND platform = ? COLLATE NOCASE"
       );
-      if (fileStmt.get(id, `%${id}%`, platform2)) return true;
+      if (fileStmt.get(id, `%${escaped}%`, platform2)) return true;
     }
     return false;
   }
@@ -41980,14 +42035,40 @@ async function cleanupEmptyCategoryDirs(targetDir) {
         (e) => e !== ".open-nami-archive.json" && e !== "archive.txt" && e !== "archive_yt-dlp.txt" && e !== "archive_gallery-dl.sqlite3"
       );
       if (nonArchiveEntries.length === 0) {
+        let hasArchiveIds = false;
         for (const entry of entries) {
-          try {
-            await fs15.unlink(path14.join(fullPath, entry));
-          } catch {
+          const entryPath = path14.join(fullPath, entry);
+          if (entry === ".open-nami-archive.json") {
+            try {
+              const raw = await fs15.readFile(entryPath, "utf-8");
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                hasArchiveIds = true;
+                break;
+              }
+            } catch {
+            }
+          } else if (entry === "archive.txt" || entry === "archive_yt-dlp.txt") {
+            try {
+              const raw = await fs15.readFile(entryPath, "utf-8");
+              if (raw.trim().length > 0) {
+                hasArchiveIds = true;
+                break;
+              }
+            } catch {
+            }
           }
         }
-        await fs15.rmdir(fullPath).catch(() => {
-        });
+        if (!hasArchiveIds) {
+          for (const entry of entries) {
+            try {
+              await fs15.unlink(path14.join(fullPath, entry));
+            } catch {
+            }
+          }
+          await fs15.rmdir(fullPath).catch(() => {
+          });
+        }
       }
     } catch {
     }
@@ -42052,6 +42133,42 @@ var REFERER_MAP = {
   x: "https://x.com/",
   facebook: "https://www.facebook.com/"
 };
+async function createBrowserCookieCopy(platform2, rawBrowserPref) {
+  if (platform2 === "unknown" || !rawBrowserPref || rawBrowserPref.toLowerCase() === "none") {
+    return null;
+  }
+  try {
+    const tempCookieDir = await fs16.mkdtemp(path15.join(os10.tmpdir(), "open-nami-cookies-"));
+    const tempCookieFile = path15.join(
+      tempCookieDir,
+      `cookie-${platform2}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`
+    );
+    const exported = await exportCookiesForPlatform(rawBrowserPref, platform2, tempCookieFile);
+    if (exported) {
+      try {
+        await fs16.chmod(tempCookieFile, 384);
+      } catch {
+      }
+      return {
+        filePath: tempCookieFile,
+        isTemporary: true,
+        cleanup: async () => {
+          try {
+            await fs16.rm(tempCookieDir, { recursive: true, force: true });
+          } catch {
+          }
+        }
+      };
+    } else {
+      try {
+        await fs16.rm(tempCookieDir, { recursive: true, force: true });
+      } catch {
+      }
+    }
+  } catch {
+  }
+  return null;
+}
 async function dispatchDownload(options) {
   const { profile, choice, onProgress } = options;
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username);
@@ -42072,28 +42189,7 @@ async function dispatchDownload(options) {
   const masterCookie = findCookieFile(profile.platform);
   let cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
   if (!cookieCopy && rawBrowserPref && rawBrowserPref.toLowerCase() !== "none") {
-    try {
-      const tempCookieDir = path15.join(os10.tmpdir(), "open-nami-cookies");
-      await fs16.mkdir(tempCookieDir, { recursive: true, mode: 448 });
-      const tempCookieFile = path15.join(
-        tempCookieDir,
-        `cookie-${profile.platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`
-      );
-      const exported = await exportCookiesForPlatform(rawBrowserPref, profile.platform, tempCookieFile);
-      if (exported) {
-        cookieCopy = {
-          filePath: tempCookieFile,
-          isTemporary: true,
-          cleanup: async () => {
-            try {
-              await fs16.unlink(tempCookieFile);
-            } catch {
-            }
-          }
-        };
-      }
-    } catch {
-    }
+    cookieCopy = await createBrowserCookieCopy(profile.platform, rawBrowserPref);
   }
   let totalDownloaded = 0;
   let totalSkipped = 0;
@@ -42119,7 +42215,7 @@ async function dispatchDownload(options) {
           });
         }
         activeLedger.recordMedia({
-          id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
+          id: `${profile.platform.toLowerCase()}:${profile.username.toLowerCase()}:${progress.currentFile}`,
           platform: profile.platform,
           author: profile.username,
           url: profile.cleanUrl || "",
@@ -43415,24 +43511,23 @@ function startClipboardWatcher(options = {}) {
           if (parsed.platform !== "unknown" && parsed.cleanUrl && !processedUrls.has(parsed.cleanUrl)) {
             processedUrls.add(parsed.cleanUrl);
             options.onDetected?.(parsed);
-            try {
-              const res = await dispatch({
-                profile: parsed,
-                choice: options.getChoice ? options.getChoice() : options.choice || "all",
-                outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
-                writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : options.writeMetadata ?? false,
-                signal: options.signal,
-                onProgress: (p) => {
-                  if (p.statusText) {
-                    options.onProgress?.(parsed, p.statusText);
-                  }
+            dispatch({
+              profile: parsed,
+              choice: options.getChoice ? options.getChoice() : options.choice || "all",
+              outputDir: resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir),
+              writeMetadata: options.getWriteMetadata ? options.getWriteMetadata() : options.writeMetadata ?? false,
+              signal: options.signal,
+              onProgress: (p) => {
+                if (p.statusText) {
+                  options.onProgress?.(parsed, p.statusText);
                 }
-              });
+              }
+            }).then((res) => {
               options.onComplete?.(parsed, res);
-            } catch (err) {
+            }).catch((err) => {
               const error = err instanceof Error ? err : new Error(String(err));
               options.onError?.(parsed, error);
-            }
+            });
           }
         }
       } catch {
@@ -43907,6 +44002,9 @@ var PLATFORMS = ["instagram", "tiktok", "facebook", "x"];
 var CHOICES2 = ["all", "photos", "videos", "stories", "highlights"];
 var DATE_PRESETS = ["all", "24h", "7d", "30d", "2024", "2023", "2022", "2021", "custom"];
 var LIMIT_PRESETS = [void 0, 10, 24, 50, 100, "custom"];
+function extractBatchLinesFromInput(rawText) {
+  return Array.from(new Set(parseBatchContent(rawText)));
+}
 function BatchView({
   onBack,
   outputDir,
@@ -43992,11 +44090,7 @@ function BatchView({
         return;
       }
     } else {
-      lines = Array.from(
-        new Set(
-          rawText.split(/[\r\n,;\s]+/).map((s) => s.trim()).filter(Boolean)
-        )
-      );
+      lines = extractBatchLinesFromInput(rawText);
       if (lines.length === 0) {
         setErrorMessage("Please enter at least one profile URL or username");
         return;
@@ -44827,12 +44921,11 @@ async function dispatchPull(options = {}) {
   for (let i = 0; i < allTracked.length; i++) {
     if (options.signal?.aborted) break;
     const profileRec = allTracked[i];
-    let targetDir = profileRec.targetDir;
+    let targetDir = options.outputDir ? resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir) : profileRec.targetDir;
     if (!fs21.existsSync(targetDir)) {
-      targetDir = resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir);
       await fsPromises6.mkdir(targetDir, { recursive: true });
-      profileRec.targetDir = targetDir;
     }
+    profileRec.targetDir = targetDir;
     options.onProfileStart?.(profileRec, i, allTracked.length);
     let parsed = parseProfileInput(profileRec.profileUrl);
     if (parsed.platform === "unknown" || !parsed.username) {
@@ -45129,10 +45222,7 @@ function PullView({
       return;
     }
     if (input === "d" || input === "D") {
-      const selected = items.filter((p) => p.selected);
-      if (selected.length > 1) {
-        setUntrackConfirm({ type: "bulk", profiles: selected.map((s) => s.profile) });
-      } else if (items[cursor]) {
+      if (items[cursor]) {
         setUntrackConfirm({ type: "single", profile: items[cursor].profile });
       }
       return;
@@ -45169,10 +45259,7 @@ function PullView({
       targets.push({
         match: "[d] Untrack",
         action: () => {
-          const selected = items.filter((p) => p.selected);
-          if (selected.length > 1) {
-            setUntrackConfirm({ type: "bulk", profiles: selected.map((s) => s.profile) });
-          } else if (items[cursor]) {
+          if (items[cursor]) {
             setUntrackConfirm({ type: "single", profile: items[cursor].profile });
           }
         }
@@ -46820,6 +46907,9 @@ var HELP = `
     [o]              Open Downloads folder on completion
     [Esc]            Back / Exit
 `;
+function shouldRunDirectDownload(initialChoice, initialInput) {
+  return Boolean(initialChoice && initialInput);
+}
 function formatTrackedProfilesTable(profiles) {
   if (!profiles || profiles.length === 0) {
     return "No tracked profiles found. Download profiles first, or use open-nami <url> to start tracking.";
@@ -47334,7 +47424,7 @@ async function main() {
     }
   }
   const isTTY = Boolean(process.stdout.isTTY);
-  if (!isTTY && initialChoice && initialInput) {
+  if (initialChoice && initialInput) {
     const parsed = parseProfileInput(initialInput);
     if (parsed.platform === "unknown" || !parsed.cleanUrl) {
       console.error(`open-nami: that doesn't look like a valid profile URL or username: ${initialInput}`);
@@ -47414,7 +47504,8 @@ export {
   handlePullCli,
   handleTrackCommand,
   handleUntrackCommand,
-  resolveVersion
+  resolveVersion,
+  shouldRunDirectDownload
 };
 /*! Bundled license information:
 

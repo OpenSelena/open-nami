@@ -220,3 +220,46 @@ test('TikTokExtractor extract forwards session cookies and query parameters in A
   assert.equal(capturedOptions?.cookieDomain, 'tiktok.com')
 })
 
+test('TikTokExtractor extract applies since, until, limit on SSR hydration and deduplicates API overlap', async () => {
+  const {TikTokExtractor} = await import('./tiktok.js')
+
+  const mockHttpClient: any = {
+    fetchText: async () => `
+      <script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">
+      {"__DEFAULT_SCOPE__":{"webapp.user-detail":{
+        "userInfo":{"user":{"id":"55","secUid":"MS4wLjABAAAA_TEST"}},
+        "itemList":[
+          {"id":"post_ssr_old","desc":"Old","createTime":"1000","video":{"playAddr":"https://cdn.tiktok.com/old.mp4"}},
+          {"id":"post_ssr_valid","desc":"Valid","createTime":"2000","video":{"playAddr":"https://cdn.tiktok.com/valid.mp4"}},
+          {"id":"post_ssr_future","desc":"Future","createTime":"3000","video":{"playAddr":"https://cdn.tiktok.com/future.mp4"}}
+        ]
+      }}}
+      </script>
+    `,
+    fetchJson: async () => {
+      return {
+        itemList: [
+          {"id":"post_ssr_valid","desc":"Valid overlap","createTime":"2000","video":{"playAddr":"https://cdn.tiktok.com/valid.mp4"}},
+          {"id":"post_api_new","desc":"New","createTime":"2500","video":{"playAddr":"https://cdn.tiktok.com/new.mp4"}}
+        ],
+        hasMore: false,
+        cursor: '0',
+      }
+    },
+  }
+
+  const extractor = new TikTokExtractor(mockHttpClient)
+  const items = []
+  for await (const item of extractor.extract(
+    {platform: 'tiktok', username: 'tester', cleanUrl: 'https://www.tiktok.com/@tester', rawInput: 'tester'},
+    {subDir: 'Videos', since: 1500, until: 2800},
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(items.length, 2)
+  assert.equal(items[0].id, 'post_ssr_valid')
+  assert.equal(items[1].id, 'post_api_new')
+})
+
+

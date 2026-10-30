@@ -75,3 +75,56 @@ test('startClipboardWatcher respects abort signal and terminates cleanly', async
   await watcher.promise
   assert.ok(pollCount >= 2, 'Should have polled at least twice before abort')
 })
+
+test('startClipboardWatcher does not block polling loop during active downloads', async () => {
+  const clipboardQueue = [
+    'https://www.instagram.com/user_first/',
+    'https://www.instagram.com/user_second/',
+  ]
+
+  let currentIndex = 0
+  const mockReadClipboard = () => {
+    if (currentIndex < clipboardQueue.length) {
+      return clipboardQueue[currentIndex++]
+    }
+    return ''
+  }
+
+  const detected: string[] = []
+  let firstResolve: (() => void) | null = null
+
+  const mockDispatch = async (opts: any): Promise<EngineResult> => {
+    if (opts.profile.username === 'user_first') {
+      // Simulate long download that stays pending until released
+      await new Promise<void>((resolve) => {
+        firstResolve = resolve
+      })
+    }
+    return {
+      success: true,
+      downloadedCount: 1,
+      skippedCount: 0,
+      errors: [],
+      outputDir: opts.outputDir || '/downloads',
+    }
+  }
+
+  const watcher = startClipboardWatcher({
+    intervalMs: 10,
+    readClipboardFn: mockReadClipboard,
+    dispatchFn: mockDispatch,
+    onDetected: (p) => detected.push(p.username),
+  })
+
+  // Wait 40ms: during this time, even though user_first is still downloading,
+  // user_second should already be detected by the non-blocking polling loop!
+  await new Promise((r) => setTimeout(r, 50))
+  assert.deepEqual(detected, ['user_first', 'user_second'])
+
+  // Release first download
+  const resolveFirst = firstResolve as (() => void) | null
+  resolveFirst?.()
+  watcher.stop()
+  await watcher.promise
+})
+

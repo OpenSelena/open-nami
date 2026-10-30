@@ -658,6 +658,90 @@ test('InstagramExtractor extract Highlights finishes cleanly when highlights tra
   assert.ok(progressMessages.some(m => m.includes('has no available highlights')))
 })
 
+test('InstagramExtractor defers checkpoint cursor advance until current page items are yielded', async () => {
+  const {InstagramExtractor} = await import('./instagram.js')
+  const checkpoints: Array<{key: string; val?: string}> = []
+
+  const mockHttpClient: any = {
+    fetchJson: async (url: string) => {
+      if (url.includes('web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: 'user_checkpoint',
+              username: 'checkpoint_user',
+              edge_owner_to_timeline_media: {
+                page_info: {
+                  has_next_page: true,
+                  end_cursor: 'cursor_page_2',
+                },
+                edges: [
+                  {
+                    node: {
+                      id: 'post_page1',
+                      __typename: 'GraphImage',
+                      display_url: 'https://cdn.example.com/p1.jpg',
+                      shortcode: 'SC1',
+                      taken_at_timestamp: 1700000000,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      if (url.includes('graphql/query') || url.includes('/api/v1/')) {
+        return {
+          data: {
+            user: {
+              edge_owner_to_timeline_media: {
+                page_info: {
+                  has_next_page: true,
+                  end_cursor: 'cursor_page_3',
+                },
+                edges: [
+                  {
+                    node: {
+                      id: 'post_page2',
+                      __typename: 'GraphImage',
+                      display_url: 'https://cdn.example.com/p2.jpg',
+                      shortcode: 'SC2',
+                      taken_at_timestamp: 1700000001,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const items = []
+
+  for await (const item of extractor.extract(
+    {platform: 'instagram', username: 'checkpoint_user', cleanUrl: 'https://instagram.com/checkpoint_user', rawInput: 'checkpoint_user'},
+    {
+      subDir: 'Photos',
+      onCheckpoint: (key, val) => {
+        checkpoints.push({key, val})
+      },
+    },
+  )) {
+    items.push(item)
+    if (items.length === 2) break
+  }
+
+  assert.equal(items.length, 2)
+  // Checkpoint for page 2 must be emitted before page 3 cursor
+  assert.equal(checkpoints[0]?.val, 'cursor_page_2')
+})
+
+
 
 
 

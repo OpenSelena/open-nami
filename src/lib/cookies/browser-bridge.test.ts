@@ -60,6 +60,12 @@ HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssocia
 `
   assert.equal(parseWindowsDefaultBrowserProgId(edgeUwpRaw), 'AppXq0fevzme2pys62n3e0fbqsw5cj08ege9')
 
+  const maliciousRaw = `
+HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice
+    ProgId    REG_SZ    ChromeHTML & calc.exe
+`
+  assert.equal(parseWindowsDefaultBrowserProgId(maliciousRaw), null)
+
   const errorRaw = 'ERROR: The system was unable to find the specified registry key or value.\r\n'
   assert.equal(parseWindowsDefaultBrowserProgId(errorRaw), null)
   assert.equal(parseWindowsDefaultBrowserProgId(''), null)

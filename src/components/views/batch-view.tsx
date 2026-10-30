@@ -6,7 +6,7 @@ import {Panel} from '../panel.js'
 import {FramedInput} from '../framed-input.js'
 import {TextInput} from '../text-input.js'
 import {ProgressBar} from '../progress-bar.js'
-import {runBatchQueue, type BatchItem, type BatchQueueResult} from '../../lib/batch.js'
+import {runBatchQueue, parseBatchContent, type BatchItem, type BatchQueueResult} from '../../lib/batch.js'
 import {resolveDefaultDownloadDir} from '../../lib/engines/dispatcher.js'
 import {resolveDateFilter, parseLimit} from '../../lib/engines/filters.js'
 import {revealInFileManager} from '../../lib/reveal.js'
@@ -36,6 +36,10 @@ const PLATFORMS: SupportedPlatform[] = ['instagram', 'tiktok', 'facebook', 'x']
 const CHOICES: MediaTarget[] = ['all', 'photos', 'videos', 'stories', 'highlights']
 const DATE_PRESETS = ['all', '24h', '7d', '30d', '2024', '2023', '2022', '2021', 'custom']
 const LIMIT_PRESETS: Array<number | 'custom' | undefined> = [undefined, 10, 24, 50, 100, 'custom']
+
+export function extractBatchLinesFromInput(rawText: string): string[] {
+  return Array.from(new Set(parseBatchContent(rawText)))
+}
 
 export function BatchView({
   onBack,
@@ -134,14 +138,7 @@ export function BatchView({
         return
       }
     } else {
-      lines = Array.from(
-        new Set(
-          rawText
-            .split(/[\r\n,;\s]+/)
-            .map(s => s.trim())
-            .filter(Boolean),
-        ),
-      )
+      lines = extractBatchLinesFromInput(rawText)
       if (lines.length === 0) {
         setErrorMessage('Please enter at least one profile URL or username')
         return

@@ -166,3 +166,62 @@ test('PullView registers click targets for interactive mouse navigation', async 
     instance.unmount()
   }
 })
+
+test('PullView [d] Untrack action targets single cursor item rather than defaulting to bulk', async () => {
+  const mockProfiles: TrackedProfileRecord[] = [
+    {
+      platform: 'instagram',
+      username: 'user_one',
+      profileUrl: 'https://instagram.com/user_one',
+      targetDir: '/downloads/user_one',
+      choice: 'photos',
+      lastPulledAt: new Date().toISOString(),
+      mediaCount: 10,
+    },
+    {
+      platform: 'instagram',
+      username: 'user_two',
+      profileUrl: 'https://instagram.com/user_two',
+      targetDir: '/downloads/user_two',
+      choice: 'photos',
+      lastPulledAt: new Date().toISOString(),
+      mediaCount: 20,
+    },
+  ]
+
+  const registeredTargets: ClickTarget[] = []
+  const {stream, getOutput} = createMockStdout()
+  const instance = render(
+    React.createElement(PullView, {
+      onBack: () => {},
+      contentWidth: 80,
+      theme: testTheme,
+      gapComponent: () => null,
+      initialProfiles: mockProfiles,
+      onRegisterClickTargets: (targets) => {
+        registeredTargets.splice(0, registeredTargets.length, ...targets)
+      },
+    }),
+    {stdout: stream as any, debug: true},
+  )
+
+  try {
+    await instance.waitUntilRenderFlush()
+    await new Promise((r) => setTimeout(r, 50))
+    const untrackTarget = registeredTargets.find((t) => t.match === '[d] Untrack')
+    assert.ok(untrackTarget, 'Must have [d] Untrack target registered')
+
+    // Trigger untrack target
+    untrackTarget.action()
+    await instance.waitUntilRenderFlush()
+    await new Promise((r) => setTimeout(r, 50))
+    const frame = getOutput()
+
+    // Must show single untrack confirmation for cursor item (@user_one), NOT bulk untrack of 2 profiles!
+    assert.ok(frame.includes('Untrack @user_one'), `Expected single untrack prompt, got: ${frame}`)
+    assert.equal(frame.includes('Untrack 2 selected profiles'), false, 'Must NOT default to bulk untrack')
+  } finally {
+    instance.unmount()
+  }
+})
+

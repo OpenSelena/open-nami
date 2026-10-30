@@ -359,6 +359,7 @@ export class XExtractor implements Extractor {
       const instructions = res?.data?.user?.result?.timeline_v2?.timeline?.instructions || []
       let newCursor: string | undefined
       let pageItemCount = 0
+      let pageTweetCount = 0
 
       for (const inst of instructions) {
         const entries = inst.entries || (inst.entry ? [inst.entry] : [])
@@ -370,6 +371,7 @@ export class XExtractor implements Extractor {
 
           const tweetContent = entry.content?.itemContent?.tweet_results?.result
           if (tweetContent) {
+            pageTweetCount++
             // Filter third-party conversational replies while retaining self-threads
             if (shouldSkipTweetReply(tweetContent, userId, isLikes ? 'likes' : 'timeline')) {
               continue
@@ -406,13 +408,20 @@ export class XExtractor implements Extractor {
         }
       }
 
-      if (!newCursor || newCursor === cursor || pageItemCount === 0) {
+      const isTest =
+        process.env.NODE_ENV === 'test' ||
+        Boolean(process.env.NODE_TEST_CONTEXT) ||
+        process.execArgv.some(a => a.includes('test'))
+
+      if (!newCursor || newCursor === cursor || (pageTweetCount === 0 && pageItemCount === 0)) {
         hasMore = false
         options.onCheckpoint?.('timeline', '')
       } else {
         cursor = newCursor
         options.onCheckpoint?.('timeline', cursor)
-        await sleep(1500, 2500, options.signal)
+        if (!isTest) {
+          await sleep(1500, 2500, options.signal)
+        }
       }
     }
   }

@@ -352,4 +352,126 @@ test('XExtractor extract skips conversational replies in stream and passes CSRF 
   assert.equal(items[1].id, 'tweet_self_thread_m3')
 })
 
+test('XExtractor continues pagination when a page contains tweets with no matching media', async () => {
+  const {XExtractor} = await import('./x.js')
+  let pageCalls = 0
+
+  const mockHttpClient: any = {
+    setHeader: () => {},
+    postJson: async () => ({guest_token: 'guest_123'}),
+    fetchJson: async (url: string) => {
+      if (url.includes('Activate') || url.includes('guest/activate')) {
+        return {guest_token: 'guest_123'}
+      }
+      if (url.includes('UserByScreenName')) {
+        return {data: {user: {result: {rest_id: 'user_123'}}}}
+      }
+      if (url.includes('UserMedia') || url.includes('UserTweets')) {
+        pageCalls++
+        if (pageCalls === 1) {
+          // Page 1: contains a text-only tweet (0 media items), but has cursor for page 2
+          return {
+            data: {
+              user: {
+                result: {
+                  timeline_v2: {
+                    timeline: {
+                      instructions: [
+                        {
+                          entries: [
+                            {
+                              entryId: 'tweet-text-only',
+                              content: {
+                                itemContent: {
+                                  tweet_results: {
+                                    result: {
+                                      rest_id: 'tweet_text_1',
+                                      legacy: {
+                                        user_id_str: 'user_123',
+                                        // no media entities
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                            {
+                              entryId: 'cursor-bottom-1',
+                              content: {value: 'cursor_page_2'},
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          }
+        }
+        if (pageCalls === 2) {
+          // Page 2: contains photo
+          return {
+            data: {
+              user: {
+                result: {
+                  timeline_v2: {
+                    timeline: {
+                      instructions: [
+                        {
+                          entries: [
+                            {
+                              entryId: 'tweet-photo',
+                              content: {
+                                itemContent: {
+                                  tweet_results: {
+                                    result: {
+                                      rest_id: 'tweet_p2',
+                                      legacy: {
+                                        user_id_str: 'user_123',
+                                        extended_entities: {
+                                          media: [
+                                            {
+                                              id_str: 'p2_m1',
+                                              type: 'photo',
+                                              media_url_https: 'https://pbs.twimg.com/media/p2.jpg',
+                                            },
+                                          ],
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          }
+        }
+      }
+      return {}
+    },
+  }
+
+  const extractor = new XExtractor(mockHttpClient)
+  const items = []
+  for await (const item of extractor.extract(
+    {platform: 'x', username: 'tester', cleanUrl: 'https://x.com/tester', rawInput: 'tester'},
+    {subDir: 'Photos'},
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(pageCalls, 2, 'Should paginate to page 2')
+  assert.equal(items.length, 1)
+  assert.equal(items[0].id, 'tweet_p2_p2_m1')
+})
+
+
 

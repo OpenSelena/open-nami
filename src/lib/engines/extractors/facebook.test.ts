@@ -186,6 +186,40 @@ test('FacebookExtractor paginates through multiple pages using next page URLs', 
   assert.equal(items.length, 2)
   assert.equal(items[0].url, 'https://scontent.xx.fbcdn.net/photo1.jpg')
   assert.equal(items[1].url, 'https://scontent.xx.fbcdn.net/photo2.jpg')
+  assert.notEqual(items[0].id, items[1].id, 'Page 2 item ID must not collide with Page 1 item ID')
+  assert.notEqual(items[0].filename, items[1].filename, 'Page 2 filename must not collide with Page 1 filename')
   assert.equal(mockClient.pagesFetched, 2)
+})
+
+test('FacebookExtractor paginates beyond 5 pages without arbitrary hardcap', async () => {
+  class MockDeepClient extends HttpClient {
+    pagesFetched = 0
+    override async fetchText(url: string): Promise<string> {
+      this.pagesFetched++
+      const pageNum = this.pagesFetched
+      const hasNext = pageNum < 7
+      return `
+        ,"image":{"uri":"https:\\/\\/scontent.xx.fbcdn.net\\/photo_p${pageNum}.jpg"}
+        ${hasNext ? `<div id="m_more_item"><a href="/zuck/photos?cursor=page${pageNum + 1}">See More</a></div>` : ''}
+      `
+    }
+  }
+
+  const mockClient = new MockDeepClient()
+  const extractor = new FacebookExtractor(mockClient)
+  const profile: ParsedProfile = {
+    platform: 'facebook',
+    username: 'zuck',
+    cleanUrl: 'https://www.facebook.com/zuck',
+    rawInput: 'https://www.facebook.com/zuck',
+  }
+
+  const items = []
+  for await (const item of extractor.extract(profile, {subDir: 'Photos'})) {
+    items.push(item)
+  }
+
+  assert.equal(mockClient.pagesFetched, 7)
+  assert.equal(items.length, 7)
 })
 

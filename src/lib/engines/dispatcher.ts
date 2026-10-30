@@ -43,6 +43,42 @@ export const REFERER_MAP: Record<SupportedPlatform, string> = {
   facebook: 'https://www.facebook.com/',
 }
 
+export async function createBrowserCookieCopy(
+  platform: string,
+  rawBrowserPref: string,
+): Promise<{filePath: string; isTemporary: boolean; cleanup: () => Promise<void>} | null> {
+  if (platform === 'unknown' || !rawBrowserPref || rawBrowserPref.toLowerCase() === 'none') {
+    return null
+  }
+  try {
+    const tempCookieDir = await fs.mkdtemp(path.join(os.tmpdir(), 'open-nami-cookies-'))
+    const tempCookieFile = path.join(
+      tempCookieDir,
+      `cookie-${platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`,
+    )
+    const exported = await exportCookiesForPlatform(rawBrowserPref, platform as SupportedPlatform, tempCookieFile)
+    if (exported) {
+      try {
+        await fs.chmod(tempCookieFile, 0o600)
+      } catch {}
+      return {
+        filePath: tempCookieFile,
+        isTemporary: true,
+        cleanup: async () => {
+          try {
+            await fs.rm(tempCookieDir, {recursive: true, force: true})
+          } catch {}
+        },
+      }
+    } else {
+      try {
+        await fs.rm(tempCookieDir, {recursive: true, force: true})
+      } catch {}
+    }
+  } catch {}
+  return null
+}
+
 export async function dispatchDownload(options: DispatchOptions): Promise<EngineResult> {
   const {profile, choice, onProgress} = options
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
@@ -69,26 +105,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   let cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null
 
   if (!cookieCopy && rawBrowserPref && rawBrowserPref.toLowerCase() !== 'none') {
-    try {
-      const tempCookieDir = path.join(os.tmpdir(), 'open-nami-cookies')
-      await fs.mkdir(tempCookieDir, {recursive: true, mode: 0o700})
-      const tempCookieFile = path.join(
-        tempCookieDir,
-        `cookie-${profile.platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`,
-      )
-      const exported = await exportCookiesForPlatform(rawBrowserPref, profile.platform, tempCookieFile)
-      if (exported) {
-        cookieCopy = {
-          filePath: tempCookieFile,
-          isTemporary: true,
-          cleanup: async () => {
-            try {
-              await fs.unlink(tempCookieFile)
-            } catch {}
-          },
-        }
-      }
-    } catch {}
+    cookieCopy = await createBrowserCookieCopy(profile.platform, rawBrowserPref)
   }
 
   let totalDownloaded = 0
@@ -117,7 +134,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           })
         }
         activeLedger.recordMedia({
-          id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
+          id: `${profile.platform.toLowerCase()}:${profile.username.toLowerCase()}:${progress.currentFile}`,
           platform: profile.platform,
           author: profile.username,
           url: profile.cleanUrl || '',
