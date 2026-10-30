@@ -10,115 +10,104 @@ if [ -t 1 ]; then
   BOLD="\033[1m"
   DIM="\033[2m"
   RESET="\033[0m"
-  ORANGE="\033[38;2;193;95;60m"
+  if [ "${COLORTERM:-}" = "truecolor" ] || [ "${COLORTERM:-}" = "24bit" ]; then
+    BRAND="\033[38;2;193;95;60m"
+  else
+    BRAND="\033[38;5;166m"
+  fi
   GREEN="\033[32m"
   RED="\033[31m"
+  YELLOW="\033[33m"
 else
   BOLD=""
   DIM=""
   RESET=""
-  ORANGE=""
+  BRAND=""
   GREEN=""
   RED=""
+  YELLOW=""
 fi
 
 printf "\n"
-printf "${ORANGE}${BOLD}  ___                   _   _                 _ ${RESET}\n"
-printf "${ORANGE}${BOLD} / _ \ _ __   ___ _ __ | \ | | __ _ _ __ ___ (_) ${RESET}\n"
-printf "${ORANGE}${BOLD}| | | | '_ \ / _ \ '_ \|  \| |/ _\` | '_ \` _ \| | ${RESET}\n"
-printf "${ORANGE}${BOLD}| |_| | |_) |  __/ | | | |\  | (_| | | | | | | | ${RESET}\n"
-printf "${ORANGE}${BOLD} \___/| .__/ \___|_| |_|_| \_|\__,_|_| |_| |_|_| ${RESET}\n"
-printf "${ORANGE}${BOLD}      |_|                                        ${RESET}\n"
-printf "\n"
-printf "${DIM}  Open Nami installer — bulk social media profile downloader.${RESET}\n\n"
+printf "${BRAND}${BOLD}  █▀█ █▀█ █▀▀ █▀▄█  █▀▄█ █▀█ █▀▄▀█ ▀█▀${RESET}\n"
+printf "${BRAND}${BOLD}  █ ▓ █▀▓ █▀▓ █  ▓  █  ▓ █▀█ █ ▓ █  ▓ ${RESET}\n"
+printf "${BRAND}${BOLD}  ▀▀▀ ▀   ▀▀▀ ▀  ▀  ▀  ▀ ▀ ▀ ▀   ▀ ▀▀▀${RESET}\n"
+printf "  ${DIM}grab any profile. paste. download. done.${RESET}\n\n"
 
-# Step 1: Check for Node.js
-printf "  Checking Node.js... "
+# 1. Node.js Check
 if command -v node >/dev/null 2>&1; then
   NODE_VER=$(node -v | sed 's/^v//')
   NODE_MAJOR=$(echo "$NODE_VER" | cut -d. -f1)
   if [ "$NODE_MAJOR" -ge 18 ]; then
-    printf "${GREEN}ok${RESET} ${DIM}(v%s)${RESET}\n" "$NODE_VER"
+    printf "  ${GREEN}✓${RESET} Node.js ${DIM}(v%s)${RESET}\n" "$NODE_VER"
   else
-    printf "${RED}failed${RESET}\n"
-    printf "\n${RED}Error: Node.js 18 or higher is required (found v%s).${RESET}\n" "$NODE_VER"
-    printf "Please update Node.js and try again: ${BOLD}https://nodejs.org${RESET}\n\n"
+    printf "  ${RED}✗${RESET} Node.js v%s (Node.js 18+ required)\n" "$NODE_VER"
+    printf "    Please update Node.js: ${BOLD}https://nodejs.org${RESET}\n\n"
     exit 1
   fi
 else
-  printf "${RED}not found${RESET}\n"
-  printf "\n${RED}Error: Node.js is not installed.${RESET}\n"
-  printf "Please install Node.js 18+ and try again: ${BOLD}https://nodejs.org${RESET}\n\n"
+  printf "  ${RED}✗${RESET} Node.js not found (Node.js 18+ required)\n"
+  printf "    Please install Node.js: ${BOLD}https://nodejs.org${RESET}\n\n"
   exit 1
 fi
 
-# Step 2: Check for npm
-printf "  Checking npm... "
+# 2. npm Check
 if command -v npm >/dev/null 2>&1; then
   NPM_VER=$(npm -v)
-  printf "${GREEN}ok${RESET} ${DIM}(v%s)${RESET}\n" "$NPM_VER"
+  printf "  ${GREEN}✓${RESET} npm ${DIM}(v%s)${RESET}\n" "$NPM_VER"
 else
-  printf "${RED}not found${RESET}\n"
-  printf "\n${RED}Error: npm is not installed.${RESET}\n"
-  printf "npm is required to install Open Nami globally.\n\n"
+  printf "  ${RED}✗${RESET} npm not found\n\n"
   exit 1
 fi
 
-# Step 3: Install Open Nami globally
-printf "  Installing open-nami globally via npm... "
+# 3. Global npm Install
+printf "  ${DIM}• Installing open-nami...${RESET}\r"
+INSTALLED=0
 if npm install -g open-nami >/dev/null 2>&1; then
-  printf "${GREEN}done${RESET}\n"
-else
-  printf "${RED}failed${RESET}\n"
-  if command -v sudo >/dev/null 2>&1; then
-    printf "  Retrying with sudo... "
-    if sudo npm install -g open-nami >/dev/null 2>&1; then
-      printf "${GREEN}done${RESET}\n"
-    else
-      printf "${RED}failed${RESET}\n"
-      printf "\n${RED}Error: Failed to install open-nami globally.${RESET}\n"
-      printf "Try running manually: ${BOLD}npm install -g open-nami${RESET}\n\n"
-      exit 1
+  INSTALLED=1
+elif command -v sudo >/dev/null 2>&1; then
+  if [ -r /dev/tty ] && [ -w /dev/tty ]; then
+    if sudo </dev/tty npm install -g open-nami >/dev/null 2>&1; then
+      INSTALLED=1
     fi
-  else
-    printf "\n${RED}Error: Failed to install open-nami globally.${RESET}\n"
-    printf "Try running manually: ${BOLD}npm install -g open-nami${RESET}\n\n"
-    exit 1
   fi
 fi
 
-# Step 4: Verify installation
-printf "  Verifying binary... "
+if [ "$INSTALLED" -eq 1 ]; then
+  printf "  ${GREEN}✓${RESET} Installed open-nami            \n"
+else
+  printf "  ${RED}✗${RESET} Failed to install open-nami globally\n\n"
+  printf "  Try running manually:\n"
+  printf "    ${BOLD}sudo npm install -g open-nami${RESET}\n\n"
+  exit 1
+fi
+
+# 4. Verify Binary in PATH
 if command -v open-nami >/dev/null 2>&1; then
-  printf "${GREEN}ok${RESET}\n"
+  VER=$(open-nami --version 2>/dev/null || echo "")
+  if [ -n "$VER" ]; then
+    printf "  ${GREEN}✓${RESET} Binary ready ${DIM}(v%s)${RESET}\n" "$VER"
+  fi
 else
-  printf "${RED}warning${RESET}\n"
-  printf "${DIM}  Installed, but 'open-nami' was not found on your current PATH.${RESET}\n"
-  printf "${DIM}  Make sure your npm global bin directory is in PATH.${RESET}\n"
-  printf "${DIM}  Usually: export PATH=\"\$(npm prefix -g)/bin:\$PATH\"${RESET}\n"
+  NPM_BIN=""
+  if command -v npm >/dev/null 2>&1; then
+    NPM_BIN="$(npm prefix -g 2>/dev/null)/bin"
+  fi
+  printf "  ${YELLOW}!${RESET} Installed, but 'open-nami' is not in PATH\n"
+  if [ -n "$NPM_BIN" ] && [ -d "$NPM_BIN" ]; then
+    printf "    Add to ~/.bashrc or ~/.zshrc:\n"
+    printf "      ${BOLD}export PATH=\"%s:\$PATH\"${RESET}\n" "$NPM_BIN"
+  fi
 fi
 
-# Step 5: Optional gallery-dl check
-printf "  Checking gallery-dl... "
+# 5. Optional Extractor Engines
 if command -v gallery-dl >/dev/null 2>&1; then
-  GDL_VER=$(gallery-dl --version 2>/dev/null || echo "detected")
-  printf "${GREEN}found${RESET} ${DIM}(%s)${RESET}\n" "$GDL_VER"
-else
-  printf "${DIM}will use python fallback or PATH${RESET}\n"
+  printf "  ${GREEN}✓${RESET} gallery-dl found\n"
 fi
-
-# Step 6: Optional yt-dlp check
-printf "  Checking yt-dlp... "
 if command -v yt-dlp >/dev/null 2>&1; then
-  YTDLP_VER=$(yt-dlp --version 2>/dev/null || echo "detected")
-  printf "${GREEN}found${RESET} ${DIM}(%s)${RESET}\n" "$YTDLP_VER"
-else
-  printf "${DIM}will use python fallback or PATH${RESET}\n"
+  printf "  ${GREEN}✓${RESET} yt-dlp found\n"
 fi
 
-printf "\n"
-printf "${GREEN}${BOLD}  Open Nami installed successfully!${RESET}\n\n"
-printf "  Run it now:\n"
-printf "    ${BOLD}open-nami <url-or-user>${RESET}    ${DIM}# straight to the media picker${RESET}\n"
-printf "    ${BOLD}open-nami${RESET}                 ${DIM}# interactive home screen${RESET}\n"
-printf "\n"
+printf "\n  ${BOLD}Ready.${RESET} Run:\n"
+printf "    ${BOLD}open-nami${RESET}               ${DIM}# interactive home screen${RESET}\n"
+printf "    ${BOLD}open-nami <url-or-user>${RESET} ${DIM}# direct download${RESET}\n\n"
