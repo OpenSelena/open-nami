@@ -45,6 +45,17 @@ export const REFERER_MAP: Record<SupportedPlatform, string> = {
 export async function dispatchDownload(options: DispatchOptions): Promise<EngineResult> {
   const {profile, choice, onProgress} = options
   const targetDir = options.outputDir || resolveDefaultDownloadDir(profile.platform, profile.username)
+
+  if (options.signal?.aborted) {
+    return {
+      success: false,
+      downloadedCount: 0,
+      skippedCount: 0,
+      errors: ['Download aborted'],
+      outputDir: targetDir,
+    }
+  }
+
   await fs.mkdir(targetDir, {recursive: true})
 
   const rawBrowserPref = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser ?? 'auto'

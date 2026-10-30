@@ -93,22 +93,30 @@ test('buildGalleryDlArgs and buildYtDlpArgs place double dash before target URL 
 
 test('dispatchDownload honors pre-aborted signal and returns immediately', async () => {
   const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-abort-test-'))
   const controller = new AbortController()
   controller.abort()
 
-  const result = await dispatchDownload({
-    profile: {
-      platform: 'instagram',
-      username: 'aborttest',
-      cleanUrl: 'https://www.instagram.com/aborttest/',
-      rawInput: 'aborttest',
-    },
-    choice: 'photos',
-    signal: controller.signal,
-  })
+  try {
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'aborttest',
+        cleanUrl: 'https://www.instagram.com/aborttest/',
+        rawInput: 'aborttest',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      signal: controller.signal,
+    })
 
-  assert.equal(result.downloadedCount, 0)
-  assert.equal(result.skippedCount, 0)
+    assert.equal(result.downloadedCount, 0)
+    assert.equal(result.skippedCount, 0)
+    assert.equal(result.success, false)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
 })
 
 test('buildYtDlpArgs includes concurrent-fragments 4 and anti-ban retry/sleep jitter', async () => {
