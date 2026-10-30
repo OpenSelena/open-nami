@@ -91,6 +91,7 @@ export interface StreamDownloadOptions {
   concurrency?: number
   limit?: number
   writeMetadata?: boolean
+  earlyExitThreshold?: number
   defaultPlatform?: string
   defaultAuthor?: string
   onProgress?: (progress: EngineProgress) => void
@@ -173,6 +174,8 @@ export async function downloadMediaStream(
   let queueLock = Promise.resolve()
   let isDone = false
   let consecutiveErrors = 0
+  let consecutiveDuplicates = 0
+  let lastSeenPostId: string | undefined
   const MAX_CONSECUTIVE_ERRORS = 5
 
   function getNextItem(): Promise<IteratorResult<MediaItem>> {
@@ -237,6 +240,11 @@ export async function downloadMediaStream(
           } catch {}
         }
         skipped++
+        const currentPostId = item.carouselId || item.id
+        if (currentPostId !== lastSeenPostId) {
+          consecutiveDuplicates++
+          lastSeenPostId = currentPostId
+        }
         onProgress?.({
           job: jobName,
           downloadedCount: downloaded,
@@ -244,8 +252,15 @@ export async function downloadMediaStream(
           currentFile: finalFilename,
           statusText: `Skipping already downloaded: ${finalFilename}`,
         })
+        if (options.earlyExitThreshold && consecutiveDuplicates >= options.earlyExitThreshold) {
+          isDone = true
+          break
+        }
         continue
       }
+
+      consecutiveDuplicates = 0
+      lastSeenPostId = item.carouselId || item.id
 
       onProgress?.({
         job: jobName,

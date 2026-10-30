@@ -58,6 +58,12 @@ export class MediaLedger {
       }
       const { DatabaseSync } = require('node:sqlite')
       this.db = new DatabaseSync(resolvedPath)
+      if (resolvedPath !== ':memory:') {
+        try {
+          this.db.exec('PRAGMA journal_mode = WAL;')
+          this.db.exec('PRAGMA busy_timeout = 5000;')
+        } catch {}
+      }
       this.initTables()
     } catch {
       this.isFallback = true

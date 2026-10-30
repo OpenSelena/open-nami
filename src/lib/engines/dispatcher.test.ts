@@ -181,6 +181,17 @@ test('buildGalleryDlArgs appends --cookies-from-browser when configured', async 
   assert.ok(argsWithBrowser.includes('--cookies-from-browser'))
   assert.equal(argsWithBrowser[argsWithBrowser.indexOf('--cookies-from-browser') + 1], 'chrome')
 
+  const argsWithAbort = buildGalleryDlArgs({
+    destDir: 'X:/target',
+    subDir: 'Photos',
+    platform: 'instagram',
+    cleanUrl: 'https://www.instagram.com/creator',
+    username: 'creator',
+    abortAfterDuplicates: 5,
+  })
+  assert.ok(argsWithAbort.includes('--abort'))
+  assert.equal(argsWithAbort[argsWithAbort.indexOf('--abort') + 1], '5')
+
   const argsWithNone = buildGalleryDlArgs({
     destDir: 'X:/target',
     subDir: 'Photos',
@@ -755,6 +766,53 @@ test('dispatchDownload skips tracking when noTrack is true', async () => {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }
 })
+
+test('dispatchDownload early-exits when earlyExitThreshold is met in ledger', async () => {
+  const {dispatchDownload, defaultTaskManager} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-earlyexit-'))
+
+  try {
+    // Seed the ledger with 5 items
+    for (let i = 1; i <= 5; i++) {
+      defaultTaskManager.ledger.recordMedia({
+        id: `seen_media_${i}`,
+        platform: 'instagram',
+        author: 'early_exit_user',
+        url: `https://example.com/seen_${i}.jpg`,
+        filename: `seen_${i}.jpg`,
+        filePath: path.join(tmpDir, `seen_${i}.jpg`),
+        downloadedAt: new Date().toISOString(),
+      })
+    }
+
+    let nativeCalled = false
+    let capturedOptions: any = null
+
+    await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'early_exit_user',
+        cleanUrl: 'https://www.instagram.com/early_exit_user/',
+        rawInput: 'early_exit_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      earlyExitThreshold: 5,
+      runnerOverrides: {
+        nativeRunner: async (subDir) => {
+          nativeCalled = true
+          return {success: true, downloaded: 0, skipped: 5}
+        },
+      },
+    })
+
+    assert.ok(nativeCalled)
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
 
 
 

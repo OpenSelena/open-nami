@@ -24,6 +24,7 @@ export interface GalleryDlOptions {
   cookiesFromBrowser?: string
   signal?: AbortSignal
   writeMetadata?: boolean
+  abortAfterDuplicates?: number
   onProgress?: (progress: EngineProgress) => void
 }
 
@@ -36,8 +37,9 @@ export function buildGalleryDlArgs(options: {
   cookiePath?: string | null
   cookiesFromBrowser?: string
   writeMetadata?: boolean
+  abortAfterDuplicates?: number
 }): string[] {
-  const {destDir, subDir, platform, cleanUrl, username, cookiePath, cookiesFromBrowser, writeMetadata} = options
+  const {destDir, subDir, platform, cleanUrl, username, cookiePath, cookiesFromBrowser, writeMetadata, abortAfterDuplicates} = options
   const args = [
     '-D', destDir,
     '-o', `user-agent=${UA}`,
@@ -49,6 +51,10 @@ export function buildGalleryDlArgs(options: {
     '--retries', '3',
     '--sleep-429', '10',
   ]
+
+  if (abortAfterDuplicates && abortAfterDuplicates > 0) {
+    args.push('--abort', String(abortAfterDuplicates))
+  }
 
   if (writeMetadata) {
     args.push('--write-metadata')
@@ -107,6 +113,7 @@ export async function runGalleryDl(options: GalleryDlOptions): Promise<{success:
     cookiePath,
     cookiesFromBrowser: options.cookiesFromBrowser,
     writeMetadata: options.writeMetadata,
+    abortAfterDuplicates: options.abortAfterDuplicates,
   })
 
   let downloadedCount = 0

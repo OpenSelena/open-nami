@@ -187,3 +187,41 @@ test('filterMediaStream respects limit and date bounds on async streams', async 
     [800, 700],
   )
 })
+
+test('filterMediaStream early-exits after N consecutive duplicate items, bypassing pinned posts', async () => {
+  const seenIds = new Set(['pinned_1', 'pinned_2', 'old_1', 'old_2', 'old_3', 'old_4', 'old_5', 'ancient_1'])
+  let totalYielded = 0
+
+  async function* feed(): AsyncGenerator<MediaItem> {
+    const ids = [
+      'pinned_1', 'pinned_2',
+      'new_1', 'new_2',
+      'old_1', 'old_2', 'old_3', 'old_4', 'old_5',
+      'ancient_1'
+    ]
+    for (const id of ids) {
+      totalYielded++
+      yield {
+        id,
+        url: `https://example.com/${id}.jpg`,
+        filename: id,
+        extension: 'jpg',
+        type: 'photo',
+      }
+    }
+  }
+
+  const results: MediaItem[] = []
+  for await (const item of filterMediaStream(feed(), {
+    earlyExitThreshold: 5,
+    isDuplicate: item => seenIds.has(item.id),
+  })) {
+    results.push(item)
+  }
+
+  assert.equal(totalYielded, 9, 'Should halt extraction immediately upon 5th consecutive duplicate')
+  assert.equal(results.length, 9)
+  assert.equal(results[2]?.id, 'new_1')
+  assert.equal(results[3]?.id, 'new_2')
+})
+

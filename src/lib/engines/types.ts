@@ -36,6 +36,7 @@ export interface DispatchOptions {
   writeMetadata?: boolean
   cookiesFromBrowser?: string
   noTrack?: boolean
+  earlyExitThreshold?: number
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void
   runnerOverrides?: {

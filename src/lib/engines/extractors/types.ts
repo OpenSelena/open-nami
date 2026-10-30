@@ -38,6 +38,8 @@ export interface ExtractOptions {
   until?: number
   limit?: number
   initialCursor?: string
+  earlyExitThreshold?: number
+  isKnownMedia?: (id: string) => boolean | Promise<boolean>
   onCheckpoint?: (cursorKey: string, cursorValue: string) => Promise<void> | void
 }
 

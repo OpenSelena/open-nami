@@ -5,6 +5,8 @@ export interface MediaFilterOptions {
   until?: number // Unix timestamp (seconds)
   limit?: number // Max total items
   reverseChronological?: boolean // Defaults to true for social feeds
+  earlyExitThreshold?: number // Halt after N consecutive duplicate items
+  isDuplicate?: (item: MediaItem) => boolean | Promise<boolean>
 }
 
 /**
@@ -193,6 +195,8 @@ export async function* filterMediaStream(
 ): AsyncGenerator<MediaItem, void, unknown> {
   const maxLimit = filters.limit
   let count = 0
+  let consecutiveDuplicates = 0
+  let lastSeenPostId: string | undefined
 
   if (maxLimit !== undefined && maxLimit <= 0) {
     return
@@ -201,6 +205,24 @@ export async function* filterMediaStream(
   for await (const item of items) {
     if (maxLimit !== undefined && count >= maxLimit) {
       break
+    }
+
+    let shouldEarlyExit = false
+    if (filters.isDuplicate) {
+      const isDup = await filters.isDuplicate(item)
+      const currentPostId = item.carouselId || item.id
+      if (isDup) {
+        if (currentPostId !== lastSeenPostId) {
+          consecutiveDuplicates++
+          lastSeenPostId = currentPostId
+        }
+        if (filters.earlyExitThreshold && consecutiveDuplicates >= filters.earlyExitThreshold) {
+          shouldEarlyExit = true
+        }
+      } else {
+        consecutiveDuplicates = 0
+        lastSeenPostId = currentPostId
+      }
     }
 
     const {include, stop} = shouldIncludeItem(item, filters)
@@ -213,7 +235,7 @@ export async function* filterMediaStream(
       }
     }
 
-    if (stop) {
+    if (stop || shouldEarlyExit) {
       break
     }
   }

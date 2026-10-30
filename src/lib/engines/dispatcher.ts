@@ -160,6 +160,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           until: untilSeconds,
           limit: remainingLimit,
           initialCursor,
+          earlyExitThreshold: options.earlyExitThreshold,
+          isKnownMedia: (id) => defaultTaskManager.ledger.hasMedia(id),
           onCheckpoint: async (key, val) => {
             if (val) {
               currentCursors[key] = val
@@ -180,6 +182,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           since: sinceSeconds,
           until: untilSeconds,
           limit: remainingLimit,
+          earlyExitThreshold: options.earlyExitThreshold,
+          isDuplicate: (item) => defaultTaskManager.ledger.hasMedia(item.id),
         })
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
@@ -193,6 +197,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           signal: options.signal,
           limit: remainingLimit,
           writeMetadata: options.writeMetadata,
+          earlyExitThreshold: options.earlyExitThreshold,
           defaultPlatform: profile.platform,
           defaultAuthor: profile.username,
           onProgress: handleProgress,
@@ -225,6 +230,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
+        abortAfterDuplicates: options.earlyExitThreshold,
         onProgress: handleProgress,
       }
       return options.runnerOverrides?.gdlRunner
@@ -240,6 +246,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
+        abortAfterDuplicates: options.earlyExitThreshold,
         onProgress: handleProgress,
       }
       return options.runnerOverrides?.ytRunner
