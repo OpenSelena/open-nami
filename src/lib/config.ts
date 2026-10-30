@@ -12,6 +12,10 @@ export interface AppConfig {
     | 'edge'
     | 'brave'
     | 'firefox'
+    | 'zen'
+    | 'chromium'
+    | 'librewolf'
+    | 'waterfox'
     | 'helium'
     | 'opera'
     | 'vivaldi'
@@ -43,7 +47,19 @@ export function loadConfig(configPath = getDefaultConfigPath()): AppConfig {
         } else if (lower === 'auto' || trimmed === '') {
           cookiesFromBrowser = 'auto'
         } else {
-          const knownBrowsers = ['chrome', 'edge', 'brave', 'firefox', 'helium', 'opera', 'vivaldi']
+          const knownBrowsers = [
+            'chrome',
+            'edge',
+            'brave',
+            'firefox',
+            'zen',
+            'chromium',
+            'librewolf',
+            'waterfox',
+            'helium',
+            'opera',
+            'vivaldi',
+          ]
           cookiesFromBrowser = (knownBrowsers.includes(lower)
             ? lower
             : trimmed) as NonNullable<AppConfig['cookiesFromBrowser']>

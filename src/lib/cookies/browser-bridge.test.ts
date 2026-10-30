@@ -1,14 +1,20 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import {
   listDetectedBrowsers,
   parseWindowsDefaultBrowserProgId,
   mapProgIdToBrowserId,
   parseMacDefaultBrowserBundleId,
   parseLinuxDefaultBrowserDesktop,
+  mapLinuxDesktopToBrowserId,
   detectSystemDefaultBrowser,
   resolveBrowserCookieArg,
   exportCookiesForPlatform,
+  findGeckoProfileDir,
+  extractGeckoCookiesToNetscape,
 } from './browser-bridge.js'
 
 test('listDetectedBrowsers detects known browser profile paths including Helium', () => {
@@ -262,4 +268,73 @@ test('resolveBrowserCookieArg resolves cookie arguments accurately', () => {
 test('exportCookiesForPlatform returns false for invalid or unavailable browser', async () => {
   const result = await exportCookiesForPlatform('nonexistent-browser', 'instagram', '/tmp/fake-cookie.txt')
   assert.equal(result, false)
+})
+
+test('listDetectedBrowsers detects Zen Browser candidate', () => {
+  const browsers = listDetectedBrowsers()
+  const zen = browsers.find(b => b.id === 'zen')
+  assert.ok(zen, 'Zen candidate should be present in detected browsers list')
+  assert.equal(zen.name, 'Zen Browser')
+  assert.equal(zen.engine, 'firefox')
+})
+
+test('mapLinuxDesktopToBrowserId and mapProgIdToBrowserId identify Zen Browser', () => {
+  const linuxZen = mapLinuxDesktopToBrowserId('app.zen_browser.zen.desktop')
+  assert.equal(linuxZen.id, 'zen')
+  assert.equal(linuxZen.name, 'Zen Browser')
+  assert.equal(linuxZen.engine, 'firefox')
+
+  const winZen = mapProgIdToBrowserId('ZenURL', '"C:\\Program Files\\Zen\\zen.exe" %1')
+  assert.equal(winZen.id, 'zen')
+  assert.equal(winZen.name, 'Zen Browser')
+  assert.equal(winZen.engine, 'firefox')
+})
+
+test('findGeckoProfileDir locates profile directly or via profiles.ini', () => {
+  const tmpDir = path.join(os.tmpdir(), `gecko-test-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`)
+  try {
+    fs.mkdirSync(tmpDir, { recursive: true })
+
+    // Non-existent cookies.sqlite returns null
+    assert.equal(findGeckoProfileDir(tmpDir), null)
+
+    // Subdirectory with cookies.sqlite
+    const profileSub = path.join(tmpDir, 'xyz.default-release')
+    fs.mkdirSync(profileSub, { recursive: true })
+    fs.writeFileSync(path.join(profileSub, 'cookies.sqlite'), 'dummy sqlite data')
+
+    const resolved = findGeckoProfileDir(tmpDir)
+    assert.equal(resolved, profileSub)
+
+    // Direct profile directory containing cookies.sqlite
+    assert.equal(findGeckoProfileDir(profileSub), profileSub)
+  } finally {
+    try {
+      fs.rmSync(tmpDir, { recursive: true, force: true })
+    } catch {}
+  }
+})
+
+test('extractGeckoCookiesToNetscape handles non-existent or invalid profile gracefully', () => {
+  const emptyDir = path.join(os.tmpdir(), `empty-gecko-${Date.now()}`)
+  try {
+    fs.mkdirSync(emptyDir, { recursive: true })
+    const result = extractGeckoCookiesToNetscape(emptyDir, ['%instagram.com%'])
+    assert.equal(result, null)
+  } finally {
+    try {
+      fs.rmSync(emptyDir, { recursive: true, force: true })
+    } catch {}
+  }
+})
+
+test('resolveBrowserCookieArg resolves zen to firefox profile format', () => {
+  const zenDetected = {
+    id: 'zen',
+    name: 'Zen Browser',
+    profileDir: '/tmp/fake/zen/profile',
+    available: true,
+  }
+  const res = resolveBrowserCookieArg(zenDetected)
+  assert.ok(res?.startsWith('firefox:'), 'Zen browser argument should format as firefox:<profileDir>')
 })

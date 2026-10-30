@@ -15,6 +15,7 @@ downloads/
 .claude/
 .agents/
 .scratch/
+AGENTS.local.md
 
 __pycache__/
 *.pyc

@@ -1,8 +1,9 @@
 import path from 'node:path'
 import fs from 'node:fs/promises'
+import os from 'node:os'
 import {loadConfig} from '../config.js'
 import {findCookieFile, createSafeCookieCopy} from '../cookies.js'
-import {resolveBrowserCookieArg} from '../cookies/browser-bridge.js'
+import {resolveBrowserCookieArg, exportCookiesForPlatform} from '../cookies/browser-bridge.js'
 import {getExtractor} from './extractors/index.js'
 import {downloadMediaStream} from './downloader.js'
 import {loadCheckpoint, saveCheckpoint, clearCheckpoint} from './checkpoint.js'
@@ -53,7 +54,30 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   defaultTaskManager.events.emit('job:start', { profile, choice, outputDir: targetDir })
 
   const masterCookie = findCookieFile(profile.platform)
-  const cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null
+  let cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null
+
+  if (!cookieCopy && rawBrowserPref && rawBrowserPref.toLowerCase() !== 'none') {
+    try {
+      const tempCookieDir = path.join(os.tmpdir(), 'open-nami-cookies')
+      await fs.mkdir(tempCookieDir, {recursive: true, mode: 0o700})
+      const tempCookieFile = path.join(
+        tempCookieDir,
+        `cookie-${profile.platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`,
+      )
+      const exported = await exportCookiesForPlatform(rawBrowserPref, profile.platform, tempCookieFile)
+      if (exported) {
+        cookieCopy = {
+          filePath: tempCookieFile,
+          isTemporary: true,
+          cleanup: async () => {
+            try {
+              await fs.unlink(tempCookieFile)
+            } catch {}
+          },
+        }
+      }
+    } catch {}
+  }
 
   let totalDownloaded = 0
   let totalSkipped = 0
@@ -264,9 +288,10 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
         const subDir = job.type === 'photos' ? 'Photos' : job.type === 'stories' ? 'Stories' : 'Highlights'
         let res = await runNative(subDir)
 
-        // Fallback to gallery-dl if native extractor failed or found 0 items (unless error was authentication failure)
+        // Fallback to gallery-dl if native extractor failed or found 0 items (unless error was authentication failure and no browser cookies configured)
         const isAuthError = Boolean(res.error && (res.error.includes('cookie') || res.error.includes('authenticated session') || res.error.includes('Settings (^s)')))
-        if (!isAuthError && (!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
+        const hasBrowserFallback = Boolean(cookiesFromBrowser && cookiesFromBrowser !== 'none')
+        if ((!isAuthError || hasBrowserFallback) && (!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
           handleProgress({
             job: subDir,
             downloadedCount: totalDownloaded,

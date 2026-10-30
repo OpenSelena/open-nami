@@ -1,7 +1,10 @@
 import { execSync } from 'node:child_process'
+import { createRequire } from 'node:module'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+
+const require = createRequire(import.meta.url)
 
 export type BrowserEngine =
   | 'chrome'
@@ -28,117 +31,180 @@ export interface BrowserIdentity {
   profileDir?: string
 }
 
+export interface BrowserCandidate {
+  id: string
+  name: string
+  winDirs: string[]
+  macDirs: string[]
+  linuxDirs: string[]
+  engine: BrowserEngine
+}
+
 export function listDetectedBrowsers(): DetectedBrowser[] {
   const isWin = process.platform === 'win32'
   const isMac = process.platform === 'darwin'
   const home = os.homedir()
 
-  const candidates: Array<{
-    id: string
-    name: string
-    winDir: string
-    macDir: string
-    linuxDir: string
-    engine?: BrowserEngine
-  }> = [
+  const candidates: BrowserCandidate[] = [
     {
       id: 'chrome',
       name: 'Google Chrome',
-      winDir: path.join(
-        process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
-        'Google',
-        'Chrome',
-        'User Data',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'Google', 'Chrome'),
-      linuxDir: path.join(home, '.config', 'google-chrome'),
+      winDirs: [
+        path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'Google', 'Chrome', 'User Data'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'Google', 'Chrome'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'google-chrome'),
+        path.join(home, '.var', 'app', 'com.google.Chrome', 'config', 'google-chrome'),
+        path.join(home, '.config', 'chromium'),
+        path.join(home, '.var', 'app', 'org.chromium.Chromium', 'config', 'chromium'),
+      ],
       engine: 'chrome',
     },
     {
       id: 'edge',
       name: 'Microsoft Edge',
-      winDir: path.join(
-        process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
-        'Microsoft',
-        'Edge',
-        'User Data',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'Microsoft Edge'),
-      linuxDir: path.join(home, '.config', 'microsoft-edge'),
+      winDirs: [
+        path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'Microsoft', 'Edge', 'User Data'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'Microsoft Edge'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'microsoft-edge'),
+        path.join(home, '.var', 'app', 'com.microsoft.Edge', 'config', 'microsoft-edge'),
+      ],
       engine: 'edge',
     },
     {
       id: 'brave',
       name: 'Brave Browser',
-      winDir: path.join(
-        process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
-        'BraveSoftware',
-        'Brave-Browser',
-        'User Data',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'BraveSoftware', 'Brave-Browser'),
-      linuxDir: path.join(home, '.config', 'BraveSoftware', 'Brave-Browser'),
+      winDirs: [
+        path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'BraveSoftware', 'Brave-Browser', 'User Data'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'BraveSoftware', 'Brave-Browser'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'BraveSoftware', 'Brave-Browser'),
+        path.join(home, '.var', 'app', 'com.brave.Browser', 'config', 'BraveSoftware', 'Brave-Browser'),
+      ],
       engine: 'brave',
     },
     {
       id: 'firefox',
       name: 'Mozilla Firefox',
-      winDir: path.join(
-        process.env.APPDATA || path.join(home, 'AppData', 'Roaming'),
-        'Mozilla',
-        'Firefox',
-        'Profiles',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'Firefox', 'Profiles'),
-      linuxDir: path.join(home, '.mozilla', 'firefox'),
+      winDirs: [
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'Mozilla', 'Firefox', 'Profiles'),
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'Mozilla', 'Firefox'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'Firefox', 'Profiles'),
+        path.join(home, 'Library', 'Application Support', 'Firefox'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'mozilla', 'firefox'),
+        path.join(home, '.mozilla', 'firefox'),
+        path.join(home, '.var', 'app', 'org.mozilla.firefox', '.mozilla', 'firefox'),
+      ],
+      engine: 'firefox',
+    },
+    {
+      id: 'zen',
+      name: 'Zen Browser',
+      winDirs: [
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'zen', 'Profiles'),
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'zen'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'zen', 'Profiles'),
+        path.join(home, 'Library', 'Application Support', 'zen'),
+      ],
+      linuxDirs: [
+        path.join(home, '.var', 'app', 'app.zen_browser.zen', '.zen'),
+        path.join(home, '.zen'),
+      ],
       engine: 'firefox',
     },
     {
       id: 'helium',
       name: 'Helium',
-      winDir: path.join(
-        process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
-        'imput',
-        'Helium',
-        'User Data',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'net.imput.Helium'),
-      linuxDir: path.join(home, '.config', 'helium'),
+      winDirs: [
+        path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'imput', 'Helium', 'User Data'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'net.imput.Helium'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'helium'),
+        path.join(home, '.var', 'app', 'net.imput.Helium', 'config', 'helium'),
+      ],
       engine: 'chrome',
     },
     {
       id: 'opera',
       name: 'Opera',
-      winDir: path.join(
-        process.env.APPDATA || path.join(home, 'AppData', 'Roaming'),
-        'Opera Software',
-        'Opera Stable',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'com.operasoftware.Opera'),
-      linuxDir: path.join(home, '.config', 'opera'),
+      winDirs: [
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'Opera Software', 'Opera Stable'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'com.operasoftware.Opera'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'opera'),
+        path.join(home, '.var', 'app', 'com.opera.Opera', 'config', 'opera'),
+      ],
       engine: 'opera',
     },
     {
       id: 'vivaldi',
       name: 'Vivaldi',
-      winDir: path.join(
-        process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'),
-        'Vivaldi',
-        'User Data',
-      ),
-      macDir: path.join(home, 'Library', 'Application Support', 'Vivaldi'),
-      linuxDir: path.join(home, '.config', 'vivaldi'),
+      winDirs: [
+        path.join(process.env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'Vivaldi', 'User Data'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'Vivaldi'),
+      ],
+      linuxDirs: [
+        path.join(home, '.config', 'vivaldi'),
+        path.join(home, '.var', 'app', 'com.vivaldi.Vivaldi', 'config', 'vivaldi'),
+      ],
       engine: 'vivaldi',
+    },
+    {
+      id: 'librewolf',
+      name: 'LibreWolf',
+      winDirs: [
+        path.join(process.env.APPDATA || path.join(home, 'AppData', 'Roaming'), 'librewolf', 'Profiles'),
+      ],
+      macDirs: [
+        path.join(home, 'Library', 'Application Support', 'librewolf', 'Profiles'),
+      ],
+      linuxDirs: [
+        path.join(home, '.librewolf'),
+        path.join(home, '.var', 'app', 'io.gitlab.librewolf-community', '.librewolf'),
+      ],
+      engine: 'firefox',
     },
   ]
 
   return candidates.map(c => {
-    const profileDir = isWin ? c.winDir : isMac ? c.macDir : c.linuxDir
+    const dirs = isWin ? c.winDirs : isMac ? c.macDirs : c.linuxDirs
+    const existing = dirs.find(d => {
+      try {
+        return fs.existsSync(d)
+      } catch {
+        return false
+      }
+    })
+    const profileDir = existing || dirs[0] || ''
     return {
       id: c.id,
       name: c.name,
       profileDir,
-      available: fs.existsSync(profileDir),
+      available: Boolean(existing),
       engine: c.engine,
     }
   })
@@ -238,6 +304,15 @@ export function mapProgIdToBrowserId(
     }
   }
 
+  // Zen Browser
+  if (pLower.includes('zen') || cmd.includes('zen')) {
+    return {
+      id: 'zen',
+      name: 'Zen Browser',
+      engine: 'firefox',
+    }
+  }
+
   // Opera
   if (pLower.startsWith('opera') || pLower.includes('opera') || cmd.includes('opera.exe')) {
     return {
@@ -317,6 +392,9 @@ export function mapBundleIdToBrowserId(bundleId: string): BrowserIdentity {
   if (lower.includes('firefox')) {
     return { id: 'firefox', name: 'Mozilla Firefox', engine: 'firefox' }
   }
+  if (lower.includes('zen')) {
+    return { id: 'zen', name: 'Zen Browser', engine: 'firefox' }
+  }
   if (lower.includes('opera')) {
     return { id: 'opera', name: 'Opera', engine: 'opera' }
   }
@@ -369,6 +447,9 @@ export function mapLinuxDesktopToBrowserId(desktopFile: string): BrowserIdentity
   }
   if (lower.includes('firefox')) {
     return { id: 'firefox', name: 'Mozilla Firefox', engine: 'firefox' }
+  }
+  if (lower.includes('zen')) {
+    return { id: 'zen', name: 'Zen Browser', engine: 'firefox' }
   }
   if (lower.includes('opera')) {
     return { id: 'opera', name: 'Opera', engine: 'opera' }
@@ -497,8 +578,171 @@ export function detectSystemDefaultBrowser(
 }
 
 /**
+ * Finds the actual profile directory containing cookies.sqlite for a Gecko/Firefox browser.
+ * Inspects profiles.ini or scans subdirectories.
+ */
+export function findGeckoProfileDir(baseDir: string): string | null {
+  if (!baseDir) return null
+  try {
+    if (!fs.existsSync(baseDir)) return null
+  } catch {
+    return null
+  }
+
+  // 1. If baseDir itself directly contains cookies.sqlite, return baseDir
+  try {
+    if (fs.existsSync(path.join(baseDir, 'cookies.sqlite'))) {
+      return baseDir
+    }
+  } catch {}
+
+  // 2. Try profiles.ini
+  const iniPath = path.join(baseDir, 'profiles.ini')
+  if (fs.existsSync(iniPath)) {
+    try {
+      const content = fs.readFileSync(iniPath, 'utf8')
+      const lines = content.split(/\r?\n/)
+      let defaultPath: string | null = null
+      let firstPath: string | null = null
+      let currentPath: string | null = null
+      let currentIsDefault = false
+
+      for (const line of lines) {
+        const trimmed = line.trim()
+        if (trimmed.startsWith('[')) {
+          if (currentPath) {
+            if (currentIsDefault && !defaultPath) defaultPath = currentPath
+            if (!firstPath) firstPath = currentPath
+          }
+          currentPath = null
+          currentIsDefault = false
+        } else if (trimmed.startsWith('Path=')) {
+          currentPath = trimmed.slice(5).trim()
+        } else if (trimmed === 'Default=1') {
+          currentIsDefault = true
+        }
+      }
+      if (currentPath) {
+        if (currentIsDefault && !defaultPath) defaultPath = currentPath
+        if (!firstPath) firstPath = currentPath
+      }
+
+      const targetRel = defaultPath || firstPath
+      if (targetRel) {
+        const full = path.isAbsolute(targetRel) ? targetRel : path.join(baseDir, targetRel)
+        if (fs.existsSync(path.join(full, 'cookies.sqlite'))) {
+          return full
+        }
+      }
+    } catch {}
+  }
+
+  // 3. Fallback scan subdirectories for cookies.sqlite
+  try {
+    const entries = fs.readdirSync(baseDir, { withFileTypes: true })
+    const sorted = entries
+      .filter(e => e.isDirectory())
+      .sort((a, b) => {
+        const aScore = a.name.includes('default-release') ? 2 : a.name.includes('default') ? 1 : 0
+        const bScore = b.name.includes('default-release') ? 2 : b.name.includes('default') ? 1 : 0
+        return bScore - aScore
+      })
+    for (const entry of sorted) {
+      const full = path.join(baseDir, entry.name)
+      if (fs.existsSync(path.join(full, 'cookies.sqlite'))) {
+        return full
+      }
+    }
+  } catch {}
+
+  return null
+}
+
+/**
+ * Extracts platform cookies from Gecko/Firefox cookies.sqlite into Netscape format string.
+ * Uses an ephemeral temporary copy to bypass SQLite database locking while the browser is open.
+ */
+export function extractGeckoCookiesToNetscape(
+  profileDir: string,
+  platformDomains: string[],
+): string | null {
+  const sqliteFile = path.join(profileDir, 'cookies.sqlite')
+  if (!fs.existsSync(sqliteFile)) return null
+
+  const tempDb = path.join(
+    os.tmpdir(),
+    `open_nami_gecko_${Date.now()}_${Math.random().toString(36).slice(2)}.sqlite`,
+  )
+  const tempWal = `${tempDb}-wal`
+  const srcWal = `${sqliteFile}-wal`
+
+  try {
+    fs.copyFileSync(sqliteFile, tempDb)
+    if (fs.existsSync(srcWal)) {
+      try {
+        fs.copyFileSync(srcWal, tempWal)
+      } catch {}
+    }
+
+    let DatabaseSync: any
+    try {
+      const sqliteModule = require('node:sqlite')
+      DatabaseSync = sqliteModule?.DatabaseSync
+    } catch {
+      return null
+    }
+    if (!DatabaseSync) return null
+
+    const db = new DatabaseSync(tempDb, { open: true, readOnly: true })
+    const whereClauses = platformDomains.map(() => 'host LIKE ?').join(' OR ')
+    const query = `SELECT host, path, isSecure, expiry, name, value, isHttpOnly FROM moz_cookies ${
+      whereClauses ? `WHERE ${whereClauses}` : ''
+    }`
+    const stmt = db.prepare(query)
+    const rows = stmt.all(...platformDomains) as Array<{
+      host: string
+      path: string
+      isSecure: number
+      expiry: number
+      name: string
+      value: string
+      isHttpOnly: number
+    }>
+    db.close()
+
+    if (!rows || rows.length === 0) return null
+
+    const lines = ['# Netscape HTTP Cookie File']
+    for (const r of rows) {
+      const domain = r.isHttpOnly ? `#HttpOnly_${r.host}` : r.host
+      const sub = r.host.startsWith('.') ? 'TRUE' : 'FALSE'
+      const p = r.path || '/'
+      const sec = r.isSecure ? 'TRUE' : 'FALSE'
+      let exp = r.expiry || 0
+      if (exp > 1e13) exp = Math.floor(exp / 1000000)
+      else if (exp > 1e11) exp = Math.floor(exp / 1000)
+      else exp = Math.floor(exp)
+
+      lines.push(`${domain}\t${sub}\t${p}\t${sec}\t${exp}\t${r.name}\t${r.value}`)
+    }
+
+    return lines.join('\n') + '\n'
+  } catch {
+    return null
+  } finally {
+    try {
+      if (fs.existsSync(tempDb)) fs.unlinkSync(tempDb)
+    } catch {}
+    try {
+      if (fs.existsSync(tempWal)) fs.unlinkSync(tempWal)
+    } catch {}
+  }
+}
+
+/**
  * Resolves browser cookie argument for gallery-dl and yt-dlp engines.
  * For Helium: returns chrome:<profileDir> to point Chromium engines to custom user data.
+ * For Zen: returns firefox:<profileDir> pointing to Gecko profile.
  * For standard browsers: returns browser id.
  * For null/none: returns null.
  */
@@ -514,14 +758,23 @@ export function resolveBrowserCookieArg(
     if (!trimmed || trimmed.toLowerCase() === 'none') {
       return null
     }
-    if (trimmed.toLowerCase() === 'helium') {
+    const lower = trimmed.toLowerCase()
+    if (lower === 'auto') {
+      const defaultBrowser = detectSystemDefaultBrowser()
+      return resolveBrowserCookieArg(defaultBrowser)
+    }
+    if (lower === 'helium') {
       const detectedHelium = listDetectedBrowsers().find(b => b.id === 'helium')
       const profileDir = detectedHelium?.profileDir
       return profileDir ? `chrome:${profileDir}` : 'chrome'
     }
-    if (trimmed.toLowerCase() === 'auto') {
-      const defaultBrowser = detectSystemDefaultBrowser()
-      return resolveBrowserCookieArg(defaultBrowser)
+    if (lower === 'zen') {
+      const detectedZen = listDetectedBrowsers().find(b => b.id === 'zen')
+      if (detectedZen?.profileDir) {
+        const geckoDir = findGeckoProfileDir(detectedZen.profileDir)
+        return geckoDir ? `firefox:${geckoDir}` : `firefox:${detectedZen.profileDir}`
+      }
+      return 'firefox'
     }
     return trimmed
   }
@@ -530,24 +783,75 @@ export function resolveBrowserCookieArg(
     return null
   }
 
-  if (browser.id.toLowerCase() === 'helium') {
+  const id = browser.id.toLowerCase()
+  if (id === 'helium') {
     const profileDir =
       browser.profileDir || listDetectedBrowsers().find(b => b.id === 'helium')?.profileDir
     return profileDir ? `chrome:${profileDir}` : 'chrome'
   }
 
+  if (id === 'zen') {
+    const profileDir =
+      browser.profileDir || listDetectedBrowsers().find(b => b.id === 'zen')?.profileDir
+    if (profileDir) {
+      const geckoDir = findGeckoProfileDir(profileDir)
+      return geckoDir ? `firefox:${geckoDir}` : `firefox:${profileDir}`
+    }
+    return 'firefox'
+  }
+
   return browser.id
 }
 
+/**
+ * Automatically extracts session cookies for a specific social media platform from
+ * the user's browser, serializing them into a standard Netscape cookie file at destPath.
+ */
 export async function exportCookiesForPlatform(
   browserId: string,
   platform: string,
   destPath: string,
 ): Promise<boolean> {
   const browsers = listDetectedBrowsers()
-  const browser = browsers.find(b => b.id === browserId)
-  if (!browser || !browser.available) {
+  let browser: DetectedBrowser | undefined
+
+  if (browserId.toLowerCase() === 'auto') {
+    browser = detectSystemDefaultBrowser() ?? undefined
+    if (!browser || !browser.available || !browser.profileDir) {
+      browser = browsers.find(b => b.available && b.profileDir)
+    }
+  } else {
+    browser = browsers.find(b => b.id.toLowerCase() === browserId.toLowerCase())
+  }
+
+  if (!browser || !browser.available || !browser.profileDir) {
     return false
   }
+
+  if (browser.engine === 'firefox') {
+    const profileDir = findGeckoProfileDir(browser.profileDir)
+    if (!profileDir) return false
+
+    const platformDomainMap: Record<string, string[]> = {
+      instagram: ['%instagram.com%'],
+      tiktok: ['%tiktok.com%'],
+      facebook: ['%facebook.com%'],
+      x: ['%x.com%', '%twitter.com%'],
+      twitter: ['%x.com%', '%twitter.com%'],
+    }
+
+    const domains = platformDomainMap[platform.toLowerCase()] || [`%${platform.toLowerCase()}%`]
+    const netscapeData = extractGeckoCookiesToNetscape(profileDir, domains)
+    if (!netscapeData) return false
+
+    try {
+      fs.mkdirSync(path.dirname(destPath), { recursive: true })
+      fs.writeFileSync(destPath, netscapeData, { encoding: 'utf8', mode: 0o600 })
+      return true
+    } catch {
+      return false
+    }
+  }
+
   return false
 }

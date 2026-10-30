@@ -4,6 +4,24 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2026-10-30
+
+### Added & Automated
+- **Linux Multi-Path & Flatpak Browser Discovery**:
+  - Replaced single static paths with candidate directory arrays across Linux, macOS, and Windows.
+  - Added support for Flatpak browser installations (`com.google.Chrome`, `app.zen_browser.zen`, `io.gitlab.librewolf-community`, `org.chromium.Chromium`).
+  - Added modern Fedora XDG profile path discovery for Firefox (`~/.config/mozilla/firefox`).
+- **Zen Browser First-Class Support**:
+  - Registered Zen Browser across configuration (`knownBrowsers`), Linux `.desktop` file handler (`app.zen_browser.zen.desktop`), Windows ProgId, and macOS bundle IDs.
+  - Automatically formats Gecko profile parameters as `firefox:<profileDir>` for engine compatibility.
+- **Lock-Free Live Gecko Cookie Extraction**:
+  - Implemented `extractGeckoCookiesToNetscape()`: ephemerally copies SQLite databases and WAL files to `os.tmpdir()` to safely read active session cookies without running-browser database locks.
+  - Formats active cookies into standard Netscape tab-delimited syntax.
+- **Automated Native Extractor Cookie Forwarding**:
+  - Updated `dispatcher.ts` to export ephemeral `0o600` Netscape session cookie files prior to running native extractors when no physical cookie file exists.
+  - Ensures both Tier 1 native extractors and Tier 2 fallbacks receive authenticated session cookies.
+  - Updated dispatcher circuit breaker to allow seamless fallback on authenticated sessions.
+
 ## [1.6.1] - 2026-10-25
 
 ### Fixed & Cleaned
