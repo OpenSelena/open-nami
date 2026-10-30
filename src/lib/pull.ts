@@ -7,6 +7,7 @@ import {
   resolveDefaultDownloadDir,
 } from './engines/dispatcher.js'
 import { parseProfileInput, buildCanonicalProfile } from './parser.js'
+import { countMediaFilesInDir } from './engines/storage/disk-sync.js'
 import type { SupportedPlatform, ParsedProfile } from './parser.js'
 import type { MediaTarget, EngineProgress, DispatchRunnerResult } from './engines/types.js'
 import type { TrackedProfileRecord, MediaLedger } from './engines/storage/ledger.js'
@@ -175,12 +176,16 @@ export async function dispatchPull(options: PullOptions = {}): Promise<PullSumma
 
       if (itemRes.status === 'success') {
         succeeded++
+        const diskStats = countMediaFilesInDir(targetDir)
+        const finalCount = diskStats.count > 0
+          ? diskStats.count
+          : profileRec.mediaCount + res.downloadedCount
         ledger.trackProfile({
           ...profileRec,
           targetDir,
           choice,
           lastPulledAt: new Date().toISOString(),
-          mediaCount: profileRec.mediaCount + res.downloadedCount,
+          mediaCount: finalCount,
           status: 'ok',
         })
         options.onProfileComplete?.(itemRes, i, allTracked.length)

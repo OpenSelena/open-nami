@@ -10,6 +10,7 @@ import {loadCheckpoint, saveCheckpoint, clearCheckpoint} from './checkpoint.js'
 import {filterMediaStream, parseDateBoundary, parseLimit} from './filters.js'
 import {runGalleryDl} from './gallery-dl.js'
 import {runYtDlp} from './yt-dlp.js'
+import {countMediaFilesInDir} from './storage/disk-sync.js'
 import {
   TaskManager,
   defaultTaskManager,
@@ -104,6 +105,17 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     defaultTaskManager.events.emit('job:progress', progress)
     if (progress.currentFile && progress.statusText?.startsWith('Saved:')) {
       try {
+        if (progress.itemId) {
+          activeLedger.recordMedia({
+            id: progress.itemId,
+            platform: profile.platform,
+            author: profile.username,
+            url: profile.cleanUrl || '',
+            filename: progress.currentFile,
+            filePath: path.join(targetDir, progress.currentFile),
+            downloadedAt: new Date().toISOString(),
+          })
+        }
         activeLedger.recordMedia({
           id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
           platform: profile.platform,
@@ -184,7 +196,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           until: untilSeconds,
           limit: remainingLimit,
           earlyExitThreshold: options.earlyExitThreshold,
-          isDuplicate: (item) => activeLedger.hasMedia(item.id),
+          isDuplicate: (item) => activeLedger.hasMedia(item.id, profile.platform, profile.username),
         })
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
@@ -376,15 +388,20 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     }
 
     if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
+      const diskStats = countMediaFilesInDir(targetDir)
       const existing = activeLedger.getTrackedProfile(profile.platform, profile.username)
+      const finalCount = diskStats.count > 0
+        ? diskStats.count
+        : (existing?.mediaCount || 0) + engineResult.downloadedCount
+
       activeLedger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
         targetDir,
-        choice,
+        choice: choice === 'all' && diskStats.choice ? diskStats.choice : choice,
         lastPulledAt: new Date().toISOString(),
-        mediaCount: (existing?.mediaCount || 0) + engineResult.downloadedCount,
+        mediaCount: finalCount,
         status: errors.length === 0 ? 'ok' : 'partial',
       })
     }

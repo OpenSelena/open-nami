@@ -4,6 +4,26 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] - 2026-10-30
+
+### Fixed
+- **Creator Profile Disk Discovery & Accurate Media Counting**:
+  - Automatically scans existing creator download directories on launch and synchronization, registering pre-existing creators with exact, live media counts directly from disk.
+  - Eliminated naive accumulator drift (`mediaCount += downloadedCount`) where skipping already-downloaded files previously left counts inaccurate or zeroed.
+  - Added recursive media scanner ignoring archive sidecars, captions, temporary download chunks, and database files.
+  - Automatically detects creator media format preferences (`photos`, `videos`, or `all`) based on actual files in directories.
+- **Media Ledger & Duplicate Detection Key Alignment**:
+  - Resolved identifier discrepancy between platform item IDs emitted by stream extractors and storage keys in `media_ledger`.
+  - Passes `itemId` through engine progress events so both platform post IDs and filename-based records are indexed in the database.
+  - Updated `hasMedia` to support bare IDs, compound keys, and case-insensitive filename matches, enabling early-exit duplicate threshold detection to stop pagination immediately on previously-downloaded posts.
+- **Untracked Blacklist Protection**:
+  - Added `untracked_profiles` table ensuring explicitly untracked profiles (`open-nami untrack <user>` or `[d]` in TUI) are not revived on subsequent disk scans.
+  - Case-insensitive lookups (`COLLATE NOCASE`) across SQLite queries prevent platform and username casing mismatches.
+- **Interactive Mouse Navigation in TUI Footer**:
+  - Registered mouse click target for `^h history` footer shortcut to switch seamlessly into the tracked profiles view.
+- **CLI Commands**:
+  - Added `open-nami track <url-or-user>` to manually register or resume tracking for a creator.
+
 ## [1.9.2] - 2026-10-30
 
 ### Fixed

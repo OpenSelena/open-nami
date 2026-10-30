@@ -9,6 +9,7 @@ export interface EngineProgress {
   skippedCount: number
   currentFile?: string
   statusText: string
+  itemId?: string
 }
 
 export interface EngineResult {

@@ -3,8 +3,9 @@ import {createRequire} from 'node:module'
 import {render} from 'ink'
 import {App} from './app.js'
 import {captureFrames} from './lib/click-map.js'
-import {parseProfileInput} from './lib/parser.js'
-import {dispatchDownload} from './lib/engines/dispatcher.js'
+import {parseProfileInput, buildCanonicalProfile} from './lib/parser.js'
+import {dispatchDownload, resolveDefaultDownloadDir} from './lib/engines/dispatcher.js'
+import {countMediaFilesInDir} from './lib/engines/storage/disk-sync.js'
 import type {MediaTarget} from './lib/engines/types.js'
 import {generateCompletion} from './lib/completion.js'
 import {updateYtDlp, updateGalleryDl} from './lib/engines/fetcher.js'
@@ -39,6 +40,7 @@ const HELP = `
     $ open-nami <profile-url-or-user>    Open directly to format picker
     $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
     $ open-nami list                     List all tracked profiles in registry
+    $ open-nami track <url-or-user>      Add creator profile to tracking registry
     $ open-nami untrack <username>       Remove creator from tracking without deleting files
     $ open-nami untrack --all            Remove all creators from tracking registry
     $ open-nami <url> --photos           Download photos directly
@@ -179,6 +181,58 @@ export function handleUntrackCommand(
     return {
       success: true,
       message: `Untracked @${target.username} from registry. Downloaded media files preserved on disk.`,
+    }
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close()
+    }
+  }
+}
+
+export function handleTrackCommand(
+  target?: string,
+  ledger?: MediaLedger,
+): { success: boolean; message: string } {
+  if (!target || !target.trim()) {
+    return {
+      success: false,
+      message: 'Please provide a profile link or username to track (e.g. open-nami track selenagomez).',
+    }
+  }
+
+  const cleanTarget = target.trim()
+  const ownsLedger = !ledger
+  const activeLedger = ledger || new MediaLedger()
+
+  try {
+    let parsed = parseProfileInput(cleanTarget)
+    if (parsed.platform === 'unknown' && parsed.username) {
+      parsed = buildCanonicalProfile('instagram', parsed.username, cleanTarget)
+    }
+
+    if (parsed.platform === 'unknown' || !parsed.username) {
+      return {
+        success: false,
+        message: `Could not parse profile from "${cleanTarget}". Please provide a full URL or @username.`,
+      }
+    }
+
+    const targetDir = resolveDefaultDownloadDir(parsed.platform, parsed.username)
+    const diskStats = countMediaFilesInDir(targetDir)
+    activeLedger.trackProfile({
+      platform: parsed.platform,
+      username: parsed.username.toLowerCase(),
+      profileUrl: parsed.cleanUrl || `https://${parsed.platform}.com/${parsed.username}`,
+      targetDir,
+      choice: diskStats.choice || 'all',
+      lastPulledAt: diskStats.lastMtimeMs ? new Date(diskStats.lastMtimeMs).toISOString() : new Date().toISOString(),
+      mediaCount: diskStats.count,
+      status: 'ok',
+    })
+
+    return {
+      success: true,
+      message: `Tracked @${parsed.username} (${parsed.platform})${diskStats.count > 0 ? ` with ${diskStats.count} existing media files on disk` : ''}.`,
     }
   } finally {
     if (ownsLedger) {
@@ -391,6 +445,18 @@ async function main() {
     const output = handleListCommand()
     console.log(output)
     process.exit(0)
+  }
+
+  if (args[0] === 'track') {
+    const targetUser = args[1]
+    const res = handleTrackCommand(targetUser)
+    if (res.success) {
+      console.log(res.message)
+      process.exit(0)
+    } else {
+      console.error(res.message)
+      process.exit(1)
+    }
   }
 
   if (args[0] === 'untrack') {

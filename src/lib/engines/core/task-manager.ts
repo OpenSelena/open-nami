@@ -4,46 +4,19 @@ import fs from 'node:fs/promises'
 import fsSync from 'node:fs'
 import { EngineEventBus } from './event-bus.js'
 import { MediaLedger } from '../storage/ledger.js'
+import { countMediaFilesInDir } from '../storage/disk-sync.js'
 import { ExtractorPluginRegistry, defaultPluginRegistry } from './plugin.js'
-import { resolvePlatformDownloadsDir } from '../../known-folders.js'
-import { loadConfig } from '../../config.js'
+import {
+  expandPath,
+  resolveDownloadBaseDir,
+  resolveDefaultDownloadDir,
+} from './download-dirs.js'
 import type { DispatchOptions, EngineResult } from '../types.js'
 
-function expandPath(dir: string): string {
-  if (dir.startsWith('~/') || dir.startsWith('~\\') || dir === '~') {
-    return path.join(os.homedir(), dir.slice(1))
-  }
-  return dir
-}
-
-export function resolveDownloadBaseDir(customBaseDir?: string): string {
-  if (customBaseDir && customBaseDir.trim()) {
-    return path.resolve(expandPath(customBaseDir.trim()))
-  }
-  const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR
-  if (envDir && envDir.trim()) {
-    return path.resolve(expandPath(envDir.trim()))
-  }
-  const configDir = loadConfig().downloadDir
-  if (configDir && configDir.trim()) {
-    return path.resolve(expandPath(configDir.trim()))
-  }
-  if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
-    const raw = process.env.NAMI_BASE_DIR.trim()
-    return path.resolve(expandPath(raw.endsWith('downloads') ? raw : path.join(raw, 'downloads')))
-  }
-
-  // Dynamically auto-detect user's platform Downloads folder (like Open Omni)
-  return path.join(resolvePlatformDownloadsDir(), 'Open Nami')
-}
-
-export function resolveDefaultDownloadDir(
-  platform: string,
-  username: string,
-  baseDir?: string,
-): string {
-  const root = resolveDownloadBaseDir(baseDir)
-  return path.join(root, platform, username)
+export {
+  expandPath,
+  resolveDownloadBaseDir,
+  resolveDefaultDownloadDir,
 }
 
 export async function cleanupEmptyCategoryDirs(targetDir: string): Promise<void> {
@@ -112,15 +85,20 @@ export class TaskManager {
     }
 
     if (!options.noTrack && (result.success || result.downloadedCount > 0)) {
+      const diskStats = countMediaFilesInDir(targetDir)
       const existing = this.ledger.getTrackedProfile(profile.platform, profile.username)
+      const finalCount = diskStats.count > 0
+        ? diskStats.count
+        : (existing?.mediaCount || 0) + result.downloadedCount
+
       this.ledger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
         targetDir,
-        choice,
+        choice: choice === 'all' && diskStats.choice ? diskStats.choice : choice,
         lastPulledAt: new Date().toISOString(),
-        mediaCount: (existing?.mediaCount || 0) + result.downloadedCount,
+        mediaCount: finalCount,
         status: errors.length === 0 ? 'ok' : 'partial',
       })
     }

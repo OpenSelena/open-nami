@@ -251,6 +251,7 @@ export async function downloadMediaStream(
           skippedCount: skipped,
           currentFile: finalFilename,
           statusText: `Skipping already downloaded: ${finalFilename}`,
+          itemId: item.id,
         })
         if (options.earlyExitThreshold && consecutiveDuplicates >= options.earlyExitThreshold) {
           isDone = true
@@ -325,6 +326,7 @@ export async function downloadMediaStream(
           skippedCount: skipped,
           currentFile: finalFilename,
           statusText: `Saved: ${finalFilename}`,
+          itemId: item.id,
         })
       } catch (err: unknown) {
         try {

@@ -10434,10 +10434,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path19, index, value) {
-        if (index >= path19.length) return value;
-        var key = path19[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path19, index + 1, value);
+      function copyWithSetImpl(obj, path21, index, value) {
+        if (index >= path21.length) return value;
+        var key = path21[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path21, index + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10464,11 +10464,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path19, index) {
-        var key = path19[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index + 1 === path19.length)
+      function copyWithDeleteImpl(obj, path21, index) {
+        var key = path21[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index + 1 === path21.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path19, index + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path21, index + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23745,29 +23745,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path19, value) {
+      overrideHookState = function(fiber, id, path21, value) {
         id = findHook(fiber, id);
-        null !== id && (path19 = copyWithSetImpl(id.memoizedState, path19, 0, value), id.memoizedState = path19, id.baseState = path19, fiber.memoizedProps = assign({}, fiber.memoizedProps), path19 = enqueueConcurrentRenderForLane(fiber, 2), null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2));
+        null !== id && (path21 = copyWithSetImpl(id.memoizedState, path21, 0, value), id.memoizedState = path21, id.baseState = path21, fiber.memoizedProps = assign({}, fiber.memoizedProps), path21 = enqueueConcurrentRenderForLane(fiber, 2), null !== path21 && scheduleUpdateOnFiber(path21, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path19) {
+      overrideHookStateDeletePath = function(fiber, id, path21) {
         id = findHook(fiber, id);
-        null !== id && (path19 = copyWithDeleteImpl(id.memoizedState, path19, 0), id.memoizedState = path19, id.baseState = path19, fiber.memoizedProps = assign({}, fiber.memoizedProps), path19 = enqueueConcurrentRenderForLane(fiber, 2), null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2));
+        null !== id && (path21 = copyWithDeleteImpl(id.memoizedState, path21, 0), id.memoizedState = path21, id.baseState = path21, fiber.memoizedProps = assign({}, fiber.memoizedProps), path21 = enqueueConcurrentRenderForLane(fiber, 2), null !== path21 && scheduleUpdateOnFiber(path21, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path19, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path19, 0, value);
+      overrideProps = function(fiber, path21, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path21, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path19 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2);
+        path21 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path21 && scheduleUpdateOnFiber(path21, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path19) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path19, 0);
+      overridePropsDeletePath = function(fiber, path21) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path21, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path19 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path19 && scheduleUpdateOnFiber(path19, fiber, 2);
+        path21 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path21 && scheduleUpdateOnFiber(path21, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.2",
+      version: "1.9.3",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs23 = await import("fs");
-  const content = fs23.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs24 = await import("fs");
+  const content = fs24.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -33772,8 +33772,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path19) => {
-  return path19?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path21) => {
+  return path21?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -36965,8 +36965,8 @@ async function clearCheckpoint(destDir) {
 }
 
 // src/lib/engines/dispatcher.ts
-import path13 from "path";
-import fs15 from "fs/promises";
+import path15 from "path";
+import fs16 from "fs/promises";
 import os10 from "os";
 
 // src/lib/config.ts
@@ -38177,8 +38177,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs23 = user.friendship_status;
-      const isFollowing = fs23 ? Boolean(fs23.following) : Boolean(user.followed_by_viewer);
+      const fs24 = user.friendship_status;
+      const isFollowing = fs24 ? Boolean(fs24.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -40031,7 +40031,8 @@ async function downloadMediaStream(items, options) {
           downloadedCount: downloaded,
           skippedCount: skipped,
           currentFile: finalFilename,
-          statusText: `Skipping already downloaded: ${finalFilename}`
+          statusText: `Skipping already downloaded: ${finalFilename}`,
+          itemId: item.id
         });
         if (options.earlyExitThreshold && consecutiveDuplicates >= options.earlyExitThreshold) {
           isDone = true;
@@ -40097,7 +40098,8 @@ async function downloadMediaStream(items, options) {
           downloadedCount: downloaded,
           skippedCount: skipped,
           currentFile: finalFilename,
-          statusText: `Saved: ${finalFilename}`
+          statusText: `Saved: ${finalFilename}`,
+          itemId: item.id
         });
       } catch (err) {
         try {
@@ -40941,342 +40943,19 @@ async function runYtDlp(options) {
   });
 }
 
-// src/lib/engines/core/task-manager.ts
+// src/lib/engines/storage/disk-sync.ts
+import fs13 from "fs";
 import path12 from "path";
-import os9 from "os";
-import fs14 from "fs/promises";
-import fsSync from "fs";
 
-// src/lib/engines/core/event-bus.ts
-import { EventEmitter as EventEmitter3 } from "events";
-var EngineEventBus = class {
-  emitter = new EventEmitter3();
-  constructor() {
-    this.emitter.setMaxListeners(50);
-  }
-  on(event, listener) {
-    this.emitter.on(event, listener);
-    return () => this.emitter.off(event, listener);
-  }
-  off(event, listener) {
-    this.emitter.off(event, listener);
-  }
-  once(event, listener) {
-    this.emitter.once(event, listener);
-  }
-  emit(event, payload) {
-    return this.emitter.emit(event, payload);
-  }
-  removeAllListeners(event) {
-    if (event !== void 0) {
-      this.emitter.removeAllListeners(event);
-    } else {
-      this.emitter.removeAllListeners();
-    }
-  }
-};
-
-// src/lib/engines/storage/ledger.ts
-import fs12 from "fs";
-import path10 from "path";
-import os7 from "os";
-import { createRequire as createRequire2 } from "module";
-var require3 = createRequire2(import.meta.url);
-var MediaLedger = class {
-  db = null;
-  inMemoryFallback = {
-    media: /* @__PURE__ */ new Map(),
-    checkpoints: /* @__PURE__ */ new Map(),
-    trackedProfiles: /* @__PURE__ */ new Map()
-  };
-  isFallback = false;
-  resolvedPath;
-  constructor(dbPath, forceFallback = false) {
-    const isTest = process.env.NODE_ENV === "test" || process.env.OPEN_NAMI_TEST === "1" || process.argv.some((a) => a.includes("--test"));
-    const envDb = process.env.OPEN_NAMI_DB?.trim();
-    const defaultPath = isTest ? ":memory:" : path10.join(os7.homedir(), ".open-nami", "nami.db");
-    const resolvedPath = dbPath ?? (envDb || (forceFallback ? ":memory:" : defaultPath));
-    this.resolvedPath = resolvedPath;
-    if (forceFallback) {
-      this.isFallback = true;
-      this.loadFallbackDisk();
-      return;
-    }
-    try {
-      if (resolvedPath !== ":memory:") {
-        fs12.mkdirSync(path10.dirname(resolvedPath), { recursive: true });
-      }
-      const { DatabaseSync } = require3("node:sqlite");
-      this.db = new DatabaseSync(resolvedPath);
-      if (resolvedPath !== ":memory:") {
-        try {
-          this.db.exec("PRAGMA journal_mode = WAL;");
-          this.db.exec("PRAGMA busy_timeout = 5000;");
-        } catch {
-        }
-      }
-      this.initTables();
-    } catch {
-      this.isFallback = true;
-      this.loadFallbackDisk();
-    }
-  }
-  loadFallbackDisk() {
-    if (this.resolvedPath === ":memory:") return;
-    try {
-      if (fs12.existsSync(this.resolvedPath)) {
-        const raw = fs12.readFileSync(this.resolvedPath, "utf8");
-        const data = JSON.parse(raw);
-        if (data && typeof data === "object") {
-          if (data.media && typeof data.media === "object") {
-            for (const [k, v] of Object.entries(data.media)) {
-              this.inMemoryFallback.media.set(k, v);
-            }
-          }
-          if (data.checkpoints && typeof data.checkpoints === "object") {
-            for (const [k, v] of Object.entries(data.checkpoints)) {
-              this.inMemoryFallback.checkpoints.set(k, v);
-            }
-          }
-          if (data.trackedProfiles && typeof data.trackedProfiles === "object") {
-            for (const [k, v] of Object.entries(data.trackedProfiles)) {
-              this.inMemoryFallback.trackedProfiles.set(k, v);
-            }
-          }
-        }
-      }
-    } catch {
-    }
-  }
-  flushFallbackDisk() {
-    if (this.resolvedPath === ":memory:") return;
-    try {
-      fs12.mkdirSync(path10.dirname(this.resolvedPath), { recursive: true });
-      const data = {
-        media: Object.fromEntries(this.inMemoryFallback.media),
-        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints),
-        trackedProfiles: Object.fromEntries(this.inMemoryFallback.trackedProfiles)
-      };
-      fs12.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), "utf8");
-    } catch {
-    }
-  }
-  initTables() {
-    if (!this.db) return;
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS media_ledger (
-        id TEXT PRIMARY KEY,
-        platform TEXT,
-        author TEXT,
-        url TEXT,
-        filename TEXT,
-        file_path TEXT,
-        downloaded_at TEXT
-      );
-      CREATE TABLE IF NOT EXISTS checkpoints (
-        key TEXT PRIMARY KEY,
-        platform TEXT,
-        username TEXT,
-        target_dir TEXT,
-        cursors_json TEXT,
-        updated_at TEXT
-      );
-      CREATE TABLE IF NOT EXISTS tracked_profiles (
-        platform TEXT NOT NULL,
-        username TEXT NOT NULL,
-        profile_url TEXT NOT NULL,
-        target_dir TEXT NOT NULL,
-        choice TEXT NOT NULL,
-        last_pulled_at TEXT NOT NULL,
-        media_count INTEGER DEFAULT 0,
-        status TEXT,
-        PRIMARY KEY (platform, username)
-      );
-    `);
-  }
-  hasMedia(id) {
-    if (this.isFallback || !this.db) {
-      return this.inMemoryFallback.media.has(id);
-    }
-    const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ?");
-    const row = stmt.get(id);
-    return Boolean(row);
-  }
-  recordMedia(media) {
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.media.set(media.id, media);
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO media_ledger (id, platform, author, url, filename, file_path, downloaded_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
-      media.id,
-      media.platform,
-      media.author,
-      media.url,
-      media.filename,
-      media.filePath,
-      media.downloadedAt
-    );
-  }
-  saveCheckpoint(checkpoint) {
-    const key = `${checkpoint.platform}:${checkpoint.username.toLowerCase()}`;
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.checkpoints.set(key, checkpoint);
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO checkpoints (key, platform, username, target_dir, cursors_json, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
-      key,
-      checkpoint.platform,
-      checkpoint.username,
-      checkpoint.targetDir,
-      JSON.stringify(checkpoint.cursors),
-      checkpoint.updatedAt
-    );
-  }
-  getCheckpoint(platform2, username) {
-    const key = `${platform2}:${username.toLowerCase()}`;
-    if (this.isFallback || !this.db) {
-      return this.inMemoryFallback.checkpoints.get(key) || null;
-    }
-    const stmt = this.db.prepare(
-      "SELECT platform, username, target_dir, cursors_json, updated_at FROM checkpoints WHERE key = ?"
-    );
-    const row = stmt.get(key);
-    if (!row) return null;
-    return {
-      platform: row.platform,
-      username: row.username,
-      targetDir: row.target_dir,
-      cursors: JSON.parse(row.cursors_json || "{}"),
-      updatedAt: row.updated_at
-    };
-  }
-  clearCheckpoint(platform2, username) {
-    const key = `${platform2}:${username.toLowerCase()}`;
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.checkpoints.delete(key);
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare("DELETE FROM checkpoints WHERE key = ?");
-    stmt.run(key);
-  }
-  trackProfile(profile) {
-    const key = `${profile.platform}:${profile.username.toLowerCase()}`;
-    const normalized = {
-      ...profile,
-      username: profile.username.toLowerCase()
-    };
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.trackedProfiles.set(key, normalized);
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO tracked_profiles (
-        platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
-      normalized.platform,
-      normalized.username,
-      normalized.profileUrl,
-      normalized.targetDir,
-      normalized.choice,
-      normalized.lastPulledAt,
-      normalized.mediaCount,
-      normalized.status ?? null
-    );
-  }
-  getTrackedProfiles() {
-    if (this.isFallback || !this.db) {
-      return Array.from(this.inMemoryFallback.trackedProfiles.values());
-    }
-    const stmt = this.db.prepare(
-      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles ORDER BY last_pulled_at DESC"
-    );
-    const rows = stmt.all();
-    return rows.map((r) => ({
-      platform: r.platform,
-      username: r.username,
-      profileUrl: r.profile_url,
-      targetDir: r.target_dir,
-      choice: r.choice,
-      lastPulledAt: r.last_pulled_at,
-      mediaCount: Number(r.media_count || 0),
-      status: r.status || void 0
-    }));
-  }
-  getTrackedProfile(platform2, username) {
-    const key = `${platform2}:${username.toLowerCase()}`;
-    if (this.isFallback || !this.db) {
-      return this.inMemoryFallback.trackedProfiles.get(key) || null;
-    }
-    const stmt = this.db.prepare(
-      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles WHERE platform = ? AND username = ?"
-    );
-    const row = stmt.get(platform2, username.toLowerCase());
-    if (!row) return null;
-    return {
-      platform: row.platform,
-      username: row.username,
-      profileUrl: row.profile_url,
-      targetDir: row.target_dir,
-      choice: row.choice,
-      lastPulledAt: row.last_pulled_at,
-      mediaCount: Number(row.media_count || 0),
-      status: row.status || void 0
-    };
-  }
-  untrackProfile(platform2, username) {
-    const key = `${platform2}:${username.toLowerCase()}`;
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.trackedProfiles.delete(key);
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare("DELETE FROM tracked_profiles WHERE platform = ? AND username = ?");
-    stmt.run(platform2, username.toLowerCase());
-  }
-  untrackProfiles(profiles) {
-    for (const p of profiles) {
-      this.untrackProfile(p.platform, p.username);
-    }
-  }
-  clearTrackedProfiles() {
-    if (this.isFallback || !this.db) {
-      this.inMemoryFallback.trackedProfiles.clear();
-      this.flushFallbackDisk();
-      return;
-    }
-    const stmt = this.db.prepare("DELETE FROM tracked_profiles");
-    stmt.run();
-  }
-  close() {
-    if (this.db) {
-      try {
-        this.db.close();
-      } catch {
-      }
-      this.db = null;
-    }
-  }
-};
+// src/lib/engines/core/download-dirs.ts
+import path11 from "path";
+import os8 from "os";
 
 // src/lib/known-folders.ts
 import { execFileSync as execFileSync2 } from "child_process";
-import fs13 from "fs";
-import os8 from "os";
-import path11 from "path";
+import fs12 from "fs";
+import os7 from "os";
+import path10 from "path";
 var KNOWN_FOLDER_DOWNLOADS_GUID = "{374DE290-123F-4565-9164-39C4925E467B}";
 var USER_SHELL_FOLDERS_REG_KEY = "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\User Shell Folders";
 function expandWindowsEnv(str, env3 = process.env, homeDir) {
@@ -41316,14 +40995,14 @@ function parseLinuxUserDirsOutput(content) {
   }
   return void 0;
 }
-function isPathDriveAccessible(filePath, fsExists = fs13.existsSync, platform2 = process.platform) {
+function isPathDriveAccessible(filePath, fsExists = fs12.existsSync, platform2 = process.platform) {
   try {
     if (fsExists(filePath)) {
       return true;
     }
     if (platform2 === "win32") {
       const match = filePath.match(/^([a-zA-Z]:[\\/])/i);
-      const driveRoot = match ? match[1] : path11.win32.parse(path11.win32.resolve(filePath)).root;
+      const driveRoot = match ? match[1] : path10.win32.parse(path10.win32.resolve(filePath)).root;
       return fsExists(driveRoot);
     }
     const normalized = filePath.replace(/\\/g, "/");
@@ -41331,10 +41010,10 @@ function isPathDriveAccessible(filePath, fsExists = fs13.existsSync, platform2 =
     if (mountMatch) {
       return fsExists(mountMatch[1]);
     }
-    let curr = path11.posix.dirname(normalized);
+    let curr = path10.posix.dirname(normalized);
     while (curr && curr !== "/") {
       if (fsExists(curr)) return true;
-      curr = path11.posix.dirname(curr);
+      curr = path10.posix.dirname(curr);
     }
     return fsExists("/");
   } catch {
@@ -41342,7 +41021,7 @@ function isPathDriveAccessible(filePath, fsExists = fs13.existsSync, platform2 =
   }
 }
 function resolveWindowsDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os8.homedir();
+  const homeDir = options.homeDir ?? os7.homedir();
   const env3 = options.env ?? process.env;
   const runQuery = options.regQueryFn ?? ((key, value) => {
     try {
@@ -41354,7 +41033,7 @@ function resolveWindowsDownloadsDir(options = {}) {
       return "";
     }
   });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs13.existsSync, "win32"));
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs12.existsSync, "win32"));
   let raw = parseWindowsRegistryOutput(
     runQuery(USER_SHELL_FOLDERS_REG_KEY, KNOWN_FOLDER_DOWNLOADS_GUID),
     KNOWN_FOLDER_DOWNLOADS_GUID
@@ -41365,38 +41044,38 @@ function resolveWindowsDownloadsDir(options = {}) {
   if (raw) {
     const expanded = expandWindowsEnv(raw, env3, homeDir);
     if (checkAccessible(expanded)) {
-      return path11.win32.resolve(expanded);
+      return path10.win32.resolve(expanded);
     }
   }
   return void 0;
 }
 function resolveLinuxDownloadsDir(options = {}) {
-  const homeDir = options.homeDir ?? os8.homedir();
+  const homeDir = options.homeDir ?? os7.homedir();
   const env3 = options.env ?? process.env;
   const readFn = options.readFileFn ?? ((p) => {
     try {
-      return fs13.readFileSync(p, "utf8");
+      return fs12.readFileSync(p, "utf8");
     } catch {
       return "";
     }
   });
-  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs13.existsSync, "linux"));
-  const configHome = env3.XDG_CONFIG_HOME || path11.join(homeDir, ".config");
-  const userDirsFile = path11.join(configHome, "user-dirs.dirs");
+  const checkAccessible = options.driveAccessibleFn ?? ((p) => isPathDriveAccessible(p, fs12.existsSync, "linux"));
+  const configHome = env3.XDG_CONFIG_HOME || path10.join(homeDir, ".config");
+  const userDirsFile = path10.join(configHome, "user-dirs.dirs");
   const content = readFn(userDirsFile);
   if (!content) return void 0;
   const raw = parseLinuxUserDirsOutput(content);
   if (!raw) return void 0;
   const expanded = raw.replace(/\$HOME/g, homeDir).replace(/\$\{HOME\}/g, homeDir);
   if (checkAccessible(expanded)) {
-    return path11.posix.resolve(expanded);
+    return path10.posix.resolve(expanded);
   }
   return void 0;
 }
 function resolvePlatformDownloadsDir(options = {}) {
   const platform2 = options.platform ?? process.platform;
-  const homeDir = options.homeDir ?? os8.homedir();
-  const defaultFallback = path11.join(homeDir, "Downloads");
+  const homeDir = options.homeDir ?? os7.homedir();
+  const defaultFallback = path10.join(homeDir, "Downloads");
   if (platform2 === "win32") {
     const resolved = resolveWindowsDownloadsDir(options);
     if (resolved) return resolved;
@@ -41407,53 +41086,837 @@ function resolvePlatformDownloadsDir(options = {}) {
   return defaultFallback;
 }
 
-// src/lib/engines/core/task-manager.ts
+// src/lib/engines/core/download-dirs.ts
 function expandPath(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path12.join(os9.homedir(), dir.slice(1));
+    return path11.join(os8.homedir(), dir.slice(1));
   }
   return dir;
 }
 function resolveDownloadBaseDir(customBaseDir) {
   if (customBaseDir && customBaseDir.trim()) {
-    return path12.resolve(expandPath(customBaseDir.trim()));
+    return path11.resolve(expandPath(customBaseDir.trim()));
   }
   const envDir = process.env.OPEN_NAMI_DIR || process.env.NAMI_DIR;
   if (envDir && envDir.trim()) {
-    return path12.resolve(expandPath(envDir.trim()));
+    return path11.resolve(expandPath(envDir.trim()));
   }
   const configDir = loadConfig().downloadDir;
   if (configDir && configDir.trim()) {
-    return path12.resolve(expandPath(configDir.trim()));
+    return path11.resolve(expandPath(configDir.trim()));
   }
   if (process.env.NAMI_BASE_DIR && process.env.NAMI_BASE_DIR.trim()) {
     const raw = process.env.NAMI_BASE_DIR.trim();
-    return path12.resolve(expandPath(raw.endsWith("downloads") ? raw : path12.join(raw, "downloads")));
+    return path11.resolve(expandPath(raw.endsWith("downloads") ? raw : path11.join(raw, "downloads")));
   }
-  return path12.join(resolvePlatformDownloadsDir(), "Open Nami");
+  return path11.join(resolvePlatformDownloadsDir(), "Open Nami");
 }
 function resolveDefaultDownloadDir(platform2, username, baseDir) {
   const root = resolveDownloadBaseDir(baseDir);
-  return path12.join(root, platform2, username);
+  return path11.join(root, platform2, username);
 }
+
+// src/lib/parser.ts
+var INVALID_CHARS_REGEX = /[<>:"/\\|?*\x00-\x1f]/g;
+var WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
+function sanitizeUsername(username) {
+  let cleaned = username.replace(INVALID_CHARS_REGEX, "_").trim().replace(/^[.\s]+|[.\s]+$/g, "");
+  if (WINDOWS_RESERVED_NAMES.test(cleaned)) {
+    cleaned = `_${cleaned}`;
+  }
+  return cleaned.slice(0, 120) || "unknown";
+}
+function buildProfileUrl(platform2, username) {
+  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
+  switch (platform2) {
+    case "instagram":
+      return `https://www.instagram.com/${cleanUser}/`;
+    case "tiktok":
+      return `https://www.tiktok.com/@${cleanUser}`;
+    case "facebook":
+      return `https://www.facebook.com/${cleanUser}`;
+    case "x":
+      return `https://x.com/${cleanUser}`;
+  }
+}
+function buildCanonicalProfile(platform2, username, rawInput) {
+  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
+  return {
+    platform: platform2,
+    username: sanitizeUsername(cleanUser),
+    cleanUrl: buildProfileUrl(platform2, cleanUser),
+    rawInput: rawInput ?? cleanUser
+  };
+}
+function isBareUsername(input) {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+  if (/^https?:\/\//i.test(trimmed) || /[\/\\:\s]/.test(trimmed)) return false;
+  const user = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+  if (!user) return false;
+  if (!/^[a-zA-Z0-9._-]+$/.test(user)) return false;
+  if (!/[a-zA-Z0-9]/.test(user)) return false;
+  const cleaned = user.replace(/^[.\s]+|[.\s]+$/g, "");
+  return cleaned.length > 0 && /[a-zA-Z0-9]/.test(cleaned);
+}
+function parseProfileInput(input) {
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return { platform: "unknown", username: "", cleanUrl: "", rawInput: input };
+  }
+  const prefixMatch = trimmed.match(/^(ig|instagram|tt|tiktok|fb|facebook|x|twitter):([^\s/]+)$/i);
+  if (prefixMatch) {
+    const rawPrefix = prefixMatch[1].toLowerCase();
+    const rawUser = prefixMatch[2];
+    if (rawPrefix === "ig" || rawPrefix === "instagram") {
+      return buildCanonicalProfile("instagram", rawUser, input);
+    } else if (rawPrefix === "tt" || rawPrefix === "tiktok") {
+      return buildCanonicalProfile("tiktok", rawUser, input);
+    } else if (rawPrefix === "fb" || rawPrefix === "facebook") {
+      return buildCanonicalProfile("facebook", rawUser, input);
+    } else if (rawPrefix === "x" || rawPrefix === "twitter") {
+      return buildCanonicalProfile("x", rawUser, input);
+    }
+  }
+  let candidate = trimmed;
+  if (!/^https?:\/\//i.test(candidate)) {
+    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
+      candidate = "https://" + candidate;
+    }
+  }
+  try {
+    const url = new URL(candidate);
+    const host = url.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "");
+    const pathname = url.pathname.replace(/\/+$/, "");
+    const pathParts = pathname.split("/").filter(Boolean);
+    if (host.includes("tiktok.com")) {
+      const userPart = pathParts[0] || "";
+      const username = userPart.startsWith("@") ? userPart.slice(1) : userPart;
+      if (username) {
+        return {
+          platform: "tiktok",
+          username: sanitizeUsername(username),
+          cleanUrl: `https://www.tiktok.com/@${username}`,
+          rawInput: input
+        };
+      }
+    }
+    if (host.includes("instagram.com")) {
+      const firstPart = pathParts[0] || "";
+      const reserved = ["p", "reel", "reels", "tv", "stories", "explore", "direct", "accounts"];
+      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
+        const username = firstPart.replace(/^@/, "");
+        return {
+          platform: "instagram",
+          username: sanitizeUsername(username),
+          cleanUrl: `https://www.instagram.com/${username}/`,
+          rawInput: input
+        };
+      }
+    }
+    if (host.includes("facebook.com") || host === "fb.com") {
+      if (pathParts[0]?.toLowerCase() === "profile.php") {
+        const id = url.searchParams.get("id");
+        if (id) {
+          return {
+            platform: "facebook",
+            username: sanitizeUsername(id),
+            cleanUrl: `https://www.facebook.com/profile.php?id=${id}`,
+            rawInput: input
+          };
+        }
+      } else if (pathParts[0]?.toLowerCase() === "people" && pathParts[1]) {
+        return {
+          platform: "facebook",
+          username: sanitizeUsername(pathParts[1]),
+          cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
+          rawInput: input
+        };
+      } else if (pathParts[0]) {
+        const reserved = ["watch", "videos", "reel", "groups", "pages", "events", "photo"];
+        if (!reserved.includes(pathParts[0].toLowerCase())) {
+          return {
+            platform: "facebook",
+            username: sanitizeUsername(pathParts[0]),
+            cleanUrl: `https://www.facebook.com/${pathParts[0]}`,
+            rawInput: input
+          };
+        }
+      }
+    }
+    if (host.includes("x.com") || host.includes("twitter.com")) {
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {
+        return {
+          platform: "x",
+          username: "i_history_likes",
+          cleanUrl: "https://x.com/i/history/likes",
+          rawInput: input
+        };
+      }
+      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "bookmarks") {
+        return {
+          platform: "x",
+          username: "i_bookmarks",
+          cleanUrl: "https://x.com/i/bookmarks",
+          rawInput: input
+        };
+      }
+      const firstPart = pathParts[0] || "";
+      const reserved = ["home", "explore", "notifications", "messages", "i", "settings"];
+      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
+        const username = firstPart.replace(/^@/, "");
+        const isLikesUrl = pathParts[1]?.toLowerCase() === "likes";
+        return {
+          platform: "x",
+          username: sanitizeUsername(username),
+          cleanUrl: isLikesUrl ? `https://x.com/${username}/likes` : `https://x.com/${username}`,
+          rawInput: input
+        };
+      }
+    }
+  } catch {
+  }
+  if (isBareUsername(trimmed)) {
+    const rawUser = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+    const user = rawUser.replace(/^[.\s]+|[.\s]+$/g, "");
+    return {
+      platform: "unknown",
+      username: user,
+      cleanUrl: "",
+      rawInput: input
+    };
+  }
+  return {
+    platform: "unknown",
+    username: "",
+    cleanUrl: "",
+    rawInput: input
+  };
+}
+
+// src/lib/engines/storage/disk-sync.ts
+var IMAGE_EXTS = /* @__PURE__ */ new Set([".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif"]);
+var VIDEO_EXTS = /* @__PURE__ */ new Set([".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v"]);
+var AUDIO_EXTS = /* @__PURE__ */ new Set([".mp3", ".m4a", ".wav", ".aac"]);
+var KNOWN_PLATFORMS = /* @__PURE__ */ new Set(["instagram", "tiktok", "facebook", "x"]);
+function isMediaFile(fileName) {
+  const base = path12.basename(fileName);
+  if (base.startsWith(".")) return false;
+  if (base.endsWith(".download") || base.endsWith(".tmp") || base.endsWith(".part")) return false;
+  const ext = path12.extname(base).toLowerCase();
+  return IMAGE_EXTS.has(ext) || VIDEO_EXTS.has(ext) || AUDIO_EXTS.has(ext);
+}
+function countMediaFilesInDir(dir) {
+  let photoCount = 0;
+  let videoCount = 0;
+  let lastMtimeMs = 0;
+  if (!fs13.existsSync(dir)) {
+    return { count: 0, lastMtimeMs: 0, choice: "all", photoCount: 0, videoCount: 0 };
+  }
+  function walk(currentDir) {
+    let entries;
+    try {
+      entries = fs13.readdirSync(currentDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (entry.name.startsWith(".")) continue;
+      const fullPath = path12.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (entry.isFile()) {
+        if (!isMediaFile(entry.name)) continue;
+        const ext = path12.extname(entry.name).toLowerCase();
+        if (IMAGE_EXTS.has(ext)) {
+          photoCount++;
+        } else if (VIDEO_EXTS.has(ext) || AUDIO_EXTS.has(ext)) {
+          videoCount++;
+        }
+        try {
+          const stat = fs13.statSync(fullPath);
+          if (stat.mtimeMs > lastMtimeMs) {
+            lastMtimeMs = stat.mtimeMs;
+          }
+        } catch {
+        }
+      }
+    }
+  }
+  walk(dir);
+  let choice = "all";
+  if (photoCount > 0 && videoCount === 0) {
+    choice = "photos";
+  } else if (videoCount > 0 && photoCount === 0) {
+    choice = "videos";
+  }
+  return {
+    count: photoCount + videoCount,
+    lastMtimeMs,
+    choice,
+    photoCount,
+    videoCount
+  };
+}
+function extractArchiveItemIds(dir) {
+  const ids = /* @__PURE__ */ new Set();
+  function parseArchiveFile(filePath) {
+    if (!fs13.existsSync(filePath)) return;
+    try {
+      const base = path12.basename(filePath);
+      if (base === ".open-nami-archive.json") {
+        const raw = fs13.readFileSync(filePath, "utf-8");
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            if (item) ids.add(String(item));
+          }
+        }
+      } else if (base === "archive.txt" || base === "archive_yt-dlp.txt") {
+        const raw = fs13.readFileSync(filePath, "utf-8");
+        const lines = raw.split(/\r?\n/);
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line || line.startsWith("#")) continue;
+          const parts = line.split(/\s+/);
+          const id = parts[parts.length - 1];
+          if (id) ids.add(id);
+        }
+      }
+    } catch {
+    }
+  }
+  const candidateDirs = [dir];
+  try {
+    const entries = fs13.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      if (e.isDirectory() && !e.name.startsWith(".")) {
+        candidateDirs.push(path12.join(dir, e.name));
+      }
+    }
+  } catch {
+  }
+  for (const cDir of candidateDirs) {
+    parseArchiveFile(path12.join(cDir, ".open-nami-archive.json"));
+    parseArchiveFile(path12.join(cDir, "archive.txt"));
+    parseArchiveFile(path12.join(cDir, "archive_yt-dlp.txt"));
+  }
+  return Array.from(ids);
+}
+function syncDiskProfilesToLedger(ledger, customBaseDir) {
+  let baseDir;
+  try {
+    baseDir = resolveDownloadBaseDir(customBaseDir);
+  } catch {
+    return { scanned: 0, added: 0, updated: 0 };
+  }
+  if (!fs13.existsSync(baseDir)) {
+    return { scanned: 0, added: 0, updated: 0 };
+  }
+  let scanned = 0;
+  let added = 0;
+  let updated = 0;
+  let platformEntries;
+  try {
+    platformEntries = fs13.readdirSync(baseDir, { withFileTypes: true });
+  } catch {
+    return { scanned: 0, added: 0, updated: 0 };
+  }
+  for (const platEntry of platformEntries) {
+    if (!platEntry.isDirectory()) continue;
+    const platform2 = platEntry.name.toLowerCase();
+    if (!KNOWN_PLATFORMS.has(platform2)) continue;
+    const platformDir = path12.join(baseDir, platEntry.name);
+    let creatorEntries;
+    try {
+      creatorEntries = fs13.readdirSync(platformDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const creatorEntry of creatorEntries) {
+      if (!creatorEntry.isDirectory()) continue;
+      if (creatorEntry.name.startsWith(".")) continue;
+      const username = creatorEntry.name.toLowerCase();
+      if (ledger.isUntracked(platform2, username)) {
+        continue;
+      }
+      const creatorDir = path12.join(platformDir, creatorEntry.name);
+      const stats = countMediaFilesInDir(creatorDir);
+      if (stats.count === 0) continue;
+      scanned++;
+      const archiveIds = extractArchiveItemIds(creatorDir);
+      for (const id of archiveIds) {
+        ledger.recordMedia({
+          id,
+          platform: platform2,
+          author: username,
+          url: "",
+          filename: "",
+          filePath: "",
+          downloadedAt: new Date(stats.lastMtimeMs || Date.now()).toISOString()
+        });
+      }
+      const existing = ledger.getTrackedProfile(platform2, username);
+      if (!existing) {
+        let profileUrl;
+        try {
+          profileUrl = buildProfileUrl(platform2, username);
+        } catch {
+          profileUrl = `https://${platform2}.com/${username}`;
+        }
+        ledger.trackProfile({
+          platform: platform2,
+          username,
+          profileUrl,
+          targetDir: creatorDir,
+          choice: stats.choice,
+          lastPulledAt: stats.lastMtimeMs ? new Date(stats.lastMtimeMs).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
+          mediaCount: stats.count,
+          status: "ok"
+        });
+        added++;
+      } else {
+        if (existing.mediaCount !== stats.count || existing.targetDir !== creatorDir) {
+          ledger.trackProfile({
+            ...existing,
+            targetDir: creatorDir,
+            mediaCount: stats.count,
+            choice: existing.choice === "all" && stats.choice !== "all" ? existing.choice : stats.choice
+          });
+          updated++;
+        }
+      }
+    }
+  }
+  return { scanned, added, updated };
+}
+
+// src/lib/engines/core/task-manager.ts
+import path14 from "path";
+import fs15 from "fs/promises";
+import fsSync from "fs";
+
+// src/lib/engines/core/event-bus.ts
+import { EventEmitter as EventEmitter3 } from "events";
+var EngineEventBus = class {
+  emitter = new EventEmitter3();
+  constructor() {
+    this.emitter.setMaxListeners(50);
+  }
+  on(event, listener) {
+    this.emitter.on(event, listener);
+    return () => this.emitter.off(event, listener);
+  }
+  off(event, listener) {
+    this.emitter.off(event, listener);
+  }
+  once(event, listener) {
+    this.emitter.once(event, listener);
+  }
+  emit(event, payload) {
+    return this.emitter.emit(event, payload);
+  }
+  removeAllListeners(event) {
+    if (event !== void 0) {
+      this.emitter.removeAllListeners(event);
+    } else {
+      this.emitter.removeAllListeners();
+    }
+  }
+};
+
+// src/lib/engines/storage/ledger.ts
+import fs14 from "fs";
+import path13 from "path";
+import os9 from "os";
+import { createRequire as createRequire2 } from "module";
+var require3 = createRequire2(import.meta.url);
+var MediaLedger = class {
+  db = null;
+  inMemoryFallback = {
+    media: /* @__PURE__ */ new Map(),
+    checkpoints: /* @__PURE__ */ new Map(),
+    trackedProfiles: /* @__PURE__ */ new Map(),
+    untrackedProfiles: /* @__PURE__ */ new Set()
+  };
+  isFallback = false;
+  resolvedPath;
+  lastDiskSyncMs = 0;
+  constructor(dbPath, forceFallback = false) {
+    const isTest = process.env.NODE_ENV === "test" || process.env.OPEN_NAMI_TEST === "1" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test")) || process.argv.some((a) => a.includes("--test") || a.includes(".test."));
+    const envDb = process.env.OPEN_NAMI_DB?.trim();
+    const defaultPath = isTest ? ":memory:" : path13.join(os9.homedir(), ".open-nami", "nami.db");
+    const resolvedPath = dbPath ?? (envDb || (forceFallback ? ":memory:" : defaultPath));
+    this.resolvedPath = resolvedPath;
+    if (forceFallback) {
+      this.isFallback = true;
+      this.loadFallbackDisk();
+      return;
+    }
+    try {
+      if (resolvedPath !== ":memory:") {
+        fs14.mkdirSync(path13.dirname(resolvedPath), { recursive: true });
+      }
+      const { DatabaseSync } = require3("node:sqlite");
+      this.db = new DatabaseSync(resolvedPath);
+      if (resolvedPath !== ":memory:") {
+        try {
+          this.db.exec("PRAGMA journal_mode = WAL;");
+          this.db.exec("PRAGMA busy_timeout = 5000;");
+        } catch {
+        }
+      }
+      this.initTables();
+    } catch {
+      this.isFallback = true;
+      this.loadFallbackDisk();
+    }
+  }
+  loadFallbackDisk() {
+    if (this.resolvedPath === ":memory:") return;
+    try {
+      if (fs14.existsSync(this.resolvedPath)) {
+        const raw = fs14.readFileSync(this.resolvedPath, "utf8");
+        const data = JSON.parse(raw);
+        if (data && typeof data === "object") {
+          if (data.media && typeof data.media === "object") {
+            for (const [k, v] of Object.entries(data.media)) {
+              this.inMemoryFallback.media.set(k, v);
+            }
+          }
+          if (data.checkpoints && typeof data.checkpoints === "object") {
+            for (const [k, v] of Object.entries(data.checkpoints)) {
+              this.inMemoryFallback.checkpoints.set(k, v);
+            }
+          }
+          if (data.trackedProfiles && typeof data.trackedProfiles === "object") {
+            for (const [k, v] of Object.entries(data.trackedProfiles)) {
+              this.inMemoryFallback.trackedProfiles.set(k, v);
+            }
+          }
+          if (Array.isArray(data.untrackedProfiles)) {
+            for (const k of data.untrackedProfiles) {
+              if (k) this.inMemoryFallback.untrackedProfiles.add(String(k));
+            }
+          }
+        }
+      }
+    } catch {
+    }
+  }
+  flushFallbackDisk() {
+    if (this.resolvedPath === ":memory:") return;
+    try {
+      fs14.mkdirSync(path13.dirname(this.resolvedPath), { recursive: true });
+      const data = {
+        media: Object.fromEntries(this.inMemoryFallback.media),
+        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints),
+        trackedProfiles: Object.fromEntries(this.inMemoryFallback.trackedProfiles),
+        untrackedProfiles: Array.from(this.inMemoryFallback.untrackedProfiles)
+      };
+      fs14.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), "utf8");
+    } catch {
+    }
+  }
+  initTables() {
+    if (!this.db) return;
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS media_ledger (
+        id TEXT PRIMARY KEY,
+        platform TEXT,
+        author TEXT,
+        url TEXT,
+        filename TEXT,
+        file_path TEXT,
+        downloaded_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS checkpoints (
+        key TEXT PRIMARY KEY,
+        platform TEXT,
+        username TEXT,
+        target_dir TEXT,
+        cursors_json TEXT,
+        updated_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS tracked_profiles (
+        platform TEXT NOT NULL,
+        username TEXT NOT NULL,
+        profile_url TEXT NOT NULL,
+        target_dir TEXT NOT NULL,
+        choice TEXT NOT NULL,
+        last_pulled_at TEXT NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        status TEXT,
+        PRIMARY KEY (platform, username)
+      );
+      CREATE TABLE IF NOT EXISTS untracked_profiles (
+        platform TEXT NOT NULL,
+        username TEXT NOT NULL,
+        untracked_at TEXT NOT NULL,
+        PRIMARY KEY (platform, username)
+      );
+    `);
+  }
+  syncDiskProfiles(customBaseDir, force = false) {
+    const isTest = process.env.NODE_ENV === "test" || process.env.OPEN_NAMI_TEST === "1" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test")) || process.argv.some((a) => a.includes("--test") || a.includes(".test."));
+    if (this.resolvedPath === ":memory:" && !force) {
+      return { scanned: 0, added: 0, updated: 0 };
+    }
+    if (isTest && !force) {
+      return { scanned: 0, added: 0, updated: 0 };
+    }
+    const now = Date.now();
+    if (!force && now - this.lastDiskSyncMs < 3e3) {
+      return { scanned: 0, added: 0, updated: 0 };
+    }
+    this.lastDiskSyncMs = now;
+    return syncDiskProfilesToLedger(this, customBaseDir);
+  }
+  hasMedia(id, platform2, username) {
+    if (this.isFallback || !this.db) {
+      if (this.inMemoryFallback.media.has(id)) return true;
+      if (platform2 && username) {
+        const compound = `${platform2.toLowerCase()}:${username.toLowerCase()}:${id}`;
+        if (this.inMemoryFallback.media.has(compound)) return true;
+      }
+      return false;
+    }
+    const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ?");
+    if (stmt.get(id)) return true;
+    if (platform2 && username) {
+      const compoundKey = `${platform2.toLowerCase()}:${username.toLowerCase()}:${id}`;
+      if (stmt.get(compoundKey)) return true;
+      const fileStmt = this.db.prepare(
+        "SELECT 1 FROM media_ledger WHERE (filename = ? OR id LIKE ?) AND platform = ? COLLATE NOCASE"
+      );
+      if (fileStmt.get(id, `%${id}%`, platform2)) return true;
+    }
+    return false;
+  }
+  recordMedia(media) {
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.media.set(media.id, media);
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO media_ledger (id, platform, author, url, filename, file_path, downloaded_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      media.id,
+      media.platform,
+      media.author,
+      media.url,
+      media.filename,
+      media.filePath,
+      media.downloadedAt
+    );
+  }
+  saveCheckpoint(checkpoint) {
+    const key = `${checkpoint.platform.toLowerCase()}:${checkpoint.username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.checkpoints.set(key, checkpoint);
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO checkpoints (key, platform, username, target_dir, cursors_json, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      key,
+      checkpoint.platform,
+      checkpoint.username,
+      checkpoint.targetDir,
+      JSON.stringify(checkpoint.cursors),
+      checkpoint.updatedAt
+    );
+  }
+  getCheckpoint(platform2, username) {
+    const key = `${platform2.toLowerCase()}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.checkpoints.get(key) || null;
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, target_dir, cursors_json, updated_at FROM checkpoints WHERE key = ?"
+    );
+    const row = stmt.get(key);
+    if (!row) return null;
+    return {
+      platform: row.platform,
+      username: row.username,
+      targetDir: row.target_dir,
+      cursors: JSON.parse(row.cursors_json || "{}"),
+      updatedAt: row.updated_at
+    };
+  }
+  clearCheckpoint(platform2, username) {
+    const key = `${platform2.toLowerCase()}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.checkpoints.delete(key);
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare("DELETE FROM checkpoints WHERE key = ?");
+    stmt.run(key);
+  }
+  isUntracked(platform2, username) {
+    const key = `${platform2.toLowerCase()}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.untrackedProfiles.has(key);
+    }
+    const stmt = this.db.prepare(
+      "SELECT 1 FROM untracked_profiles WHERE platform = ? COLLATE NOCASE AND username = ? COLLATE NOCASE"
+    );
+    return Boolean(stmt.get(platform2, username));
+  }
+  trackProfile(profile) {
+    const normPlatform = profile.platform.toLowerCase();
+    const normUsername = profile.username.toLowerCase();
+    const key = `${normPlatform}:${normUsername}`;
+    const normalized = {
+      ...profile,
+      platform: normPlatform,
+      username: normUsername
+    };
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.untrackedProfiles.delete(key);
+      this.inMemoryFallback.trackedProfiles.set(key, normalized);
+      this.flushFallbackDisk();
+      return;
+    }
+    const delUntracked = this.db.prepare(
+      "DELETE FROM untracked_profiles WHERE platform = ? COLLATE NOCASE AND username = ? COLLATE NOCASE"
+    );
+    delUntracked.run(normPlatform, normUsername);
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO tracked_profiles (
+        platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      normalized.platform,
+      normalized.username,
+      normalized.profileUrl,
+      normalized.targetDir,
+      normalized.choice,
+      normalized.lastPulledAt,
+      normalized.mediaCount,
+      normalized.status ?? null
+    );
+  }
+  getTrackedProfiles() {
+    this.syncDiskProfiles();
+    if (this.isFallback || !this.db) {
+      return Array.from(this.inMemoryFallback.trackedProfiles.values());
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles ORDER BY last_pulled_at DESC"
+    );
+    const rows = stmt.all();
+    return rows.map((r) => ({
+      platform: r.platform,
+      username: r.username,
+      profileUrl: r.profile_url,
+      targetDir: r.target_dir,
+      choice: r.choice,
+      lastPulledAt: r.last_pulled_at,
+      mediaCount: Number(r.media_count || 0),
+      status: r.status || void 0
+    }));
+  }
+  getTrackedProfile(platform2, username) {
+    const key = `${platform2.toLowerCase()}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.trackedProfiles.get(key) || null;
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles WHERE platform = ? COLLATE NOCASE AND username = ? COLLATE NOCASE"
+    );
+    const row = stmt.get(platform2, username);
+    if (!row) return null;
+    return {
+      platform: row.platform,
+      username: row.username,
+      profileUrl: row.profile_url,
+      targetDir: row.target_dir,
+      choice: row.choice,
+      lastPulledAt: row.last_pulled_at,
+      mediaCount: Number(row.media_count || 0),
+      status: row.status || void 0
+    };
+  }
+  untrackProfile(platform2, username) {
+    const normPlatform = platform2.toLowerCase();
+    const normUsername = username.toLowerCase();
+    const key = `${normPlatform}:${normUsername}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.delete(key);
+      this.inMemoryFallback.untrackedProfiles.add(key);
+      this.flushFallbackDisk();
+      return;
+    }
+    const delStmt = this.db.prepare(
+      "DELETE FROM tracked_profiles WHERE platform = ? COLLATE NOCASE AND username = ? COLLATE NOCASE"
+    );
+    delStmt.run(platform2, username);
+    const insStmt = this.db.prepare(
+      "INSERT OR REPLACE INTO untracked_profiles (platform, username, untracked_at) VALUES (?, ?, ?)"
+    );
+    insStmt.run(normPlatform, normUsername, (/* @__PURE__ */ new Date()).toISOString());
+  }
+  untrackProfiles(profiles) {
+    for (const p of profiles) {
+      this.untrackProfile(p.platform, p.username);
+    }
+  }
+  clearTrackedProfiles() {
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    if (this.isFallback || !this.db) {
+      for (const [k] of this.inMemoryFallback.trackedProfiles) {
+        this.inMemoryFallback.untrackedProfiles.add(k);
+      }
+      this.inMemoryFallback.trackedProfiles.clear();
+      this.flushFallbackDisk();
+      return;
+    }
+    this.db.exec(`
+      INSERT OR REPLACE INTO untracked_profiles (platform, username, untracked_at)
+      SELECT platform, username, '${now}' FROM tracked_profiles;
+      DELETE FROM tracked_profiles;
+    `);
+  }
+  close() {
+    if (this.db) {
+      try {
+        this.db.close();
+      } catch {
+      }
+      this.db = null;
+    }
+  }
+};
+
+// src/lib/engines/core/task-manager.ts
 async function cleanupEmptyCategoryDirs(targetDir) {
   const candidateDirs = ["All", "Stories", "Highlights", "Photos", "Videos"];
   for (const dirName of candidateDirs) {
-    const fullPath = path12.join(targetDir, dirName);
+    const fullPath = path14.join(targetDir, dirName);
     try {
       if (!fsSync.existsSync(fullPath)) continue;
-      const entries = await fs14.readdir(fullPath);
+      const entries = await fs15.readdir(fullPath);
       const nonArchiveEntries = entries.filter(
         (e) => e !== ".open-nami-archive.json" && e !== "archive.txt" && e !== "archive_yt-dlp.txt" && e !== "archive_gallery-dl.sqlite3"
       );
       if (nonArchiveEntries.length === 0) {
         for (const entry of entries) {
           try {
-            await fs14.unlink(path12.join(fullPath, entry));
+            await fs15.unlink(path14.join(fullPath, entry));
           } catch {
           }
         }
-        await fs14.rmdir(fullPath).catch(() => {
+        await fs15.rmdir(fullPath).catch(() => {
         });
       }
     } catch {
@@ -41492,15 +41955,17 @@ var TaskManager = class {
       outputDir: targetDir
     };
     if (!options.noTrack && (result.success || result.downloadedCount > 0)) {
+      const diskStats = countMediaFilesInDir(targetDir);
       const existing = this.ledger.getTrackedProfile(profile.platform, profile.username);
+      const finalCount = diskStats.count > 0 ? diskStats.count : (existing?.mediaCount || 0) + result.downloadedCount;
       this.ledger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
         targetDir,
-        choice,
+        choice: choice === "all" && diskStats.choice ? diskStats.choice : choice,
         lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
-        mediaCount: (existing?.mediaCount || 0) + result.downloadedCount,
+        mediaCount: finalCount,
         status: errors.length === 0 ? "ok" : "partial"
       });
     }
@@ -41529,7 +41994,7 @@ async function dispatchDownload(options) {
       outputDir: targetDir
     };
   }
-  await fs15.mkdir(targetDir, { recursive: true });
+  await fs16.mkdir(targetDir, { recursive: true });
   const rawBrowserPref = options.cookiesFromBrowser ?? loadConfig().cookiesFromBrowser ?? "auto";
   const resolvedBrowserArg = resolveBrowserCookieArg(rawBrowserPref);
   const cookiesFromBrowser = resolvedBrowserArg ?? void 0;
@@ -41538,9 +42003,9 @@ async function dispatchDownload(options) {
   let cookieCopy = masterCookie ? await createSafeCookieCopy(masterCookie) : null;
   if (!cookieCopy && rawBrowserPref && rawBrowserPref.toLowerCase() !== "none") {
     try {
-      const tempCookieDir = path13.join(os10.tmpdir(), "open-nami-cookies");
-      await fs15.mkdir(tempCookieDir, { recursive: true, mode: 448 });
-      const tempCookieFile = path13.join(
+      const tempCookieDir = path15.join(os10.tmpdir(), "open-nami-cookies");
+      await fs16.mkdir(tempCookieDir, { recursive: true, mode: 448 });
+      const tempCookieFile = path15.join(
         tempCookieDir,
         `cookie-${profile.platform}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.txt`
       );
@@ -41551,7 +42016,7 @@ async function dispatchDownload(options) {
           isTemporary: true,
           cleanup: async () => {
             try {
-              await fs15.unlink(tempCookieFile);
+              await fs16.unlink(tempCookieFile);
             } catch {
             }
           }
@@ -41572,13 +42037,24 @@ async function dispatchDownload(options) {
     defaultTaskManager.events.emit("job:progress", progress);
     if (progress.currentFile && progress.statusText?.startsWith("Saved:")) {
       try {
+        if (progress.itemId) {
+          activeLedger.recordMedia({
+            id: progress.itemId,
+            platform: profile.platform,
+            author: profile.username,
+            url: profile.cleanUrl || "",
+            filename: progress.currentFile,
+            filePath: path15.join(targetDir, progress.currentFile),
+            downloadedAt: (/* @__PURE__ */ new Date()).toISOString()
+          });
+        }
         activeLedger.recordMedia({
           id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
           platform: profile.platform,
           author: profile.username,
           url: profile.cleanUrl || "",
           filename: progress.currentFile,
-          filePath: path13.join(targetDir, progress.currentFile),
+          filePath: path15.join(targetDir, progress.currentFile),
           downloadedAt: (/* @__PURE__ */ new Date()).toISOString()
         });
       } catch {
@@ -41609,7 +42085,7 @@ async function dispatchDownload(options) {
     const savedCheckpoint = options.resume ? await loadCheckpoint(targetDir) : null;
     const currentCursors = savedCheckpoint?.cursors ? { ...savedCheckpoint.cursors } : {};
     const defaultRunNative = async (subDir) => {
-      const dest = subDir === "All" ? targetDir : path13.join(targetDir, subDir);
+      const dest = subDir === "All" ? targetDir : path15.join(targetDir, subDir);
       const remainingLimit = globalLimit !== void 0 ? Math.max(0, globalLimit - totalDownloaded) : void 0;
       if (remainingLimit === 0) {
         return { success: true, downloaded: 0, skipped: 0 };
@@ -41649,14 +42125,14 @@ async function dispatchDownload(options) {
           until: untilSeconds,
           limit: remainingLimit,
           earlyExitThreshold: options.earlyExitThreshold,
-          isDuplicate: (item) => activeLedger.hasMedia(item.id)
+          isDuplicate: (item) => activeLedger.hasMedia(item.id, profile.platform, profile.username)
         });
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
           destDir: dest,
           destDirMap: subDir === "All" ? {
-            photo: path13.join(targetDir, "Photos"),
-            video: path13.join(targetDir, "Videos")
+            photo: path15.join(targetDir, "Photos"),
+            video: path15.join(targetDir, "Videos")
           } : void 0,
           cookiePath: cookieCopy?.filePath,
           referer: REFERER_MAP[profile.platform],
@@ -41820,15 +42296,17 @@ async function dispatchDownload(options) {
       outputDir: targetDir
     };
     if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
+      const diskStats = countMediaFilesInDir(targetDir);
       const existing = activeLedger.getTrackedProfile(profile.platform, profile.username);
+      const finalCount = diskStats.count > 0 ? diskStats.count : (existing?.mediaCount || 0) + engineResult.downloadedCount;
       activeLedger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
         targetDir,
-        choice,
+        choice: choice === "all" && diskStats.choice ? diskStats.choice : choice,
         lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
-        mediaCount: (existing?.mediaCount || 0) + engineResult.downloadedCount,
+        mediaCount: finalCount,
         status: errors.length === 0 ? "ok" : "partial"
       });
     }
@@ -42248,16 +42726,16 @@ function ErrorView({ message, hint, columns, theme }) {
 
 // src/components/views/settings-view.tsx
 var import_react45 = __toESM(require_react(), 1);
-import fs17 from "fs";
-import path15 from "path";
+import fs18 from "fs";
+import path17 from "path";
 import os14 from "os";
 
 // src/lib/diagnostics/doctor.ts
 import { execFile } from "child_process";
 import { promisify } from "util";
 import os13 from "os";
-import fs16 from "fs";
-import path14 from "path";
+import fs17 from "fs";
+import path16 from "path";
 var execFileAsync = promisify(execFile);
 async function defaultCheckBinary(bin) {
   const versionFlag = bin === "ffmpeg" ? "-version" : "--version";
@@ -42293,11 +42771,11 @@ async function runDoctor(options = {}) {
   };
   let storageOk = false;
   try {
-    const testDir = options.storageDir || path14.join(os13.homedir(), ".open-nami");
-    fs16.mkdirSync(testDir, { recursive: true });
-    const testFile = path14.join(testDir, `.doctor_test_${Date.now()}_${Math.random().toString(36).slice(2)}`);
-    fs16.writeFileSync(testFile, "ok");
-    fs16.unlinkSync(testFile);
+    const testDir = options.storageDir || path16.join(os13.homedir(), ".open-nami");
+    fs17.mkdirSync(testDir, { recursive: true });
+    const testFile = path16.join(testDir, `.doctor_test_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+    fs17.writeFileSync(testFile, "ok");
+    fs17.unlinkSync(testFile);
     storageOk = true;
   } catch {
   }
@@ -42317,7 +42795,7 @@ async function runDoctor(options = {}) {
 var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
 function expandDir(dir) {
   if (dir.startsWith("~/") || dir.startsWith("~\\") || dir === "~") {
-    return path15.join(os14.homedir(), dir.slice(1));
+    return path17.join(os14.homedir(), dir.slice(1));
   }
   return dir;
 }
@@ -42577,7 +43055,7 @@ function SettingsView({
       };
     }
     const expanded = expandDir(dir);
-    if (!fs17.existsSync(expanded)) {
+    if (!fs18.existsSync(expanded)) {
       return {
         ok: false,
         text: "directory does not exist yet"
@@ -42600,7 +43078,7 @@ function SettingsView({
     if (!dir) {
       return "default: platform Downloads / Open Nami";
     }
-    return `target: ${path15.resolve(expandDir(dir))}`;
+    return `target: ${path17.resolve(expandDir(dir))}`;
   }, [downloadDir]);
   const cycleFocus = (0, import_react45.useCallback)((forward = true) => {
     const fields = ["cookies", "browser", "download", "metadata", "limit"];
@@ -42816,184 +43294,6 @@ function readClipboard(execFn = execFileSync3) {
   return "";
 }
 
-// src/lib/parser.ts
-var INVALID_CHARS_REGEX = /[<>:"/\\|?*\x00-\x1f]/g;
-var WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\..*)?$/i;
-function sanitizeUsername(username) {
-  let cleaned = username.replace(INVALID_CHARS_REGEX, "_").trim().replace(/^[.\s]+|[.\s]+$/g, "");
-  if (WINDOWS_RESERVED_NAMES.test(cleaned)) {
-    cleaned = `_${cleaned}`;
-  }
-  return cleaned.slice(0, 120) || "unknown";
-}
-function buildProfileUrl(platform2, username) {
-  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
-  switch (platform2) {
-    case "instagram":
-      return `https://www.instagram.com/${cleanUser}/`;
-    case "tiktok":
-      return `https://www.tiktok.com/@${cleanUser}`;
-    case "facebook":
-      return `https://www.facebook.com/${cleanUser}`;
-    case "x":
-      return `https://x.com/${cleanUser}`;
-  }
-}
-function buildCanonicalProfile(platform2, username, rawInput) {
-  const cleanUser = username.trim().replace(/^@/, "").replace(/^[.\s]+|[.\s]+$/g, "");
-  return {
-    platform: platform2,
-    username: sanitizeUsername(cleanUser),
-    cleanUrl: buildProfileUrl(platform2, cleanUser),
-    rawInput: rawInput ?? cleanUser
-  };
-}
-function isBareUsername(input) {
-  const trimmed = input.trim();
-  if (!trimmed) return false;
-  if (/^https?:\/\//i.test(trimmed) || /[\/\\:\s]/.test(trimmed)) return false;
-  const user = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
-  if (!user) return false;
-  if (!/^[a-zA-Z0-9._-]+$/.test(user)) return false;
-  if (!/[a-zA-Z0-9]/.test(user)) return false;
-  const cleaned = user.replace(/^[.\s]+|[.\s]+$/g, "");
-  return cleaned.length > 0 && /[a-zA-Z0-9]/.test(cleaned);
-}
-function parseProfileInput(input) {
-  const trimmed = input.trim();
-  if (!trimmed) {
-    return { platform: "unknown", username: "", cleanUrl: "", rawInput: input };
-  }
-  const prefixMatch = trimmed.match(/^(ig|instagram|tt|tiktok|fb|facebook|x|twitter):([^\s/]+)$/i);
-  if (prefixMatch) {
-    const rawPrefix = prefixMatch[1].toLowerCase();
-    const rawUser = prefixMatch[2];
-    if (rawPrefix === "ig" || rawPrefix === "instagram") {
-      return buildCanonicalProfile("instagram", rawUser, input);
-    } else if (rawPrefix === "tt" || rawPrefix === "tiktok") {
-      return buildCanonicalProfile("tiktok", rawUser, input);
-    } else if (rawPrefix === "fb" || rawPrefix === "facebook") {
-      return buildCanonicalProfile("facebook", rawUser, input);
-    } else if (rawPrefix === "x" || rawPrefix === "twitter") {
-      return buildCanonicalProfile("x", rawUser, input);
-    }
-  }
-  let candidate = trimmed;
-  if (!/^https?:\/\//i.test(candidate)) {
-    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
-      candidate = "https://" + candidate;
-    }
-  }
-  try {
-    const url = new URL(candidate);
-    const host = url.hostname.toLowerCase().replace(/^www\./, "").replace(/^m\./, "");
-    const pathname = url.pathname.replace(/\/+$/, "");
-    const pathParts = pathname.split("/").filter(Boolean);
-    if (host.includes("tiktok.com")) {
-      const userPart = pathParts[0] || "";
-      const username = userPart.startsWith("@") ? userPart.slice(1) : userPart;
-      if (username) {
-        return {
-          platform: "tiktok",
-          username: sanitizeUsername(username),
-          cleanUrl: `https://www.tiktok.com/@${username}`,
-          rawInput: input
-        };
-      }
-    }
-    if (host.includes("instagram.com")) {
-      const firstPart = pathParts[0] || "";
-      const reserved = ["p", "reel", "reels", "tv", "stories", "explore", "direct", "accounts"];
-      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
-        const username = firstPart.replace(/^@/, "");
-        return {
-          platform: "instagram",
-          username: sanitizeUsername(username),
-          cleanUrl: `https://www.instagram.com/${username}/`,
-          rawInput: input
-        };
-      }
-    }
-    if (host.includes("facebook.com") || host === "fb.com") {
-      if (pathParts[0]?.toLowerCase() === "profile.php") {
-        const id = url.searchParams.get("id");
-        if (id) {
-          return {
-            platform: "facebook",
-            username: sanitizeUsername(id),
-            cleanUrl: `https://www.facebook.com/profile.php?id=${id}`,
-            rawInput: input
-          };
-        }
-      } else if (pathParts[0]?.toLowerCase() === "people" && pathParts[1]) {
-        return {
-          platform: "facebook",
-          username: sanitizeUsername(pathParts[1]),
-          cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
-          rawInput: input
-        };
-      } else if (pathParts[0]) {
-        const reserved = ["watch", "videos", "reel", "groups", "pages", "events", "photo"];
-        if (!reserved.includes(pathParts[0].toLowerCase())) {
-          return {
-            platform: "facebook",
-            username: sanitizeUsername(pathParts[0]),
-            cleanUrl: `https://www.facebook.com/${pathParts[0]}`,
-            rawInput: input
-          };
-        }
-      }
-    }
-    if (host.includes("x.com") || host.includes("twitter.com")) {
-      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {
-        return {
-          platform: "x",
-          username: "i_history_likes",
-          cleanUrl: "https://x.com/i/history/likes",
-          rawInput: input
-        };
-      }
-      if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "bookmarks") {
-        return {
-          platform: "x",
-          username: "i_bookmarks",
-          cleanUrl: "https://x.com/i/bookmarks",
-          rawInput: input
-        };
-      }
-      const firstPart = pathParts[0] || "";
-      const reserved = ["home", "explore", "notifications", "messages", "i", "settings"];
-      if (firstPart && !reserved.includes(firstPart.toLowerCase())) {
-        const username = firstPart.replace(/^@/, "");
-        const isLikesUrl = pathParts[1]?.toLowerCase() === "likes";
-        return {
-          platform: "x",
-          username: sanitizeUsername(username),
-          cleanUrl: isLikesUrl ? `https://x.com/${username}/likes` : `https://x.com/${username}`,
-          rawInput: input
-        };
-      }
-    }
-  } catch {
-  }
-  if (isBareUsername(trimmed)) {
-    const rawUser = trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
-    const user = rawUser.replace(/^[.\s]+|[.\s]+$/g, "");
-    return {
-      platform: "unknown",
-      username: user,
-      cleanUrl: "",
-      rawInput: input
-    };
-  }
-  return {
-    platform: "unknown",
-    username: "",
-    cleanUrl: "",
-    rawInput: input
-  };
-}
-
 // src/lib/watcher.ts
 function startClipboardWatcher(options = {}) {
   const choice = options.choice || "all";
@@ -43079,9 +43379,9 @@ function startClipboardWatcher(options = {}) {
 }
 
 // src/lib/reveal.ts
-import fs18 from "fs";
+import fs19 from "fs";
 import { spawn as spawn4 } from "child_process";
-import path16 from "path";
+import path18 from "path";
 function buildOpenBrowserCommand(url, platform2 = process.platform) {
   try {
     const parsed = new URL(url.trim());
@@ -43108,12 +43408,12 @@ function openBrowser(url) {
   }
 }
 function getRevealCommand(targetPath, platform2 = process.platform, isDirectory) {
-  const pathModule = platform2 === "win32" ? path16.win32 : platform2 === "darwin" ? path16.posix : path16;
+  const pathModule = platform2 === "win32" ? path18.win32 : platform2 === "darwin" ? path18.posix : path18;
   const resolved = pathModule.resolve(targetPath);
   const isDir = isDirectory !== void 0 ? isDirectory : (() => {
     try {
-      if (fs18.existsSync(resolved)) {
-        return fs18.statSync(resolved).isDirectory();
+      if (fs19.existsSync(resolved)) {
+        return fs19.statSync(resolved).isDirectory();
       }
     } catch {
     }
@@ -43408,7 +43708,7 @@ function WatcherView({
 
 // src/components/views/batch-view.tsx
 var import_react47 = __toESM(require_react(), 1);
-import fs19 from "fs";
+import fs20 from "fs";
 
 // src/lib/batch.ts
 import fsPromises5 from "fs/promises";
@@ -43617,7 +43917,7 @@ function BatchView({
         setErrorMessage("Please enter a valid batch file path");
         return;
       }
-      if (!fs19.existsSync(trimmed)) {
+      if (!fs20.existsSync(trimmed)) {
         setErrorMessage(`File not found: ${trimmed}`);
         return;
       }
@@ -44403,7 +44703,7 @@ function BatchView({
 var import_react48 = __toESM(require_react(), 1);
 
 // src/lib/pull.ts
-import fs20 from "fs";
+import fs21 from "fs";
 import fsPromises6 from "fs/promises";
 function sleep2(ms, signal) {
   return new Promise((resolve) => {
@@ -44458,7 +44758,7 @@ async function dispatchPull(options = {}) {
     if (options.signal?.aborted) break;
     const profileRec = allTracked[i];
     let targetDir = profileRec.targetDir;
-    if (!fs20.existsSync(targetDir)) {
+    if (!fs21.existsSync(targetDir)) {
       targetDir = resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir);
       await fsPromises6.mkdir(targetDir, { recursive: true });
       profileRec.targetDir = targetDir;
@@ -44503,12 +44803,14 @@ async function dispatchPull(options = {}) {
       totalSkipped += res.skippedCount;
       if (itemRes.status === "success") {
         succeeded++;
+        const diskStats = countMediaFilesInDir(targetDir);
+        const finalCount = diskStats.count > 0 ? diskStats.count : profileRec.mediaCount + res.downloadedCount;
         ledger.trackProfile({
           ...profileRec,
           targetDir,
           choice,
           lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
-          mediaCount: profileRec.mediaCount + res.downloadedCount,
+          mediaCount: finalCount,
           status: "ok"
         });
         options.onProfileComplete?.(itemRes, i, allTracked.length);
@@ -45102,16 +45404,16 @@ function frameRowSpan(row) {
 }
 
 // src/lib/update-check.ts
-import fs21 from "fs";
-import path17 from "path";
+import fs22 from "fs";
+import path19 from "path";
 import os15 from "os";
 var DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1e3;
 var DEFAULT_TIMEOUT_MS = 1500;
 function getDefaultUpdateCachePath() {
   if (process.env.OPEN_NAMI_UPDATE_CACHE && process.env.OPEN_NAMI_UPDATE_CACHE.trim()) {
-    return path17.resolve(process.env.OPEN_NAMI_UPDATE_CACHE.trim());
+    return path19.resolve(process.env.OPEN_NAMI_UPDATE_CACHE.trim());
   }
-  return path17.join(os15.homedir(), ".open-nami", "update-check.json");
+  return path19.join(os15.homedir(), ".open-nami", "update-check.json");
 }
 function compareSemVer(v1, v2) {
   const clean1 = (v1 || "").trim().replace(/^v/, "");
@@ -45129,8 +45431,8 @@ function compareSemVer(v1, v2) {
 }
 function getCachedUpdateInfo(currentVersion, cachePath = getDefaultUpdateCachePath()) {
   try {
-    if (!fs21.existsSync(cachePath)) return null;
-    const raw = fs21.readFileSync(cachePath, "utf8");
+    if (!fs22.existsSync(cachePath)) return null;
+    const raw = fs22.readFileSync(cachePath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && typeof parsed.latestVersion === "string") {
       const updateAvailable = compareSemVer(currentVersion, parsed.latestVersion) < 0;
@@ -45179,11 +45481,11 @@ async function checkForUpdate(options = {}) {
         const latestVersion = data.version.trim();
         const updateAvailable = compareSemVer(currentVersion, latestVersion) < 0;
         try {
-          const dir = path17.dirname(cachePath);
-          if (!fs21.existsSync(dir)) {
-            fs21.mkdirSync(dir, { recursive: true, mode: 448 });
+          const dir = path19.dirname(cachePath);
+          if (!fs22.existsSync(dir)) {
+            fs22.mkdirSync(dir, { recursive: true, mode: 448 });
           }
-          fs21.writeFileSync(
+          fs22.writeFileSync(
             cachePath,
             JSON.stringify(
               {
@@ -45215,17 +45517,17 @@ async function checkForUpdate(options = {}) {
 }
 
 // src/lib/announcements.ts
-import fs22 from "fs";
-import path18 from "path";
+import fs23 from "fs";
+import path20 from "path";
 import os16 from "os";
 var DEFAULT_ANNOUNCEMENT_URL = "https://raw.githubusercontent.com/OpenSelena/open-nami/main/announcements.json";
 var DEFAULT_INTERVAL_MS2 = 6 * 60 * 60 * 1e3;
 var DEFAULT_TIMEOUT_MS2 = 2e3;
 function getDefaultAnnouncementCachePath() {
   if (process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE && process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE.trim()) {
-    return path18.resolve(process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE.trim());
+    return path20.resolve(process.env.OPEN_NAMI_ANNOUNCEMENT_CACHE.trim());
   }
-  return path18.join(os16.homedir(), ".open-nami", "announcements.json");
+  return path20.join(os16.homedir(), ".open-nami", "announcements.json");
 }
 function isAnnouncementEligible(item, currentVersion, dismissedIds = []) {
   if (!item || typeof item !== "object") return false;
@@ -45268,8 +45570,8 @@ function parseAnnouncementsPayload(payload, currentVersion, dismissedIds = []) {
 }
 function getCachedAnnouncement(currentVersion, cachePath = getDefaultAnnouncementCachePath()) {
   try {
-    if (!fs22.existsSync(cachePath)) return null;
-    const raw = fs22.readFileSync(cachePath, "utf8");
+    if (!fs23.existsSync(cachePath)) return null;
+    const raw = fs23.readFileSync(cachePath, "utf8");
     const parsed = JSON.parse(raw);
     const dismissedIds = Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds : [];
     if (parsed.activeAnnouncement && isAnnouncementEligible(parsed.activeAnnouncement, currentVersion, dismissedIds)) {
@@ -45286,9 +45588,9 @@ function dismissAnnouncement(id, cachePath = getDefaultAnnouncementCachePath()) 
       activeAnnouncement: null,
       dismissedIds: []
     };
-    if (fs22.existsSync(cachePath)) {
+    if (fs23.existsSync(cachePath)) {
       try {
-        const raw = fs22.readFileSync(cachePath, "utf8");
+        const raw = fs23.readFileSync(cachePath, "utf8");
         const parsed = JSON.parse(raw);
         if (parsed && typeof parsed === "object") {
           cache3 = {
@@ -45307,8 +45609,8 @@ function dismissAnnouncement(id, cachePath = getDefaultAnnouncementCachePath()) 
     if (cache3.activeAnnouncement?.id === cleanId) {
       cache3.activeAnnouncement = null;
     }
-    fs22.mkdirSync(path18.dirname(cachePath), { recursive: true });
-    fs22.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
+    fs23.mkdirSync(path20.dirname(cachePath), { recursive: true });
+    fs23.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
   } catch {
   }
 }
@@ -45327,9 +45629,9 @@ async function fetchAnnouncement(options = {}) {
     activeAnnouncement: null,
     dismissedIds: []
   };
-  if (fs22.existsSync(cachePath)) {
+  if (fs23.existsSync(cachePath)) {
     try {
-      const raw = fs22.readFileSync(cachePath, "utf8");
+      const raw = fs23.readFileSync(cachePath, "utf8");
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
         cache3 = {
@@ -45366,8 +45668,8 @@ async function fetchAnnouncement(options = {}) {
     cache3.lastChecked = Date.now();
     cache3.activeAnnouncement = active;
     try {
-      fs22.mkdirSync(path18.dirname(cachePath), { recursive: true });
-      fs22.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
+      fs23.mkdirSync(path20.dirname(cachePath), { recursive: true });
+      fs23.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
     } catch {
     }
     return active;
@@ -46402,6 +46704,7 @@ var HELP = `
     $ open-nami <profile-url-or-user>    Open directly to format picker
     $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
     $ open-nami list                     List all tracked profiles in registry
+    $ open-nami track <url-or-user>      Add creator profile to tracking registry
     $ open-nami untrack <username>       Remove creator from tracking without deleting files
     $ open-nami untrack --all            Remove all creators from tracking registry
     $ open-nami <url> --photos           Download photos directly
@@ -46526,6 +46829,49 @@ function handleUntrackCommand(username, ledger) {
     return {
       success: true,
       message: `Untracked @${target.username} from registry. Downloaded media files preserved on disk.`
+    };
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close();
+    }
+  }
+}
+function handleTrackCommand(target, ledger) {
+  if (!target || !target.trim()) {
+    return {
+      success: false,
+      message: "Please provide a profile link or username to track (e.g. open-nami track selenagomez)."
+    };
+  }
+  const cleanTarget = target.trim();
+  const ownsLedger = !ledger;
+  const activeLedger = ledger || new MediaLedger();
+  try {
+    let parsed = parseProfileInput(cleanTarget);
+    if (parsed.platform === "unknown" && parsed.username) {
+      parsed = buildCanonicalProfile("instagram", parsed.username, cleanTarget);
+    }
+    if (parsed.platform === "unknown" || !parsed.username) {
+      return {
+        success: false,
+        message: `Could not parse profile from "${cleanTarget}". Please provide a full URL or @username.`
+      };
+    }
+    const targetDir = resolveDefaultDownloadDir(parsed.platform, parsed.username);
+    const diskStats = countMediaFilesInDir(targetDir);
+    activeLedger.trackProfile({
+      platform: parsed.platform,
+      username: parsed.username.toLowerCase(),
+      profileUrl: parsed.cleanUrl || `https://${parsed.platform}.com/${parsed.username}`,
+      targetDir,
+      choice: diskStats.choice || "all",
+      lastPulledAt: diskStats.lastMtimeMs ? new Date(diskStats.lastMtimeMs).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
+      mediaCount: diskStats.count,
+      status: "ok"
+    });
+    return {
+      success: true,
+      message: `Tracked @${parsed.username} (${parsed.platform})${diskStats.count > 0 ? ` with ${diskStats.count} existing media files on disk` : ""}.`
     };
   } finally {
     if (ownsLedger) {
@@ -46722,6 +47068,17 @@ async function main() {
     const output = handleListCommand();
     console.log(output);
     process.exit(0);
+  }
+  if (args[0] === "track") {
+    const targetUser = args[1];
+    const res = handleTrackCommand(targetUser);
+    if (res.success) {
+      console.log(res.message);
+      process.exit(0);
+    } else {
+      console.error(res.message);
+      process.exit(1);
+    }
   }
   if (args[0] === "untrack") {
     const targetUser = args[1];
@@ -46985,6 +47342,7 @@ export {
   formatTrackedProfilesTable,
   handleListCommand,
   handlePullCli,
+  handleTrackCommand,
   handleUntrackCommand,
   resolveVersion
 };
