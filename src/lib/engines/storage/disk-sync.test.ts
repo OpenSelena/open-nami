@@ -132,29 +132,32 @@ describe('disk-sync storage module', () => {
     }
   })
 
-  it('hasMedia matches bare IDs, compound keys, and filenames', () => {
+  it('hasMedia matches bare IDs, compound keys, and filenames in both sqlite and fallback modes', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nami-ledger-has-'))
     const dbPath = path.join(tmp, 'test.db')
-    const ledger = new MediaLedger(dbPath)
+    const sqliteLedger = new MediaLedger(dbPath)
+    const fallbackLedger = new MediaLedger(undefined, true)
 
-    try {
-      ledger.recordMedia({
-        id: '987654321',
-        platform: 'instagram',
-        author: 'creator_one',
-        url: '',
-        filename: 'creator_one_987654321.jpg',
-        filePath: '/tmp/creator_one_987654321.jpg',
-        downloadedAt: new Date().toISOString(),
-      })
+    for (const ledger of [sqliteLedger, fallbackLedger]) {
+      try {
+        ledger.recordMedia({
+          id: '987654321',
+          platform: 'instagram',
+          author: 'creator_one',
+          url: '',
+          filename: 'creator_one_987654321.jpg',
+          filePath: '/tmp/creator_one_987654321.jpg',
+          downloadedAt: new Date().toISOString(),
+        })
 
-      assert.equal(ledger.hasMedia('987654321'), true)
-      assert.equal(ledger.hasMedia('987654321', 'instagram', 'creator_one'), true)
-      assert.equal(ledger.hasMedia('creator_one_987654321.jpg', 'instagram', 'creator_one'), true)
-      assert.equal(ledger.hasMedia('non_existent'), false)
-    } finally {
-      ledger.close()
-      fs.rmSync(tmp, { recursive: true, force: true })
+        assert.equal(ledger.hasMedia('987654321'), true)
+        assert.equal(ledger.hasMedia('987654321', 'instagram', 'creator_one'), true)
+        assert.equal(ledger.hasMedia('creator_one_987654321.jpg', 'instagram', 'creator_one'), true)
+        assert.equal(ledger.hasMedia('non_existent'), false)
+      } finally {
+        ledger.close()
+      }
     }
+    fs.rmSync(tmp, { recursive: true, force: true })
   })
 })

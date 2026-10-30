@@ -199,6 +199,18 @@ export class MediaLedger {
         const compound = `${platform.toLowerCase()}:${username.toLowerCase()}:${id}`
         if (this.inMemoryFallback.media.has(compound)) return true
       }
+      for (const record of this.inMemoryFallback.media.values()) {
+        if (record.filename && record.filename === id) {
+          if (!platform || record.platform.toLowerCase() === platform.toLowerCase()) {
+            return true
+          }
+        }
+        if (record.id && record.id.includes(id)) {
+          if (!platform || record.platform.toLowerCase() === platform.toLowerCase()) {
+            return true
+          }
+        }
+      }
       return false
     }
 

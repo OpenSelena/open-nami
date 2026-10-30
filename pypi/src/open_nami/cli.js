@@ -41679,6 +41679,18 @@ var MediaLedger = class {
         const compound = `${platform2.toLowerCase()}:${username.toLowerCase()}:${id}`;
         if (this.inMemoryFallback.media.has(compound)) return true;
       }
+      for (const record of this.inMemoryFallback.media.values()) {
+        if (record.filename && record.filename === id) {
+          if (!platform2 || record.platform.toLowerCase() === platform2.toLowerCase()) {
+            return true;
+          }
+        }
+        if (record.id && record.id.includes(id)) {
+          if (!platform2 || record.platform.toLowerCase() === platform2.toLowerCase()) {
+            return true;
+          }
+        }
+      }
       return false;
     }
     const stmt = this.db.prepare("SELECT 1 FROM media_ledger WHERE id = ?");
