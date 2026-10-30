@@ -185,7 +185,7 @@ export class MediaLedger {
       return { scanned: 0, added: 0, updated: 0 }
     }
     const now = Date.now()
-    if (!force && now - this.lastDiskSyncMs < 3000) {
+    if (!force && now - this.lastDiskSyncMs < 30000) {
       return { scanned: 0, added: 0, updated: 0 }
     }
     this.lastDiskSyncMs = now
@@ -248,6 +248,42 @@ export class MediaLedger {
       media.filePath,
       media.downloadedAt,
     )
+  }
+
+  recordMediaBatch(records: MediaRecord[]): void {
+    if (records.length === 0) return
+    if (this.isFallback || !this.db) {
+      for (const m of records) {
+        this.inMemoryFallback.media.set(m.id, m)
+      }
+      this.flushFallbackDisk()
+      return
+    }
+
+    this.db.exec('BEGIN TRANSACTION;')
+    try {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO media_ledger (id, platform, author, url, filename, file_path, downloaded_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `)
+      for (const m of records) {
+        stmt.run(
+          m.id,
+          m.platform,
+          m.author,
+          m.url,
+          m.filename,
+          m.filePath,
+          m.downloadedAt,
+        )
+      }
+      this.db.exec('COMMIT;')
+    } catch (err) {
+      try {
+        this.db.exec('ROLLBACK;')
+      } catch {}
+      throw err
+    }
   }
 
   saveCheckpoint(checkpoint: CheckpointRecord): void {

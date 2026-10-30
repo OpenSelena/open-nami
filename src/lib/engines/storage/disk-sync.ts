@@ -188,48 +188,58 @@ export function syncDiskProfilesToLedger(
       if (stats.count === 0) continue
 
       scanned++
-      const archiveIds = extractArchiveItemIds(creatorDir)
-      for (const id of archiveIds) {
-        ledger.recordMedia({
-          id,
-          platform,
-          author: username,
-          url: '',
-          filename: '',
-          filePath: '',
-          downloadedAt: new Date(stats.lastMtimeMs || Date.now()).toISOString(),
-        })
-      }
-
       const existing = ledger.getTrackedProfile(platform, username)
-      if (!existing) {
-        let profileUrl: string
-        try {
-          profileUrl = buildProfileUrl(platform as any, username)
-        } catch {
-          profileUrl = `https://${platform}.com/${username}`
+      const needsSync =
+        !existing ||
+        existing.mediaCount !== stats.count ||
+        existing.targetDir !== creatorDir
+
+      if (needsSync) {
+        const archiveIds = extractArchiveItemIds(creatorDir)
+        if (archiveIds.length > 0) {
+          const mtimeIso = new Date(stats.lastMtimeMs || Date.now()).toISOString()
+          const records = archiveIds.map((id) => ({
+            id,
+            platform,
+            author: username,
+            url: '',
+            filename: '',
+            filePath: '',
+            downloadedAt: mtimeIso,
+          }))
+          ledger.recordMediaBatch(records)
         }
 
-        ledger.trackProfile({
-          platform,
-          username,
-          profileUrl,
-          targetDir: creatorDir,
-          choice: stats.choice,
-          lastPulledAt: stats.lastMtimeMs
-            ? new Date(stats.lastMtimeMs).toISOString()
-            : new Date().toISOString(),
-          mediaCount: stats.count,
-          status: 'ok',
-        })
-        added++
-      } else {
-        if (existing.mediaCount !== stats.count || existing.targetDir !== creatorDir) {
+        if (!existing) {
+          let profileUrl: string
+          try {
+            profileUrl = buildProfileUrl(platform as any, username)
+          } catch {
+            profileUrl = `https://${platform}.com/${username}`
+          }
+
+          ledger.trackProfile({
+            platform,
+            username,
+            profileUrl,
+            targetDir: creatorDir,
+            choice: stats.choice,
+            lastPulledAt: stats.lastMtimeMs
+              ? new Date(stats.lastMtimeMs).toISOString()
+              : new Date().toISOString(),
+            mediaCount: stats.count,
+            status: 'ok',
+          })
+          added++
+        } else {
           ledger.trackProfile({
             ...existing,
             targetDir: creatorDir,
             mediaCount: stats.count,
-            choice: existing.choice === 'all' && stats.choice !== 'all' ? existing.choice : stats.choice,
+            choice:
+              existing.choice === 'all' && stats.choice !== 'all'
+                ? existing.choice
+                : stats.choice,
           })
           updated++
         }

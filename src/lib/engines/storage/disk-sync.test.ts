@@ -132,6 +132,55 @@ describe('disk-sync storage module', () => {
     }
   })
 
+  it('recordMediaBatch inserts items in batch and sync skips unchanged creators', () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nami-batch-sync-'))
+    const dbPath = path.join(baseDir, 'test.db')
+    const ledger = new MediaLedger(dbPath)
+
+    try {
+      ledger.recordMediaBatch([
+        {
+          id: 'batch_1',
+          platform: 'instagram',
+          author: 'user1',
+          url: '',
+          filename: 'b1.jpg',
+          filePath: '',
+          downloadedAt: new Date().toISOString(),
+        },
+        {
+          id: 'batch_2',
+          platform: 'instagram',
+          author: 'user1',
+          url: '',
+          filename: 'b2.jpg',
+          filePath: '',
+          downloadedAt: new Date().toISOString(),
+        },
+      ])
+
+      assert.equal(ledger.hasMedia('batch_1'), true)
+      assert.equal(ledger.hasMedia('batch_2'), true)
+
+      const igUserDir = path.join(baseDir, 'instagram', 'batch_creator', 'Photos')
+      fs.mkdirSync(igUserDir, { recursive: true })
+      fs.writeFileSync(path.join(igUserDir, 'p1.jpg'), 'data')
+      fs.writeFileSync(path.join(igUserDir, 'archive.txt'), 'b_arc_1\n')
+
+      const res1 = syncDiskProfilesToLedger(ledger, baseDir)
+      assert.equal(res1.added, 1)
+      assert.equal(ledger.hasMedia('b_arc_1'), true)
+
+      // Second sync should find creator already up to date and not add or update
+      const res2 = syncDiskProfilesToLedger(ledger, baseDir)
+      assert.equal(res2.added, 0)
+      assert.equal(res2.updated, 0)
+    } finally {
+      ledger.close()
+      fs.rmSync(baseDir, { recursive: true, force: true })
+    }
+  })
+
   it('hasMedia matches bare IDs, compound keys, and filenames in both sqlite and fallback modes', () => {
     const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nami-ledger-has-'))
     const dbPath = path.join(tmp, 'test.db')

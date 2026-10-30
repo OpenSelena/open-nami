@@ -36131,7 +36131,7 @@ var import_react39 = __toESM(require_react(), 1);
 var import_react38 = __toESM(require_react(), 1);
 var ENABLE = "\x1B[?1000h\x1B[?1006h";
 var DISABLE = "\x1B[?1006l\x1B[?1000l";
-var SGR_PRESS = /\u001B\[<(\d+);(\d+);(\d+)M/g;
+var SGR_ANY_MOUSE = /\u001B\[<(\d+);(\d+);(\d+)([Mm])/g;
 function useMouseClick(onClick, isActive) {
   const handlerRef = (0, import_react38.useRef)(onClick);
   handlerRef.current = onClick;
@@ -36140,15 +36140,35 @@ function useMouseClick(onClick, isActive) {
   (0, import_react38.useEffect)(() => {
     if (!isActive || !stdin || !stdout || !process.stdin.isTTY) return;
     stdout.write(ENABLE);
-    const onData = (data) => {
-      for (const match of String(data).matchAll(SGR_PRESS)) {
-        const [, button, x, y] = match;
-        if (button === "0") handlerRef.current(Number(x), Number(y));
+    const origEmit = stdin.emit;
+    stdin.emit = function(event, chunk, ...args) {
+      if (event === "data" && (typeof chunk === "string" || Buffer.isBuffer(chunk))) {
+        const text = String(chunk);
+        let lastIndex = 0;
+        let nonMouse = "";
+        let hasMouse = false;
+        for (const match of text.matchAll(SGR_ANY_MOUSE)) {
+          hasMouse = true;
+          nonMouse += text.slice(lastIndex, match.index);
+          lastIndex = match.index + match[0].length;
+          const [, button, x, y, state] = match;
+          if (button === "0" && state === "M") {
+            handlerRef.current(Number(x), Number(y));
+          }
+        }
+        if (hasMouse) {
+          nonMouse += text.slice(lastIndex);
+          if (!nonMouse) {
+            return true;
+          }
+          const nextChunk = Buffer.isBuffer(chunk) ? Buffer.from(nonMouse) : nonMouse;
+          return origEmit.call(this, event, nextChunk, ...args);
+        }
       }
+      return origEmit.call(this, event, chunk, ...args);
     };
-    stdin.on("data", onData);
     return () => {
-      stdin.off("data", onData);
+      stdin.emit = origEmit;
       stdout.write(DISABLE);
     };
   }, [isActive, stdin, stdout]);
@@ -41444,39 +41464,42 @@ function syncDiskProfilesToLedger(ledger, customBaseDir) {
       const stats = countMediaFilesInDir(creatorDir);
       if (stats.count === 0) continue;
       scanned++;
-      const archiveIds = extractArchiveItemIds(creatorDir);
-      for (const id of archiveIds) {
-        ledger.recordMedia({
-          id,
-          platform: platform2,
-          author: username,
-          url: "",
-          filename: "",
-          filePath: "",
-          downloadedAt: new Date(stats.lastMtimeMs || Date.now()).toISOString()
-        });
-      }
       const existing = ledger.getTrackedProfile(platform2, username);
-      if (!existing) {
-        let profileUrl;
-        try {
-          profileUrl = buildProfileUrl(platform2, username);
-        } catch {
-          profileUrl = `https://${platform2}.com/${username}`;
+      const needsSync = !existing || existing.mediaCount !== stats.count || existing.targetDir !== creatorDir;
+      if (needsSync) {
+        const archiveIds = extractArchiveItemIds(creatorDir);
+        if (archiveIds.length > 0) {
+          const mtimeIso = new Date(stats.lastMtimeMs || Date.now()).toISOString();
+          const records = archiveIds.map((id) => ({
+            id,
+            platform: platform2,
+            author: username,
+            url: "",
+            filename: "",
+            filePath: "",
+            downloadedAt: mtimeIso
+          }));
+          ledger.recordMediaBatch(records);
         }
-        ledger.trackProfile({
-          platform: platform2,
-          username,
-          profileUrl,
-          targetDir: creatorDir,
-          choice: stats.choice,
-          lastPulledAt: stats.lastMtimeMs ? new Date(stats.lastMtimeMs).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
-          mediaCount: stats.count,
-          status: "ok"
-        });
-        added++;
-      } else {
-        if (existing.mediaCount !== stats.count || existing.targetDir !== creatorDir) {
+        if (!existing) {
+          let profileUrl;
+          try {
+            profileUrl = buildProfileUrl(platform2, username);
+          } catch {
+            profileUrl = `https://${platform2}.com/${username}`;
+          }
+          ledger.trackProfile({
+            platform: platform2,
+            username,
+            profileUrl,
+            targetDir: creatorDir,
+            choice: stats.choice,
+            lastPulledAt: stats.lastMtimeMs ? new Date(stats.lastMtimeMs).toISOString() : (/* @__PURE__ */ new Date()).toISOString(),
+            mediaCount: stats.count,
+            status: "ok"
+          });
+          added++;
+        } else {
           ledger.trackProfile({
             ...existing,
             targetDir: creatorDir,
@@ -41666,7 +41689,7 @@ var MediaLedger = class {
       return { scanned: 0, added: 0, updated: 0 };
     }
     const now = Date.now();
-    if (!force && now - this.lastDiskSyncMs < 3e3) {
+    if (!force && now - this.lastDiskSyncMs < 3e4) {
       return { scanned: 0, added: 0, updated: 0 };
     }
     this.lastDiskSyncMs = now;
@@ -41724,6 +41747,41 @@ var MediaLedger = class {
       media.filePath,
       media.downloadedAt
     );
+  }
+  recordMediaBatch(records) {
+    if (records.length === 0) return;
+    if (this.isFallback || !this.db) {
+      for (const m of records) {
+        this.inMemoryFallback.media.set(m.id, m);
+      }
+      this.flushFallbackDisk();
+      return;
+    }
+    this.db.exec("BEGIN TRANSACTION;");
+    try {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO media_ledger (id, platform, author, url, filename, file_path, downloaded_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const m of records) {
+        stmt.run(
+          m.id,
+          m.platform,
+          m.author,
+          m.url,
+          m.filename,
+          m.filePath,
+          m.downloadedAt
+        );
+      }
+      this.db.exec("COMMIT;");
+    } catch (err) {
+      try {
+        this.db.exec("ROLLBACK;");
+      } catch {
+      }
+      throw err;
+    }
   }
   saveCheckpoint(checkpoint) {
     const key = `${checkpoint.platform.toLowerCase()}:${checkpoint.username.toLowerCase()}`;
