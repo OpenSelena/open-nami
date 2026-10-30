@@ -12,6 +12,7 @@ import {startClipboardWatcher} from './lib/watcher.js'
 import {runBatchQueue} from './lib/batch.js'
 import {runDoctor} from './lib/diagnostics/doctor.js'
 import {checkForUpdate} from './lib/update-check.js'
+import {fetchAnnouncement} from './lib/announcements.js'
 
 export const resolveVersion = (): string => {
   try {
@@ -94,9 +95,10 @@ async function main() {
   }
 
   if (args.includes('--doctor')) {
-    const [report, updateInfo] = await Promise.all([
+    const [report, updateInfo, announcement] = await Promise.all([
       runDoctor(),
       checkForUpdate({ currentVersion: VERSION }),
+      fetchAnnouncement({ currentVersion: VERSION }),
     ])
     const updateText = updateInfo.updateAvailable && updateInfo.latestVersion
       ? `\x1b[33m(update available: v${updateInfo.latestVersion})\x1b[0m`
@@ -111,6 +113,14 @@ async function main() {
     console.log(`  \x1b[1mCookies:\x1b[0m`)
     for (const [platform, ok] of Object.entries(report.cookies)) {
       console.log(`    ${ok ? '\x1b[32m✓\x1b[0m' : '\x1b[90m○\x1b[0m'} ${platform}`)
+    }
+    if (announcement) {
+      const icon = announcement.level === 'warning' || announcement.level === 'alert' ? '⚠' : '📢'
+      const color = announcement.level === 'warning' || announcement.level === 'alert' ? '\x1b[33m' : '\x1b[36m'
+      console.log(`\n  \x1b[1mNotice:\x1b[0m ${color}${icon} [${announcement.title}]\x1b[0m ${announcement.message}`)
+      if (announcement.url) {
+        console.log(`          \x1b[4m${announcement.url}\x1b[0m`)
+      }
     }
     console.log()
     process.exit(0)

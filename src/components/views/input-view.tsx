@@ -4,6 +4,7 @@ import {FramedInput} from '../framed-input.js'
 import {TextInput} from '../text-input.js'
 import {terminalLink} from '../../lib/format.js'
 import {BRAND_COLOR, type Theme} from '../../theme.js'
+import type {Announcement} from '../../lib/announcements.js'
 
 export type InputViewProps = {
   urlInput: string
@@ -21,6 +22,7 @@ export type InputViewProps = {
   theme: Theme
   buttonText: string
   gapComponent: React.ComponentType<{lines?: number}>
+  announcement?: Announcement | null
 }
 
 export function InputView({
@@ -39,6 +41,7 @@ export function InputView({
   theme,
   buttonText,
   gapComponent: Gap,
+  announcement,
 }: InputViewProps) {
   return (
     <Box flexDirection="column" alignItems="center">
@@ -62,6 +65,27 @@ export function InputView({
       ) : clipboardAccepted ? (
         <Text color={theme.gray} dimColor={theme.dimSecondary}>from your clipboard: ↵ to download it</Text>
       ) : null}
+      {announcement && (
+        <Box marginTop={1} flexDirection="row" alignItems="center">
+          <Text
+            color={
+              announcement.level === 'warning' || announcement.level === 'alert'
+                ? 'yellow'
+                : 'cyan'
+            }
+          >
+            {announcement.level === 'warning' || announcement.level === 'alert' ? '⚠ ' : '📢 '}
+            <Text bold>{announcement.title}: </Text>
+            {announcement.url ? (
+              <Text underline>
+                {terminalLink(announcement.message, announcement.url)}
+              </Text>
+            ) : (
+              announcement.message
+            )}
+          </Text>
+        </Box>
+      )}
       <Gap />
       <Text color={theme.gray} dimColor={theme.dimSecondary}>
         <Text color={BRAND_COLOR} underline>

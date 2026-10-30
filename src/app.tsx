@@ -29,6 +29,7 @@ import {useMouseClick} from './lib/use-mouse-click.js'
 import {formatEngineError} from './lib/format.js'
 import {loadConfig} from './lib/config.js'
 import {getCachedUpdateInfo, checkForUpdate, type UpdateCheckResult} from './lib/update-check.js'
+import {getCachedAnnouncement, fetchAnnouncement, type Announcement} from './lib/announcements.js'
 import {useEngineEvents} from './lib/engines/core/use-engine-events.js'
 import type {MediaTarget, EngineProgress, EngineResult} from './lib/engines/types.js'
 
@@ -235,12 +236,18 @@ function InnerApp({
   }, [])
 
   const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(() => getCachedUpdateInfo(version))
+  const [announcement, setAnnouncement] = useState<Announcement | null>(() => getCachedAnnouncement(version))
 
   useEffect(() => {
     let cancelled = false
     checkForUpdate({currentVersion: version}).then(info => {
       if (!cancelled && info.updateAvailable) {
         setUpdateInfo(info)
+      }
+    })
+    fetchAnnouncement({currentVersion: version}).then(active => {
+      if (!cancelled && active) {
+        setAnnouncement(active)
       }
     })
     return () => {
@@ -494,6 +501,9 @@ function InnerApp({
         const latestUrl = `https://github.com/OpenSelena/open-nami/releases/tag/${latestTag}`
         targets.push({match: latestTag, padX: 1, action: () => openBrowser(latestUrl)})
       }
+      if (announcement?.url && announcement.title) {
+        targets.push({match: announcement.title, padX: 1, action: () => openBrowser(announcement.url!)})
+      }
       targets.push({match: `  ${DOWNLOAD_BUTTON}  `, padY: 1, action: () => handleInputSubmit(urlInput)})
       if (clipboardOffered && clipboardUrl) {
         targets.push({match: 'Tab to paste it', action: () => setUrlInput(clipboardUrl)})
@@ -620,6 +630,7 @@ function InnerApp({
           theme={theme}
           buttonText={DOWNLOAD_BUTTON}
           gapComponent={Gap}
+          announcement={announcement}
         />
       )}
 
