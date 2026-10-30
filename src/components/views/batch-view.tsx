@@ -54,12 +54,10 @@ export function BatchView({
   const [filePath, setFilePath] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  // Focused control
   const [focusedControl, setFocusedControl] = useState<FocusControl>('input')
   const [customLimitText, setCustomLimitText] = useState('')
   const [customDateText, setCustomDateText] = useState('')
 
-  // Options
   const [defaultPlatform, setDefaultPlatform] = useState<SupportedPlatform>('instagram')
   const [choice, setChoice] = useState<MediaTarget>(defaultChoice)
   const [limit, setLimit] = useState<number | undefined>(defaultLimit)
@@ -67,7 +65,6 @@ export function BatchView({
   const [writeMetadata, setWriteMetadata] = useState(defaultWriteMetadata)
   const [resume, setResume] = useState(true)
 
-  // Running state
   const [queueItems, setQueueItems] = useState<BatchItem[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentProgressText, setCurrentProgressText] = useState('')
@@ -218,12 +215,10 @@ export function BatchView({
   }, [inputField, filePath, rawText, choice, defaultPlatform, outputDir, dateFilter, limit, resume, writeMetadata])
 
   useInput((input, key) => {
-    // 1. Never intercept Ctrl+C so global exit works
     if (key.ctrl && (input === 'c' || input === 'C')) {
       return
     }
 
-    // 2. Escape handling
     if (key.escape) {
       if (focusedControl === 'custom-limit' || focusedControl === 'custom-date') {
         setFocusedControl('start')
@@ -242,7 +237,6 @@ export function BatchView({
       return
     }
 
-    // 3. Done phase
     if (phase === 'done') {
       if (key.return) {
         setPhase('input')
@@ -256,12 +250,10 @@ export function BatchView({
       return
     }
 
-    // 4. Running phase
     if (phase === 'running') {
       return
     }
 
-    // 5. Input phase
     if (phase === 'input') {
       if (focusedControl === 'custom-limit' || focusedControl === 'custom-date') {
         return
@@ -291,7 +283,6 @@ export function BatchView({
         return
       }
 
-      // Option navigation & activation
       if (focusedControl === 'platform') {
         if (key.rightArrow) { setFocusedControl('choice'); return }
         if (key.downArrow) { setFocusedControl('limit'); return }
@@ -356,7 +347,6 @@ export function BatchView({
     }
   }, {isActive: Boolean(process.stdin.isTTY)})
 
-  // Register interactive mouse click targets with parent
   useEffect(() => {
     if (!onRegisterClickTargets) return
 
@@ -382,7 +372,6 @@ export function BatchView({
         },
       })
 
-      // Download button on FramedInput
       targets.push({
         match: 'download',
         padX: 2,

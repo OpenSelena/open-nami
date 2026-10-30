@@ -27,7 +27,6 @@ export function parseDateBoundary(
 
   if (typeof input === 'number') {
     if (isNaN(input) || input <= 0) return undefined
-    // If it looks like milliseconds (greater than year 2100 in seconds, ~4.1e9)
     if (input > 4e9) {
       return Math.floor(input / 1000)
     }
@@ -37,7 +36,6 @@ export function parseDateBoundary(
   const trimmed = input.trim()
   if (!trimmed) return undefined
 
-  // Relative format: e.g. "7d", "24h", "30d", "1y"
   const relMatch = trimmed.match(/^(\d+)\s*(s|m|h|d|w|y)$/i)
   if (relMatch) {
     const amount = parseInt(relMatch[1], 10)
@@ -57,7 +55,6 @@ export function parseDateBoundary(
 
   // Pure numeric string
   if (/^\d+$/.test(trimmed)) {
-    // 4-digit year: YYYY (e.g. 2021, 2022)
     if (trimmed.length === 4) {
       const year = parseInt(trimmed, 10)
       if (year >= 1990 && year <= 2100) {
@@ -70,7 +67,6 @@ export function parseDateBoundary(
       }
     }
 
-    // 8-digit compact date: YYYYMMDD
     if (trimmed.length === 8) {
       const year = parseInt(trimmed.slice(0, 4), 10)
       const month = parseInt(trimmed.slice(4, 6), 10) - 1
@@ -88,7 +84,6 @@ export function parseDateBoundary(
     return num
   }
 
-  // Year + Month string: YYYY-MM (e.g. "2021-05")
   if (/^\d{4}-\d{2}$/.test(trimmed)) {
     const year = parseInt(trimmed.slice(0, 4), 10)
     const month = parseInt(trimmed.slice(5, 7), 10)
@@ -176,14 +171,11 @@ export function shouldIncludeItem(
   const reverseChrono = filters.reverseChronological ?? true
 
   if (item.date !== undefined && item.date !== null) {
-    // If newer than until boundary: skip this item, continue paginating to reach older items
     if (filters.until !== undefined && item.date > filters.until) {
       return {include: false, stop: false}
     }
 
-    // If older than since boundary:
     if (filters.since !== undefined && item.date < filters.since) {
-      // In reverse-chronological feeds, subsequent items will only be older, so stop completely
       return {include: false, stop: reverseChrono}
     }
   }

@@ -225,7 +225,6 @@ function InnerApp({
     return {name: 'input'}
   })
 
-  // Read clipboard on startup
   useEffect(() => {
     try {
       const clip = readClipboard()

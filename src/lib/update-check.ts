@@ -87,7 +87,6 @@ export async function checkForUpdate(
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS
   const fetcher = options.fetchFn ?? globalThis.fetch
 
-  // Check opt-out environment variables
   if (
     process.env.NO_UPDATE_NOTIFIER === '1' ||
     process.env.OPEN_NAMI_NO_UPDATE === '1'
@@ -99,7 +98,6 @@ export async function checkForUpdate(
     }
   }
 
-  // Check cache freshness unless forced
   const cached = getCachedUpdateInfo(currentVersion, cachePath)
   if (!options.force && cached && Date.now() - cached.lastChecked < interval) {
     return cached
@@ -124,7 +122,6 @@ export async function checkForUpdate(
         const latestVersion = data.version.trim()
         const updateAvailable = compareSemVer(currentVersion, latestVersion) < 0
 
-        // Persist to cache
         try {
           const dir = path.dirname(cachePath)
           if (!fs.existsSync(dir)) {
@@ -154,7 +151,6 @@ export async function checkForUpdate(
     }
   } catch {}
 
-  // Fallback gracefully on network failure
   return (
     cached ?? {
       currentVersion,

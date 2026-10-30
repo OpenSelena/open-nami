@@ -83,7 +83,6 @@ export function parseProfileInput(input: string): ParsedProfile {
     }
   }
 
-  // Handle URLs
   let candidate = trimmed
   if (!/^https?:\/\//i.test(candidate)) {
     if (candidate.includes('instagram.com') || candidate.includes('tiktok.com') || candidate.includes('facebook.com') || candidate.includes('x.com') || candidate.includes('twitter.com')) {
@@ -190,11 +189,8 @@ export function parseProfileInput(input: string): ParsedProfile {
         }
       }
     }
-  } catch {
-    // Not a valid URL
-  }
+  } catch {}
 
-  // Bare username (e.g. "momo", "@momo")
   if (isBareUsername(trimmed)) {
     const rawUser = trimmed.startsWith('@') ? trimmed.slice(1) : trimmed
     const user = rawUser.replace(/^[.\s]+|[.\s]+$/g, '')

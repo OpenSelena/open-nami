@@ -142,7 +142,6 @@ export function WatcherView({
     revealInFileManager(target)
   }, [outputDir])
 
-  // Register mouse click targets
   useEffect(() => {
     if (!onRegisterClickTargets) return
 

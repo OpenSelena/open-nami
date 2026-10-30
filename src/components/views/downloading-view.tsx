@@ -50,7 +50,6 @@ export function DownloadingView({
   const currentFile = progress?.currentFile ? truncate(progress.currentFile, 42) : ''
   const statusLine = progress?.statusText || (currentFile ? currentFile : 'downloading…')
 
-  // Album slide extraction
   let slideInfo: {current: number; total: number} | null = null
   const slideRegex = /(?:Slide|Album\s+slide|Part)\s+(\d+)\/(\d+)/i
   const match = statusLine.match(slideRegex) || currentFile.match(slideRegex)

@@ -56,12 +56,10 @@ export function parseBatchContent(content: string): string[] {
 
   for (const rawLine of lines) {
     let line = rawLine.trim()
-    // Ignore comment lines
     if (!line || line.startsWith('#') || line.startsWith('//')) {
       continue
     }
 
-    // Strip trailing comments (e.g. "https://instagram.com/user # my notes")
     const hashIdx = line.indexOf(' #')
     if (hashIdx !== -1) {
       line = line.slice(0, hashIdx).trim()
@@ -96,7 +94,6 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
 
   const items: BatchItem[] = rawEntries.map(raw => {
     let profile = parseProfileInput(raw)
-    // If the input was a bare username or unknown platform, but a defaultPlatform was specified, resolve it!
     if (options.defaultPlatform && profile.platform === 'unknown' && profile.username) {
       profile = buildCanonicalProfile(options.defaultPlatform, profile.username, raw)
     }
@@ -178,7 +175,6 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
       options.onAccountError?.(item, err instanceof Error ? err : new Error(errMsg))
     }
 
-    // Cooldown jitter before next account
     if (i < items.length - 1 && !options.signal?.aborted) {
       await sleep(minDelay, maxDelay, options.signal)
     }

@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated Native Extractor Cookie Forwarding**:
   - Updated `dispatcher.ts` to export ephemeral `0o600` Netscape session cookie files prior to running native extractors when no physical cookie file exists.
   - Ensures both Tier 1 native extractors and Tier 2 fallbacks receive authenticated session cookies.
-  - Updated dispatcher circuit breaker to allow seamless fallback on authenticated sessions.
+  - Updated dispatcher circuit breaker to allow fallback on authenticated sessions.
 
 ## [1.6.1] - 2026-10-25
 
@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Automated Default in Settings TUI**:
   - Browser Cookie Bridge in `SettingsView` (`^s`) now defaults to `[AUTO]`.
   - Dynamically displays detected system default browser and feedback in the Nordic settings frame.
-  - Defaults `cookiesFromBrowser` in `AppConfig` to `'auto'` for seamless zero-config onboarding.
+  - Defaults `cookiesFromBrowser` in `AppConfig` to `'auto'` for zero-config onboarding.
 
 ## [1.5.1] - 2026-10-25
 
@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Replaced the wireframe download box with a sleek modern vertical accent bar (`▎`).
   - Added formatted category tags (`[PHOTOS]`, `[VIDEOS]`, `[STORIES]`, `[HIGHLIGHTS]`, `[EVERYTHING]`) with solid inverted background badges on focus.
   - Added inline secondary descriptions for each media type (`Feed images and carousels`, `Reels and timeline clips`, etc.).
-  - Expanded interactive mouse click targets to match tags, labels, and descriptions seamlessly.
+  - Expanded interactive mouse click targets to match tags, labels, and descriptions directly.
 
 ## [1.2.9] - 2026-10-24
 
@@ -231,7 +231,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Upgraded TikTok rehydration parser with 5 fallback strategies (`__UNIVERSAL_DATA_FOR_REHYDRATION__`, `SIGI_STATE` script tags, `window['SIGI_STATE']` assignments, `__NEXT_DATA__` page props, and direct `secUid` HTML regexes) and comprehensive device/app query parameters.
   - Implemented Facebook mobile server-rendered fallback (`mbasic.facebook.com` / `m.facebook.com`) for blank desktop React shells, HTML5 video detection, and multi-page album cursor pagination.
 - **Failover & Cross-Engine Deduplication**:
-  - Added seamless failover in `EngineDispatch` to automatically hand off to `gallery-dl` or `yt-dlp` upon extraction barriers.
+  - Added automatic failover in `EngineDispatch` to hand off to `gallery-dl` or `yt-dlp` upon extraction barriers.
   - Added bidirectional cross-engine archive deduplication with `archive_yt-dlp.txt` and `archive.txt`, preventing duplicate downloads across native TypeScript extractors, `yt-dlp`, and `gallery-dl`.
 - **Tests**:
   - Expanded automated test suite from 118 to 143 passing unit tests with 100% pass rate.

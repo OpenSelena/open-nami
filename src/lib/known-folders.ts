@@ -83,7 +83,6 @@ export function isPathDriveAccessible(
       return fsExists(driveRoot)
     }
 
-    // POSIX path handling
     const normalized = filePath.replace(/\\/g, '/')
     const mountMatch = normalized.match(/^(\/(?:media(?:\/[^/]+)?|mnt|run\/media(?:\/[^/]+)?)\/[^/]+)/)
     if (mountMatch) {
@@ -131,12 +130,10 @@ export function resolveWindowsDownloadsDir(options: ResolveKnownFolderOptions = 
   const checkAccessible =
     options.driveAccessibleFn ?? (p => isPathDriveAccessible(p, fs.existsSync, 'win32'))
 
-  // 1. Try Known Folder GUID
   let raw = parseWindowsRegistryOutput(
     runQuery(USER_SHELL_FOLDERS_REG_KEY, KNOWN_FOLDER_DOWNLOADS_GUID),
     KNOWN_FOLDER_DOWNLOADS_GUID,
   )
-  // 2. Fallback to legacy "Downloads" value if GUID is missing
   if (!raw) {
     raw = parseWindowsRegistryOutput(runQuery(USER_SHELL_FOLDERS_REG_KEY, 'Downloads'), 'Downloads')
   }

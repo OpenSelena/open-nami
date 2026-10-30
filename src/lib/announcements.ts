@@ -175,7 +175,6 @@ export async function fetchAnnouncement(
     return null
   }
 
-  // Load existing cache
   let cache: AnnouncementCacheData = {
     lastChecked: 0,
     activeAnnouncement: null,
@@ -196,7 +195,6 @@ export async function fetchAnnouncement(
     } catch {}
   }
 
-  // Check freshness unless force is requested
   if (!options.force && cache.lastChecked && Date.now() - cache.lastChecked < interval) {
     if (cache.activeAnnouncement && isAnnouncementEligible(cache.activeAnnouncement, currentVersion, cache.dismissedIds)) {
       return cache.activeAnnouncement
