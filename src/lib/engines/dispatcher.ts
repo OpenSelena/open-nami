@@ -367,6 +367,20 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       outputDir: targetDir,
     }
 
+    if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
+      const existing = defaultTaskManager.ledger.getTrackedProfile(profile.platform, profile.username)
+      defaultTaskManager.ledger.trackProfile({
+        platform: profile.platform,
+        username: profile.username,
+        profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
+        targetDir,
+        choice,
+        lastPulledAt: new Date().toISOString(),
+        mediaCount: (existing?.mediaCount || 0) + engineResult.downloadedCount,
+        status: errors.length === 0 ? 'ok' : 'partial',
+      })
+    }
+
     defaultTaskManager.events.emit('job:complete', { result: engineResult })
     return engineResult
   } catch (err: unknown) {

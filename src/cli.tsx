@@ -60,6 +60,7 @@ const HELP = `
     -l, --limit <n>      Limit maximum items to download
     --resume             Resume download from saved pagination checkpoint
     --write-metadata     Save post metadata & captions to sidecar .json files
+    --no-track           Do not add downloaded profile to tracked history registry
     --completion         Generate shell completion script (bash, zsh, fish, powershell)
 
   Hotkeys in TUI:
@@ -205,6 +206,7 @@ async function main() {
   let limit: number | undefined
   let isResume = false
   let writeMetadata = false
+  let noTrack = false
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i]
@@ -246,6 +248,8 @@ async function main() {
       isResume = true
     } else if (arg === '--write-metadata') {
       writeMetadata = true
+    } else if (arg === '--no-track') {
+      noTrack = true
     } else if (arg === '-b' || arg === '--batch') {
       batchFile = args[++i]
     } else if (arg.startsWith('--batch=')) {
@@ -333,6 +337,7 @@ async function main() {
         limit,
         resume: isResume,
         writeMetadata,
+        noTrack,
         signal: controller.signal,
         onAccountStart: (item, idx, total) => {
           console.log(`\x1b[36m[${idx + 1}/${total}]\x1b[0m \x1b[1m@${item.profile.username}\x1b[0m on \x1b[35m${item.profile.platform}\x1b[0m…`)
@@ -381,6 +386,7 @@ async function main() {
         limit,
         resume: isResume,
         writeMetadata,
+        noTrack,
         onProgress: (progress) => {
           if (progress.currentFile) {
             console.log(`[open-nami] [${progress.job}] ${progress.currentFile}`)

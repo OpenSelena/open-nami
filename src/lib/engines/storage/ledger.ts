@@ -23,11 +23,23 @@ export interface CheckpointRecord {
   updatedAt: string
 }
 
+export interface TrackedProfileRecord {
+  platform: string
+  username: string
+  profileUrl: string
+  targetDir: string
+  choice: string
+  lastPulledAt: string
+  mediaCount: number
+  status?: string
+}
+
 export class MediaLedger {
   private db: any = null
   private inMemoryFallback = {
     media: new Map<string, MediaRecord>(),
     checkpoints: new Map<string, CheckpointRecord>(),
+    trackedProfiles: new Map<string, TrackedProfileRecord>(),
   }
   private isFallback = false
   private resolvedPath: string
@@ -70,6 +82,11 @@ export class MediaLedger {
               this.inMemoryFallback.checkpoints.set(k, v as CheckpointRecord)
             }
           }
+          if (data.trackedProfiles && typeof data.trackedProfiles === 'object') {
+            for (const [k, v] of Object.entries(data.trackedProfiles)) {
+              this.inMemoryFallback.trackedProfiles.set(k, v as TrackedProfileRecord)
+            }
+          }
         }
       }
     } catch {}
@@ -82,6 +99,7 @@ export class MediaLedger {
       const data = {
         media: Object.fromEntries(this.inMemoryFallback.media),
         checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints),
+        trackedProfiles: Object.fromEntries(this.inMemoryFallback.trackedProfiles),
       }
       fs.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), 'utf8')
     } catch {}
@@ -106,6 +124,17 @@ export class MediaLedger {
         target_dir TEXT,
         cursors_json TEXT,
         updated_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS tracked_profiles (
+        platform TEXT NOT NULL,
+        username TEXT NOT NULL,
+        profile_url TEXT NOT NULL,
+        target_dir TEXT NOT NULL,
+        choice TEXT NOT NULL,
+        last_pulled_at TEXT NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        status TEXT,
+        PRIMARY KEY (platform, username)
       );
     `)
   }
@@ -189,6 +218,87 @@ export class MediaLedger {
     }
     const stmt = this.db.prepare('DELETE FROM checkpoints WHERE key = ?')
     stmt.run(key)
+  }
+
+  trackProfile(profile: TrackedProfileRecord): void {
+    const key = `${profile.platform}:${profile.username.toLowerCase()}`
+    const normalized: TrackedProfileRecord = {
+      ...profile,
+      username: profile.username.toLowerCase(),
+    }
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.set(key, normalized)
+      this.flushFallbackDisk()
+      return
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO tracked_profiles (
+        platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    stmt.run(
+      normalized.platform,
+      normalized.username,
+      normalized.profileUrl,
+      normalized.targetDir,
+      normalized.choice,
+      normalized.lastPulledAt,
+      normalized.mediaCount,
+      normalized.status ?? null,
+    )
+  }
+
+  getTrackedProfiles(): TrackedProfileRecord[] {
+    if (this.isFallback || !this.db) {
+      return Array.from(this.inMemoryFallback.trackedProfiles.values())
+    }
+    const stmt = this.db.prepare(
+      'SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles ORDER BY last_pulled_at DESC',
+    )
+    const rows = stmt.all() as any[]
+    return rows.map(r => ({
+      platform: r.platform,
+      username: r.username,
+      profileUrl: r.profile_url,
+      targetDir: r.target_dir,
+      choice: r.choice,
+      lastPulledAt: r.last_pulled_at,
+      mediaCount: Number(r.media_count || 0),
+      status: r.status || undefined,
+    }))
+  }
+
+  getTrackedProfile(platform: string, username: string): TrackedProfileRecord | null {
+    const key = `${platform}:${username.toLowerCase()}`
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.trackedProfiles.get(key) || null
+    }
+    const stmt = this.db.prepare(
+      'SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles WHERE platform = ? AND username = ?',
+    )
+    const row = stmt.get(platform, username.toLowerCase()) as any
+    if (!row) return null
+    return {
+      platform: row.platform,
+      username: row.username,
+      profileUrl: row.profile_url,
+      targetDir: row.target_dir,
+      choice: row.choice,
+      lastPulledAt: row.last_pulled_at,
+      mediaCount: Number(row.media_count || 0),
+      status: row.status || undefined,
+    }
+  }
+
+  untrackProfile(platform: string, username: string): void {
+    const key = `${platform}:${username.toLowerCase()}`
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.delete(key)
+      this.flushFallbackDisk()
+      return
+    }
+    const stmt = this.db.prepare('DELETE FROM tracked_profiles WHERE platform = ? AND username = ?')
+    stmt.run(platform, username.toLowerCase())
   }
 
   close(): void {

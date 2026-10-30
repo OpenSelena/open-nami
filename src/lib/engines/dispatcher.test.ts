@@ -688,4 +688,73 @@ test('dispatchDownload passes undefined to runners when cookiesFromBrowser is "n
   }
 })
 
+test('dispatchDownload automatically tracks successfully downloaded profile in ledger', async () => {
+  const {dispatchDownload, defaultTaskManager} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-track-'))
+
+  try {
+    defaultTaskManager.ledger.untrackProfile('instagram', 'track_test_user')
+
+    await dispatchDownload({
+      profile: {
+        platform: 'instagram',
+        username: 'track_test_user',
+        cleanUrl: 'https://www.instagram.com/track_test_user/',
+        rawInput: 'track_test_user',
+      },
+      choice: 'photos',
+      outputDir: tmpDir,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: true, downloaded: 4, skipped: 0}
+        },
+      },
+    })
+
+    const tracked = defaultTaskManager.ledger.getTrackedProfile('instagram', 'track_test_user')
+    assert.ok(tracked, 'Profile should be automatically tracked after successful download')
+    assert.equal(tracked.username, 'track_test_user')
+    assert.equal(tracked.choice, 'photos')
+    assert.equal(tracked.mediaCount, 4)
+  } finally {
+    defaultTaskManager.ledger.untrackProfile('instagram', 'track_test_user')
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload skips tracking when noTrack is true', async () => {
+  const {dispatchDownload, defaultTaskManager} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-dispatch-notrack-'))
+
+  try {
+    defaultTaskManager.ledger.untrackProfile('tiktok', 'notrack_user')
+
+    await dispatchDownload({
+      profile: {
+        platform: 'tiktok',
+        username: 'notrack_user',
+        cleanUrl: 'https://www.tiktok.com/@notrack_user',
+        rawInput: 'notrack_user',
+      },
+      choice: 'videos',
+      outputDir: tmpDir,
+      noTrack: true,
+      runnerOverrides: {
+        nativeRunner: async () => {
+          return {success: true, downloaded: 2, skipped: 0}
+        },
+      },
+    })
+
+    const tracked = defaultTaskManager.ledger.getTrackedProfile('tiktok', 'notrack_user')
+    assert.equal(tracked, null, 'Profile should NOT be tracked when noTrack is true')
+  } finally {
+    defaultTaskManager.ledger.untrackProfile('tiktok', 'notrack_user')
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+
 

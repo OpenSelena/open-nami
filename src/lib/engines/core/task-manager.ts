@@ -111,6 +111,20 @@ export class TaskManager {
       outputDir: targetDir,
     }
 
+    if (!options.noTrack && (result.success || result.downloadedCount > 0)) {
+      const existing = this.ledger.getTrackedProfile(profile.platform, profile.username)
+      this.ledger.trackProfile({
+        platform: profile.platform,
+        username: profile.username,
+        profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
+        targetDir,
+        choice,
+        lastPulledAt: new Date().toISOString(),
+        mediaCount: (existing?.mediaCount || 0) + result.downloadedCount,
+        status: errors.length === 0 ? 'ok' : 'partial',
+      })
+    }
+
     this.events.emit('job:complete', { result })
     return result
   }

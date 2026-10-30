@@ -154,3 +154,91 @@ test('MediaLedger fallback persists across re-opens with file path', () => {
   }
 })
 
+test('MediaLedger tracks, lists, and untracks profiles in SQLite', () => {
+  const ledger = new MediaLedger(':memory:')
+  assert.equal(ledger.getTrackedProfiles().length, 0)
+  assert.equal(ledger.getTrackedProfile('instagram', 'selenagomez'), null)
+
+  ledger.trackProfile({
+    platform: 'instagram',
+    username: 'selenagomez',
+    profileUrl: 'https://www.instagram.com/selenagomez/',
+    targetDir: '/tmp/instagram/selenagomez',
+    choice: 'all',
+    lastPulledAt: '2026-10-30T10:00:00Z',
+    mediaCount: 15,
+  })
+
+  const list = ledger.getTrackedProfiles()
+  assert.equal(list.length, 1)
+  assert.equal(list[0]?.username, 'selenagomez')
+  assert.equal(list[0]?.mediaCount, 15)
+
+  const single = ledger.getTrackedProfile('instagram', 'selenagomez')
+  assert.ok(single)
+  assert.equal(single.targetDir, '/tmp/instagram/selenagomez')
+
+  // Case-insensitive lookup
+  const singleUpper = ledger.getTrackedProfile('instagram', 'SelenaGomez')
+  assert.ok(singleUpper)
+  assert.equal(singleUpper.username, 'selenagomez')
+
+  // Update existing
+  ledger.trackProfile({
+    platform: 'instagram',
+    username: 'selenagomez',
+    profileUrl: 'https://www.instagram.com/selenagomez/',
+    targetDir: '/tmp/instagram/selenagomez',
+    choice: 'photos',
+    lastPulledAt: '2026-10-30T12:00:00Z',
+    mediaCount: 20,
+    status: 'ok',
+  })
+
+  const updated = ledger.getTrackedProfile('instagram', 'selenagomez')
+  assert.equal(updated?.mediaCount, 20)
+  assert.equal(updated?.choice, 'photos')
+  assert.equal(updated?.status, 'ok')
+
+  ledger.untrackProfile('instagram', 'selenagomez')
+  assert.equal(ledger.getTrackedProfiles().length, 0)
+  assert.equal(ledger.getTrackedProfile('instagram', 'selenagomez'), null)
+  ledger.close()
+})
+
+test('MediaLedger fallback tracks and persists profiles across re-opens', () => {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nami-ledger-track-fallback-'))
+  const dbFile = path.join(tmpDir, 'fallback-profiles.json')
+
+  try {
+    const l1 = new MediaLedger(dbFile, true)
+    l1.trackProfile({
+      platform: 'tiktok',
+      username: 'creator_abc',
+      profileUrl: 'https://www.tiktok.com/@creator_abc',
+      targetDir: path.join(tmpDir, 'tiktok', 'creator_abc'),
+      choice: 'videos',
+      lastPulledAt: '2026-10-30T10:00:00Z',
+      mediaCount: 8,
+    })
+    l1.close()
+
+    const l2 = new MediaLedger(dbFile, true)
+    const list = l2.getTrackedProfiles()
+    assert.equal(list.length, 1)
+    assert.equal(list[0]?.username, 'creator_abc')
+    assert.equal(list[0]?.mediaCount, 8)
+
+    l2.untrackProfile('tiktok', 'creator_abc')
+    assert.equal(l2.getTrackedProfiles().length, 0)
+    l2.close()
+
+    const l3 = new MediaLedger(dbFile, true)
+    assert.equal(l3.getTrackedProfiles().length, 0)
+    l3.close()
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true })
+  }
+})
+
+

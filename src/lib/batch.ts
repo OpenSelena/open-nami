@@ -24,6 +24,7 @@ export interface BatchQueueOptions {
   limit?: number
   resume?: boolean
   writeMetadata?: boolean
+  noTrack?: boolean
   minDelayMs?: number
   maxDelayMs?: number
   signal?: AbortSignal
@@ -145,6 +146,7 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
         limit: options.limit,
         resume: options.resume,
         writeMetadata: options.writeMetadata,
+        noTrack: options.noTrack,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
         onProgress: (progress) => {
