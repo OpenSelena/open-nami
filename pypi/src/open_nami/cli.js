@@ -9637,14 +9637,14 @@ var require_react_reconciler_production = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React26 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React27 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React27.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -22237,14 +22237,14 @@ var require_react_reconciler_development = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React26 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React27 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React27.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -26420,18 +26420,18 @@ var require_react_jsx_runtime_development = __commonJS({
       function isValidElement(object) {
         return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
       }
-      var React26 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React26.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+      var React27 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React27.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
         return null;
       };
-      React26 = {
+      React27 = {
         react_stack_bottom_frame: function(callStackForError) {
           return callStackForError();
         }
       };
       var specialPropKeyWarningShown;
       var didWarnAboutElementRef = {};
-      var unknownOwnerDebugStack = React26.react_stack_bottom_frame.bind(
-        React26,
+      var unknownOwnerDebugStack = React27.react_stack_bottom_frame.bind(
+        React27,
         UnknownOwner
       )();
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.8.0",
+      version: "1.9.0",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs22 = await import("fs");
-  const content = fs22.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs23 = await import("fs");
+  const content = fs23.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -35863,7 +35863,7 @@ var import_react32 = __toESM(require_react(), 1);
 var import_react33 = __toESM(require_react(), 1);
 
 // src/app.tsx
-var import_react49 = __toESM(require_react(), 1);
+var import_react50 = __toESM(require_react(), 1);
 
 // node_modules/ink-spinner/build/index.js
 var import_react34 = __toESM(require_react(), 1);
@@ -36422,7 +36422,8 @@ function InputView({
   theme,
   buttonText,
   gapComponent: Gap2,
-  announcement
+  announcement,
+  trackedCount = 0
 }) {
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(FramedInput, { title: "Paste a profile link", width: boxWidth, button: buttonText, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
@@ -36443,6 +36444,12 @@ function InputView({
       "\u2717 ",
       warning
     ] }) : clipboardOffered ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "link in your clipboard: Tab to paste it" }) : clipboardAccepted ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "from your clipboard: \u21B5 to download it" }) : null,
+    trackedCount > 0 && !urlInput && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, bold: true, children: "[p]" }),
+      " Pull Updates (",
+      trackedCount,
+      " tracked)"
+    ] }) }),
     announcement && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { marginTop: 1, flexDirection: "row", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
       Text,
       {
@@ -38166,8 +38173,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs22 = user.friendship_status;
-      const isFollowing = fs22 ? Boolean(fs22.following) : Boolean(user.followed_by_viewer);
+      const fs23 = user.friendship_status;
+      const isFollowing = fs23 ? Boolean(fs23.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -39949,6 +39956,8 @@ async function downloadMediaStream(items, options) {
   let queueLock = Promise.resolve();
   let isDone = false;
   let consecutiveErrors = 0;
+  let consecutiveDuplicates = 0;
+  let lastSeenPostId;
   const MAX_CONSECUTIVE_ERRORS = 5;
   function getNextItem() {
     const nextItem = queueLock.then(() => iterator.next());
@@ -40008,6 +40017,11 @@ async function downloadMediaStream(items, options) {
           }
         }
         skipped++;
+        const currentPostId = item.carouselId || item.id;
+        if (currentPostId !== lastSeenPostId) {
+          consecutiveDuplicates++;
+          lastSeenPostId = currentPostId;
+        }
         onProgress?.({
           job: jobName,
           downloadedCount: downloaded,
@@ -40015,8 +40029,14 @@ async function downloadMediaStream(items, options) {
           currentFile: finalFilename,
           statusText: `Skipping already downloaded: ${finalFilename}`
         });
+        if (options.earlyExitThreshold && consecutiveDuplicates >= options.earlyExitThreshold) {
+          isDone = true;
+          break;
+        }
         continue;
       }
+      consecutiveDuplicates = 0;
+      lastSeenPostId = item.carouselId || item.id;
       onProgress?.({
         job: jobName,
         downloadedCount: downloaded,
@@ -40230,12 +40250,31 @@ function shouldIncludeItem(item, filters) {
 async function* filterMediaStream(items, filters) {
   const maxLimit = filters.limit;
   let count = 0;
+  let consecutiveDuplicates = 0;
+  let lastSeenPostId;
   if (maxLimit !== void 0 && maxLimit <= 0) {
     return;
   }
   for await (const item of items) {
     if (maxLimit !== void 0 && count >= maxLimit) {
       break;
+    }
+    let shouldEarlyExit = false;
+    if (filters.isDuplicate) {
+      const isDup = await filters.isDuplicate(item);
+      const currentPostId = item.carouselId || item.id;
+      if (isDup) {
+        if (currentPostId !== lastSeenPostId) {
+          consecutiveDuplicates++;
+          lastSeenPostId = currentPostId;
+        }
+        if (filters.earlyExitThreshold && consecutiveDuplicates >= filters.earlyExitThreshold) {
+          shouldEarlyExit = true;
+        }
+      } else {
+        consecutiveDuplicates = 0;
+        lastSeenPostId = currentPostId;
+      }
     }
     const { include, stop } = shouldIncludeItem(item, filters);
     if (include) {
@@ -40245,7 +40284,7 @@ async function* filterMediaStream(items, filters) {
         break;
       }
     }
-    if (stop) {
+    if (stop || shouldEarlyExit) {
       break;
     }
   }
@@ -40561,7 +40600,7 @@ var PLATFORM_SLEEP = {
   facebook: "1.0-1.8"
 };
 function buildGalleryDlArgs(options) {
-  const { destDir, subDir, platform: platform2, cleanUrl, username, cookiePath, cookiesFromBrowser, writeMetadata } = options;
+  const { destDir, subDir, platform: platform2, cleanUrl, username, cookiePath, cookiesFromBrowser, writeMetadata, abortAfterDuplicates } = options;
   const args = [
     "-D",
     destDir,
@@ -40582,6 +40621,9 @@ function buildGalleryDlArgs(options) {
     "--sleep-429",
     "10"
   ];
+  if (abortAfterDuplicates && abortAfterDuplicates > 0) {
+    args.push("--abort", String(abortAfterDuplicates));
+  }
   if (writeMetadata) {
     args.push("--write-metadata");
   }
@@ -40630,7 +40672,8 @@ async function runGalleryDl(options) {
     username: profile.username,
     cookiePath,
     cookiesFromBrowser: options.cookiesFromBrowser,
-    writeMetadata: options.writeMetadata
+    writeMetadata: options.writeMetadata,
+    abortAfterDuplicates: options.abortAfterDuplicates
   });
   let downloadedCount = 0;
   let skippedCount = 0;
@@ -40939,7 +40982,8 @@ var MediaLedger = class {
   db = null;
   inMemoryFallback = {
     media: /* @__PURE__ */ new Map(),
-    checkpoints: /* @__PURE__ */ new Map()
+    checkpoints: /* @__PURE__ */ new Map(),
+    trackedProfiles: /* @__PURE__ */ new Map()
   };
   isFallback = false;
   resolvedPath;
@@ -40957,6 +41001,13 @@ var MediaLedger = class {
       }
       const { DatabaseSync } = require3("node:sqlite");
       this.db = new DatabaseSync(resolvedPath);
+      if (resolvedPath !== ":memory:") {
+        try {
+          this.db.exec("PRAGMA journal_mode = WAL;");
+          this.db.exec("PRAGMA busy_timeout = 5000;");
+        } catch {
+        }
+      }
       this.initTables();
     } catch {
       this.isFallback = true;
@@ -40980,6 +41031,11 @@ var MediaLedger = class {
               this.inMemoryFallback.checkpoints.set(k, v);
             }
           }
+          if (data.trackedProfiles && typeof data.trackedProfiles === "object") {
+            for (const [k, v] of Object.entries(data.trackedProfiles)) {
+              this.inMemoryFallback.trackedProfiles.set(k, v);
+            }
+          }
         }
       }
     } catch {
@@ -40991,7 +41047,8 @@ var MediaLedger = class {
       fs12.mkdirSync(path10.dirname(this.resolvedPath), { recursive: true });
       const data = {
         media: Object.fromEntries(this.inMemoryFallback.media),
-        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints)
+        checkpoints: Object.fromEntries(this.inMemoryFallback.checkpoints),
+        trackedProfiles: Object.fromEntries(this.inMemoryFallback.trackedProfiles)
       };
       fs12.writeFileSync(this.resolvedPath, JSON.stringify(data, null, 2), "utf8");
     } catch {
@@ -41016,6 +41073,17 @@ var MediaLedger = class {
         target_dir TEXT,
         cursors_json TEXT,
         updated_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS tracked_profiles (
+        platform TEXT NOT NULL,
+        username TEXT NOT NULL,
+        profile_url TEXT NOT NULL,
+        target_dir TEXT NOT NULL,
+        choice TEXT NOT NULL,
+        last_pulled_at TEXT NOT NULL,
+        media_count INTEGER DEFAULT 0,
+        status TEXT,
+        PRIMARY KEY (platform, username)
       );
     `);
   }
@@ -41094,6 +41162,83 @@ var MediaLedger = class {
     }
     const stmt = this.db.prepare("DELETE FROM checkpoints WHERE key = ?");
     stmt.run(key);
+  }
+  trackProfile(profile) {
+    const key = `${profile.platform}:${profile.username.toLowerCase()}`;
+    const normalized = {
+      ...profile,
+      username: profile.username.toLowerCase()
+    };
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.set(key, normalized);
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO tracked_profiles (
+        platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      normalized.platform,
+      normalized.username,
+      normalized.profileUrl,
+      normalized.targetDir,
+      normalized.choice,
+      normalized.lastPulledAt,
+      normalized.mediaCount,
+      normalized.status ?? null
+    );
+  }
+  getTrackedProfiles() {
+    if (this.isFallback || !this.db) {
+      return Array.from(this.inMemoryFallback.trackedProfiles.values());
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles ORDER BY last_pulled_at DESC"
+    );
+    const rows = stmt.all();
+    return rows.map((r) => ({
+      platform: r.platform,
+      username: r.username,
+      profileUrl: r.profile_url,
+      targetDir: r.target_dir,
+      choice: r.choice,
+      lastPulledAt: r.last_pulled_at,
+      mediaCount: Number(r.media_count || 0),
+      status: r.status || void 0
+    }));
+  }
+  getTrackedProfile(platform2, username) {
+    const key = `${platform2}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      return this.inMemoryFallback.trackedProfiles.get(key) || null;
+    }
+    const stmt = this.db.prepare(
+      "SELECT platform, username, profile_url, target_dir, choice, last_pulled_at, media_count, status FROM tracked_profiles WHERE platform = ? AND username = ?"
+    );
+    const row = stmt.get(platform2, username.toLowerCase());
+    if (!row) return null;
+    return {
+      platform: row.platform,
+      username: row.username,
+      profileUrl: row.profile_url,
+      targetDir: row.target_dir,
+      choice: row.choice,
+      lastPulledAt: row.last_pulled_at,
+      mediaCount: Number(row.media_count || 0),
+      status: row.status || void 0
+    };
+  }
+  untrackProfile(platform2, username) {
+    const key = `${platform2}:${username.toLowerCase()}`;
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.delete(key);
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare("DELETE FROM tracked_profiles WHERE platform = ? AND username = ?");
+    stmt.run(platform2, username.toLowerCase());
   }
   close() {
     if (this.db) {
@@ -41325,6 +41470,19 @@ var TaskManager = class {
       errors,
       outputDir: targetDir
     };
+    if (!options.noTrack && (result.success || result.downloadedCount > 0)) {
+      const existing = this.ledger.getTrackedProfile(profile.platform, profile.username);
+      this.ledger.trackProfile({
+        platform: profile.platform,
+        username: profile.username,
+        profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
+        targetDir,
+        choice,
+        lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+        mediaCount: (existing?.mediaCount || 0) + result.downloadedCount,
+        status: errors.length === 0 ? "ok" : "partial"
+      });
+    }
     this.events.emit("job:complete", { result });
     return result;
   }
@@ -41446,6 +41604,8 @@ async function dispatchDownload(options) {
           until: untilSeconds,
           limit: remainingLimit,
           initialCursor,
+          earlyExitThreshold: options.earlyExitThreshold,
+          isKnownMedia: (id) => defaultTaskManager.ledger.hasMedia(id),
           onCheckpoint: async (key, val) => {
             if (val) {
               currentCursors[key] = val;
@@ -41465,7 +41625,9 @@ async function dispatchDownload(options) {
         const filtered = filterMediaStream(items, {
           since: sinceSeconds,
           until: untilSeconds,
-          limit: remainingLimit
+          limit: remainingLimit,
+          earlyExitThreshold: options.earlyExitThreshold,
+          isDuplicate: (item) => defaultTaskManager.ledger.hasMedia(item.id)
         });
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
@@ -41479,6 +41641,7 @@ async function dispatchDownload(options) {
           signal: options.signal,
           limit: remainingLimit,
           writeMetadata: options.writeMetadata,
+          earlyExitThreshold: options.earlyExitThreshold,
           defaultPlatform: profile.platform,
           defaultAuthor: profile.username,
           onProgress: handleProgress
@@ -41509,6 +41672,7 @@ async function dispatchDownload(options) {
         cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
+        abortAfterDuplicates: options.earlyExitThreshold,
         onProgress: handleProgress
       };
       return options.runnerOverrides?.gdlRunner ? options.runnerOverrides.gdlRunner(subDir, runnerOpts) : runGalleryDl(runnerOpts);
@@ -41521,6 +41685,7 @@ async function dispatchDownload(options) {
         cookiesFromBrowser,
         signal: options.signal,
         writeMetadata: options.writeMetadata,
+        abortAfterDuplicates: options.earlyExitThreshold,
         onProgress: handleProgress
       };
       return options.runnerOverrides?.ytRunner ? options.runnerOverrides.ytRunner(runnerOpts) : runYtDlp(runnerOpts);
@@ -41632,6 +41797,19 @@ async function dispatchDownload(options) {
       errors,
       outputDir: targetDir
     };
+    if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
+      const existing = defaultTaskManager.ledger.getTrackedProfile(profile.platform, profile.username);
+      defaultTaskManager.ledger.trackProfile({
+        platform: profile.platform,
+        username: profile.username,
+        profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
+        targetDir,
+        choice,
+        lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+        mediaCount: (existing?.mediaCount || 0) + engineResult.downloadedCount,
+        status: errors.length === 0 ? "ok" : "partial"
+      });
+    }
     defaultTaskManager.events.emit("job:complete", { result: engineResult });
     return engineResult;
   } catch (err) {
@@ -43289,6 +43467,7 @@ async function runBatchQueue(options) {
         limit: options.limit,
         resume: options.resume,
         writeMetadata: options.writeMetadata,
+        noTrack: options.noTrack,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
         onProgress: (progress) => {
@@ -44197,6 +44376,591 @@ function BatchView({
   ] });
 }
 
+// src/components/views/pull-view.tsx
+var import_react48 = __toESM(require_react(), 1);
+
+// src/lib/pull.ts
+import fs20 from "fs";
+import fsPromises6 from "fs/promises";
+function sleep2(ms, signal) {
+  return new Promise((resolve) => {
+    if (signal?.aborted) return resolve();
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      resolve();
+    }, { once: true });
+  });
+}
+async function dispatchPull(options = {}) {
+  const ledger = options.ledger || defaultTaskManager.ledger;
+  const earlyExitThreshold = options.earlyExitThreshold ?? 5;
+  const minDelay = options.minDelayMs ?? 2e3;
+  const maxDelay = options.maxDelayMs ?? 3e3;
+  let allTracked = options.profiles ? [...options.profiles] : ledger.getTrackedProfiles();
+  if (options.platform) {
+    allTracked = allTracked.filter((p) => p.platform === options.platform);
+  }
+  if (options.target) {
+    const rawTarget = options.target.trim().replace(/^@/, "");
+    const filtered = allTracked.filter(
+      (p) => p.username.toLowerCase() === rawTarget.toLowerCase() || p.profileUrl.toLowerCase().includes(rawTarget.toLowerCase())
+    );
+    if (filtered.length > 0) {
+      allTracked = filtered;
+    } else {
+      const parsed = parseProfileInput(options.target);
+      if (parsed.platform !== "unknown" && parsed.username) {
+        const fallbackTargetDir = resolveDefaultDownloadDir(parsed.platform, parsed.username, options.outputDir);
+        allTracked = [{
+          platform: parsed.platform,
+          username: parsed.username.toLowerCase(),
+          profileUrl: parsed.cleanUrl || `https://${parsed.platform}.com/${parsed.username}`,
+          targetDir: fallbackTargetDir,
+          choice: options.choice || "all",
+          lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+          mediaCount: 0
+        }];
+      } else {
+        allTracked = [];
+      }
+    }
+  }
+  const itemsResult = [];
+  let totalDownloaded = 0;
+  let totalSkipped = 0;
+  let succeeded = 0;
+  let failed = 0;
+  for (let i = 0; i < allTracked.length; i++) {
+    if (options.signal?.aborted) break;
+    const profileRec = allTracked[i];
+    let targetDir = profileRec.targetDir;
+    if (!fs20.existsSync(targetDir)) {
+      targetDir = resolveDefaultDownloadDir(profileRec.platform, profileRec.username, options.outputDir);
+      await fsPromises6.mkdir(targetDir, { recursive: true });
+      profileRec.targetDir = targetDir;
+    }
+    options.onProfileStart?.(profileRec, i, allTracked.length);
+    let parsed = parseProfileInput(profileRec.profileUrl);
+    if (parsed.platform === "unknown" || !parsed.username) {
+      parsed = buildCanonicalProfile(profileRec.platform, profileRec.username, profileRec.profileUrl);
+    }
+    const choice = options.choice || profileRec.choice || "all";
+    try {
+      const res = await dispatchDownload({
+        profile: parsed,
+        choice,
+        outputDir: targetDir,
+        earlyExitThreshold,
+        signal: options.signal,
+        runnerOverrides: options.runnerOverrides,
+        onProgress: (engineProg) => {
+          options.onProfileProgress?.({
+            profile: profileRec,
+            index: i,
+            total: allTracked.length,
+            status: "downloading",
+            engineProgress: engineProg,
+            downloaded: engineProg.downloadedCount,
+            skipped: engineProg.skippedCount
+          });
+        }
+      });
+      const itemRes = {
+        profile: profileRec,
+        status: res.success ? "success" : res.downloadedCount > 0 ? "success" : "failed",
+        downloaded: res.downloadedCount,
+        skipped: res.skippedCount,
+        error: res.errors.length > 0 ? res.errors.join("; ") : void 0,
+        targetDir
+      };
+      totalDownloaded += res.downloadedCount;
+      totalSkipped += res.skippedCount;
+      if (itemRes.status === "success") {
+        succeeded++;
+        ledger.trackProfile({
+          ...profileRec,
+          targetDir,
+          choice,
+          lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+          mediaCount: profileRec.mediaCount + res.downloadedCount,
+          status: "ok"
+        });
+        options.onProfileComplete?.(itemRes, i, allTracked.length);
+      } else {
+        failed++;
+        ledger.trackProfile({
+          ...profileRec,
+          targetDir,
+          lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+          status: "error"
+        });
+        options.onProfileError?.(profileRec, new Error(itemRes.error || "Download failed"));
+      }
+      itemsResult.push(itemRes);
+    } catch (err) {
+      failed++;
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const itemRes = {
+        profile: profileRec,
+        status: "failed",
+        downloaded: 0,
+        skipped: 0,
+        error: errMsg,
+        targetDir
+      };
+      itemsResult.push(itemRes);
+      ledger.trackProfile({
+        ...profileRec,
+        targetDir,
+        lastPulledAt: (/* @__PURE__ */ new Date()).toISOString(),
+        status: "error"
+      });
+      options.onProfileError?.(profileRec, err instanceof Error ? err : new Error(errMsg));
+    }
+    if (i < allTracked.length - 1 && !options.signal?.aborted) {
+      const delay = minDelay + Math.random() * Math.max(0, maxDelay - minDelay);
+      await sleep2(delay, options.signal);
+    }
+  }
+  return {
+    total: allTracked.length,
+    succeeded,
+    failed,
+    totalDownloaded,
+    totalSkipped,
+    items: itemsResult
+  };
+}
+
+// src/components/views/pull-view.tsx
+var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+function formatTimeAgo(isoString) {
+  if (!isoString) return "never";
+  const time = new Date(isoString).getTime();
+  if (isNaN(time)) return "never";
+  const diffSec = Math.floor((Date.now() - time) / 1e3);
+  if (diffSec < 60) return "just now";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHour = Math.floor(diffMin / 60);
+  if (diffHour < 24) return `${diffHour}h ago`;
+  const diffDay = Math.floor(diffHour / 24);
+  if (diffDay < 30) return `${diffDay}d ago`;
+  return isoString.slice(0, 10);
+}
+function PullView({
+  onBack,
+  outputDir,
+  contentWidth,
+  theme,
+  gapComponent: Gap2,
+  ledger,
+  initialProfiles,
+  onRegisterClickTargets
+}) {
+  const [phase, setPhase] = (0, import_react48.useState)("list");
+  const [items, setItems] = (0, import_react48.useState)(() => {
+    const list = initialProfiles ?? (ledger || defaultTaskManager.ledger).getTrackedProfiles();
+    return list.map((p) => ({ profile: p, selected: true }));
+  });
+  const [cursor, setCursor] = (0, import_react48.useState)(0);
+  const [untrackConfirm, setUntrackConfirm] = (0, import_react48.useState)(null);
+  const [statusMessage, setStatusMessage] = (0, import_react48.useState)(null);
+  const [activeProfile, setActiveProfile] = (0, import_react48.useState)(null);
+  const [syncIndex, setSyncIndex] = (0, import_react48.useState)(0);
+  const [syncTotal, setSyncTotal] = (0, import_react48.useState)(0);
+  const [downloadedCount, setDownloadedCount] = (0, import_react48.useState)(0);
+  const [skippedCount, setSkippedCount] = (0, import_react48.useState)(0);
+  const [currentFile, setCurrentFile] = (0, import_react48.useState)("");
+  const [summary, setSummary] = (0, import_react48.useState)(null);
+  const abortControllerRef = (0, import_react48.useRef)(null);
+  (0, import_react48.useEffect)(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, []);
+  const startPull = (0, import_react48.useCallback)(
+    async (targetsToPull) => {
+      abortControllerRef.current?.abort();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setPhase("syncing");
+      setSyncTotal(targetsToPull.length);
+      setSyncIndex(0);
+      setDownloadedCount(0);
+      setSkippedCount(0);
+      setCurrentFile("");
+      const activeLedger = ledger || defaultTaskManager.ledger;
+      try {
+        const res = await dispatchPull({
+          profiles: targetsToPull,
+          outputDir,
+          ledger: activeLedger,
+          signal: controller.signal,
+          onProfileStart: (profile, idx, total) => {
+            setActiveProfile(profile);
+            setSyncIndex(idx);
+            setSyncTotal(total);
+            setCurrentFile("");
+          },
+          onProfileProgress: (prog) => {
+            if (prog.engineProgress?.currentFile) {
+              setCurrentFile(prog.engineProgress.currentFile);
+            }
+          },
+          onProfileComplete: (res2) => {
+            setDownloadedCount((prev) => prev + res2.downloaded);
+            setSkippedCount((prev) => prev + res2.skipped);
+            setCurrentFile("");
+          }
+        });
+        setSummary(res);
+        setPhase("done");
+      } catch (err) {
+        if (controller.signal.aborted) {
+          setPhase("list");
+          return;
+        }
+        setStatusMessage(`Pull error: ${err.message || String(err)}`);
+        setPhase("list");
+      }
+    },
+    [outputDir, ledger]
+  );
+  use_input_default((input, key) => {
+    if (phase === "syncing") {
+      if (key.escape) {
+        abortControllerRef.current?.abort();
+      }
+      return;
+    }
+    if (phase === "done") {
+      if ((input === "o" || input === "O") && !key.ctrl) {
+        if (outputDir) {
+          revealInFileManager(outputDir);
+        } else if (summary?.items?.[0]?.targetDir) {
+          revealInFileManager(summary.items[0].targetDir);
+        }
+        return;
+      }
+      if (key.return || key.escape) {
+        onBack();
+        return;
+      }
+      return;
+    }
+    if (untrackConfirm) {
+      if (input === "y" || input === "Y") {
+        const target = untrackConfirm;
+        const activeLedger = ledger || defaultTaskManager.ledger;
+        activeLedger.untrackProfile(target.platform, target.username);
+        setUntrackConfirm(null);
+        setStatusMessage(`Untracked @${target.username} (files preserved on disk)`);
+        setItems((prev) => {
+          const next = prev.filter(
+            (p) => !(p.profile.platform === target.platform && p.profile.username === target.username)
+          );
+          setCursor((c) => Math.max(0, Math.min(c, next.length - 1)));
+          return next;
+        });
+        return;
+      }
+      if (input === "n" || input === "N" || key.escape) {
+        setUntrackConfirm(null);
+        return;
+      }
+      return;
+    }
+    if (items.length === 0) {
+      if (key.escape || key.return) {
+        onBack();
+      }
+      return;
+    }
+    if (key.upArrow) {
+      setCursor((c) => c > 0 ? c - 1 : items.length - 1);
+      return;
+    }
+    if (key.downArrow) {
+      setCursor((c) => c < items.length - 1 ? c + 1 : 0);
+      return;
+    }
+    if (input === " ") {
+      setItems((prev) => {
+        const next = [...prev];
+        if (next[cursor]) {
+          next[cursor] = { ...next[cursor], selected: !next[cursor].selected };
+        }
+        return next;
+      });
+      return;
+    }
+    if (input === "a" || input === "A") {
+      setItems((prev) => {
+        const allSelected = prev.every((p) => p.selected);
+        return prev.map((p) => ({ ...p, selected: !allSelected }));
+      });
+      return;
+    }
+    if (input === "d" || input === "D") {
+      if (items[cursor]) {
+        setUntrackConfirm(items[cursor].profile);
+      }
+      return;
+    }
+    if (key.return) {
+      const selected = items.filter((p) => p.selected);
+      const targetsToPull = selected.length > 0 ? selected : [items[cursor]];
+      startPull(targetsToPull.map((t) => t.profile));
+      return;
+    }
+    if (key.escape) {
+      onBack();
+      return;
+    }
+  }, { isActive: Boolean(process.stdin.isTTY) });
+  (0, import_react48.useEffect)(() => {
+    if (!onRegisterClickTargets) return;
+    const targets = [];
+    if (phase === "list" && !untrackConfirm && items.length > 0) {
+      targets.push({
+        match: "Pull Selected",
+        action: () => {
+          const selected = items.filter((p) => p.selected);
+          const toPull = selected.length > 0 ? selected : [items[cursor]];
+          startPull(toPull.map((t) => t.profile));
+        }
+      });
+      targets.push({
+        match: "[d] Untrack",
+        action: () => {
+          if (items[cursor]) setUntrackConfirm(items[cursor].profile);
+        }
+      });
+      targets.push({
+        match: "[a] All",
+        action: () => {
+          setItems((prev) => {
+            const allSelected = prev.every((p) => p.selected);
+            return prev.map((p) => ({ ...p, selected: !allSelected }));
+          });
+        }
+      });
+      for (const item of items) {
+        targets.push({
+          match: `@${item.profile.username}`,
+          action: () => {
+            setItems(
+              (prev) => prev.map(
+                (p) => p.profile.username === item.profile.username ? { ...p, selected: !p.selected } : p
+              )
+            );
+          }
+        });
+      }
+    }
+    if (phase === "done") {
+      targets.push({
+        match: "Reveal in folder",
+        action: () => {
+          if (outputDir) {
+            revealInFileManager(outputDir);
+          } else if (summary?.items?.[0]?.targetDir) {
+            revealInFileManager(summary.items[0].targetDir);
+          }
+        }
+      });
+      targets.push({ match: "[\u21B5] Done", action: onBack });
+      targets.push({ match: "[Esc] Back", action: onBack });
+    }
+    onRegisterClickTargets(targets);
+  }, [
+    phase,
+    untrackConfirm,
+    items,
+    cursor,
+    summary,
+    outputDir,
+    onBack,
+    startPull,
+    onRegisterClickTargets
+  ]);
+  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    phase === "list" && items.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: "Tracked Profiles", width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "No tracked profiles found." }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Download profiles with open-nami <url> to start tracking updates." }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[Esc] Back" })
+    ] }) }),
+    phase === "list" && untrackConfirm && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: "Confirm Untrack", width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.primary, bold: true, children: [
+        "Untrack @",
+        untrackConfirm.username,
+        " on ",
+        untrackConfirm.platform,
+        "?"
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Downloaded media files on disk will NOT be deleted." }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "red", bold: true, children: "[y] Confirm Untrack" }),
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          "   ",
+          "[n / Esc] Cancel"
+        ] })
+      ] })
+    ] }) }),
+    phase === "list" && !untrackConfirm && items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: `Tracked Profiles (${items.length})`, width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      statusMessage && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "yellow", children: statusMessage }) }),
+      items.map((item, idx) => {
+        const isCursor = idx === cursor;
+        const checkbox = item.selected ? "[x]" : "[ ]";
+        const lastSync = formatTimeAgo(item.profile.lastPulledAt);
+        return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          Box_default,
+          {
+            flexDirection: "row",
+            children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: isCursor ? theme.primary : theme.gray, bold: isCursor, children: [
+              isCursor ? "\u276F " : "  ",
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: item.selected ? "green" : theme.gray, children: [
+                checkbox,
+                " "
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: isCursor ? theme.primary : theme.gray, children: [
+                item.profile.platform.padEnd(10),
+                " "
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { bold: true, color: isCursor ? theme.primary : void 0, children: `@${item.profile.username}`.padEnd(20) }),
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: `${item.profile.mediaCount || 0} media`.padEnd(12) }),
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: `synced ${lastSync}` })
+            ] })
+          },
+          `${item.profile.platform}-${item.profile.username}`
+        );
+      }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[\u2191\u2193]" }),
+        " Navigate",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[Space]" }),
+        " Toggle",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[a]" }),
+        " All",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[d]" }),
+        " Untrack",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, bold: true, children: "[\u21B5] Pull Selected" })
+      ] })
+    ] }) }),
+    phase === "syncing" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      Panel,
+      {
+        title: `Syncing Profiles (${syncIndex + 1}/${syncTotal})`,
+        width: contentWidth,
+        children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+          activeProfile && /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "row", alignItems: "center", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.primary, children: [
+              /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(build_default, { type: "dots" }),
+              " "
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { bold: true, color: theme.primary, children: [
+              "Syncing @",
+              activeProfile.username,
+              " "
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              "on ",
+              activeProfile.platform,
+              "\u2026"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { marginTop: 1, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "green", bold: true, children: downloadedCount }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              " ",
+              "new downloaded \xB7",
+              " "
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              skippedCount,
+              " skipped"
+            ] })
+          ] }),
+          currentFile && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginTop: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+            "\u2192 ",
+            currentFile.slice(0, 60)
+          ] }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[Esc]" }),
+            " Cancel"
+          ] })
+        ] })
+      }
+    ),
+    phase === "done" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: "Synchronization Complete", width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+        Text,
+        {
+          bold: true,
+          color: summary && summary.failed === 0 ? "green" : "yellow",
+          children: [
+            summary?.succeeded || 0,
+            " up-to-date, ",
+            summary?.failed || 0,
+            " ",
+            "failed of ",
+            summary?.total || 0,
+            " profiles."
+          ]
+        }
+      ) }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.primary, children: [
+        "Total new media:",
+        " ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { bold: true, color: "green", children: summary?.totalDownloaded || 0 }),
+        " ",
+        "downloaded (",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          summary?.totalSkipped || 0,
+          " skipped"
+        ] }),
+        ")"
+      ] }) }),
+      summary?.items && summary.items.map((item) => /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+        Box_default,
+        {
+          flexDirection: "row",
+          children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: item.status === "success" ? "green" : "red", children: item.status === "success" ? "\u2713 " : "\u2717 " }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { bold: true, children: [
+              `@${item.profile.username}`,
+              ": "
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: item.status === "success" ? `${item.downloaded} new items downloaded (${item.skipped} skipped)` : item.error || "Failed" })
+          ]
+        },
+        `${item.profile.platform}-${item.profile.username}`
+      )),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[o]" }),
+        " Reveal in folder",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[\u21B5]" }),
+        " Done",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[Esc]" }),
+        " Back"
+      ] })
+    ] }) })
+  ] });
+}
+
 // src/lib/click-map.ts
 var ANSI_PATTERN = new RegExp(
   [
@@ -44249,7 +45013,7 @@ function frameRowSpan(row) {
 }
 
 // src/lib/update-check.ts
-import fs20 from "fs";
+import fs21 from "fs";
 import path17 from "path";
 import os15 from "os";
 var DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1e3;
@@ -44276,8 +45040,8 @@ function compareSemVer(v1, v2) {
 }
 function getCachedUpdateInfo(currentVersion, cachePath = getDefaultUpdateCachePath()) {
   try {
-    if (!fs20.existsSync(cachePath)) return null;
-    const raw = fs20.readFileSync(cachePath, "utf8");
+    if (!fs21.existsSync(cachePath)) return null;
+    const raw = fs21.readFileSync(cachePath, "utf8");
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && typeof parsed.latestVersion === "string") {
       const updateAvailable = compareSemVer(currentVersion, parsed.latestVersion) < 0;
@@ -44327,10 +45091,10 @@ async function checkForUpdate(options = {}) {
         const updateAvailable = compareSemVer(currentVersion, latestVersion) < 0;
         try {
           const dir = path17.dirname(cachePath);
-          if (!fs20.existsSync(dir)) {
-            fs20.mkdirSync(dir, { recursive: true, mode: 448 });
+          if (!fs21.existsSync(dir)) {
+            fs21.mkdirSync(dir, { recursive: true, mode: 448 });
           }
-          fs20.writeFileSync(
+          fs21.writeFileSync(
             cachePath,
             JSON.stringify(
               {
@@ -44362,7 +45126,7 @@ async function checkForUpdate(options = {}) {
 }
 
 // src/lib/announcements.ts
-import fs21 from "fs";
+import fs22 from "fs";
 import path18 from "path";
 import os16 from "os";
 var DEFAULT_ANNOUNCEMENT_URL = "https://raw.githubusercontent.com/OpenSelena/open-nami/main/announcements.json";
@@ -44415,8 +45179,8 @@ function parseAnnouncementsPayload(payload, currentVersion, dismissedIds = []) {
 }
 function getCachedAnnouncement(currentVersion, cachePath = getDefaultAnnouncementCachePath()) {
   try {
-    if (!fs21.existsSync(cachePath)) return null;
-    const raw = fs21.readFileSync(cachePath, "utf8");
+    if (!fs22.existsSync(cachePath)) return null;
+    const raw = fs22.readFileSync(cachePath, "utf8");
     const parsed = JSON.parse(raw);
     const dismissedIds = Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds : [];
     if (parsed.activeAnnouncement && isAnnouncementEligible(parsed.activeAnnouncement, currentVersion, dismissedIds)) {
@@ -44441,9 +45205,9 @@ async function fetchAnnouncement(options = {}) {
     activeAnnouncement: null,
     dismissedIds: []
   };
-  if (fs21.existsSync(cachePath)) {
+  if (fs22.existsSync(cachePath)) {
     try {
-      const raw = fs21.readFileSync(cachePath, "utf8");
+      const raw = fs22.readFileSync(cachePath, "utf8");
       const parsed = JSON.parse(raw);
       if (parsed && typeof parsed === "object") {
         cache3 = {
@@ -44480,8 +45244,8 @@ async function fetchAnnouncement(options = {}) {
     cache3.lastChecked = Date.now();
     cache3.activeAnnouncement = active;
     try {
-      fs21.mkdirSync(path18.dirname(cachePath), { recursive: true });
-      fs21.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
+      fs22.mkdirSync(path18.dirname(cachePath), { recursive: true });
+      fs22.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
     } catch {
     }
     return active;
@@ -44491,7 +45255,7 @@ async function fetchAnnouncement(options = {}) {
 }
 
 // src/lib/engines/core/use-engine-events.ts
-var import_react48 = __toESM(require_react(), 1);
+var import_react49 = __toESM(require_react(), 1);
 var INITIAL_ENGINE_EVENT_STATE = {
   isDownloading: false,
   activeJob: void 0,
@@ -44555,26 +45319,34 @@ function subscribeToEngineEvents(bus, onChange) {
 }
 function useEngineEvents(customBus) {
   const bus = customBus || defaultTaskManager.events;
-  const [state, setState] = (0, import_react48.useState)(() => ({
+  const [state, setState] = (0, import_react49.useState)(() => ({
     ...INITIAL_ENGINE_EVENT_STATE
   }));
-  (0, import_react48.useEffect)(() => {
+  (0, import_react49.useEffect)(() => {
     return subscribeToEngineEvents(bus, setState);
   }, [bus]);
   return state;
 }
 
 // src/app.tsx
-var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
 var TAGLINE = "grab any profile. paste. download. done.";
 var DOWNLOAD_BUTTON = "download";
-var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { children: " " }, i)) });
+var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Text, { children: " " }, i)) });
 var HINTS = {
   input: [
     ["\u21B5", "download"],
     ["^w", "watcher"],
     ["^b", "batch"],
     ["^s", "settings"],
+    ["^c", "quit"]
+  ],
+  pull: [
+    ["\u2191\u2193", "navigate"],
+    ["space", "toggle"],
+    ["d", "untrack"],
+    ["\u21B5", "pull"],
+    ["esc", "back"],
     ["^c", "quit"]
   ],
   platform: [
@@ -44643,11 +45415,11 @@ function App2({
   writeMetadata,
   version = "1.0.0"
 }) {
-  const [themeMode, setThemeMode] = (0, import_react49.useState)(initialThemeMode);
-  const cycleTheme = (0, import_react49.useCallback)(() => {
+  const [themeMode, setThemeMode] = (0, import_react50.useState)(initialThemeMode);
+  const cycleTheme = (0, import_react50.useCallback)(() => {
     setThemeMode(nextThemeMode);
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
     InnerApp,
     {
       initialInput,
@@ -44679,18 +45451,33 @@ function InnerApp({
   const { exit } = use_app_default();
   const { stdout } = use_stdout_default();
   const engineEvents = useEngineEvents();
-  const config = (0, import_react49.useMemo)(() => loadConfig(), []);
+  const config = (0, import_react50.useMemo)(() => loadConfig(), []);
   const effectiveLimit = limit ?? config.defaultLimit;
   const effectiveWriteMetadata = writeMetadata ?? Boolean(config.writeMetadata);
-  const [urlInput, setUrlInput] = (0, import_react49.useState)(initialInput ?? "");
-  const [clipboardUrl, setClipboardUrl] = (0, import_react49.useState)(void 0);
-  const [settingsFocus, setSettingsFocus] = (0, import_react49.useState)("cookies");
-  const [batchClickTargets, setBatchClickTargets] = (0, import_react49.useState)([]);
-  const [watcherClickTargets, setWatcherClickTargets] = (0, import_react49.useState)([]);
+  const [urlInput, setUrlInput] = (0, import_react50.useState)(initialInput ?? "");
+  const [clipboardUrl, setClipboardUrl] = (0, import_react50.useState)(void 0);
+  const [settingsFocus, setSettingsFocus] = (0, import_react50.useState)("cookies");
+  const [batchClickTargets, setBatchClickTargets] = (0, import_react50.useState)([]);
+  const [watcherClickTargets, setWatcherClickTargets] = (0, import_react50.useState)([]);
+  const [pullClickTargets, setPullClickTargets] = (0, import_react50.useState)([]);
+  const [trackedCount, setTrackedCount] = (0, import_react50.useState)(() => {
+    try {
+      return defaultTaskManager.ledger.getTrackedProfiles().length;
+    } catch {
+      return 0;
+    }
+  });
+  const refreshTrackedCount = (0, import_react50.useCallback)(() => {
+    try {
+      setTrackedCount(defaultTaskManager.ledger.getTrackedProfiles().length);
+    } catch {
+      setTrackedCount(0);
+    }
+  }, []);
   const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
-  const [phase, setPhase] = (0, import_react49.useState)(() => {
+  const [phase, setPhase] = (0, import_react50.useState)(() => {
     if (initialInput) {
       const parsed = parseProfileInput(initialInput);
       if (parsed.platform !== "unknown" && parsed.cleanUrl) {
@@ -44702,7 +45489,7 @@ function InnerApp({
     }
     return { name: "input" };
   });
-  (0, import_react49.useEffect)(() => {
+  (0, import_react50.useEffect)(() => {
     try {
       const clip = readClipboard();
       if (clip && (clip.startsWith("http://") || clip.startsWith("https://") || clip.startsWith("@"))) {
@@ -44711,9 +45498,9 @@ function InnerApp({
     } catch {
     }
   }, []);
-  const [updateInfo, setUpdateInfo] = (0, import_react49.useState)(() => getCachedUpdateInfo(version));
-  const [announcement, setAnnouncement] = (0, import_react49.useState)(() => getCachedAnnouncement(version));
-  (0, import_react49.useEffect)(() => {
+  const [updateInfo, setUpdateInfo] = (0, import_react50.useState)(() => getCachedUpdateInfo(version));
+  const [announcement, setAnnouncement] = (0, import_react50.useState)(() => getCachedAnnouncement(version));
+  (0, import_react50.useEffect)(() => {
     let cancelled = false;
     checkForUpdate({ currentVersion: version }).then((info) => {
       if (!cancelled && info.updateAvailable) {
@@ -44731,9 +45518,9 @@ function InnerApp({
   }, [version]);
   const clipboardOffered = Boolean(clipboardUrl) && urlInput === "";
   const clipboardAccepted = Boolean(clipboardUrl) && urlInput === clipboardUrl;
-  const abortControllerRef = (0, import_react49.useRef)(null);
-  const probingTimeoutRef = (0, import_react49.useRef)(null);
-  (0, import_react49.useEffect)(() => {
+  const abortControllerRef = (0, import_react50.useRef)(null);
+  const probingTimeoutRef = (0, import_react50.useRef)(null);
+  (0, import_react50.useEffect)(() => {
     return () => {
       abortControllerRef.current?.abort();
       if (probingTimeoutRef.current) {
@@ -44741,7 +45528,7 @@ function InnerApp({
       }
     };
   }, []);
-  const resetToInput = (0, import_react49.useCallback)(() => {
+  const resetToInput = (0, import_react50.useCallback)(() => {
     if (probingTimeoutRef.current) {
       clearTimeout(probingTimeoutRef.current);
       probingTimeoutRef.current = null;
@@ -44749,9 +45536,10 @@ function InnerApp({
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
     setUrlInput("");
+    refreshTrackedCount();
     setPhase({ name: "input" });
-  }, []);
-  const handleModeSelect = (0, import_react49.useCallback)(async (choiceOrOptions, profile) => {
+  }, [refreshTrackedCount]);
+  const handleModeSelect = (0, import_react50.useCallback)(async (choiceOrOptions, profile) => {
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -44801,7 +45589,7 @@ function InnerApp({
       });
     }
   }, [outputDir, since, until, effectiveLimit, resume, effectiveWriteMetadata]);
-  const handlePlatformSelect = (0, import_react49.useCallback)((platform2, username, rawInput) => {
+  const handlePlatformSelect = (0, import_react50.useCallback)((platform2, username, rawInput) => {
     const canonical = buildCanonicalProfile(platform2, username, rawInput);
     setPhase({ name: "probing", target: canonical.cleanUrl, status: "probing profile\u2026" });
     if (probingTimeoutRef.current) clearTimeout(probingTimeoutRef.current);
@@ -44814,7 +45602,7 @@ function InnerApp({
       }
     }, 450);
   }, [initialChoice, handleModeSelect]);
-  const handleInputSubmit = (0, import_react49.useCallback)((input) => {
+  const handleInputSubmit = (0, import_react50.useCallback)((input) => {
     const trimmed = input.trim();
     if (!trimmed) return;
     const parsed = parseProfileInput(trimmed);
@@ -44872,13 +45660,25 @@ function InnerApp({
       }
       return;
     }
+    if ((input === "p" || input === "P") && !key.ctrl) {
+      if (phase.name === "pull") {
+        setPhase({ name: "input" });
+        refreshTrackedCount();
+        return;
+      }
+      if (phase.name === "input" && urlInput.trim() === "") {
+        setPhase({ name: "pull" });
+        return;
+      }
+    }
     if (key.ctrl && input === "c") {
       exit();
       return;
     }
     if (key.escape) {
-      if (phase.name === "settings" || phase.name === "watcher") {
+      if (phase.name === "settings" || phase.name === "watcher" || phase.name === "pull") {
         setPhase({ name: "input" });
+        refreshTrackedCount();
         return;
       }
       if (phase.name === "batch") {
@@ -44914,7 +45714,7 @@ function InnerApp({
   }, { isActive: Boolean(process.stdin.isTTY) });
   const hints = [...HINTS[phase.name], ["^t", `theme:${theme.mode}`]];
   const releaseUrl = `https://github.com/OpenSelena/open-nami/releases/tag/v${version}`;
-  const clickTargets = (0, import_react49.useMemo)(() => {
+  const clickTargets = (0, import_react50.useMemo)(() => {
     const hintAction = (key) => {
       if (key === "^c") return () => exit();
       if (key === "^t") return cycleTheme;
@@ -44922,8 +45722,11 @@ function InnerApp({
       if (key === "^w") return () => setPhase((prev) => prev.name === "watcher" ? { name: "input" } : { name: "watcher" });
       if (key === "^b") return () => setPhase((prev) => prev.name === "batch" ? { name: "input" } : { name: "batch" });
       if (key === "esc") {
-        if (phase.name === "settings" || phase.name === "platform" || phase.name === "watcher" || phase.name === "batch") {
-          return () => setPhase({ name: "input" });
+        if (phase.name === "settings" || phase.name === "platform" || phase.name === "watcher" || phase.name === "batch" || phase.name === "pull") {
+          return () => {
+            refreshTrackedCount();
+            setPhase({ name: "input" });
+          };
         }
         return resetToInput;
       }
@@ -44954,6 +45757,10 @@ function InnerApp({
       }
       if (clipboardAccepted) {
         targets.push({ match: "to download it", action: () => handleInputSubmit(urlInput) });
+      }
+      if (trackedCount > 0 && !urlInput) {
+        targets.push({ match: "Pull Updates", action: () => setPhase({ name: "pull" }) });
+        targets.push({ match: "[p]", action: () => setPhase({ name: "pull" }) });
       }
       targets.push({ match: "OpenSelena", padX: 1, action: () => openBrowser("https://github.com/OpenSelena/open-nami") });
     }
@@ -45000,6 +45807,9 @@ function InnerApp({
     if (phase.name === "watcher") {
       targets.push(...watcherClickTargets);
     }
+    if (phase.name === "pull") {
+      targets.push(...pullClickTargets);
+    }
     for (const [key, label] of hints) {
       const action = hintAction(key);
       if (action) targets.push({ match: `${key} ${label}`, action });
@@ -45021,7 +45831,10 @@ function InnerApp({
     handleModeSelect,
     resetToInput,
     batchClickTargets,
-    watcherClickTargets
+    watcherClickTargets,
+    pullClickTargets,
+    trackedCount,
+    refreshTrackedCount
   ]);
   useMouseClick(
     (x, y) => {
@@ -45037,13 +45850,13 @@ function InnerApp({
     },
     Boolean(process.stdin.isTTY)
   );
-  return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(FullScreen, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Logo, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: TAGLINE }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "instagram \xB7 tiktok \xB7 facebook \xB7 x \xB7 +more" }),
-    /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, {}),
-    phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(FullScreen, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Logo, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Gap, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Text, { color: theme.primary, children: TAGLINE }),
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "instagram \xB7 tiktok \xB7 facebook \xB7 x \xB7 +more" }),
+    /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Gap, {}),
+    phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       InputView,
       {
         urlInput,
@@ -45060,10 +45873,11 @@ function InnerApp({
         theme,
         buttonText: DOWNLOAD_BUTTON,
         gapComponent: Gap,
-        announcement
+        announcement,
+        trackedCount
       }
     ),
-    phase.name === "platform" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "platform" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       PlatformView,
       {
         contentWidth,
@@ -45073,7 +45887,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       ProbingView,
       {
         target: phase.target,
@@ -45082,7 +45896,7 @@ function InnerApp({
         buttonText: DOWNLOAD_BUTTON
       }
     ),
-    phase.name === "picking" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "picking" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       PickingView,
       {
         contentWidth,
@@ -45098,7 +45912,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       DownloadingView,
       {
         profile: phase.profile,
@@ -45112,7 +45926,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       CompletionView,
       {
         profile: phase.profile,
@@ -45121,7 +45935,7 @@ function InnerApp({
         gapComponent: Gap
       }
     ),
-    phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       ErrorView,
       {
         message: phase.message,
@@ -45130,7 +45944,7 @@ function InnerApp({
         theme
       }
     ),
-    phase.name === "settings" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "settings" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       SettingsView,
       {
         boxWidth,
@@ -45144,7 +45958,7 @@ function InnerApp({
         latestVersion: updateInfo?.latestVersion
       }
     ),
-    phase.name === "watcher" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "watcher" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       WatcherView,
       {
         onBack: resetToInput,
@@ -45156,7 +45970,7 @@ function InnerApp({
         onRegisterClickTargets: setWatcherClickTargets
       }
     ),
-    phase.name === "batch" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "batch" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
       BatchView,
       {
         onBack: resetToInput,
@@ -45171,15 +45985,29 @@ function InnerApp({
         onRegisterClickTargets: setBatchClickTargets
       }
     ),
-    hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(import_jsx_runtime18.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap, { lines: 2 }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+    phase.name === "pull" && /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      PullView,
+      {
+        onBack: () => {
+          refreshTrackedCount();
+          setPhase({ name: "input" });
+        },
+        outputDir,
+        contentWidth,
+        theme,
+        gapComponent: Gap,
+        onRegisterClickTargets: setPullClickTargets
+      }
+    ),
+    hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(import_jsx_runtime19.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Gap, { lines: 2 }),
+      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
         Shortcuts,
         {
           items: hints,
-          leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(build_default, { type: "dots" }) }),
-            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(Text, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(Text, { color: theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(build_default, { type: "dots" }) }),
+            /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
               " ",
               phase.status
             ] })
@@ -45212,7 +46040,8 @@ _open_nami_completions() {
     cur="\${COMP_WORDS[COMP_CWORD]}"
     prev="\${COMP_WORDS[COMP_CWORD-1]}"
 
-    local options="--help -h --version -v --update -U --update-ytdlp --update-gallerydl --photos --videos --stories --highlights --all --output -o --theme --completion"
+    local options="--help -h --version -v --doctor --update -U --update-ytdlp --update-gallerydl --photos --videos --stories --highlights --all --output -o --theme --since --until --limit -l --resume --write-metadata --no-track --completion"
+    local subcommands="pull list untrack"
 
     case "$prev" in
         --theme)
@@ -45227,10 +46056,16 @@ _open_nami_completions() {
             COMPREPLY=($(compgen -d -- "$cur"))
             return 0
             ;;
+        untrack|pull)
+            return 0
+            ;;
     esac
 
     if [[ "$cur" == -* ]]; then
         COMPREPLY=($(compgen -W "$options" -- "$cur"))
+        return 0
+    elif [[ "$COMP_CWORD" -eq 1 ]]; then
+        COMPREPLY=($(compgen -W "$subcommands" -- "$cur"))
         return 0
     fi
 }
@@ -45259,9 +46094,11 @@ _open_nami() {
         '--stories[Download stories only (Instagram)]' \\
         '--highlights[Download highlights only (Instagram)]' \\
         '--all[Download all available media]' \\
+        '--no-track[Do not add downloaded profile to tracked history registry]' \\
         '(-o --output)'{-o,--output}'[Destination download directory]:output directory:_files -/' \\
         '--theme[Set color theme]:theme:(auto light dark)' \\
-        '--completion[Generate shell autocompletion script]:shell:(bash zsh fish powershell)'
+        '--completion[Generate shell autocompletion script]:shell:(bash zsh fish powershell)' \\
+        '1:subcommand:(pull list untrack)'
 }
 
 if [[ -n "$ZSH_VERSION" ]]; then
@@ -45289,9 +46126,11 @@ complete -c open-nami -l videos -d "Download videos and reels only"
 complete -c open-nami -l stories -d "Download stories only (Instagram)"
 complete -c open-nami -l highlights -d "Download highlights only (Instagram)"
 complete -c open-nami -l all -d "Download all available media"
+complete -c open-nami -l no-track -d "Do not add downloaded profile to tracked history registry"
 complete -c open-nami -s o -l output -r -a "(__fish_complete_directories)" -d "Destination directory"
 complete -c open-nami -l theme -x -a "auto light dark" -d "Set color theme"
 complete -c open-nami -l completion -x -a "bash zsh fish powershell" -d "Generate shell autocompletion script"
+complete -c open-nami -a "pull list untrack" -d "Subcommand"
 
 for cmd in opennami nami on
     complete -c $cmd -w open-nami
@@ -45339,6 +46178,7 @@ $completer = {
             [PSCustomObject]@{ Option = '--stories'; Short = $null; Tooltip = 'Download stories only (Instagram)' },
             [PSCustomObject]@{ Option = '--highlights'; Short = $null; Tooltip = 'Download highlights only (Instagram)' },
             [PSCustomObject]@{ Option = '--all'; Short = $null; Tooltip = 'Download all available media' },
+            [PSCustomObject]@{ Option = '--no-track'; Short = $null; Tooltip = 'Do not track profile in history' },
             [PSCustomObject]@{ Option = '--output'; Short = '-o'; Tooltip = 'Destination directory' },
             [PSCustomObject]@{ Option = '--theme'; Short = $null; Tooltip = 'Set color theme (auto, light, dark)' },
             [PSCustomObject]@{ Option = '--completion'; Short = $null; Tooltip = 'Generate shell completion script' }
@@ -45381,7 +46221,7 @@ function generateCompletion(shell) {
 }
 
 // src/cli.tsx
-var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
 var resolveVersion = () => {
   try {
     if (typeof import.meta !== "undefined" && import.meta?.url) {
@@ -45402,6 +46242,9 @@ var HELP = `
   Usage:
     $ open-nami                          Launch interactive TUI
     $ open-nami <profile-url-or-user>    Open directly to format picker
+    $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
+    $ open-nami list                     List all tracked profiles in registry
+    $ open-nami untrack <username>       Remove creator from tracking without deleting files
     $ open-nami <url> --photos           Download photos directly
     $ open-nami <url> --videos           Download videos directly
     $ open-nami <url> --all              Download all media directly
@@ -45427,6 +46270,7 @@ var HELP = `
     -l, --limit <n>      Limit maximum items to download
     --resume             Resume download from saved pagination checkpoint
     --write-metadata     Save post metadata & captions to sidecar .json files
+    --no-track           Do not add downloaded profile to tracked history registry
     --completion         Generate shell completion script (bash, zsh, fish, powershell)
 
   Hotkeys in TUI:
@@ -45444,6 +46288,165 @@ var HELP = `
     [o]              Open Downloads folder on completion
     [Esc]            Back / Exit
 `;
+function formatTrackedProfilesTable(profiles) {
+  if (!profiles || profiles.length === 0) {
+    return "No tracked profiles found. Download profiles first, or use open-nami <url> to start tracking.";
+  }
+  const headers = ["Platform", "Username", "Target", "Media", "Last Synced", "Directory"];
+  const rows = profiles.map((p) => {
+    const lastSync = p.lastPulledAt ? p.lastPulledAt.slice(0, 16).replace("T", " ") : "Never";
+    return [
+      p.platform,
+      `@${p.username}`,
+      p.choice || "all",
+      String(p.mediaCount || 0),
+      lastSync,
+      p.targetDir || ""
+    ];
+  });
+  const colWidths = headers.map((h, i) => {
+    const maxValLen = rows.reduce((max, r) => Math.max(max, (r[i] || "").length), 0);
+    return Math.max(h.length, maxValLen);
+  });
+  const pad = (str, width) => str + " ".repeat(Math.max(0, width - str.length));
+  const headerLine = headers.map((h, i) => pad(h, colWidths[i])).join("  ");
+  const dividerLine = colWidths.map((w) => "\u2500".repeat(w)).join("  ");
+  const rowLines = rows.map((r) => r.map((cell, i) => pad(cell, colWidths[i])).join("  "));
+  return [
+    `
+  Tracked Profiles (${profiles.length}):
+`,
+    `  ${headerLine}`,
+    `  ${dividerLine}`,
+    ...rowLines.map((l) => `  ${l}`),
+    ""
+  ].join("\n");
+}
+function handleListCommand(ledger) {
+  const ownsLedger = !ledger;
+  const activeLedger = ledger || new MediaLedger();
+  try {
+    const profiles = activeLedger.getTrackedProfiles();
+    return formatTrackedProfilesTable(profiles);
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close();
+    }
+  }
+}
+function handleUntrackCommand(username, ledger) {
+  if (!username || !username.trim()) {
+    return {
+      success: false,
+      message: "Please provide a username to untrack (e.g. open-nami untrack selenagomez)."
+    };
+  }
+  const cleanUser = username.trim().replace(/^@/, "");
+  const ownsLedger = !ledger;
+  const activeLedger = ledger || new MediaLedger();
+  try {
+    const profiles = activeLedger.getTrackedProfiles();
+    const target = profiles.find(
+      (p) => p.username.toLowerCase() === cleanUser.toLowerCase()
+    );
+    if (!target) {
+      return {
+        success: false,
+        message: `Profile "@${cleanUser}" is not in the tracked registry.`
+      };
+    }
+    activeLedger.untrackProfile(target.platform, target.username);
+    return {
+      success: true,
+      message: `Untracked @${target.username} from registry. Downloaded media files preserved on disk.`
+    };
+  } finally {
+    if (ownsLedger) {
+      activeLedger.close();
+    }
+  }
+}
+async function handlePullCli(pullArgs, ledger) {
+  let target;
+  let choice;
+  let outputDir;
+  let platform2 = void 0;
+  let earlyExitThreshold;
+  for (let i = 0; i < pullArgs.length; i++) {
+    const arg = pullArgs[i];
+    if (arg === "--photos") choice = "photos";
+    else if (arg === "--videos") choice = "videos";
+    else if (arg === "--stories") choice = "stories";
+    else if (arg === "--highlights") choice = "highlights";
+    else if (arg === "--all") choice = "all";
+    else if (arg === "-o" || arg === "--output") outputDir = pullArgs[++i];
+    else if (arg.startsWith("--output=")) outputDir = arg.slice("--output=".length);
+    else if (arg === "-p" || arg === "--platform") platform2 = pullArgs[++i]?.toLowerCase();
+    else if (arg.startsWith("--platform=")) platform2 = arg.slice("--platform=".length).toLowerCase();
+    else if (arg === "--early-exit") {
+      const parsed = parseInt(pullArgs[++i], 10);
+      if (!isNaN(parsed) && parsed > 0) earlyExitThreshold = parsed;
+    } else if (arg.startsWith("--early-exit=")) {
+      const parsed = parseInt(arg.slice("--early-exit=".length), 10);
+      if (!isNaN(parsed) && parsed > 0) earlyExitThreshold = parsed;
+    } else if (!arg.startsWith("-") && !target) {
+      target = arg;
+    }
+  }
+  const controller = new AbortController();
+  const sigintHandler = () => {
+    console.log("\n[open-nami] Stopping profile sync\u2026");
+    controller.abort();
+  };
+  process.on("SIGINT", sigintHandler);
+  try {
+    console.log(`
+  \x1B[36mOpen Nami\x1B[0m: Profile Synchronization (v${VERSION})`);
+    if (target) {
+      console.log(`  \x1B[90mTarget creator:\x1B[0m @${target.replace(/^@/, "")}`);
+    }
+    if (choice) {
+      console.log(`  \x1B[90mTarget media:\x1B[0m ${choice}`);
+    }
+    console.log();
+    const result = await dispatchPull({
+      target,
+      platform: platform2,
+      choice,
+      outputDir,
+      earlyExitThreshold,
+      ledger,
+      signal: controller.signal,
+      onProfileStart: (profile, idx, total) => {
+        console.log(`\x1B[36m[${idx + 1}/${total}]\x1B[0m \x1B[1m@${profile.username}\x1B[0m on \x1B[35m${profile.platform}\x1B[0m\u2026`);
+      },
+      onProfileProgress: (progress) => {
+        if (progress.engineProgress?.currentFile) {
+          process.stdout.write(`\r  \x1B[90m\u2192 ${progress.engineProgress.currentFile.slice(0, 60)}\x1B[0m\x1B[K`);
+        }
+      },
+      onProfileComplete: (res) => {
+        process.stdout.write("\r\x1B[K");
+        console.log(`  \x1B[32m\u2713 @${res.profile.username}:\x1B[0m ${res.downloaded} new items downloaded (${res.skipped} skipped)
+`);
+      },
+      onProfileError: (profile, err) => {
+        process.stdout.write("\r\x1B[K");
+        console.error(`  \x1B[31m\u2717 @${profile.username}:\x1B[0m ${err.message}
+`);
+      }
+    });
+    if (result.total === 0) {
+      console.log("No tracked profiles found to synchronize. Run `open-nami <url>` to download and track a profile.");
+      return 0;
+    }
+    console.log(`\x1B[1mSync completed:\x1B[0m ${result.succeeded} up-to-date, ${result.failed} failed of ${result.total} total profiles.`);
+    console.log(`\x1B[32mTotal new media:\x1B[0m ${result.totalDownloaded} downloaded (${result.totalSkipped} skipped).`);
+    return result.failed > 0 ? 1 : 0;
+  } finally {
+    process.removeListener("SIGINT", sigintHandler);
+  }
+}
 var enterAltScreen = () => process.stdout.write("\x1B[?1049h\x1B[H");
 var leaveAltScreen = () => process.stdout.write("\x1B[?1006l\x1B[?1000l\x1B[?1049l");
 async function main() {
@@ -45548,6 +46551,26 @@ async function main() {
     }
     process.exit(hasFailure ? 1 : 0);
   }
+  if (args[0] === "list") {
+    const output = handleListCommand();
+    console.log(output);
+    process.exit(0);
+  }
+  if (args[0] === "untrack") {
+    const targetUser = args[1];
+    const res = handleUntrackCommand(targetUser);
+    if (res.success) {
+      console.log(res.message);
+      process.exit(0);
+    } else {
+      console.error(res.message);
+      process.exit(1);
+    }
+  }
+  if (args[0] === "pull" || args[0] === "sync") {
+    const exitCode = await handlePullCli(args.slice(1));
+    process.exit(exitCode);
+  }
   let initialInput;
   let initialChoice;
   let outputDir;
@@ -45560,6 +46583,7 @@ async function main() {
   let limit;
   let isResume = false;
   let writeMetadata = false;
+  let noTrack = false;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "-o" || arg === "--output") {
@@ -45600,6 +46624,8 @@ async function main() {
       isResume = true;
     } else if (arg === "--write-metadata") {
       writeMetadata = true;
+    } else if (arg === "--no-track") {
+      noTrack = true;
     } else if (arg === "-b" || arg === "--batch") {
       batchFile = args[++i];
     } else if (arg.startsWith("--batch=")) {
@@ -45684,6 +46710,7 @@ async function main() {
         limit,
         resume: isResume,
         writeMetadata,
+        noTrack,
         signal: controller.signal,
         onAccountStart: (item, idx, total) => {
           console.log(`\x1B[36m[${idx + 1}/${total}]\x1B[0m \x1B[1m@${item.profile.username}\x1B[0m on \x1B[35m${item.profile.platform}\x1B[0m\u2026`);
@@ -45730,6 +46757,7 @@ async function main() {
         limit,
         resume: isResume,
         writeMetadata,
+        noTrack,
         onProgress: (progress) => {
           if (progress.currentFile) {
             console.log(`[open-nami] [${progress.job}] ${progress.currentFile}`);
@@ -45756,7 +46784,7 @@ async function main() {
   }
   try {
     const { waitUntilExit } = render_default(
-      /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
         App2,
         {
           initialInput,
@@ -45778,12 +46806,19 @@ async function main() {
     if (isTTY) leaveAltScreen();
   }
 }
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+var isTestEnv = process.env.NODE_ENV === "test" || process.argv.some((arg) => arg.includes("--test")) || process.argv[1] && (process.argv[1].endsWith(".test.ts") || process.argv[1].endsWith(".test.js") || process.argv[1].endsWith(".test.mjs"));
+if (!isTestEnv) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
 export {
   VERSION,
+  formatTrackedProfilesTable,
+  handleListCommand,
+  handlePullCli,
+  handleUntrackCommand,
   resolveVersion
 };
 /*! Bundled license information:

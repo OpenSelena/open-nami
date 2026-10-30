@@ -4,6 +4,28 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2026-10-30
+
+### Added
+- **Incremental Profile Pull & History Synchronization (`open-nami pull`)**:
+  - Automatically records downloaded creator profiles in a persistent SQLite registry (`tracked_profiles`) with disk fallback.
+  - Reverse-chronological early-exit pagination halts fetching after encountering 5 consecutive previously-downloaded posts while bypassing pinned posts.
+  - Collapses multi-item carousel posts to prevent false early exits.
+  - Added `--no-track` flag to opt out of profile tracking on individual runs.
+- **Incremental Pull Orchestrator Engine**:
+  - Implemented `dispatchPull` engine sequentially iterating tracked profiles with 2–3s jittered delays to safeguard accounts against platform rate-limits and anti-bot flags.
+  - Automatically recovers and recreates missing or relocated download directories.
+  - Isolates per-account errors (private, deleted, or unauthenticated accounts) so subsequent profiles continue processing.
+- **CLI Subcommands & Shell Autocompletions**:
+  - `open-nami pull [username]`: headless synchronization of all or targeted creator profiles.
+  - `open-nami list`: clean tabular overview of tracked creators, media counts, and sync timestamps.
+  - `open-nami untrack <username>`: safely drops tracking metadata while strictly preserving downloaded files on disk.
+  - Full autocompletion support for `pull`, `list`, `untrack`, and `--no-track` across Bash, Zsh, Fish, and PowerShell.
+- **Interactive TUI `PullView` & Home Screen Shortcut**:
+  - Added interactive `PullView` with multi-account checkboxes, `Space` toggle, `a` toggle-all, in-place untrack confirmation (`d`), and `Enter` synchronization execution.
+  - Added dynamic `[p] Pull Updates (<N> tracked)` home screen indicator and `p` hotkey when URL input is empty.
+  - Real-time spinners, per-profile progress counters, and final completion ledger summary.
+
 ## [1.8.0] - 2026-10-30
 
 ### Added
