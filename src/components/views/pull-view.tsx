@@ -39,6 +39,12 @@ export interface ProfileItemState {
   selected: boolean
 }
 
+export type UntrackConfirmState =
+  | { type: 'single'; profile: TrackedProfileRecord }
+  | { type: 'bulk'; profiles: TrackedProfileRecord[] }
+  | { type: 'all' }
+  | null
+
 export interface PullViewProps {
   onBack: () => void
   outputDir?: string
@@ -72,7 +78,7 @@ export function PullView({
   })
   const [cursor, setCursor] = useState(0)
   const [untrackConfirm, setUntrackConfirm] =
-    useState<TrackedProfileRecord | null>(null)
+    useState<UntrackConfirmState>(null)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
 
   const [activeProfile, setActiveProfile] =
@@ -171,23 +177,54 @@ export function PullView({
 
     if (untrackConfirm) {
       if (input === 'y' || input === 'Y') {
-        const target = untrackConfirm
         const activeLedger = ledger || defaultTaskManager.ledger
-        activeLedger.untrackProfile(target.platform, target.username)
-        setUntrackConfirm(null)
-        setStatusMessage(`Untracked @${target.username} (files preserved on disk)`)
-        setItems((prev) => {
-          const next = prev.filter(
-            (p) =>
-              !(
-                p.profile.platform === target.platform &&
-                p.profile.username === target.username
-              ),
+        if (untrackConfirm.type === 'all') {
+          activeLedger.clearTrackedProfiles()
+          setUntrackConfirm(null)
+          setStatusMessage('Cleared all tracked history (files preserved on disk)')
+          setItems([])
+          setCursor(0)
+          return
+        }
+        if (untrackConfirm.type === 'bulk') {
+          const targets = untrackConfirm.profiles
+          activeLedger.untrackProfiles(
+            targets.map((t) => ({platform: t.platform, username: t.username})),
           )
-          setCursor((c) => Math.max(0, Math.min(c, next.length - 1)))
-          return next
-        })
-        return
+          setUntrackConfirm(null)
+          setStatusMessage(`Untracked ${targets.length} profiles (files preserved on disk)`)
+          setItems((prev) => {
+            const next = prev.filter(
+              (p) =>
+                !targets.some(
+                  (t) =>
+                    t.platform === p.profile.platform &&
+                    t.username === p.profile.username,
+                ),
+            )
+            setCursor((c) => Math.max(0, Math.min(c, next.length - 1)))
+            return next
+          })
+          return
+        }
+        if (untrackConfirm.type === 'single') {
+          const target = untrackConfirm.profile
+          activeLedger.untrackProfile(target.platform, target.username)
+          setUntrackConfirm(null)
+          setStatusMessage(`Untracked @${target.username} (files preserved on disk)`)
+          setItems((prev) => {
+            const next = prev.filter(
+              (p) =>
+                !(
+                  p.profile.platform === target.platform &&
+                  p.profile.username === target.username
+                ),
+            )
+            setCursor((c) => Math.max(0, Math.min(c, next.length - 1)))
+            return next
+          })
+          return
+        }
       }
       if (input === 'n' || input === 'N' || key.escape) {
         setUntrackConfirm(null)
@@ -233,8 +270,18 @@ export function PullView({
     }
 
     if (input === 'd' || input === 'D') {
-      if (items[cursor]) {
-        setUntrackConfirm(items[cursor]!.profile)
+      const selected = items.filter((p) => p.selected)
+      if (selected.length > 1) {
+        setUntrackConfirm({type: 'bulk', profiles: selected.map((s) => s.profile)})
+      } else if (items[cursor]) {
+        setUntrackConfirm({type: 'single', profile: items[cursor]!.profile})
+      }
+      return
+    }
+
+    if (input === 'c' || input === 'C') {
+      if (items.length > 0) {
+        setUntrackConfirm({type: 'all'})
       }
       return
     }
@@ -268,7 +315,20 @@ export function PullView({
       targets.push({
         match: '[d] Untrack',
         action: () => {
-          if (items[cursor]) setUntrackConfirm(items[cursor]!.profile)
+          const selected = items.filter((p) => p.selected)
+          if (selected.length > 1) {
+            setUntrackConfirm({type: 'bulk', profiles: selected.map((s) => s.profile)})
+          } else if (items[cursor]) {
+            setUntrackConfirm({type: 'single', profile: items[cursor]!.profile})
+          }
+        },
+      })
+      targets.push({
+        match: '[c] Clear All',
+        action: () => {
+          if (items.length > 0) {
+            setUntrackConfirm({type: 'all'})
+          }
         },
       })
       targets.push({
@@ -329,6 +389,11 @@ export function PullView({
       {phase === 'list' && items.length === 0 && (
         <Panel title="Tracked Profiles" width={contentWidth}>
           <Box flexDirection="column" paddingY={1}>
+            {statusMessage && (
+              <Box marginBottom={1}>
+                <Text color="yellow">{statusMessage}</Text>
+              </Box>
+            )}
             <Text color={theme.gray} dimColor={theme.dimSecondary}>
               No tracked profiles found.
             </Text>
@@ -342,10 +407,23 @@ export function PullView({
       )}
 
       {phase === 'list' && untrackConfirm && (
-        <Panel title="Confirm Untrack" width={contentWidth}>
+        <Panel
+          title={
+            untrackConfirm.type === 'all'
+              ? 'Confirm Clear History'
+              : untrackConfirm.type === 'bulk'
+              ? 'Confirm Bulk Untrack'
+              : 'Confirm Untrack'
+          }
+          width={contentWidth}
+        >
           <Box flexDirection="column" paddingY={1}>
             <Text color={theme.primary} bold>
-              Untrack @{untrackConfirm.username} on {untrackConfirm.platform}?
+              {untrackConfirm.type === 'all'
+                ? `Clear all ${items.length} tracked profiles from history?`
+                : untrackConfirm.type === 'bulk'
+                ? `Untrack ${untrackConfirm.profiles.length} selected profiles?`
+                : `Untrack @${untrackConfirm.profile.username} on ${untrackConfirm.profile.platform}?`}
             </Text>
             <Text color={theme.gray} dimColor={theme.dimSecondary}>
               Downloaded media files on disk will NOT be deleted.
@@ -353,7 +431,7 @@ export function PullView({
             <Gap lines={1} />
             <Box flexDirection="row">
               <Text color="red" bold>
-                [y] Confirm Untrack
+                [y] Confirm {untrackConfirm.type === 'all' ? 'Clear All' : 'Untrack'}
               </Text>
               <Text color={theme.gray} dimColor={theme.dimSecondary}>
                 {'   '}[n / Esc] Cancel
@@ -407,6 +485,7 @@ export function PullView({
               <Text color={theme.primary}>[Space]</Text> Toggle{'  '}
               <Text color={theme.primary}>[a]</Text> All{'  '}
               <Text color={theme.primary}>[d]</Text> Untrack{'  '}
+              <Text color={theme.primary}>[c]</Text> Clear All{'  '}
               <Text color={theme.primary} bold>
                 [↵] Pull Selected
               </Text>

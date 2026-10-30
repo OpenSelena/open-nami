@@ -30,7 +30,7 @@ import {useMouseClick} from './lib/use-mouse-click.js'
 import {formatEngineError} from './lib/format.js'
 import {loadConfig} from './lib/config.js'
 import {getCachedUpdateInfo, checkForUpdate, type UpdateCheckResult} from './lib/update-check.js'
-import {getCachedAnnouncement, fetchAnnouncement, type Announcement} from './lib/announcements.js'
+import {getCachedAnnouncement, fetchAnnouncement, dismissAnnouncement, type Announcement} from './lib/announcements.js'
 import {useEngineEvents} from './lib/engines/core/use-engine-events.js'
 import type {MediaTarget, EngineProgress, EngineResult} from './lib/engines/types.js'
 
@@ -69,12 +69,15 @@ export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
     ['^w', 'watcher'],
     ['^b', 'batch'],
     ['^s', 'settings'],
+    ['^h', 'history'],
     ['^c', 'quit'],
   ],
   pull: [
     ['↑↓', 'navigate'],
     ['space', 'toggle'],
+    ['a', 'all'],
     ['d', 'untrack'],
+    ['c', 'clear all'],
     ['↵', 'pull'],
     ['esc', 'back'],
     ['^c', 'quit'],
@@ -261,7 +264,13 @@ function InnerApp({
   }, [])
 
   const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(() => getCachedUpdateInfo(version))
-  const [announcement, setAnnouncement] = useState<Announcement | null>(() => getCachedAnnouncement(version))
+  const [announcement, setAnnouncement] = useState<Announcement | null>(() => {
+    const cached = getCachedAnnouncement(version)
+    if (cached) {
+      dismissAnnouncement(cached.id)
+    }
+    return cached
+  })
 
   useEffect(() => {
     let cancelled = false
@@ -273,6 +282,7 @@ function InnerApp({
     fetchAnnouncement({currentVersion: version}).then(active => {
       if (!cancelled && active) {
         setAnnouncement(active)
+        dismissAnnouncement(active.id)
       }
     })
     return () => {
@@ -444,6 +454,19 @@ function InnerApp({
         setPhase({name: 'input'})
       } else if (phase.name === 'input') {
         setPhase({name: 'batch'})
+      }
+      return
+    }
+
+    if (key.ctrl && (input === 'h' || input === 'H' || input === 'p' || input === 'P')) {
+      if (phase.name === 'pull') {
+        setPhase({name: 'input'})
+        refreshTrackedCount()
+        return
+      }
+      if (phase.name === 'input') {
+        setPhase({name: 'pull'})
+        return
       }
       return
     }

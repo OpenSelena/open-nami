@@ -5,5 +5,6 @@
   "message": "Linux Flatpak & Zen Browser cookie detection is now live. Run open-nami --doctor to audit your setup.",
   "url": "https://github.com/OpenSelena/open-nami/releases/tag/v1.7.0",
   "expiresAt": "2026-12-31T23:59:59Z",
-  "minVersion": "1.0.0"
+  "minVersion": "1.0.0",
+  "maxVersion": "1.7.99"
 }

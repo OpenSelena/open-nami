@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.1",
+      version: "1.9.2",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -36464,7 +36464,11 @@ function InputView({
             announcement.title,
             ": "
           ] }),
-          announcement.url ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { underline: true, children: terminalLink(announcement.message, announcement.url) }) : announcement.message
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: announcement.message }),
+          announcement.url && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: " " }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { underline: true, children: terminalLink("[Details]", announcement.url) })
+          ] })
         ]
       }
     ) }),
@@ -40988,7 +40992,10 @@ var MediaLedger = class {
   isFallback = false;
   resolvedPath;
   constructor(dbPath, forceFallback = false) {
-    const resolvedPath = dbPath ?? (forceFallback ? ":memory:" : path10.join(os7.homedir(), ".open-nami", "nami.db"));
+    const isTest = process.env.NODE_ENV === "test" || process.env.OPEN_NAMI_TEST === "1" || process.argv.some((a) => a.includes("--test"));
+    const envDb = process.env.OPEN_NAMI_DB?.trim();
+    const defaultPath = isTest ? ":memory:" : path10.join(os7.homedir(), ".open-nami", "nami.db");
+    const resolvedPath = dbPath ?? (envDb || (forceFallback ? ":memory:" : defaultPath));
     this.resolvedPath = resolvedPath;
     if (forceFallback) {
       this.isFallback = true;
@@ -41239,6 +41246,20 @@ var MediaLedger = class {
     }
     const stmt = this.db.prepare("DELETE FROM tracked_profiles WHERE platform = ? AND username = ?");
     stmt.run(platform2, username.toLowerCase());
+  }
+  untrackProfiles(profiles) {
+    for (const p of profiles) {
+      this.untrackProfile(p.platform, p.username);
+    }
+  }
+  clearTrackedProfiles() {
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.clear();
+      this.flushFallbackDisk();
+      return;
+    }
+    const stmt = this.db.prepare("DELETE FROM tracked_profiles");
+    stmt.run();
   }
   close() {
     if (this.db) {
@@ -41542,6 +41563,7 @@ async function dispatchDownload(options) {
   let totalDownloaded = 0;
   let totalSkipped = 0;
   const errors = [];
+  const activeLedger = options.ledger || defaultTaskManager.ledger;
   const recordError = (err) => {
     errors.push(err);
     defaultTaskManager.events.emit("job:error", { error: err });
@@ -41550,7 +41572,7 @@ async function dispatchDownload(options) {
     defaultTaskManager.events.emit("job:progress", progress);
     if (progress.currentFile && progress.statusText?.startsWith("Saved:")) {
       try {
-        defaultTaskManager.ledger.recordMedia({
+        activeLedger.recordMedia({
           id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
           platform: profile.platform,
           author: profile.username,
@@ -41605,7 +41627,7 @@ async function dispatchDownload(options) {
           limit: remainingLimit,
           initialCursor,
           earlyExitThreshold: options.earlyExitThreshold,
-          isKnownMedia: (id) => defaultTaskManager.ledger.hasMedia(id),
+          isKnownMedia: (id) => activeLedger.hasMedia(id),
           onCheckpoint: async (key, val) => {
             if (val) {
               currentCursors[key] = val;
@@ -41627,7 +41649,7 @@ async function dispatchDownload(options) {
           until: untilSeconds,
           limit: remainingLimit,
           earlyExitThreshold: options.earlyExitThreshold,
-          isDuplicate: (item) => defaultTaskManager.ledger.hasMedia(item.id)
+          isDuplicate: (item) => activeLedger.hasMedia(item.id)
         });
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
@@ -41798,8 +41820,8 @@ async function dispatchDownload(options) {
       outputDir: targetDir
     };
     if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
-      const existing = defaultTaskManager.ledger.getTrackedProfile(profile.platform, profile.username);
-      defaultTaskManager.ledger.trackProfile({
+      const existing = activeLedger.getTrackedProfile(profile.platform, profile.username);
+      activeLedger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,
@@ -43468,6 +43490,7 @@ async function runBatchQueue(options) {
         resume: options.resume,
         writeMetadata: options.writeMetadata,
         noTrack: options.noTrack,
+        ledger: options.ledger,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
         onProgress: (progress) => {
@@ -44454,6 +44477,8 @@ async function dispatchPull(options = {}) {
         earlyExitThreshold,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
+        ledger,
+        noTrack: true,
         onProgress: (engineProg) => {
           options.onProfileProgress?.({
             profile: profileRec,
@@ -44652,19 +44677,47 @@ function PullView({
     }
     if (untrackConfirm) {
       if (input === "y" || input === "Y") {
-        const target = untrackConfirm;
         const activeLedger = ledger || defaultTaskManager.ledger;
-        activeLedger.untrackProfile(target.platform, target.username);
-        setUntrackConfirm(null);
-        setStatusMessage(`Untracked @${target.username} (files preserved on disk)`);
-        setItems((prev) => {
-          const next = prev.filter(
-            (p) => !(p.profile.platform === target.platform && p.profile.username === target.username)
+        if (untrackConfirm.type === "all") {
+          activeLedger.clearTrackedProfiles();
+          setUntrackConfirm(null);
+          setStatusMessage("Cleared all tracked history (files preserved on disk)");
+          setItems([]);
+          setCursor(0);
+          return;
+        }
+        if (untrackConfirm.type === "bulk") {
+          const targets = untrackConfirm.profiles;
+          activeLedger.untrackProfiles(
+            targets.map((t) => ({ platform: t.platform, username: t.username }))
           );
-          setCursor((c) => Math.max(0, Math.min(c, next.length - 1)));
-          return next;
-        });
-        return;
+          setUntrackConfirm(null);
+          setStatusMessage(`Untracked ${targets.length} profiles (files preserved on disk)`);
+          setItems((prev) => {
+            const next = prev.filter(
+              (p) => !targets.some(
+                (t) => t.platform === p.profile.platform && t.username === p.profile.username
+              )
+            );
+            setCursor((c) => Math.max(0, Math.min(c, next.length - 1)));
+            return next;
+          });
+          return;
+        }
+        if (untrackConfirm.type === "single") {
+          const target = untrackConfirm.profile;
+          activeLedger.untrackProfile(target.platform, target.username);
+          setUntrackConfirm(null);
+          setStatusMessage(`Untracked @${target.username} (files preserved on disk)`);
+          setItems((prev) => {
+            const next = prev.filter(
+              (p) => !(p.profile.platform === target.platform && p.profile.username === target.username)
+            );
+            setCursor((c) => Math.max(0, Math.min(c, next.length - 1)));
+            return next;
+          });
+          return;
+        }
       }
       if (input === "n" || input === "N" || key.escape) {
         setUntrackConfirm(null);
@@ -44704,8 +44757,17 @@ function PullView({
       return;
     }
     if (input === "d" || input === "D") {
-      if (items[cursor]) {
-        setUntrackConfirm(items[cursor].profile);
+      const selected = items.filter((p) => p.selected);
+      if (selected.length > 1) {
+        setUntrackConfirm({ type: "bulk", profiles: selected.map((s) => s.profile) });
+      } else if (items[cursor]) {
+        setUntrackConfirm({ type: "single", profile: items[cursor].profile });
+      }
+      return;
+    }
+    if (input === "c" || input === "C") {
+      if (items.length > 0) {
+        setUntrackConfirm({ type: "all" });
       }
       return;
     }
@@ -44735,7 +44797,20 @@ function PullView({
       targets.push({
         match: "[d] Untrack",
         action: () => {
-          if (items[cursor]) setUntrackConfirm(items[cursor].profile);
+          const selected = items.filter((p) => p.selected);
+          if (selected.length > 1) {
+            setUntrackConfirm({ type: "bulk", profiles: selected.map((s) => s.profile) });
+          } else if (items[cursor]) {
+            setUntrackConfirm({ type: "single", profile: items[cursor].profile });
+          }
+        }
+      });
+      targets.push({
+        match: "[c] Clear All",
+        action: () => {
+          if (items.length > 0) {
+            setUntrackConfirm({ type: "all" });
+          }
         }
       });
       targets.push({
@@ -44788,29 +44863,34 @@ function PullView({
   ]);
   return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
     phase === "list" && items.length === 0 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: "Tracked Profiles", width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+      statusMessage && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "yellow", children: statusMessage }) }),
       /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "No tracked profiles found." }),
       /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Download profiles with open-nami <url> to start tracking updates." }),
       /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
       /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[Esc] Back" })
     ] }) }),
-    phase === "list" && untrackConfirm && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: "Confirm Untrack", width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.primary, bold: true, children: [
-        "Untrack @",
-        untrackConfirm.username,
-        " on ",
-        untrackConfirm.platform,
-        "?"
-      ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Downloaded media files on disk will NOT be deleted." }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
-      /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "row", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "red", bold: true, children: "[y] Confirm Untrack" }),
-        /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-          "   ",
-          "[n / Esc] Cancel"
+    phase === "list" && untrackConfirm && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+      Panel,
+      {
+        title: untrackConfirm.type === "all" ? "Confirm Clear History" : untrackConfirm.type === "bulk" ? "Confirm Bulk Untrack" : "Confirm Untrack",
+        width: contentWidth,
+        children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, bold: true, children: untrackConfirm.type === "all" ? `Clear all ${items.length} tracked profiles from history?` : untrackConfirm.type === "bulk" ? `Untrack ${untrackConfirm.profiles.length} selected profiles?` : `Untrack @${untrackConfirm.profile.username} on ${untrackConfirm.profile.platform}?` }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "Downloaded media files on disk will NOT be deleted." }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Gap2, { lines: 1 }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "row", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: "red", bold: true, children: [
+              "[y] Confirm ",
+              untrackConfirm.type === "all" ? "Clear All" : "Untrack"
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              "   ",
+              "[n / Esc] Cancel"
+            ] })
+          ] })
         ] })
-      ] })
-    ] }) }),
+      }
+    ),
     phase === "list" && !untrackConfirm && items.length > 0 && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Panel, { title: `Tracked Profiles (${items.length})`, width: contentWidth, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(Box_default, { flexDirection: "column", paddingY: 1, children: [
       statusMessage && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Box_default, { marginBottom: 1, children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: "yellow", children: statusMessage }) }),
       items.map((item, idx) => {
@@ -44852,6 +44932,9 @@ function PullView({
         "  ",
         /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[d]" }),
         " Untrack",
+        "  ",
+        /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, children: "[c]" }),
+        " Clear All",
         "  ",
         /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(Text, { color: theme.primary, bold: true, children: "[\u21B5] Pull Selected" })
       ] })
@@ -45190,6 +45273,39 @@ function getCachedAnnouncement(currentVersion, cachePath = getDefaultAnnouncemen
   }
   return null;
 }
+function dismissAnnouncement(id, cachePath = getDefaultAnnouncementCachePath()) {
+  try {
+    let cache3 = {
+      lastChecked: 0,
+      activeAnnouncement: null,
+      dismissedIds: []
+    };
+    if (fs22.existsSync(cachePath)) {
+      try {
+        const raw = fs22.readFileSync(cachePath, "utf8");
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object") {
+          cache3 = {
+            lastChecked: parsed.lastChecked ?? 0,
+            activeAnnouncement: parsed.activeAnnouncement ?? null,
+            dismissedIds: Array.isArray(parsed.dismissedIds) ? parsed.dismissedIds : []
+          };
+        }
+      } catch {
+      }
+    }
+    const cleanId = id.trim();
+    if (!cache3.dismissedIds.includes(cleanId)) {
+      cache3.dismissedIds.push(cleanId);
+    }
+    if (cache3.activeAnnouncement?.id === cleanId) {
+      cache3.activeAnnouncement = null;
+    }
+    fs22.mkdirSync(path18.dirname(cachePath), { recursive: true });
+    fs22.writeFileSync(cachePath, JSON.stringify(cache3, null, 2), "utf8");
+  } catch {
+  }
+}
 async function fetchAnnouncement(options = {}) {
   const currentVersion = options.currentVersion ?? "1.0.0";
   const cachePath = options.cachePath ?? getDefaultAnnouncementCachePath();
@@ -45339,12 +45455,15 @@ var HINTS = {
     ["^w", "watcher"],
     ["^b", "batch"],
     ["^s", "settings"],
+    ["^h", "history"],
     ["^c", "quit"]
   ],
   pull: [
     ["\u2191\u2193", "navigate"],
     ["space", "toggle"],
+    ["a", "all"],
     ["d", "untrack"],
+    ["c", "clear all"],
     ["\u21B5", "pull"],
     ["esc", "back"],
     ["^c", "quit"]
@@ -45499,7 +45618,13 @@ function InnerApp({
     }
   }, []);
   const [updateInfo, setUpdateInfo] = (0, import_react50.useState)(() => getCachedUpdateInfo(version));
-  const [announcement, setAnnouncement] = (0, import_react50.useState)(() => getCachedAnnouncement(version));
+  const [announcement, setAnnouncement] = (0, import_react50.useState)(() => {
+    const cached = getCachedAnnouncement(version);
+    if (cached) {
+      dismissAnnouncement(cached.id);
+    }
+    return cached;
+  });
   (0, import_react50.useEffect)(() => {
     let cancelled = false;
     checkForUpdate({ currentVersion: version }).then((info) => {
@@ -45510,6 +45635,7 @@ function InnerApp({
     fetchAnnouncement({ currentVersion: version }).then((active) => {
       if (!cancelled && active) {
         setAnnouncement(active);
+        dismissAnnouncement(active.id);
       }
     });
     return () => {
@@ -45657,6 +45783,18 @@ function InnerApp({
         setPhase({ name: "input" });
       } else if (phase.name === "input") {
         setPhase({ name: "batch" });
+      }
+      return;
+    }
+    if (key.ctrl && (input === "h" || input === "H" || input === "p" || input === "P")) {
+      if (phase.name === "pull") {
+        setPhase({ name: "input" });
+        refreshTrackedCount();
+        return;
+      }
+      if (phase.name === "input") {
+        setPhase({ name: "pull" });
+        return;
       }
       return;
     }
@@ -46245,6 +46383,7 @@ var HELP = `
     $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
     $ open-nami list                     List all tracked profiles in registry
     $ open-nami untrack <username>       Remove creator from tracking without deleting files
+    $ open-nami untrack --all            Remove all creators from tracking registry
     $ open-nami <url> --photos           Download photos directly
     $ open-nami <url> --videos           Download videos directly
     $ open-nami <url> --all              Download all media directly
@@ -46338,13 +46477,21 @@ function handleUntrackCommand(username, ledger) {
   if (!username || !username.trim()) {
     return {
       success: false,
-      message: "Please provide a username to untrack (e.g. open-nami untrack selenagomez)."
+      message: "Please provide a username to untrack (e.g. open-nami untrack selenagomez) or use --all to clear tracked registry."
     };
   }
   const cleanUser = username.trim().replace(/^@/, "");
   const ownsLedger = !ledger;
   const activeLedger = ledger || new MediaLedger();
   try {
+    if (cleanUser === "--all" || cleanUser === "-a") {
+      const count = activeLedger.getTrackedProfiles().length;
+      activeLedger.clearTrackedProfiles();
+      return {
+        success: true,
+        message: `Cleared ${count} tracked ${count === 1 ? "profile" : "profiles"} from registry. Downloaded media files preserved on disk.`
+      };
+    }
     const profiles = activeLedger.getTrackedProfiles();
     const target = profiles.find(
       (p) => p.username.toLowerCase() === cleanUser.toLowerCase()

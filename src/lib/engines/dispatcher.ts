@@ -93,6 +93,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
   let totalDownloaded = 0
   let totalSkipped = 0
   const errors: string[] = []
+  const activeLedger = options.ledger || defaultTaskManager.ledger
 
   const recordError = (err: string) => {
     errors.push(err)
@@ -103,7 +104,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     defaultTaskManager.events.emit('job:progress', progress)
     if (progress.currentFile && progress.statusText?.startsWith('Saved:')) {
       try {
-        defaultTaskManager.ledger.recordMedia({
+        activeLedger.recordMedia({
           id: `${profile.platform}:${profile.username}:${progress.currentFile}`,
           platform: profile.platform,
           author: profile.username,
@@ -161,7 +162,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           limit: remainingLimit,
           initialCursor,
           earlyExitThreshold: options.earlyExitThreshold,
-          isKnownMedia: (id) => defaultTaskManager.ledger.hasMedia(id),
+          isKnownMedia: (id) => activeLedger.hasMedia(id),
           onCheckpoint: async (key, val) => {
             if (val) {
               currentCursors[key] = val
@@ -183,7 +184,7 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
           until: untilSeconds,
           limit: remainingLimit,
           earlyExitThreshold: options.earlyExitThreshold,
-          isDuplicate: (item) => defaultTaskManager.ledger.hasMedia(item.id),
+          isDuplicate: (item) => activeLedger.hasMedia(item.id),
         })
         const res = await downloadMediaStream(filtered, {
           jobName: `${profile.username} ${subDir}`,
@@ -375,8 +376,8 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
     }
 
     if (!options.noTrack && (engineResult.success || engineResult.downloadedCount > 0)) {
-      const existing = defaultTaskManager.ledger.getTrackedProfile(profile.platform, profile.username)
-      defaultTaskManager.ledger.trackProfile({
+      const existing = activeLedger.getTrackedProfile(profile.platform, profile.username)
+      activeLedger.trackProfile({
         platform: profile.platform,
         username: profile.username,
         profileUrl: profile.cleanUrl || `https://${profile.platform}.com/${profile.username}`,

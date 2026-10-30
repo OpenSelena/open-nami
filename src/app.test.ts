@@ -33,6 +33,7 @@ test('HINTS includes settings, watcher, and batch shortcuts in input phase', () 
     ['^w', 'watcher'],
     ['^b', 'batch'],
     ['^s', 'settings'],
+    ['^h', 'history'],
     ['^c', 'quit'],
   ])
 })
@@ -78,7 +79,9 @@ test('HINTS includes pull shortcuts', () => {
   assert.deepEqual(HINTS.pull, [
     ['↑↓', 'navigate'],
     ['space', 'toggle'],
+    ['a', 'all'],
     ['d', 'untrack'],
+    ['c', 'clear all'],
     ['↵', 'pull'],
     ['esc', 'back'],
     ['^c', 'quit'],

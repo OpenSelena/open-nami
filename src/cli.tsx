@@ -40,6 +40,7 @@ const HELP = `
     $ open-nami pull [username]          Synchronize tracked profiles (or specific user)
     $ open-nami list                     List all tracked profiles in registry
     $ open-nami untrack <username>       Remove creator from tracking without deleting files
+    $ open-nami untrack --all            Remove all creators from tracking registry
     $ open-nami <url> --photos           Download photos directly
     $ open-nami <url> --videos           Download videos directly
     $ open-nami <url> --all              Download all media directly
@@ -144,7 +145,7 @@ export function handleUntrackCommand(
   if (!username || !username.trim()) {
     return {
       success: false,
-      message: 'Please provide a username to untrack (e.g. open-nami untrack selenagomez).',
+      message: 'Please provide a username to untrack (e.g. open-nami untrack selenagomez) or use --all to clear tracked registry.',
     }
   }
 
@@ -153,6 +154,15 @@ export function handleUntrackCommand(
   const activeLedger = ledger || new MediaLedger()
 
   try {
+    if (cleanUser === '--all' || cleanUser === '-a') {
+      const count = activeLedger.getTrackedProfiles().length
+      activeLedger.clearTrackedProfiles()
+      return {
+        success: true,
+        message: `Cleared ${count} tracked ${count === 1 ? 'profile' : 'profiles'} from registry. Downloaded media files preserved on disk.`,
+      }
+    }
+
     const profiles = activeLedger.getTrackedProfiles()
     const target = profiles.find(
       (p) => p.username.toLowerCase() === cleanUser.toLowerCase(),

@@ -203,6 +203,47 @@ test('MediaLedger tracks, lists, and untracks profiles in SQLite', () => {
   ledger.untrackProfile('instagram', 'selenagomez')
   assert.equal(ledger.getTrackedProfiles().length, 0)
   assert.equal(ledger.getTrackedProfile('instagram', 'selenagomez'), null)
+
+  // Test untrackProfiles and clearTrackedProfiles
+  ledger.trackProfile({
+    platform: 'instagram',
+    username: 'user_a',
+    profileUrl: 'https://instagram.com/user_a',
+    targetDir: '/tmp/a',
+    choice: 'photos',
+    lastPulledAt: '2026-10-30T10:00:00Z',
+    mediaCount: 1,
+  })
+  ledger.trackProfile({
+    platform: 'tiktok',
+    username: 'user_b',
+    profileUrl: 'https://tiktok.com/@user_b',
+    targetDir: '/tmp/b',
+    choice: 'videos',
+    lastPulledAt: '2026-10-30T10:00:00Z',
+    mediaCount: 2,
+  })
+  ledger.trackProfile({
+    platform: 'x',
+    username: 'user_c',
+    profileUrl: 'https://x.com/user_c',
+    targetDir: '/tmp/c',
+    choice: 'photos',
+    lastPulledAt: '2026-10-30T10:00:00Z',
+    mediaCount: 3,
+  })
+  assert.equal(ledger.getTrackedProfiles().length, 3)
+
+  ledger.untrackProfiles([
+    { platform: 'instagram', username: 'user_a' },
+    { platform: 'tiktok', username: 'user_b' },
+  ])
+  assert.equal(ledger.getTrackedProfiles().length, 1)
+  assert.equal(ledger.getTrackedProfiles()[0]?.username, 'user_c')
+
+  ledger.clearTrackedProfiles()
+  assert.equal(ledger.getTrackedProfiles().length, 0)
+
   ledger.close()
 })
 

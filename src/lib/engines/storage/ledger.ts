@@ -45,7 +45,15 @@ export class MediaLedger {
   private resolvedPath: string
 
   constructor(dbPath?: string, forceFallback = false) {
-    const resolvedPath = dbPath ?? (forceFallback ? ':memory:' : path.join(os.homedir(), '.open-nami', 'nami.db'))
+    const isTest =
+      process.env.NODE_ENV === 'test' ||
+      process.env.OPEN_NAMI_TEST === '1' ||
+      process.argv.some(a => a.includes('--test'))
+    const envDb = process.env.OPEN_NAMI_DB?.trim()
+    const defaultPath = isTest
+      ? ':memory:'
+      : path.join(os.homedir(), '.open-nami', 'nami.db')
+    const resolvedPath = dbPath ?? (envDb || (forceFallback ? ':memory:' : defaultPath))
     this.resolvedPath = resolvedPath
     if (forceFallback) {
       this.isFallback = true
@@ -305,6 +313,22 @@ export class MediaLedger {
     }
     const stmt = this.db.prepare('DELETE FROM tracked_profiles WHERE platform = ? AND username = ?')
     stmt.run(platform, username.toLowerCase())
+  }
+
+  untrackProfiles(profiles: Array<{platform: string; username: string}>): void {
+    for (const p of profiles) {
+      this.untrackProfile(p.platform, p.username)
+    }
+  }
+
+  clearTrackedProfiles(): void {
+    if (this.isFallback || !this.db) {
+      this.inMemoryFallback.trackedProfiles.clear()
+      this.flushFallbackDisk()
+      return
+    }
+    const stmt = this.db.prepare('DELETE FROM tracked_profiles')
+    stmt.run()
   }
 
   close(): void {

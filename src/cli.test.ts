@@ -91,6 +91,33 @@ test('handleUntrackCommand removes profile from registry and strictly preserves 
 
     // Verify file still exists on disk
     assert.ok(fs.existsSync(sampleFile), 'Downloaded media file MUST remain untouched on disk')
+
+    // Test untrack --all
+    ledger.trackProfile({
+      platform: 'instagram',
+      username: 'multi_one',
+      profileUrl: 'https://instagram.com/multi_one',
+      targetDir: profileDir,
+      choice: 'photos',
+      lastPulledAt: '2026-10-30T00:00:00Z',
+      mediaCount: 5,
+    })
+    ledger.trackProfile({
+      platform: 'tiktok',
+      username: 'multi_two',
+      profileUrl: 'https://tiktok.com/@multi_two',
+      targetDir: profileDir,
+      choice: 'videos',
+      lastPulledAt: '2026-10-30T00:00:00Z',
+      mediaCount: 10,
+    })
+    assert.equal(ledger.getTrackedProfiles().length, 2)
+
+    const allRes = handleUntrackCommand('--all', ledger)
+    assert.equal(allRes.success, true)
+    assert.ok(allRes.message.includes('Cleared 2 tracked profiles'))
+    assert.equal(ledger.getTrackedProfiles().length, 0)
+    assert.ok(fs.existsSync(sampleFile), 'Downloaded media file MUST remain untouched after clear-all')
   } finally {
     ledger.close()
     await fsPromises.rm(tmpDir, { recursive: true, force: true })

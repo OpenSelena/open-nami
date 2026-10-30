@@ -3,6 +3,7 @@ import {parseProfileInput, buildCanonicalProfile, type ParsedProfile, type Suppo
 import {dispatchDownload, resolveDefaultDownloadDir} from './engines/dispatcher.js'
 import {sleep} from './engines/extractors/http.js'
 import type {MediaTarget, EngineProgress, DispatchRunnerResult} from './engines/types.js'
+import type {MediaLedger} from './engines/storage/ledger.js'
 
 export interface BatchItem {
   raw: string
@@ -25,6 +26,7 @@ export interface BatchQueueOptions {
   resume?: boolean
   writeMetadata?: boolean
   noTrack?: boolean
+  ledger?: MediaLedger
   minDelayMs?: number
   maxDelayMs?: number
   signal?: AbortSignal
@@ -147,6 +149,7 @@ export async function runBatchQueue(options: BatchQueueOptions): Promise<BatchQu
         resume: options.resume,
         writeMetadata: options.writeMetadata,
         noTrack: options.noTrack,
+        ledger: options.ledger,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
         onProgress: (progress) => {

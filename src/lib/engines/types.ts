@@ -1,4 +1,5 @@
 import type {ParsedProfile} from '../parser.js'
+import type {MediaLedger} from './storage/ledger.js'
 
 export type MediaTarget = 'photos' | 'videos' | 'stories' | 'highlights' | 'all'
 
@@ -36,6 +37,7 @@ export interface DispatchOptions {
   writeMetadata?: boolean
   cookiesFromBrowser?: string
   noTrack?: boolean
+  ledger?: MediaLedger
   earlyExitThreshold?: number
   signal?: AbortSignal
   onProgress?: (progress: EngineProgress) => void

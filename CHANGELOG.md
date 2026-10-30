@@ -4,6 +4,21 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2026-10-30
+
+### Fixed
+- **Announcement Display & Dismissal Hygiene**:
+  - Automatically marks fetched and cached announcements as seen/dismissed upon display so they appear only once and never repeat indefinitely across subsequent launches.
+  - Set version ceilings (`maxVersion`) on legacy release announcements so past version banners do not persist into new releases.
+  - Stripped erroneous terminal underline formatting from informational message bodies; links are now neatly isolated to dedicated clickable `[Details]` anchors.
+- **Hermetic Test Suite & User Database Protection**:
+  - Enforced test isolation in `scripts/run-tests.js` with `:memory:` database and unique ephemeral cache files, guaranteeing test runners never write test dummy accounts into the user's live database (`~/.open-nami/nami.db`).
+  - Added test-mode detection in `MediaLedger` constructor ensuring in-memory fallbacks when running unit or integration test suites without explicit database paths.
+- **History View Access & Tracked Registry Management**:
+  - Added dedicated `^h history` shortcut to main view footer alongside `^w watcher`, `^b batch`, and `^s settings`.
+  - Added bulk untrack capability in interactive `PullView` (`d` on selected accounts) and clear-all action (`c`).
+  - Added `open-nami untrack --all` CLI flag for one-step tracking registry resets while strictly preserving downloaded files on disk.
+
 ## [1.9.1] - 2026-10-30
 
 ### Added

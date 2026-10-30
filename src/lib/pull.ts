@@ -146,6 +146,8 @@ export async function dispatchPull(options: PullOptions = {}): Promise<PullSumma
         earlyExitThreshold,
         signal: options.signal,
         runnerOverrides: options.runnerOverrides,
+        ledger,
+        noTrack: true,
         onProgress: (engineProg) => {
           options.onProfileProgress?.({
             profile: profileRec,

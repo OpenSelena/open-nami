@@ -86,12 +86,14 @@ export function InputView({
           >
             <Text bold>[{announcement.level === 'warning' ? 'UPDATE' : announcement.level === 'alert' ? 'ALERT' : 'INFO'}] </Text>
             <Text bold>{announcement.title}: </Text>
-            {announcement.url ? (
-              <Text underline>
-                {terminalLink(announcement.message, announcement.url)}
-              </Text>
-            ) : (
-              announcement.message
+            <Text>{announcement.message}</Text>
+            {announcement.url && (
+              <>
+                <Text> </Text>
+                <Text underline>
+                  {terminalLink('[Details]', announcement.url)}
+                </Text>
+              </>
             )}
           </Text>
         </Box>
