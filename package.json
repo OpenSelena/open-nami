@@ -44,7 +44,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenSelena/open-nami.git"
+    "url": "git+https://github.com/OpenSelena/open-nami.git"
   },
   "dependencies": {
     "ink": "^7.1.1",
