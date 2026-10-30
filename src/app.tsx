@@ -28,6 +28,7 @@ import {clickTargetAt, findFrameRow, frameRowSpan, type ClickTarget} from './lib
 import {useMouseClick} from './lib/use-mouse-click.js'
 import {formatEngineError} from './lib/format.js'
 import {loadConfig} from './lib/config.js'
+import {getCachedUpdateInfo, checkForUpdate, type UpdateCheckResult} from './lib/update-check.js'
 import {useEngineEvents} from './lib/engines/core/use-engine-events.js'
 import type {MediaTarget, EngineProgress, EngineResult} from './lib/engines/types.js'
 
@@ -232,6 +233,20 @@ function InnerApp({
       }
     } catch {}
   }, [])
+
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(() => getCachedUpdateInfo(version))
+
+  useEffect(() => {
+    let cancelled = false
+    checkForUpdate({currentVersion: version}).then(info => {
+      if (!cancelled && info.updateAvailable) {
+        setUpdateInfo(info)
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [version])
 
   const clipboardOffered = Boolean(clipboardUrl) && urlInput === ''
   const clipboardAccepted = Boolean(clipboardUrl) && urlInput === clipboardUrl
@@ -474,6 +489,11 @@ function InnerApp({
 
     if (phase.name === 'input') {
       targets.push({match: `v${version}`, padX: 1, action: () => openBrowser(releaseUrl)})
+      if (updateInfo?.latestVersion && updateInfo.updateAvailable) {
+        const latestTag = `v${updateInfo.latestVersion}`
+        const latestUrl = `https://github.com/OpenSelena/open-nami/releases/tag/${latestTag}`
+        targets.push({match: latestTag, padX: 1, action: () => openBrowser(latestUrl)})
+      }
       targets.push({match: `  ${DOWNLOAD_BUTTON}  `, padY: 1, action: () => handleInputSubmit(urlInput)})
       if (clipboardOffered && clipboardUrl) {
         targets.push({match: 'Tab to paste it', action: () => setUrlInput(clipboardUrl)})
@@ -595,6 +615,7 @@ function InnerApp({
           clipboardUrl={clipboardUrl}
           warning={phase.warning}
           version={version}
+          latestVersion={updateInfo?.updateAvailable ? updateInfo.latestVersion : undefined}
           releaseUrl={releaseUrl}
           theme={theme}
           buttonText={DOWNLOAD_BUTTON}
@@ -678,6 +699,8 @@ function InnerApp({
           onFocusChange={setSettingsFocus}
           onSave={() => setPhase({name: 'input'})}
           onCancel={() => setPhase({name: 'input'})}
+          updateAvailable={updateInfo?.updateAvailable}
+          latestVersion={updateInfo?.latestVersion}
         />
       )}
 

@@ -16,6 +16,7 @@ export type InputViewProps = {
   clipboardUrl?: string
   warning?: string
   version?: string
+  latestVersion?: string
   releaseUrl: string
   theme: Theme
   buttonText: string
@@ -33,6 +34,7 @@ export function InputView({
   clipboardUrl,
   warning,
   version = '1.0.0',
+  latestVersion,
   releaseUrl,
   theme,
   buttonText,
@@ -65,6 +67,14 @@ export function InputView({
         <Text color={BRAND_COLOR} underline>
           {terminalLink(`v${version}`, releaseUrl)}
         </Text>
+        {latestVersion && latestVersion !== version && (
+          <Text color="yellow">
+            {' · update: '}
+            <Text color={BRAND_COLOR} underline>
+              {terminalLink(`v${latestVersion}`, `https://github.com/OpenSelena/open-nami/releases/tag/v${latestVersion}`)}
+            </Text>
+          </Text>
+        )}
         {' · by '}
         <Text color={BRAND_COLOR} underline>
           {terminalLink('OpenSelena', 'https://github.com/OpenSelena')}

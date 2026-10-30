@@ -10434,10 +10434,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path17, index, value) {
-        if (index >= path17.length) return value;
-        var key = path17[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path17, index + 1, value);
+      function copyWithSetImpl(obj, path18, index, value) {
+        if (index >= path18.length) return value;
+        var key = path18[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path18, index + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10464,11 +10464,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path17, index) {
-        var key = path17[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index + 1 === path17.length)
+      function copyWithDeleteImpl(obj, path18, index) {
+        var key = path18[index], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index + 1 === path18.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path17, index + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path18, index + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23745,29 +23745,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id, path17, value) {
+      overrideHookState = function(fiber, id, path18, value) {
         id = findHook(fiber, id);
-        null !== id && (path17 = copyWithSetImpl(id.memoizedState, path17, 0, value), id.memoizedState = path17, id.baseState = path17, fiber.memoizedProps = assign({}, fiber.memoizedProps), path17 = enqueueConcurrentRenderForLane(fiber, 2), null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2));
+        null !== id && (path18 = copyWithSetImpl(id.memoizedState, path18, 0, value), id.memoizedState = path18, id.baseState = path18, fiber.memoizedProps = assign({}, fiber.memoizedProps), path18 = enqueueConcurrentRenderForLane(fiber, 2), null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id, path17) {
+      overrideHookStateDeletePath = function(fiber, id, path18) {
         id = findHook(fiber, id);
-        null !== id && (path17 = copyWithDeleteImpl(id.memoizedState, path17, 0), id.memoizedState = path17, id.baseState = path17, fiber.memoizedProps = assign({}, fiber.memoizedProps), path17 = enqueueConcurrentRenderForLane(fiber, 2), null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2));
+        null !== id && (path18 = copyWithDeleteImpl(id.memoizedState, path18, 0), id.memoizedState = path18, id.baseState = path18, fiber.memoizedProps = assign({}, fiber.memoizedProps), path18 = enqueueConcurrentRenderForLane(fiber, 2), null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id, oldPath, newPath) {
         id = findHook(fiber, id);
         null !== id && (oldPath = copyWithRename(id.memoizedState, oldPath, newPath), id.memoizedState = oldPath, id.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path17, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path17, 0, value);
+      overrideProps = function(fiber, path18, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path18, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path17 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2);
+        path18 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path17) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path17, 0);
+      overridePropsDeletePath = function(fiber, path18) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path18, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path17 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path17 && scheduleUpdateOnFiber(path17, fiber, 2);
+        path18 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path18 && scheduleUpdateOnFiber(path18, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -31372,8 +31372,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs20 = await import("fs");
-  const content = fs20.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs21 = await import("fs");
+  const content = fs21.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -33772,8 +33772,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path17) => {
-  return path17?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path18) => {
+  return path18?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -36417,6 +36417,7 @@ function InputView({
   clipboardUrl,
   warning,
   version = "1.0.0",
+  latestVersion,
   releaseUrl,
   theme,
   buttonText,
@@ -36444,6 +36445,10 @@ function InputView({
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: BRAND_COLOR, underline: true, children: terminalLink(`v${version}`, releaseUrl) }),
+      latestVersion && latestVersion !== version && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: "yellow", children: [
+        " \xB7 update: ",
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: BRAND_COLOR, underline: true, children: terminalLink(`v${latestVersion}`, `https://github.com/OpenSelena/open-nami/releases/tag/v${latestVersion}`) })
+      ] }),
       " \xB7 by ",
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: BRAND_COLOR, underline: true, children: terminalLink("OpenSelena", "https://github.com/OpenSelena") })
     ] })
@@ -38142,8 +38147,8 @@ var InstagramExtractor = class {
     }
     const user = res.data.user;
     if (user.is_private) {
-      const fs20 = user.friendship_status;
-      const isFollowing = fs20 ? Boolean(fs20.following) : Boolean(user.followed_by_viewer);
+      const fs21 = user.friendship_status;
+      const isFollowing = fs21 ? Boolean(fs21.following) : Boolean(user.followed_by_viewer);
       if (!isFollowing) {
         throw new Error(`Instagram profile @${username} is private. You must provide a session cookie jar of an account following this profile.`);
       }
@@ -42125,7 +42130,13 @@ function formatDoctorCookies(cookies) {
   const text = count > 0 ? `\u2713 ${count} (${platforms.join(", ")})` : "none detected";
   return { count, platforms, text };
 }
-function DoctorCard({ boxWidth, theme, report }) {
+function DoctorCard({
+  boxWidth,
+  theme,
+  report,
+  updateAvailable,
+  latestVersion
+}) {
   const cookieSummary = report ? formatDoctorCookies(report.cookies) : { count: 0, platforms: [], text: "" };
   const storageSummary = report ? formatDoctorStorage(report.storageOk) : { ok: false, text: "" };
   return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
@@ -42221,7 +42232,12 @@ function DoctorCard({ boxWidth, theme, report }) {
                 }
               )
             ] })
-          ] })
+          ] }),
+          updateAvailable && latestVersion && /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Box_default, { marginTop: 0, children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(Text, { color: "yellow", children: [
+            "\u2605 update available: v",
+            latestVersion,
+            " (run npm i -g open-nami)"
+          ] }) })
         ] }) : /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: "checking system engines and storage\u2026" })
       ]
     }
@@ -42240,7 +42256,9 @@ function SettingsView({
   initialReport,
   browsers: browsersProp,
   defaultBrowser: defaultBrowserProp,
-  initialConfig: initialConfigProp
+  initialConfig: initialConfigProp,
+  updateAvailable,
+  latestVersion
 }) {
   const initialConfig = (0, import_react45.useMemo)(() => initialConfigProp ?? loadConfig(), [initialConfigProp]);
   const [internalFocus, setInternalFocus] = (0, import_react45.useState)("cookies");
@@ -42532,7 +42550,16 @@ function SettingsView({
       }
     ),
     /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(DoctorCard, { boxWidth, theme, report: doctorReport }),
+    /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(
+      DoctorCard,
+      {
+        boxWidth,
+        theme,
+        report: doctorReport,
+        updateAvailable,
+        latestVersion
+      }
+    ),
     /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Gap2, {}),
     /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: saved ? "\u2713 preferences saved to ~/.open-nami/config.json" : "tab / \u2191\u2193 switch field \xB7 space toggle/cycle \xB7 ^s / \u21B5 save \xB7 esc back" })
   ] });
@@ -44193,6 +44220,119 @@ function frameRowSpan(row) {
   return [first + 1, line.trimEnd().length];
 }
 
+// src/lib/update-check.ts
+import fs20 from "fs";
+import path17 from "path";
+import os15 from "os";
+var DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1e3;
+var DEFAULT_TIMEOUT_MS = 1500;
+function getDefaultUpdateCachePath() {
+  if (process.env.OPEN_NAMI_UPDATE_CACHE && process.env.OPEN_NAMI_UPDATE_CACHE.trim()) {
+    return path17.resolve(process.env.OPEN_NAMI_UPDATE_CACHE.trim());
+  }
+  return path17.join(os15.homedir(), ".open-nami", "update-check.json");
+}
+function compareSemVer(v1, v2) {
+  const clean1 = (v1 || "").trim().replace(/^v/, "");
+  const clean2 = (v2 || "").trim().replace(/^v/, "");
+  const parts1 = clean1.split(".").map((n) => parseInt(n, 10) || 0);
+  const parts2 = clean2.split(".").map((n) => parseInt(n, 10) || 0);
+  const len = Math.max(parts1.length, parts2.length);
+  for (let i = 0; i < len; i++) {
+    const num1 = parts1[i] ?? 0;
+    const num2 = parts2[i] ?? 0;
+    if (num1 < num2) return -1;
+    if (num1 > num2) return 1;
+  }
+  return 0;
+}
+function getCachedUpdateInfo(currentVersion, cachePath = getDefaultUpdateCachePath()) {
+  try {
+    if (!fs20.existsSync(cachePath)) return null;
+    const raw = fs20.readFileSync(cachePath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && typeof parsed.latestVersion === "string") {
+      const updateAvailable = compareSemVer(currentVersion, parsed.latestVersion) < 0;
+      return {
+        currentVersion,
+        latestVersion: parsed.latestVersion,
+        updateAvailable,
+        lastChecked: typeof parsed.lastChecked === "number" ? parsed.lastChecked : 0
+      };
+    }
+  } catch {
+  }
+  return null;
+}
+async function checkForUpdate(options = {}) {
+  const currentVersion = options.currentVersion ?? "1.0.0";
+  const cachePath = options.cachePath ?? getDefaultUpdateCachePath();
+  const interval = options.checkIntervalMs ?? DEFAULT_INTERVAL_MS;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const fetcher = options.fetchFn ?? globalThis.fetch;
+  if (process.env.NO_UPDATE_NOTIFIER === "1" || process.env.OPEN_NAMI_NO_UPDATE === "1") {
+    return {
+      currentVersion,
+      updateAvailable: false,
+      lastChecked: Date.now()
+    };
+  }
+  const cached = getCachedUpdateInfo(currentVersion, cachePath);
+  if (!options.force && cached && Date.now() - cached.lastChecked < interval) {
+    return cached;
+  }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetcher("https://registry.npmjs.org/open-nami/latest", {
+      signal: controller.signal,
+      headers: {
+        Accept: "application/json",
+        "User-Agent": `open-nami/${currentVersion}`
+      }
+    });
+    clearTimeout(timer);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.version === "string" && data.version.trim()) {
+        const latestVersion = data.version.trim();
+        const updateAvailable = compareSemVer(currentVersion, latestVersion) < 0;
+        try {
+          const dir = path17.dirname(cachePath);
+          if (!fs20.existsSync(dir)) {
+            fs20.mkdirSync(dir, { recursive: true, mode: 448 });
+          }
+          fs20.writeFileSync(
+            cachePath,
+            JSON.stringify(
+              {
+                lastChecked: Date.now(),
+                latestVersion
+              },
+              null,
+              2
+            ),
+            { encoding: "utf8", mode: 384 }
+          );
+        } catch {
+        }
+        return {
+          currentVersion,
+          latestVersion,
+          updateAvailable,
+          lastChecked: Date.now()
+        };
+      }
+    }
+  } catch {
+  }
+  return cached ?? {
+    currentVersion,
+    updateAvailable: false,
+    lastChecked: Date.now()
+  };
+}
+
 // src/lib/engines/core/use-engine-events.ts
 var import_react48 = __toESM(require_react(), 1);
 var INITIAL_ENGINE_EVENT_STATE = {
@@ -44414,6 +44554,18 @@ function InnerApp({
     } catch {
     }
   }, []);
+  const [updateInfo, setUpdateInfo] = (0, import_react49.useState)(() => getCachedUpdateInfo(version));
+  (0, import_react49.useEffect)(() => {
+    let cancelled = false;
+    checkForUpdate({ currentVersion: version }).then((info) => {
+      if (!cancelled && info.updateAvailable) {
+        setUpdateInfo(info);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [version]);
   const clipboardOffered = Boolean(clipboardUrl) && urlInput === "";
   const clipboardAccepted = Boolean(clipboardUrl) && urlInput === clipboardUrl;
   const abortControllerRef = (0, import_react49.useRef)(null);
@@ -44624,6 +44776,11 @@ function InnerApp({
     const targets = [];
     if (phase.name === "input") {
       targets.push({ match: `v${version}`, padX: 1, action: () => openBrowser(releaseUrl) });
+      if (updateInfo?.latestVersion && updateInfo.updateAvailable) {
+        const latestTag = `v${updateInfo.latestVersion}`;
+        const latestUrl = `https://github.com/OpenSelena/open-nami/releases/tag/${latestTag}`;
+        targets.push({ match: latestTag, padX: 1, action: () => openBrowser(latestUrl) });
+      }
       targets.push({ match: `  ${DOWNLOAD_BUTTON}  `, padY: 1, action: () => handleInputSubmit(urlInput) });
       if (clipboardOffered && clipboardUrl) {
         targets.push({ match: "Tab to paste it", action: () => setUrlInput(clipboardUrl) });
@@ -44732,6 +44889,7 @@ function InnerApp({
         clipboardUrl,
         warning: phase.warning,
         version,
+        latestVersion: updateInfo?.updateAvailable ? updateInfo.latestVersion : void 0,
         releaseUrl,
         theme,
         buttonText: DOWNLOAD_BUTTON,
@@ -44814,7 +44972,9 @@ function InnerApp({
         focusedField: settingsFocus,
         onFocusChange: setSettingsFocus,
         onSave: () => setPhase({ name: "input" }),
-        onCancel: () => setPhase({ name: "input" })
+        onCancel: () => setPhase({ name: "input" }),
+        updateAvailable: updateInfo?.updateAvailable,
+        latestVersion: updateInfo?.latestVersion
       }
     ),
     phase.name === "watcher" && /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
@@ -45130,9 +45290,13 @@ async function main() {
     process.exit(0);
   }
   if (args.includes("--doctor")) {
-    const report = await runDoctor();
+    const [report, updateInfo] = await Promise.all([
+      runDoctor(),
+      checkForUpdate({ currentVersion: VERSION })
+    ]);
+    const updateText = updateInfo.updateAvailable && updateInfo.latestVersion ? `\x1B[33m(update available: v${updateInfo.latestVersion})\x1B[0m` : "\x1B[32m(latest)\x1B[0m";
     console.log(`
-  \x1B[36mOpen Nami Doctor\x1B[0m (v${VERSION})
+  \x1B[36mOpen Nami Doctor\x1B[0m (v${VERSION} ${updateText})
 `);
     console.log(`  \x1B[1mRuntime:\x1B[0m Node.js ${report.nodeVersion}`);
     console.log(`  \x1B[1mStorage:\x1B[0m ${report.storageOk ? "\x1B[32m\u2713 Ready\x1B[0m" : "\x1B[31m\u2717 Inaccessible\x1B[0m"}`);

@@ -71,12 +71,16 @@ export type SettingsViewProps = {
   browsers?: DetectedBrowser[]
   defaultBrowser?: DetectedBrowser | null
   initialConfig?: AppConfig
+  updateAvailable?: boolean
+  latestVersion?: string
 }
 
 export type DoctorCardProps = {
   boxWidth: number
   theme: Theme
   report: DoctorReport | null
+  updateAvailable?: boolean
+  latestVersion?: string
 }
 
 export function formatDoctorStorage(storageOk: boolean): {ok: boolean; text: string} {
@@ -114,7 +118,13 @@ export function formatDoctorEngines(
   })
 }
 
-export function DoctorCard({boxWidth, theme, report}: DoctorCardProps) {
+export function DoctorCard({
+  boxWidth,
+  theme,
+  report,
+  updateAvailable,
+  latestVersion,
+}: DoctorCardProps) {
   const cookieSummary = report ? formatDoctorCookies(report.cookies) : {count: 0, platforms: [], text: ''}
   const storageSummary = report ? formatDoctorStorage(report.storageOk) : {ok: false, text: ''}
 
@@ -192,6 +202,14 @@ export function DoctorCard({boxWidth, theme, report}: DoctorCardProps) {
               </Text>
             </Box>
           </Box>
+
+          {updateAvailable && latestVersion && (
+            <Box marginTop={0}>
+              <Text color="yellow">
+                ★ update available: v{latestVersion} (run npm i -g open-nami)
+              </Text>
+            </Box>
+          )}
         </>
       ) : (
         <Text color={theme.gray} dimColor={theme.dimSecondary}>
@@ -217,6 +235,8 @@ export function SettingsView({
   browsers: browsersProp,
   defaultBrowser: defaultBrowserProp,
   initialConfig: initialConfigProp,
+  updateAvailable,
+  latestVersion,
 }: SettingsViewProps) {
   const initialConfig = useMemo(() => initialConfigProp ?? loadConfig(), [initialConfigProp])
   const [internalFocus, setInternalFocus] = useState<SettingsField>('cookies')
@@ -530,7 +550,13 @@ export function SettingsView({
 
       <Gap />
 
-      <DoctorCard boxWidth={boxWidth} theme={theme} report={doctorReport} />
+      <DoctorCard
+        boxWidth={boxWidth}
+        theme={theme}
+        report={doctorReport}
+        updateAvailable={updateAvailable}
+        latestVersion={latestVersion}
+      />
 
       <Gap />
       <Text color={theme.gray} dimColor={theme.dimSecondary}>

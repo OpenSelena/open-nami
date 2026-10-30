@@ -11,6 +11,7 @@ import {updateYtDlp, updateGalleryDl} from './lib/engines/fetcher.js'
 import {startClipboardWatcher} from './lib/watcher.js'
 import {runBatchQueue} from './lib/batch.js'
 import {runDoctor} from './lib/diagnostics/doctor.js'
+import {checkForUpdate} from './lib/update-check.js'
 
 export const resolveVersion = (): string => {
   try {
@@ -93,8 +94,14 @@ async function main() {
   }
 
   if (args.includes('--doctor')) {
-    const report = await runDoctor()
-    console.log(`\n  \x1b[36mOpen Nami Doctor\x1b[0m (v${VERSION})\n`)
+    const [report, updateInfo] = await Promise.all([
+      runDoctor(),
+      checkForUpdate({ currentVersion: VERSION }),
+    ])
+    const updateText = updateInfo.updateAvailable && updateInfo.latestVersion
+      ? `\x1b[33m(update available: v${updateInfo.latestVersion})\x1b[0m`
+      : '\x1b[32m(latest)\x1b[0m'
+    console.log(`\n  \x1b[36mOpen Nami Doctor\x1b[0m (v${VERSION} ${updateText})\n`)
     console.log(`  \x1b[1mRuntime:\x1b[0m Node.js ${report.nodeVersion}`)
     console.log(`  \x1b[1mStorage:\x1b[0m ${report.storageOk ? '\x1b[32m✓ Ready\x1b[0m' : '\x1b[31m✗ Inaccessible\x1b[0m'}`)
     console.log(`  \x1b[1mEngines:\x1b[0m`)
