@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {buildOpenBrowserCommand, getRevealCommand} from './reveal.js'
+import {buildOpenBrowserCommand, getRevealCommand, revealInFileManager} from './reveal.js'
 
 test('buildOpenBrowserCommand rejects non-http protocols', () => {
   assert.equal(buildOpenBrowserCommand('javascript:alert(1)', 'win32'), null)
@@ -35,4 +35,22 @@ test('getRevealCommand selects file or dir safely on Windows and macOS', () => {
   const winFile = getRevealCommand('C:\\Users\\test\\file.txt', 'win32', false)
   assert.equal(winFile.command, 'explorer.exe')
   assert.deepEqual(winFile.args, ['/select,C:\\Users\\test\\file.txt'])
+})
+
+test('revealInFileManager safely executes without throwing on unhandled errors', () => {
+  assert.doesNotThrow(() => {
+    revealInFileManager('/nonexistent/test/path/to/file.mp4')
+  })
+  assert.doesNotThrow(() => {
+    revealInFileManager('')
+  })
+  assert.doesNotThrow(() => {
+    revealInFileManager(undefined as unknown as string)
+  })
+  assert.doesNotThrow(() => {
+    revealInFileManager('./relative/path/folder')
+  })
+  assert.doesNotThrow(() => {
+    revealInFileManager(process.cwd())
+  })
 })

@@ -67,7 +67,29 @@ export function getRevealCommand(
 
 export function revealInFileManager(targetPath: string): void {
   try {
-    const {command, args} = getRevealCommand(targetPath)
+    if (!targetPath || typeof targetPath !== 'string') {
+      return
+    }
+    const resolved = path.resolve(targetPath)
+    let pathToReveal = resolved
+    try {
+      if (!fs.existsSync(resolved)) {
+        const dir = path.dirname(resolved)
+        if (fs.existsSync(dir)) {
+          pathToReveal = dir
+        } else {
+          return
+        }
+      }
+    } catch {
+      return
+    }
+
+    if (process.env.NODE_ENV === 'test' || process.env.OPEN_NAMI_TEST === '1') {
+      return
+    }
+
+    const {command, args} = getRevealCommand(pathToReveal)
     spawn(command, args, {detached: true, stdio: 'ignore'}).unref()
   } catch {}
 }
