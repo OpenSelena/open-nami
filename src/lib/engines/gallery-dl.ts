@@ -73,6 +73,14 @@ export function buildGalleryDlArgs(options: {
     args.push('--sleep-request', sleepDelay)
   } else if (subDir === 'Videos') {
     args.push('--filter', VIDEO_FILTER)
+    if (platform === 'tiktok') {
+      args.push('-o', 'photos=false', '-o', 'avatar=false')
+    }
+    args.push('--sleep-request', sleepDelay)
+  } else if (subDir === 'All') {
+    if (platform === 'tiktok') {
+      args.push('-o', 'avatar=true')
+    }
     args.push('--sleep-request', sleepDelay)
   } else if (subDir === 'Stories') {
     if (platform === 'instagram') {

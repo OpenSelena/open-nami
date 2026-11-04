@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import {parseTikTokRehydrationJson, parseTikTokItem} from './tiktok.js'
+import crypto from 'node:crypto'
+import {parseTikTokRehydrationJson, parseTikTokItem, solveTikTokWafChallenge} from './tiktok.js'
 
 test('parseTikTokRehydrationJson extracts JSON from script tag', () => {
   const html = `
@@ -261,5 +262,43 @@ test('TikTokExtractor extract applies since, until, limit on SSR hydration and d
   assert.equal(items[0].id, 'post_ssr_valid')
   assert.equal(items[1].id, 'post_api_new')
 })
+
+test('solveTikTokWafChallenge solves SHA-256 proof-of-work challenge and formats cookies', () => {
+  const a = Buffer.from('test_salt_seed').toString('base64')
+  const targetIdx = 777
+  const cDigest = crypto
+    .createHash('sha256')
+    .update(Buffer.from('test_salt_seed'))
+    .update(String(targetIdx))
+    .digest('base64')
+  const cObj = {v: {a, c: cDigest}}
+  const cs = Buffer.from(JSON.stringify(cObj)).toString('base64')
+
+  const challengeHtml = `
+    <!DOCTYPE html>
+    <html>
+    <body>
+      <p id="wci" class="_custom_waf_cookie"></p>
+      <p id="cs" class="${cs}"></p>
+      <p id="rci" class="custom_reid"></p>
+      <p id="rs" class="https://www.tiktok.com/@tiktok"></p>
+    </body>
+    </html>
+  `
+
+  const cookies = solveTikTokWafChallenge(challengeHtml)
+  assert.ok(cookies)
+  assert.equal(cookies.length, 2)
+  assert.equal(cookies[0].name, '_custom_waf_cookie')
+  const payload = JSON.parse(Buffer.from(cookies[0].value, 'base64').toString('utf8'))
+  assert.equal(Buffer.from(payload.d, 'base64').toString('utf8'), '777')
+  assert.equal(cookies[1].name, 'custom_reid')
+  assert.equal(cookies[1].value, 'https://www.tiktok.com/@tiktok')
+})
+
+test('solveTikTokWafChallenge returns null for non-challenge HTML', () => {
+  assert.equal(solveTikTokWafChallenge('<html><body>Hello</body></html>'), null)
+})
+
 
 

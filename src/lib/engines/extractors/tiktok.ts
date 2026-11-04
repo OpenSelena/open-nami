@@ -1,6 +1,52 @@
+import crypto from 'node:crypto'
 import {HttpClient, sleep} from './http.js'
 import type {Extractor, ExtractOptions, MediaItem} from './types.js'
 import type {ParsedProfile} from '../../parser.js'
+
+export function solveTikTokWafChallenge(html: string): {name: string; value: string}[] | null {
+  const csMatch = html.match(/id=["']cs["']\s+class=["']([^"']+)["']/)
+  const wciMatch = html.match(/id=["']wci["']\s+class=["']([^"']+)["']/)
+  const rciMatch = html.match(/id=["']rci["']\s+class=["']([^"']+)["']/)
+  const rsMatch = html.match(/id=["']rs["']\s+class=["']([^"']+)["']/)
+  if (!csMatch || !csMatch[1]) return null
+
+  const cs = csMatch[1]
+  const wci = wciMatch?.[1] || '_wafchallengeid'
+  const rci = rciMatch?.[1] || ''
+  const rs = rsMatch?.[1] || ''
+
+  try {
+    const pad = (4 - (cs.length % 4)) % 4
+    const c = JSON.parse(Buffer.from(cs + '='.repeat(pad), 'base64').toString('utf8'))
+    const cVal = c?.v
+    if (!cVal?.a || !cVal?.c) return null
+
+    const padA = (4 - (cVal.a.length % 4)) % 4
+    const padC = (4 - (cVal.c.length % 4)) % 4
+    const baseBuf = Buffer.from(cVal.a + '='.repeat(padA), 'base64')
+    const expected = Buffer.from(cVal.c + '='.repeat(padC), 'base64')
+
+    let foundIdx = -1
+    for (let idx = 0; idx < 1000000; idx++) {
+      const h = crypto.createHash('sha256').update(baseBuf).update(String(idx)).digest()
+      if (h.equals(expected)) {
+        foundIdx = idx
+        break
+      }
+    }
+    if (foundIdx === -1) return null
+
+    c.d = Buffer.from(String(foundIdx)).toString('base64')
+    const v = Buffer.from(JSON.stringify(c)).toString('base64')
+    const cookies = [{name: wci, value: v}]
+    if (rs && rci) {
+      cookies.push({name: rci, value: rs})
+    }
+    return cookies
+  } catch {
+    return null
+  }
+}
 
 export function parseTikTokRehydrationJson(html: string): any {
   // Pattern 1: Modern __UNIVERSAL_DATA_FOR_REHYDRATION__
@@ -91,7 +137,6 @@ export function parseTikTokRehydrationJson(html: string): any {
   return null
 }
 
-
 export function parseTikTokItem(item: any, username: string): MediaItem[] {
   const items: MediaItem[] = []
   const id = item.id || item.itemId || String(Date.now())
@@ -165,13 +210,29 @@ export class TikTokExtractor implements Extractor {
     })
 
     const profileUrl = `https://www.tiktok.com/@${cleanUsername}`
-    const html = await this.httpClient.fetchText(profileUrl, {
+    let html = await this.httpClient.fetchText(profileUrl, {
       cookiePath: options.cookiePath,
       cookieDomain: 'tiktok.com',
       signal: options.signal,
       retries: 0,
       timeoutMs: 4000,
     })
+
+    const challengeCookies = solveTikTokWafChallenge(html)
+    if (challengeCookies) {
+      for (const cookie of challengeCookies) {
+        this.httpClient.setCookie(cookie.name, cookie.value)
+      }
+      try {
+        html = await this.httpClient.fetchText(profileUrl, {
+          cookiePath: options.cookiePath,
+          cookieDomain: 'tiktok.com',
+          signal: options.signal,
+          retries: 0,
+          timeoutMs: 4000,
+        })
+      } catch {}
+    }
 
     const scope = parseTikTokRehydrationJson(html)
     const userDetail = scope?.['webapp.user-detail']
@@ -210,7 +271,7 @@ export class TikTokExtractor implements Extractor {
       return
     }
 
-    // Paginated posts via item_list API
+    // Paginated posts via creator/item_list and post/item_list endpoints
     let cursor = options.initialCursor || '0'
     let hasMore = true
     const visitedCursors = new Set<string>()
@@ -226,22 +287,40 @@ export class TikTokExtractor implements Extractor {
       visitedCursors.add(cursor)
 
       const deviceId = `${Math.floor(7250000000000000000 + Math.random() * 75000000000000000)}`
-      const queryParams = new URLSearchParams({
+      const creatorParams = new URLSearchParams({
         aid: '1988',
+        app_language: 'en',
         app_name: 'tiktok_web',
-        device_platform: 'web_pc',
+        browser_language: 'en-US',
+        browser_name: 'Mozilla',
+        browser_online: 'true',
+        browser_platform: 'Win32',
+        browser_version: '5.0 (Windows)',
         channel: 'tiktok_web',
+        cookie_enabled: 'true',
         device_id: deviceId,
+        device_platform: 'web_pc',
+        focus_state: 'true',
+        from_page: 'user',
+        history_len: '2',
+        is_fullscreen: 'false',
+        is_page_visible: 'true',
+        language: 'en',
+        os: 'windows',
+        region: 'US',
+        screen_height: '1080',
+        screen_width: '1920',
+        tz_name: 'UTC',
         secUid,
+        type: '1',
         count: '30',
-        cursor,
-        post_item_list_request_type: '0',
+        cursor: cursor === '0' ? String(Date.now() * 1000) : cursor,
       })
-      const apiUrl = `https://www.tiktok.com/api/post/item_list/?${queryParams.toString()}`
+      const creatorUrl = `https://www.tiktok.com/api/creator/item_list/?${creatorParams.toString()}`
 
       let res: any
       try {
-        res = await this.httpClient.fetchJson<any>(apiUrl, {
+        res = await this.httpClient.fetchJson<any>(creatorUrl, {
           cookiePath: options.cookiePath,
           cookieDomain: 'tiktok.com',
           signal: options.signal,
@@ -249,11 +328,47 @@ export class TikTokExtractor implements Extractor {
             'Referer': profileUrl,
           },
         })
-      } catch {
-        break
+      } catch {}
+
+      let items: any[] = res?.itemList || []
+      let nextCursor = ''
+
+      if (items.length > 0) {
+        const lastItem = items[items.length - 1]
+        if (lastItem?.createTime) {
+          nextCursor = String(Number(lastItem.createTime) * 1000)
+        }
+        hasMore = Boolean(res?.hasMorePrevious ?? res?.hasMore) && Boolean(nextCursor) && nextCursor !== cursor
+      } else {
+        const postParams = new URLSearchParams({
+          aid: '1988',
+          app_name: 'tiktok_web',
+          device_platform: 'web_pc',
+          channel: 'tiktok_web',
+          device_id: deviceId,
+          secUid,
+          count: '30',
+          cursor,
+          post_item_list_request_type: '0',
+        })
+        const postUrl = `https://www.tiktok.com/api/post/item_list/?${postParams.toString()}`
+        try {
+          const postRes = await this.httpClient.fetchJson<any>(postUrl, {
+            cookiePath: options.cookiePath,
+            cookieDomain: 'tiktok.com',
+            signal: options.signal,
+            headers: {
+              'Referer': profileUrl,
+            },
+          })
+          items = postRes?.itemList || []
+          hasMore = Boolean(postRes?.hasMore)
+          nextCursor = String(postRes?.cursor ?? '0')
+        } catch {
+          break
+        }
       }
 
-      const items = res?.itemList || []
       if (items.length === 0) break
 
       let reachedSinceLimit = false
@@ -286,8 +401,7 @@ export class TikTokExtractor implements Extractor {
 
       if (reachedSinceLimit) break
 
-      hasMore = Boolean(res?.hasMore)
-      cursor = String(res?.cursor ?? '0')
+      cursor = nextCursor || '0'
       if (hasMore && cursor && cursor !== '0') {
         options.onCheckpoint?.('timeline', cursor)
       } else {

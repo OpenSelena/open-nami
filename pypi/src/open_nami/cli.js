@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.4",
+      version: "1.9.5",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -39232,6 +39232,46 @@ var XExtractor = class {
 };
 
 // src/lib/engines/extractors/tiktok.ts
+import crypto2 from "crypto";
+function solveTikTokWafChallenge(html) {
+  const csMatch = html.match(/id=["']cs["']\s+class=["']([^"']+)["']/);
+  const wciMatch = html.match(/id=["']wci["']\s+class=["']([^"']+)["']/);
+  const rciMatch = html.match(/id=["']rci["']\s+class=["']([^"']+)["']/);
+  const rsMatch = html.match(/id=["']rs["']\s+class=["']([^"']+)["']/);
+  if (!csMatch || !csMatch[1]) return null;
+  const cs = csMatch[1];
+  const wci = wciMatch?.[1] || "_wafchallengeid";
+  const rci = rciMatch?.[1] || "";
+  const rs = rsMatch?.[1] || "";
+  try {
+    const pad = (4 - cs.length % 4) % 4;
+    const c = JSON.parse(Buffer.from(cs + "=".repeat(pad), "base64").toString("utf8"));
+    const cVal = c?.v;
+    if (!cVal?.a || !cVal?.c) return null;
+    const padA = (4 - cVal.a.length % 4) % 4;
+    const padC = (4 - cVal.c.length % 4) % 4;
+    const baseBuf = Buffer.from(cVal.a + "=".repeat(padA), "base64");
+    const expected = Buffer.from(cVal.c + "=".repeat(padC), "base64");
+    let foundIdx = -1;
+    for (let idx = 0; idx < 1e6; idx++) {
+      const h = crypto2.createHash("sha256").update(baseBuf).update(String(idx)).digest();
+      if (h.equals(expected)) {
+        foundIdx = idx;
+        break;
+      }
+    }
+    if (foundIdx === -1) return null;
+    c.d = Buffer.from(String(foundIdx)).toString("base64");
+    const v = Buffer.from(JSON.stringify(c)).toString("base64");
+    const cookies = [{ name: wci, value: v }];
+    if (rs && rci) {
+      cookies.push({ name: rci, value: rs });
+    }
+    return cookies;
+  } catch {
+    return null;
+  }
+}
 function parseTikTokRehydrationJson(html) {
   const universalMatch = html.match(
     /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/
@@ -39379,13 +39419,29 @@ var TikTokExtractor = class {
       message: `Fetching TikTok profile @${cleanUsername}...`
     });
     const profileUrl = `https://www.tiktok.com/@${cleanUsername}`;
-    const html = await this.httpClient.fetchText(profileUrl, {
+    let html = await this.httpClient.fetchText(profileUrl, {
       cookiePath: options.cookiePath,
       cookieDomain: "tiktok.com",
       signal: options.signal,
       retries: 0,
       timeoutMs: 4e3
     });
+    const challengeCookies = solveTikTokWafChallenge(html);
+    if (challengeCookies) {
+      for (const cookie of challengeCookies) {
+        this.httpClient.setCookie(cookie.name, cookie.value);
+      }
+      try {
+        html = await this.httpClient.fetchText(profileUrl, {
+          cookiePath: options.cookiePath,
+          cookieDomain: "tiktok.com",
+          signal: options.signal,
+          retries: 0,
+          timeoutMs: 4e3
+        });
+      } catch {
+      }
+    }
     const scope = parseTikTokRehydrationJson(html);
     const userDetail = scope?.["webapp.user-detail"];
     const userInfo = userDetail?.userInfo?.user;
@@ -39424,21 +39480,39 @@ var TikTokExtractor = class {
       if (visitedCursors.has(cursor)) break;
       visitedCursors.add(cursor);
       const deviceId = `${Math.floor(725e16 + Math.random() * 75e15)}`;
-      const queryParams = new URLSearchParams({
+      const creatorParams = new URLSearchParams({
         aid: "1988",
+        app_language: "en",
         app_name: "tiktok_web",
-        device_platform: "web_pc",
+        browser_language: "en-US",
+        browser_name: "Mozilla",
+        browser_online: "true",
+        browser_platform: "Win32",
+        browser_version: "5.0 (Windows)",
         channel: "tiktok_web",
+        cookie_enabled: "true",
         device_id: deviceId,
+        device_platform: "web_pc",
+        focus_state: "true",
+        from_page: "user",
+        history_len: "2",
+        is_fullscreen: "false",
+        is_page_visible: "true",
+        language: "en",
+        os: "windows",
+        region: "US",
+        screen_height: "1080",
+        screen_width: "1920",
+        tz_name: "UTC",
         secUid,
+        type: "1",
         count: "30",
-        cursor,
-        post_item_list_request_type: "0"
+        cursor: cursor === "0" ? String(Date.now() * 1e3) : cursor
       });
-      const apiUrl = `https://www.tiktok.com/api/post/item_list/?${queryParams.toString()}`;
+      const creatorUrl = `https://www.tiktok.com/api/creator/item_list/?${creatorParams.toString()}`;
       let res;
       try {
-        res = await this.httpClient.fetchJson(apiUrl, {
+        res = await this.httpClient.fetchJson(creatorUrl, {
           cookiePath: options.cookiePath,
           cookieDomain: "tiktok.com",
           signal: options.signal,
@@ -39447,9 +39521,44 @@ var TikTokExtractor = class {
           }
         });
       } catch {
-        break;
       }
-      const items = res?.itemList || [];
+      let items = res?.itemList || [];
+      let nextCursor = "";
+      if (items.length > 0) {
+        const lastItem = items[items.length - 1];
+        if (lastItem?.createTime) {
+          nextCursor = String(Number(lastItem.createTime) * 1e3);
+        }
+        hasMore = Boolean(res?.hasMorePrevious ?? res?.hasMore) && Boolean(nextCursor) && nextCursor !== cursor;
+      } else {
+        const postParams = new URLSearchParams({
+          aid: "1988",
+          app_name: "tiktok_web",
+          device_platform: "web_pc",
+          channel: "tiktok_web",
+          device_id: deviceId,
+          secUid,
+          count: "30",
+          cursor,
+          post_item_list_request_type: "0"
+        });
+        const postUrl = `https://www.tiktok.com/api/post/item_list/?${postParams.toString()}`;
+        try {
+          const postRes = await this.httpClient.fetchJson(postUrl, {
+            cookiePath: options.cookiePath,
+            cookieDomain: "tiktok.com",
+            signal: options.signal,
+            headers: {
+              "Referer": profileUrl
+            }
+          });
+          items = postRes?.itemList || [];
+          hasMore = Boolean(postRes?.hasMore);
+          nextCursor = String(postRes?.cursor ?? "0");
+        } catch {
+          break;
+        }
+      }
       if (items.length === 0) break;
       let reachedSinceLimit = false;
       for (const rawItem of items) {
@@ -39476,8 +39585,7 @@ var TikTokExtractor = class {
         if (reachedSinceLimit) break;
       }
       if (reachedSinceLimit) break;
-      hasMore = Boolean(res?.hasMore);
-      cursor = String(res?.cursor ?? "0");
+      cursor = nextCursor || "0";
       if (hasMore && cursor && cursor !== "0") {
         options.onCheckpoint?.("timeline", cursor);
       } else {
@@ -40713,6 +40821,14 @@ function buildGalleryDlArgs(options) {
     args.push("--sleep-request", sleepDelay);
   } else if (subDir === "Videos") {
     args.push("--filter", VIDEO_FILTER);
+    if (platform2 === "tiktok") {
+      args.push("-o", "photos=false", "-o", "avatar=false");
+    }
+    args.push("--sleep-request", sleepDelay);
+  } else if (subDir === "All") {
+    if (platform2 === "tiktok") {
+      args.push("-o", "avatar=true");
+    }
     args.push("--sleep-request", sleepDelay);
   } else if (subDir === "Stories") {
     if (platform2 === "instagram") {
@@ -43603,7 +43719,27 @@ function getRevealCommand(targetPath, platform2 = process.platform, isDirectory)
 }
 function revealInFileManager(targetPath) {
   try {
-    const { command, args } = getRevealCommand(targetPath);
+    if (!targetPath || typeof targetPath !== "string") {
+      return;
+    }
+    const resolved = path18.resolve(targetPath);
+    let pathToReveal = resolved;
+    try {
+      if (!fs19.existsSync(resolved)) {
+        const dir = path18.dirname(resolved);
+        if (fs19.existsSync(dir)) {
+          pathToReveal = dir;
+        } else {
+          return;
+        }
+      }
+    } catch {
+      return;
+    }
+    if (process.env.NODE_ENV === "test" || process.env.OPEN_NAMI_TEST === "1") {
+      return;
+    }
+    const { command, args } = getRevealCommand(pathToReveal);
     spawn4(command, args, { detached: true, stdio: "ignore" }).unref();
   } catch {
   }

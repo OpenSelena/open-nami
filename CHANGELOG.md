@@ -4,6 +4,17 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.5] - 2026-11-04
+
+### Fixed & Hardened
+- **TikTok Slardar WAF Challenge Auto-Solver**:
+  - Implemented automatic SHA-256 proof-of-work solver in `TikTokExtractor` for TikTok Slardar WAF challenge pages (`_wafchallengeid`), generating verification cookie tokens and re-fetching profile rehydration payloads without failure.
+- **TikTok Modern Endpoints & Pagination Parity**:
+  - Wired native pagination through `api/creator/item_list` with session cookie and `secUid` forwarding, bypassing WebAssembly `X-Bogus` signing requirements with automatic fallback to `api/post/item_list`.
+  - Added timestamp-based cursor progression and `hasMorePrevious` loop termination guards.
+- **Gallery-dl TikTok Options Hardening**:
+  - Configured `-o photos=false -o avatar=false` for video-only extractions and `-o avatar=true` for comprehensive profile downloads, preventing avatar duplication and stalled pagination loops.
+
 ## [1.9.4] - 2026-10-30
 
 ### Fixed & Hardened
