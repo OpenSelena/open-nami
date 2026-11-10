@@ -191,11 +191,11 @@ export async function ensureYtDlp(
   onStatus?: (msg: string) => void,
   signal?: AbortSignal,
 ): Promise<string> {
-  if (await commandWorks('yt-dlp', ['--version'])) return 'yt-dlp'
-
   const binaryName = process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp'
   const local = path.join(getOpenNamiBinDir(), binaryName)
   if (await commandWorks(local, ['--version'])) return local
+
+  if (await commandWorks('yt-dlp', ['--version'])) return 'yt-dlp'
 
   if (await commandWorks('python', ['-m', 'yt_dlp', '--version'])) return 'python'
   if (await commandWorks('python3', ['-m', 'yt_dlp', '--version'])) return 'python3'
@@ -208,11 +208,11 @@ export async function ensureGalleryDl(
   onStatus?: (msg: string) => void,
   signal?: AbortSignal,
 ): Promise<string> {
-  if (await commandWorks('gallery-dl', ['--version'])) return 'gallery-dl'
-
   const binaryName = process.platform === 'win32' ? 'gallery-dl.exe' : 'gallery-dl'
   const local = path.join(getOpenNamiBinDir(), binaryName)
   if (await commandWorks(local, ['--version'])) return local
+
+  if (await commandWorks('gallery-dl', ['--version'])) return 'gallery-dl'
 
   if (await commandWorks('python', ['-m', 'gallery_dl', '--version'])) return 'python'
   if (await commandWorks('python3', ['-m', 'gallery_dl', '--version'])) return 'python3'

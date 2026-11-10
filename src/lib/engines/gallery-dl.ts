@@ -74,12 +74,12 @@ export function buildGalleryDlArgs(options: {
   } else if (subDir === 'Videos') {
     args.push('--filter', VIDEO_FILTER)
     if (platform === 'tiktok') {
-      args.push('-o', 'photos=false', '-o', 'avatar=false')
+      args.push('-o', 'photos=false', '-o', 'avatar=false', '-o', 'format=best')
     }
     args.push('--sleep-request', sleepDelay)
   } else if (subDir === 'All') {
     if (platform === 'tiktok') {
-      args.push('-o', 'avatar=true')
+      args.push('-o', 'avatar=true', '-o', 'format=best')
     }
     args.push('--sleep-request', sleepDelay)
   } else if (subDir === 'Stories') {

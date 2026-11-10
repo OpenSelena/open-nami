@@ -41,6 +41,16 @@ test('parses Facebook profile URLs', () => {
   const resId = parseProfileInput('https://www.facebook.com/profile.php?id=100084729182')
   assert.equal(resId.platform, 'facebook')
   assert.equal(resId.username, '100084729182')
+
+  const resReel = parseProfileInput('https://www.facebook.com/reel/1234567890')
+  assert.equal(resReel.platform, 'facebook')
+  assert.equal(resReel.username, 'reel_1234567890')
+  assert.equal(resReel.cleanUrl, 'https://www.facebook.com/reel/1234567890')
+
+  const resWatch = parseProfileInput('https://fb.watch/xyz123/')
+  assert.equal(resWatch.platform, 'facebook')
+  assert.equal(resWatch.username, 'watch_xyz123')
+  assert.equal(resWatch.cleanUrl, 'https://fb.watch/xyz123')
 })
 
 test('parses X / Twitter profile URLs', () => {

@@ -52,14 +52,6 @@ export function resolveEngineCommand(
     }
   }
 
-  const standalone = finder(engine)
-  if (standalone) {
-    return {
-      command: standalone,
-      baseArgs: [],
-    }
-  }
-
   const binDir = getOpenNamiBinDir(env)
   const isWin = process.platform === 'win32'
   const localBin = path.join(binDir, `${engine}${isWin ? '.exe' : ''}`)
@@ -74,6 +66,14 @@ export function resolveEngineCommand(
       }
     }
   } catch {}
+
+  const standalone = finder(engine)
+  if (standalone) {
+    return {
+      command: standalone,
+      baseArgs: [],
+    }
+  }
 
   const moduleName = engine === 'gallery-dl' ? 'gallery_dl' : 'yt_dlp'
 

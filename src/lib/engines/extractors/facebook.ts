@@ -242,7 +242,12 @@ export class FacebookExtractor implements Extractor {
       process.env.NODE_ENV === 'test' ||
       Boolean(process.env.NODE_TEST_CONTEXT) ||
       process.execArgv.some(a => a.includes('test'))
-    const pathsToScrape = subDir === 'All' ? ['photos', 'videos'] : [subDir === 'Photos' ? 'photos' : 'videos']
+    const isReel = profile.cleanUrl.includes('/reel/') || profile.cleanUrl.includes('fb.watch')
+    const pathsToScrape = isReel
+      ? ['reel']
+      : subDir === 'All'
+        ? ['photos', 'videos']
+        : [subDir === 'Photos' ? 'photos' : 'videos']
     const seenUrls = new Set<string>()
     const counters = {photoIndex: 1, videoIndex: 1}
     let found = 0
@@ -250,9 +255,13 @@ export class FacebookExtractor implements Extractor {
     for (const targetPath of pathsToScrape) {
       if (options.signal?.aborted) break
 
-      const desktopUrl = `https://www.facebook.com/${encodeURIComponent(username)}/${targetPath}`
-      const mbasicUrl = `https://mbasic.facebook.com/${encodeURIComponent(username)}/${targetPath}`
-      const mobileUrl = `https://m.facebook.com/${encodeURIComponent(username)}/${targetPath}`
+      const desktopUrl = isReel ? profile.cleanUrl : `https://www.facebook.com/${encodeURIComponent(username)}/${targetPath}`
+      const mbasicUrl = isReel
+        ? profile.cleanUrl.replace('www.facebook.com', 'mbasic.facebook.com').replace('facebook.com', 'mbasic.facebook.com')
+        : `https://mbasic.facebook.com/${encodeURIComponent(username)}/${targetPath}`
+      const mobileUrl = isReel
+        ? profile.cleanUrl.replace('www.facebook.com', 'm.facebook.com').replace('facebook.com', 'm.facebook.com')
+        : `https://m.facebook.com/${encodeURIComponent(username)}/${targetPath}`
 
       let currentUrl = desktopUrl
       let html = ''

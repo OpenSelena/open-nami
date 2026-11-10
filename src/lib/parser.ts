@@ -85,7 +85,7 @@ export function parseProfileInput(input: string): ParsedProfile {
 
   let candidate = trimmed
   if (!/^https?:\/\//i.test(candidate)) {
-    if (candidate.includes('instagram.com') || candidate.includes('tiktok.com') || candidate.includes('facebook.com') || candidate.includes('x.com') || candidate.includes('twitter.com')) {
+    if (candidate.includes('instagram.com') || candidate.includes('tiktok.com') || candidate.includes('facebook.com') || candidate.includes('fb.watch') || candidate.includes('fb.com') || candidate.includes('x.com') || candidate.includes('twitter.com')) {
       candidate = 'https://' + candidate
     }
   }
@@ -126,7 +126,7 @@ export function parseProfileInput(input: string): ParsedProfile {
     }
 
     if (host.includes('facebook.com') || host === 'fb.com') {
-      // e.g. /profile.php?id=123, /people/Name/123, /username
+      // e.g. /profile.php?id=123, /people/Name/123, /username, /reel/123
       if (pathParts[0]?.toLowerCase() === 'profile.php') {
         const id = url.searchParams.get('id')
         if (id) {
@@ -144,6 +144,14 @@ export function parseProfileInput(input: string): ParsedProfile {
           cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
           rawInput: input,
         }
+      } else if (pathParts[0]?.toLowerCase() === 'reel' && pathParts[1]) {
+        const reelId = pathParts[1].replace(/[^a-zA-Z0-9_-]/g, '')
+        return {
+          platform: 'facebook',
+          username: sanitizeUsername(`reel_${reelId}`),
+          cleanUrl: `https://www.facebook.com/reel/${reelId}`,
+          rawInput: input,
+        }
       } else if (pathParts[0]) {
         const reserved = ['watch', 'videos', 'reel', 'groups', 'pages', 'events', 'photo']
         if (!reserved.includes(pathParts[0].toLowerCase())) {
@@ -154,6 +162,16 @@ export function parseProfileInput(input: string): ParsedProfile {
             rawInput: input,
           }
         }
+      }
+    }
+
+    if (host === 'fb.watch' && pathParts[0]) {
+      const watchId = pathParts[0].replace(/[^a-zA-Z0-9_-]/g, '')
+      return {
+        platform: 'facebook',
+        username: sanitizeUsername(`watch_${watchId}`),
+        cleanUrl: `https://fb.watch/${watchId}`,
+        rawInput: input,
       }
     }
 

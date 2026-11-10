@@ -26492,7 +26492,7 @@ var require_package = __commonJS({
   "package.json"(exports, module) {
     module.exports = {
       name: "open-nami",
-      version: "1.9.5",
+      version: "1.9.6",
       description: "Open Nami: terminal-first bulk social media profile downloader for Instagram, TikTok, Facebook & X.",
       type: "module",
       bin: {
@@ -39794,15 +39794,16 @@ var FacebookExtractor = class {
       message: `Fetching Facebook profile @${username}...`
     });
     const isTest = process.env.NODE_ENV === "test" || Boolean(process.env.NODE_TEST_CONTEXT) || process.execArgv.some((a) => a.includes("test"));
-    const pathsToScrape = subDir === "All" ? ["photos", "videos"] : [subDir === "Photos" ? "photos" : "videos"];
+    const isReel = profile.cleanUrl.includes("/reel/") || profile.cleanUrl.includes("fb.watch");
+    const pathsToScrape = isReel ? ["reel"] : subDir === "All" ? ["photos", "videos"] : [subDir === "Photos" ? "photos" : "videos"];
     const seenUrls = /* @__PURE__ */ new Set();
     const counters = { photoIndex: 1, videoIndex: 1 };
     let found = 0;
     for (const targetPath of pathsToScrape) {
       if (options.signal?.aborted) break;
-      const desktopUrl = `https://www.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
-      const mbasicUrl = `https://mbasic.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
-      const mobileUrl = `https://m.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
+      const desktopUrl = isReel ? profile.cleanUrl : `https://www.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
+      const mbasicUrl = isReel ? profile.cleanUrl.replace("www.facebook.com", "mbasic.facebook.com").replace("facebook.com", "mbasic.facebook.com") : `https://mbasic.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
+      const mobileUrl = isReel ? profile.cleanUrl.replace("www.facebook.com", "m.facebook.com").replace("facebook.com", "m.facebook.com") : `https://m.facebook.com/${encodeURIComponent(username)}/${targetPath}`;
       let currentUrl = desktopUrl;
       let html = "";
       try {
@@ -40629,20 +40630,20 @@ async function downloadLatestGalleryDl(targetDir, signal, onStatus) {
   throw new Error(`Could not download gallery-dl (${lastError?.message || "unknown error"}). Check your connection and try again.`);
 }
 async function ensureYtDlp(onStatus, signal) {
-  if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
   const binaryName = process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp";
   const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
+  if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
   if (await commandWorks("python", ["-m", "yt_dlp", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "yt_dlp", "--version"])) return "python3";
   onStatus?.("first run: downloading standalone yt-dlp\u2026");
   return await downloadLatestYtDlp(getOpenNamiBinDir(), signal, onStatus);
 }
 async function ensureGalleryDl(onStatus, signal) {
-  if (await commandWorks("gallery-dl", ["--version"])) return "gallery-dl";
   const binaryName = process.platform === "win32" ? "gallery-dl.exe" : "gallery-dl";
   const local = path6.join(getOpenNamiBinDir(), binaryName);
   if (await commandWorks(local, ["--version"])) return local;
+  if (await commandWorks("gallery-dl", ["--version"])) return "gallery-dl";
   if (await commandWorks("python", ["-m", "gallery_dl", "--version"])) return "python";
   if (await commandWorks("python3", ["-m", "gallery_dl", "--version"])) return "python3";
   onStatus?.("first run: downloading standalone gallery-dl\u2026");
@@ -40728,13 +40729,6 @@ function resolveEngineCommand(engine, options = {}) {
       baseArgs: []
     };
   }
-  const standalone = finder(engine);
-  if (standalone) {
-    return {
-      command: standalone,
-      baseArgs: []
-    };
-  }
   const binDir = getOpenNamiBinDir(env3);
   const isWin = process.platform === "win32";
   const localBin = path7.join(binDir, `${engine}${isWin ? ".exe" : ""}`);
@@ -40749,6 +40743,13 @@ function resolveEngineCommand(engine, options = {}) {
       }
     }
   } catch {
+  }
+  const standalone = finder(engine);
+  if (standalone) {
+    return {
+      command: standalone,
+      baseArgs: []
+    };
   }
   const moduleName = engine === "gallery-dl" ? "gallery_dl" : "yt_dlp";
   const pythonExe = finder("python");
@@ -40822,12 +40823,12 @@ function buildGalleryDlArgs(options) {
   } else if (subDir === "Videos") {
     args.push("--filter", VIDEO_FILTER);
     if (platform2 === "tiktok") {
-      args.push("-o", "photos=false", "-o", "avatar=false");
+      args.push("-o", "photos=false", "-o", "avatar=false", "-o", "format=best");
     }
     args.push("--sleep-request", sleepDelay);
   } else if (subDir === "All") {
     if (platform2 === "tiktok") {
-      args.push("-o", "avatar=true");
+      args.push("-o", "avatar=true", "-o", "format=best");
     }
     args.push("--sleep-request", sleepDelay);
   } else if (subDir === "Stories") {
@@ -41364,7 +41365,7 @@ function parseProfileInput(input) {
   }
   let candidate = trimmed;
   if (!/^https?:\/\//i.test(candidate)) {
-    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
+    if (candidate.includes("instagram.com") || candidate.includes("tiktok.com") || candidate.includes("facebook.com") || candidate.includes("fb.watch") || candidate.includes("fb.com") || candidate.includes("x.com") || candidate.includes("twitter.com")) {
       candidate = "https://" + candidate;
     }
   }
@@ -41416,6 +41417,14 @@ function parseProfileInput(input) {
           cleanUrl: `https://www.facebook.com/people/${pathParts[1]}`,
           rawInput: input
         };
+      } else if (pathParts[0]?.toLowerCase() === "reel" && pathParts[1]) {
+        const reelId = pathParts[1].replace(/[^a-zA-Z0-9_-]/g, "");
+        return {
+          platform: "facebook",
+          username: sanitizeUsername(`reel_${reelId}`),
+          cleanUrl: `https://www.facebook.com/reel/${reelId}`,
+          rawInput: input
+        };
       } else if (pathParts[0]) {
         const reserved = ["watch", "videos", "reel", "groups", "pages", "events", "photo"];
         if (!reserved.includes(pathParts[0].toLowerCase())) {
@@ -41427,6 +41436,15 @@ function parseProfileInput(input) {
           };
         }
       }
+    }
+    if (host === "fb.watch" && pathParts[0]) {
+      const watchId = pathParts[0].replace(/[^a-zA-Z0-9_-]/g, "");
+      return {
+        platform: "facebook",
+        username: sanitizeUsername(`watch_${watchId}`),
+        cleanUrl: `https://fb.watch/${watchId}`,
+        rawInput: input
+      };
     }
     if (host.includes("x.com") || host.includes("twitter.com")) {
       if (pathParts[0]?.toLowerCase() === "i" && pathParts[1]?.toLowerCase() === "history" && pathParts[2]?.toLowerCase() === "likes") {

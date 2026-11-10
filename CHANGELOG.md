@@ -4,6 +4,20 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.6] - 2026-11-10
+
+### Fixed & Hardened
+- **Managed Engine Precedence Hardening**:
+  - Re-ordered engine command resolution in `resolveEngineCommand` and `ensureGalleryDl`/`ensureYtDlp` to prioritize Open Nami's managed binary directory (`~/.open-nami/bin/`) before generic system `$PATH`.
+  - Guarantees that in-place updates via `open-nami -U` take immediate effect without being shadowed by un-updated system package manager binaries.
+- **Facebook Reel & Video URL Parsing**:
+  - Extended URL parser to natively recognize `facebook.com/reel/<id>`, `fb.com/reel/<id>`, and `fb.watch/<id>` targets.
+  - Wired direct reel extraction paths with automated fallback to Gallery DL 1.32.19, eliminating parsing rejection on single reel/video permalinks.
+- **TikTok Pre-Muxed Audio Stream Safeguard**:
+  - Appended `-o format=best` to gallery-dl video and full-archive invocations for TikTok, ensuring pre-muxed audio/video MP4 selection over silent video-only DASH streams.
+- **Upstream Gallery DL Parity**:
+  - Fully verified and synchronized with Gallery DL `v1.32.19`, unlocking upstream fixes for Facebook album `set_id` errors and TikTok challenge padding.
+
 ## [1.9.5] - 2026-11-04
 
 ### Fixed & Hardened
