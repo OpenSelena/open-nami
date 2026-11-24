@@ -935,6 +935,10 @@ export class InstagramExtractor implements Extractor {
 
     let found = 0
     const emittedItemIds = new Set<string>()
+    const isTest =
+      process.env.NODE_ENV === 'test' ||
+      Boolean(process.env.NODE_TEST_CONTEXT) ||
+      process.execArgv.some(a => a.includes('test'))
 
     let currentEdges = user?.edge_owner_to_timeline_media?.edges ?? []
     let hasNextPage = Boolean(user?.edge_owner_to_timeline_media?.page_info?.has_next_page)
@@ -1005,11 +1009,6 @@ export class InstagramExtractor implements Extractor {
 
       options.onCheckpoint?.('timeline', endCursor)
 
-      const isTest =
-        process.env.NODE_ENV === 'test' ||
-        Boolean(process.env.NODE_TEST_CONTEXT) ||
-        process.execArgv.some(a => a.includes('test'))
-
       if (!isTest) {
         await sleep(1500, 2500, options.signal)
       }
@@ -1029,52 +1028,66 @@ export class InstagramExtractor implements Extractor {
     }
 
     if ((subDir === 'Videos' || subDir === 'All') && userId) {
-      const videoEdges = user?.edge_felix_video_timeline?.edges ?? []
-      for (const edge of videoEdges) {
-        const items = parseIgNodeToMediaItems(edge.node, username)
-        for (const item of items) {
-          if (item.type !== 'video') continue
-          if (emittedItemIds.has(item.id)) continue
-          emittedItemIds.add(item.id)
+      if (options.limit !== undefined && found >= options.limit) return
 
-          found++
-          options.onProgress?.({
-            stage: 'Videos',
-            found,
-            message: `Found reel: ${item.filename}`,
-          })
-          yield item
+      const emitReelEdges = function* (
+        edges: Array<{node: IgMediaNode}>,
+      ): Generator<MediaItem, {stoppedByLimit: boolean; reachedSinceLimit: boolean}, unknown> {
+        for (const edge of edges) {
+          const items = parseIgNodeToMediaItems(edge.node, username)
+          for (const item of items) {
+            if (item.type !== 'video') continue
+
+            if (options.until !== undefined && item.date && item.date > options.until) continue
+            if (options.since !== undefined && item.date && item.date < options.since) {
+              return {stoppedByLimit: false, reachedSinceLimit: true}
+            }
+
+            if (emittedItemIds.has(item.id)) continue
+            if (options.limit !== undefined && found >= options.limit) {
+              return {stoppedByLimit: true, reachedSinceLimit: false}
+            }
+
+            emittedItemIds.add(item.id)
+            found++
+            options.onProgress?.({
+              stage: 'Videos',
+              found,
+              message: `Found reel: ${item.filename}`,
+            })
+            yield item
+
+            if (options.limit !== undefined && found >= options.limit) {
+              return {stoppedByLimit: true, reachedSinceLimit: false}
+            }
+          }
         }
+        return {stoppedByLimit: false, reachedSinceLimit: false}
       }
+
+      const videoEdges = user?.edge_felix_video_timeline?.edges ?? []
+      const felixResult = yield* emitReelEdges(videoEdges)
+      if (felixResult.stoppedByLimit) return
 
       let reelsCursor = ''
       let hasMoreReels = true
 
       while (hasMoreReels && !options.signal?.aborted) {
+        if (options.limit !== undefined && found >= options.limit) return
+
         try {
           const reelsPage = await this.fetchNextReelsPage(userId, reelsCursor, options)
           if (!reelsPage.edges || reelsPage.edges.length === 0) break
 
-          for (const edge of reelsPage.edges) {
-            const items = parseIgNodeToMediaItems(edge.node, username)
-            for (const item of items) {
-              if (item.type !== 'video') continue
-              if (emittedItemIds.has(item.id)) continue
-              emittedItemIds.add(item.id)
-
-              found++
-              options.onProgress?.({
-                stage: 'Videos',
-                found,
-                message: `Found reel: ${item.filename}`,
-              })
-              yield item
-            }
-          }
+          const reelsResult = yield* emitReelEdges(reelsPage.edges)
+          if (reelsResult.stoppedByLimit) return
+          if (reelsResult.reachedSinceLimit) break
 
           if (reelsPage.hasNextPage && reelsPage.nextCursor && reelsPage.nextCursor !== reelsCursor) {
             reelsCursor = reelsPage.nextCursor
-            await sleep(1500, 2500, options.signal)
+            if (!isTest) {
+              await sleep(1500, 2500, options.signal)
+            }
           } else {
             hasMoreReels = false
           }

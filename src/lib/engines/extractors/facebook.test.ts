@@ -5,6 +5,7 @@ import {
   decodeEscapedUrl,
   extractFacebookPaginationCursor,
   extractFacebookNextPageUrl,
+  rewriteFacebookHost,
   FacebookExtractor,
 } from './facebook.js'
 import {HttpClient} from './http.js'
@@ -221,5 +222,112 @@ test('FacebookExtractor paginates beyond 5 pages without arbitrary hardcap', asy
 
   assert.equal(mockClient.pagesFetched, 7)
   assert.equal(items.length, 7)
+})
+
+test('rewriteFacebookHost rewrites facebook.com hostnames without doubling and preserves fb.watch', () => {
+  assert.equal(
+    rewriteFacebookHost('https://www.facebook.com/reel/123', 'mbasic.facebook.com'),
+    'https://mbasic.facebook.com/reel/123',
+  )
+  assert.equal(
+    rewriteFacebookHost('https://www.facebook.com/reel/123', 'm.facebook.com'),
+    'https://m.facebook.com/reel/123',
+  )
+  assert.equal(
+    rewriteFacebookHost('https://facebook.com/reel/123?ref=share', 'mbasic.facebook.com'),
+    'https://mbasic.facebook.com/reel/123?ref=share',
+  )
+  assert.equal(
+    rewriteFacebookHost('https://fb.watch/abc123', 'mbasic.facebook.com'),
+    'https://fb.watch/abc123',
+  )
+})
+
+test('FacebookExtractor /reel/<id> fallback targets mbasic.facebook.com and m.facebook.com cleanly', async () => {
+  class MockReelClient extends HttpClient {
+    requested: string[] = []
+    constructor(private resolveOnMobile: boolean) {
+      super()
+    }
+    override async fetchText(url: string): Promise<string> {
+      this.requested.push(url)
+      if (url === 'https://www.facebook.com/reel/123') {
+        return '<div id="root"></div>'
+      }
+      if (url === 'https://mbasic.facebook.com/reel/123') {
+        if (this.resolveOnMobile) return '<div id="root"></div>'
+        return '<video src="https://video.xx.fbcdn.net/v/reel_123_mbasic.mp4"></video>'
+      }
+      if (url === 'https://m.facebook.com/reel/123') {
+        return '<video src="https://video.xx.fbcdn.net/v/reel_123_mobile.mp4"></video>'
+      }
+      throw new Error(`Unexpected url: ${url}`)
+    }
+  }
+
+  const profile: ParsedProfile = {
+    platform: 'facebook',
+    username: 'reel_123',
+    cleanUrl: 'https://www.facebook.com/reel/123',
+    rawInput: 'https://www.facebook.com/reel/123',
+  }
+
+  const mbasicClient = new MockReelClient(false)
+  const mbasicItems = []
+  for await (const item of new FacebookExtractor(mbasicClient).extract(profile, {subDir: 'Videos'})) {
+    mbasicItems.push(item)
+  }
+  assert.deepEqual(mbasicClient.requested, [
+    'https://www.facebook.com/reel/123',
+    'https://mbasic.facebook.com/reel/123',
+  ])
+  assert.ok(mbasicClient.requested.every(u => !u.includes('mbasic.mbasic.facebook.com')))
+  assert.equal(mbasicItems.length, 1)
+  assert.equal(mbasicItems[0].url, 'https://video.xx.fbcdn.net/v/reel_123_mbasic.mp4')
+
+  const mobileClient = new MockReelClient(true)
+  const mobileItems = []
+  for await (const item of new FacebookExtractor(mobileClient).extract(profile, {subDir: 'Videos'})) {
+    mobileItems.push(item)
+  }
+  assert.deepEqual(mobileClient.requested, [
+    'https://www.facebook.com/reel/123',
+    'https://mbasic.facebook.com/reel/123',
+    'https://m.facebook.com/reel/123',
+  ])
+  assert.ok(mobileClient.requested.every(u => !u.includes('m.m.facebook.com')))
+  assert.equal(mobileItems.length, 1)
+  assert.equal(mobileItems[0].url, 'https://video.xx.fbcdn.net/v/reel_123_mobile.mp4')
+})
+
+test('FacebookExtractor preserves https://fb.watch/<id> without rewriting host on fallback', async () => {
+  class MockWatchClient extends HttpClient {
+    requested: string[] = []
+    override async fetchText(url: string): Promise<string> {
+      this.requested.push(url)
+      if (this.requested.length === 1) {
+        return '<div id="root"></div>'
+      }
+      return '<video src="https://video.xx.fbcdn.net/v/watch_xyz.mp4"></video>'
+    }
+  }
+
+  const client = new MockWatchClient()
+  const profile: ParsedProfile = {
+    platform: 'facebook',
+    username: 'watch_xyz',
+    cleanUrl: 'https://fb.watch/xyz',
+    rawInput: 'https://fb.watch/xyz',
+  }
+
+  const items = []
+  for await (const item of new FacebookExtractor(client).extract(profile, {subDir: 'Videos'})) {
+    items.push(item)
+  }
+
+  assert.equal(items.length, 1)
+  assert.equal(items[0].url, 'https://video.xx.fbcdn.net/v/watch_xyz.mp4')
+  assert.ok(client.requested.length >= 2)
+  assert.ok(client.requested.every(u => u === 'https://fb.watch/xyz'))
 })
 

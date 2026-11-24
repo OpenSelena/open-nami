@@ -415,10 +415,10 @@ test('dispatchDownload fails over to gallery-dl and yt-dlp when unified All nati
 
     const result = await dispatchDownload({
       profile: {
-        platform: 'tiktok',
-        username: 'fail_tiktok',
-        cleanUrl: 'https://www.tiktok.com/@fail_tiktok',
-        rawInput: 'fail_tiktok',
+        platform: 'x',
+        username: 'fail_x',
+        cleanUrl: 'https://x.com/fail_x',
+        rawInput: 'fail_x',
       },
       choice: 'all',
       outputDir: tmpDir,
@@ -442,6 +442,96 @@ test('dispatchDownload fails over to gallery-dl and yt-dlp when unified All nati
     assert.ok(gdlJobs.includes('Photos'), 'gallery-dl should run for photos on failover')
     assert.ok(ytCalled, 'yt-dlp should run for videos on failover')
     assert.equal(result.downloadedCount, 5) // 2 from gdl photos + 3 from yt videos
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload fails over directly to gallery-dl All for TikTok choice=all when native fails or yields 0', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-tiktok-all-failover-'))
+
+  try {
+    for (const nativeResult of [
+      {success: false, downloaded: 0, skipped: 0, error: 'WAF Block'},
+      {success: true, downloaded: 0, skipped: 0},
+    ]) {
+      let nativeAllCalled = false
+      const gdlJobs: string[] = []
+      let ytCalled = false
+      const progressEvents: Array<{job: string; statusText: string}> = []
+
+      const result = await dispatchDownload({
+        profile: {
+          platform: 'tiktok',
+          username: 'fail_tiktok',
+          cleanUrl: 'https://www.tiktok.com/@fail_tiktok',
+          rawInput: 'fail_tiktok',
+        },
+        choice: 'all',
+        outputDir: tmpDir,
+        noTrack: true,
+        onProgress: (p) => {
+          progressEvents.push({job: p.job, statusText: p.statusText})
+        },
+        runnerOverrides: {
+          nativeRunner: async (subDir) => {
+            if (subDir === 'All') nativeAllCalled = true
+            return nativeResult
+          },
+          gdlRunner: async (subDir) => {
+            gdlJobs.push(subDir)
+            return {success: true, downloaded: 4, skipped: 1}
+          },
+          ytRunner: async () => {
+            ytCalled = true
+            return {success: true, downloaded: 3, skipped: 0}
+          },
+        },
+      })
+
+      assert.ok(nativeAllCalled, 'Native All runner should have been tried first')
+      assert.deepEqual(gdlJobs, ['All'])
+      assert.equal(ytCalled, false, 'yt-dlp should not run on TikTok All failover')
+      assert.ok(
+        progressEvents.some(p => p.job === 'All' && p.statusText === 'switching to gallery-dl engine…'),
+        'Progress should emit unified All gallery-dl failover message',
+      )
+      assert.equal(result.success, true)
+      assert.equal(result.downloadedCount, 4)
+      assert.equal(result.skippedCount, 1)
+      assert.deepEqual(result.errors, [])
+    }
+  } finally {
+    await fsPromises.rm(tmpDir, {recursive: true, force: true})
+  }
+})
+
+test('dispatchDownload records error when TikTok All gallery-dl failover fails', async () => {
+  const {dispatchDownload} = await import('./dispatcher.js')
+  const fsPromises = await import('node:fs/promises')
+  const tmpDir = await fsPromises.mkdtemp(path.join(os.tmpdir(), 'nami-tiktok-all-failover-err-'))
+
+  try {
+    const result = await dispatchDownload({
+      profile: {
+        platform: 'tiktok',
+        username: 'fail_tiktok_err',
+        cleanUrl: 'https://www.tiktok.com/@fail_tiktok_err',
+        rawInput: 'fail_tiktok_err',
+      },
+      choice: 'all',
+      outputDir: tmpDir,
+      noTrack: true,
+      runnerOverrides: {
+        nativeRunner: async () => ({success: true, downloaded: 0, skipped: 0}),
+        gdlRunner: async () => ({success: false, downloaded: 0, skipped: 0, error: 'HTTP 403'}),
+      },
+    })
+
+    assert.equal(result.success, false)
+    assert.deepEqual(result.errors, ['[All] HTTP 403'])
   } finally {
     await fsPromises.rm(tmpDir, {recursive: true, force: true})
   }

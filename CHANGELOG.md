@@ -4,6 +4,23 @@ All notable changes to Open Nami are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.7] - 2026-11-25
+
+### Fixed
+- **TikTok Native Extractor & `all` Failover**:
+  - Updated `TikTokExtractor` `api/creator/item_list/` `count` query parameter from `30` to `15` so TikTok no longer rejects native requests with `HTTP 400` (`statusCode: 10201`, `invalid count parameter`), and gated catch-block logging behind `DEBUG` / `OPEN_NAMI_DEBUG`.
+  - Updated `dispatchDownload` so TikTok `choice: 'all'` failover invokes `runGdl('All')` directly instead of splitting into `runGdl('Photos')` and `runYt()`.
+- **Facebook `/reel/` Fallback Host Rewriting**:
+  - Added `rewriteFacebookHost` using `URL` hostname replacement so `/reel/` URLs resolve to `mbasic.facebook.com` and `m.facebook.com` without doubling hosts (`mbasic.mbasic.facebook.com`), while leaving `fb.watch` URLs unchanged.
+- **Instagram Reels Fallback Filtering**:
+  - Enforced `since`, `until`, and `limit` bounds plus `isTest` sleep skipping across `edge_felix_video_timeline` and `fetchNextReelsPage` loops in `InstagramExtractor`.
+- **TUI Pull Shortcut & Empty Input Isolation**:
+  - Replaced the `^h history` home hint with `^p history` (since terminals map `Ctrl+H` to Backspace in Ink).
+  - Added `onEmptyHotkey` in `TextInput` wired to `InputView` so pressing `p` / `P` on an empty URL input opens `PullView` without inserting `'p'` into the input box.
+- **Shell Completions & Documentation Sync**:
+  - Synced `bash`, `zsh`, `fish`, and `powershell` completions in `completion.ts` with all subcommands (`pull`, `sync`, `list`, `track`, `untrack`) and CLI flags (`--doctor`, `-w`, `-b`, `--since`, `--until`, `-l`, `--resume`, `--write-metadata`, `-p`).
+  - Updated `docs/cookies.md` to match `<domain>_cookies.txt` naming in `cookies.ts` and document Firefox/Gecko vs Chromium Browser Cookie Bridge behavior; updated `docs/cli-reference.md`, `docs/configuration.md`, and `README.md`.
+
 ## [1.9.6] - 2026-11-10
 
 ### Fixed & Hardened

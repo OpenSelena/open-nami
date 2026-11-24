@@ -741,8 +741,270 @@ test('InstagramExtractor defers checkpoint cursor advance until current page ite
   assert.equal(checkpoints[0]?.val, 'cursor_page_2')
 })
 
+test('InstagramExtractor Reels fallback enforces limit across edge_felix_video_timeline and fetchNextReelsPage', async () => {
+  const requestedCursors: string[] = []
 
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init?: any) => {
+      if (url.includes('web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: 'user_reels_limit',
+              username: 'reelsuser',
+              edge_owner_to_timeline_media: {
+                page_info: {has_next_page: false},
+                edges: [],
+              },
+              edge_felix_video_timeline: {
+                edges: [
+                  {
+                    node: {
+                      id: 'f1',
+                      shortcode: 'FELIX1',
+                      is_video: true,
+                      video_url: 'https://instagram.com/felix1.mp4',
+                      taken_at_timestamp: 1700000300,
+                    },
+                  },
+                  {
+                    node: {
+                      id: 'f2',
+                      shortcode: 'FELIX2',
+                      is_video: true,
+                      video_url: 'https://instagram.com/felix2.mp4',
+                      taken_at_timestamp: 1700000250,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      if (url.includes('graphql/query')) {
+        const body = new URLSearchParams(init?.body || '')
+        const vars = JSON.parse(body.get('variables') || '{}')
+        requestedCursors.push(vars.after ?? '')
+        if (!vars.after) {
+          return {
+            data: {
+              fetch__XDTUserDict: {
+                reels: {
+                  page_info: {has_next_page: true, end_cursor: 'REELS_PAGE_2'},
+                  edges: [
+                    {
+                      node: {
+                        id: 'r1',
+                        shortcode: 'REEL1',
+                        is_video: true,
+                        video_url: 'https://instagram.com/reel1.mp4',
+                        taken_at_timestamp: 1700000200,
+                      },
+                    },
+                    {
+                      node: {
+                        id: 'r2',
+                        shortcode: 'REEL2',
+                        is_video: true,
+                        video_url: 'https://instagram.com/reel2.mp4',
+                        taken_at_timestamp: 1700000150,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }
+        }
+        return {
+          data: {
+            fetch__XDTUserDict: {
+              reels: {
+                page_info: {has_next_page: false},
+                edges: [
+                  {
+                    node: {
+                      id: 'r3',
+                      shortcode: 'REEL3',
+                      is_video: true,
+                      video_url: 'https://instagram.com/reel3.mp4',
+                      taken_at_timestamp: 1700000100,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      return {}
+    },
+    fetchText: async () => '<html></html>',
+  }
 
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const profile = {
+    platform: 'instagram' as const,
+    username: 'reelsuser',
+    cleanUrl: 'https://instagram.com/reelsuser',
+    rawInput: 'reelsuser',
+  }
 
+  const zeroItems = []
+  for await (const item of extractor.extract(profile, {subDir: 'Videos', limit: 0})) {
+    zeroItems.push(item)
+  }
+  assert.equal(zeroItems.length, 0)
+  assert.equal(requestedCursors.length, 0)
+
+  const oneItem = []
+  for await (const item of extractor.extract(profile, {subDir: 'Videos', limit: 1})) {
+    oneItem.push(item)
+  }
+  assert.deepEqual(oneItem.map(i => i.id), ['FELIX1'])
+  assert.equal(requestedCursors.length, 0)
+
+  const threeItems = []
+  for await (const item of extractor.extract(profile, {subDir: 'Videos', limit: 3})) {
+    threeItems.push(item)
+  }
+  assert.deepEqual(threeItems.map(i => i.id), ['FELIX1', 'FELIX2', 'REEL1'])
+  assert.deepEqual(requestedCursors, [''])
+})
+
+test('InstagramExtractor Reels fallback enforces since and until filters and stops pagination on since', async () => {
+  const requestedCursors: string[] = []
+
+  const mockHttpClient: any = {
+    fetchJson: async (url: string, init?: any) => {
+      if (url.includes('web_profile_info')) {
+        return {
+          data: {
+            user: {
+              id: 'user_reels_dates',
+              username: 'reelsdateuser',
+              edge_owner_to_timeline_media: {
+                page_info: {has_next_page: false},
+                edges: [],
+              },
+              edge_felix_video_timeline: {
+                edges: [
+                  {
+                    node: {
+                      id: 'f_new',
+                      shortcode: 'F_NEW',
+                      is_video: true,
+                      video_url: 'https://instagram.com/f_new.mp4',
+                      taken_at_timestamp: 4000,
+                    },
+                  },
+                  {
+                    node: {
+                      id: 'f_ok',
+                      shortcode: 'F_OK',
+                      is_video: true,
+                      video_url: 'https://instagram.com/f_ok.mp4',
+                      taken_at_timestamp: 2500,
+                    },
+                  },
+                  {
+                    node: {
+                      id: 'f_old',
+                      shortcode: 'F_OLD',
+                      is_video: true,
+                      video_url: 'https://instagram.com/f_old.mp4',
+                      taken_at_timestamp: 1000,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }
+      }
+      if (url.includes('graphql/query')) {
+        const body = new URLSearchParams(init?.body || '')
+        const vars = JSON.parse(body.get('variables') || '{}')
+        const after = vars.after ?? ''
+        requestedCursors.push(after)
+
+        if (after === '') {
+          return {
+            data: {
+              fetch__XDTUserDict: {
+                reels: {
+                  page_info: {has_next_page: true, end_cursor: 'REELS_P2'},
+                  edges: [
+                    {
+                      node: {
+                        id: 'r_new',
+                        shortcode: 'R_NEW',
+                        is_video: true,
+                        video_url: 'https://instagram.com/r_new.mp4',
+                        taken_at_timestamp: 3500,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }
+        }
+        if (after === 'REELS_P2') {
+          return {
+            data: {
+              fetch__XDTUserDict: {
+                reels: {
+                  page_info: {has_next_page: true, end_cursor: 'REELS_P3'},
+                  edges: [
+                    {
+                      node: {
+                        id: 'r_ok',
+                        shortcode: 'R_OK',
+                        is_video: true,
+                        video_url: 'https://instagram.com/r_ok.mp4',
+                        taken_at_timestamp: 2200,
+                      },
+                    },
+                    {
+                      node: {
+                        id: 'r_old',
+                        shortcode: 'R_OLD',
+                        is_video: true,
+                        video_url: 'https://instagram.com/r_old.mp4',
+                        taken_at_timestamp: 1500,
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          }
+        }
+        throw new Error(`Should not fetch page after since boundary: ${after}`)
+      }
+      return {}
+    },
+    fetchText: async () => '<html></html>',
+  }
+
+  const extractor = new InstagramExtractor(mockHttpClient)
+  const items = []
+  for await (const item of extractor.extract(
+    {
+      platform: 'instagram',
+      username: 'reelsdateuser',
+      cleanUrl: 'https://instagram.com/reelsdateuser',
+      rawInput: 'reelsdateuser',
+    },
+    {subDir: 'Videos', since: 2000, until: 3000},
+  )) {
+    items.push(item)
+  }
+
+  assert.deepEqual(items.map(i => i.id), ['F_OK', 'R_OK'])
+  assert.deepEqual(requestedCursors, ['', 'REELS_P2'])
+})
 
 

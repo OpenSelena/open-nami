@@ -189,6 +189,13 @@ export function parseTikTokItem(item: any, username: string): MediaItem[] {
   return items
 }
 
+function logExtractorDebug(endpoint: string, err: unknown): void {
+  if (process.env.DEBUG || process.env.OPEN_NAMI_DEBUG) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.debug(`[open-nami:tiktok] ${endpoint} fallback: ${message}`)
+  }
+}
+
 export class TikTokExtractor implements Extractor {
   platform = 'tiktok' as const
   private httpClient: HttpClient
@@ -231,7 +238,9 @@ export class TikTokExtractor implements Extractor {
           retries: 0,
           timeoutMs: 4000,
         })
-      } catch {}
+      } catch (err) {
+        logExtractorDebug('WAF re-fetch', err)
+      }
     }
 
     const scope = parseTikTokRehydrationJson(html)
@@ -313,7 +322,7 @@ export class TikTokExtractor implements Extractor {
         tz_name: 'UTC',
         secUid,
         type: '1',
-        count: '30',
+        count: '15',
         cursor: cursor === '0' ? String(Date.now() * 1000) : cursor,
       })
       const creatorUrl = `https://www.tiktok.com/api/creator/item_list/?${creatorParams.toString()}`
@@ -328,7 +337,9 @@ export class TikTokExtractor implements Extractor {
             'Referer': profileUrl,
           },
         })
-      } catch {}
+      } catch (err) {
+        logExtractorDebug('creator/item_list', err)
+      }
 
       let items: any[] = res?.itemList || []
       let nextCursor = ''
@@ -364,7 +375,8 @@ export class TikTokExtractor implements Extractor {
           items = postRes?.itemList || []
           hasMore = Boolean(postRes?.hasMore)
           nextCursor = String(postRes?.cursor ?? '0')
-        } catch {
+        } catch (err) {
+          logExtractorDebug('post/item_list', err)
           break
         }
       }

@@ -299,41 +299,58 @@ export async function dispatchDownload(options: DispatchOptions): Promise<Engine
       if (job.type === 'all') {
         let res = await runNative('All')
 
-        // Fallback to gallery-dl and yt-dlp if native extractor failed or found 0 items
+        // Fallback when native extractor failed or found 0 items
         if ((!res.success || (res.downloaded === 0 && res.skipped === 0)) && !options.signal?.aborted) {
-          handleProgress({
-            job: 'Photos',
-            downloadedCount: totalDownloaded,
-            skippedCount: totalSkipped,
-            statusText: 'switching to gallery-dl engine for photos…',
-          })
-          const gdlPhotos = await runGdl('Photos')
-          totalDownloaded += gdlPhotos.downloaded
-          totalSkipped += gdlPhotos.skipped
-          if (!gdlPhotos.success) recordError(gdlPhotos.error ? `[Photos] ${gdlPhotos.error}` : '[Photos] Execution failed')
+          if (profile.platform === 'tiktok') {
+            handleProgress({
+              job: 'All',
+              downloadedCount: totalDownloaded,
+              skippedCount: totalSkipped,
+              statusText: 'switching to gallery-dl engine…',
+            })
+            const gdlAll = await runGdl('All')
+            totalDownloaded += gdlAll.downloaded
+            totalSkipped += gdlAll.skipped
+            if (!gdlAll.success) {
+              recordError(gdlAll.error ? `[All] ${gdlAll.error}` : '[All] Execution failed')
+            } else if (gdlAll.downloaded === 0 && gdlAll.skipped === 0 && !res.success) {
+              recordError(res.error ? `[All] ${res.error}` : '[All] Execution failed')
+            }
+          } else {
+            handleProgress({
+              job: 'Photos',
+              downloadedCount: totalDownloaded,
+              skippedCount: totalSkipped,
+              statusText: 'switching to gallery-dl engine for photos…',
+            })
+            const gdlPhotos = await runGdl('Photos')
+            totalDownloaded += gdlPhotos.downloaded
+            totalSkipped += gdlPhotos.skipped
+            if (!gdlPhotos.success) recordError(gdlPhotos.error ? `[Photos] ${gdlPhotos.error}` : '[Photos] Execution failed')
 
-          handleProgress({
-            job: 'Videos',
-            downloadedCount: totalDownloaded,
-            skippedCount: totalSkipped,
-            statusText: 'switching to yt-dlp engine for videos…',
-          })
-          const ytVideos = await runYt()
-          if (ytVideos.downloaded > 0 || ytVideos.skipped > 0 || ytVideos.success) {
-            totalDownloaded += ytVideos.downloaded
-            totalSkipped += ytVideos.skipped
-            if (!ytVideos.success) recordError(ytVideos.error ? `[Videos] ${ytVideos.error}` : '[Videos] Execution failed')
-          } else if (!options.signal?.aborted) {
             handleProgress({
               job: 'Videos',
               downloadedCount: totalDownloaded,
               skippedCount: totalSkipped,
-              statusText: 'switching to gallery-dl engine for videos…',
+              statusText: 'switching to yt-dlp engine for videos…',
             })
-            const gdlVideos = await runGdl('Videos')
-            totalDownloaded += gdlVideos.downloaded
-            totalSkipped += gdlVideos.skipped
-            if (!gdlVideos.success) recordError(gdlVideos.error ? `[Videos] ${gdlVideos.error}` : '[Videos] Execution failed')
+            const ytVideos = await runYt()
+            if (ytVideos.downloaded > 0 || ytVideos.skipped > 0 || ytVideos.success) {
+              totalDownloaded += ytVideos.downloaded
+              totalSkipped += ytVideos.skipped
+              if (!ytVideos.success) recordError(ytVideos.error ? `[Videos] ${ytVideos.error}` : '[Videos] Execution failed')
+            } else if (!options.signal?.aborted) {
+              handleProgress({
+                job: 'Videos',
+                downloadedCount: totalDownloaded,
+                skippedCount: totalSkipped,
+                statusText: 'switching to gallery-dl engine for videos…',
+              })
+              const gdlVideos = await runGdl('Videos')
+              totalDownloaded += gdlVideos.downloaded
+              totalSkipped += gdlVideos.skipped
+              if (!gdlVideos.success) recordError(gdlVideos.error ? `[Videos] ${gdlVideos.error}` : '[Videos] Execution failed')
+            }
           }
         } else {
           totalDownloaded += res.downloaded

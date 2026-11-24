@@ -39,7 +39,7 @@ jobs:
         run: npm run build
 
   publish-npm:
-    name: Publish to npm
+    name: Publish to npm (OIDC)
     needs: verify
     runs-on: ubuntu-latest
     permissions:
@@ -49,11 +49,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 24
           cache: 'npm'
 
       - name: Install dependencies
@@ -64,8 +63,6 @@ jobs:
 
       - name: Publish to npm registry
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-pypi:
     name: Publish to PyPI (OIDC)

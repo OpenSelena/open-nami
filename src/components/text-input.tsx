@@ -18,6 +18,8 @@ type Props = {
   submitOnPaste?: (value: string) => boolean
   /** tab pressed — accept a suggestion, etc. */
   onTab?: () => void
+  /** single-character hotkey pressed while value is empty; return true to consume without inserting */
+  onEmptyHotkey?: (input: string) => boolean
   focus?: boolean
   onArrowUp?: () => void
   onArrowDown?: () => void
@@ -52,6 +54,7 @@ export function TextInput({
   history = [],
   submitOnPaste,
   onTab,
+  onEmptyHotkey,
   focus = true,
   onArrowUp,
   onArrowDown,
@@ -169,6 +172,18 @@ export function TextInput({
     // eslint-disable-next-line no-control-regex
     const clean = stripMouseReports(input).replace(/[\x00-\x1f\x7f]/g, '')
     if (!clean) return
+    if (
+      value === '' &&
+      !key.ctrl &&
+      !key.meta &&
+      !key.return &&
+      !key.tab &&
+      !key.escape &&
+      clean.length === 1 &&
+      onEmptyHotkey?.(clean)
+    ) {
+      return
+    }
     const [start, end] = selection ?? [cursor, cursor]
     const next = value.slice(0, start) + clean + value.slice(end)
     edit(next, start + clean.length)

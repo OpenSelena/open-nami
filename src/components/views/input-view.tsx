@@ -45,6 +45,7 @@ export function InputView({
   gapComponent: Gap,
   announcement,
   trackedCount = 0,
+  onPullClick,
 }: InputViewProps) {
   return (
     <Box flexDirection="column" alignItems="center">
@@ -59,6 +60,17 @@ export function InputView({
           onTab={() => {
             if (clipboardOffered && clipboardUrl) setUrlInput(clipboardUrl)
           }}
+          onEmptyHotkey={
+            onPullClick
+              ? (char) => {
+                  if (char === 'p' || char === 'P') {
+                    onPullClick()
+                    return true
+                  }
+                  return false
+                }
+              : undefined
+          }
         />
       </FramedInput>
       {warning ? (

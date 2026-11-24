@@ -218,6 +218,18 @@ export function extractFacebookNextPageUrl(html: string, currentUrl: string): st
   return null
 }
 
+export function rewriteFacebookHost(rawUrl: string, targetHost: string): string {
+  try {
+    const parsed = new URL(rawUrl)
+    const host = parsed.hostname.toLowerCase()
+    if (host === 'facebook.com' || host.endsWith('.facebook.com')) {
+      parsed.hostname = targetHost
+      return parsed.toString()
+    }
+  } catch {}
+  return rawUrl
+}
+
 export class FacebookExtractor implements Extractor {
   platform = 'facebook' as const
   private httpClient: HttpClient
@@ -257,10 +269,10 @@ export class FacebookExtractor implements Extractor {
 
       const desktopUrl = isReel ? profile.cleanUrl : `https://www.facebook.com/${encodeURIComponent(username)}/${targetPath}`
       const mbasicUrl = isReel
-        ? profile.cleanUrl.replace('www.facebook.com', 'mbasic.facebook.com').replace('facebook.com', 'mbasic.facebook.com')
+        ? rewriteFacebookHost(profile.cleanUrl, 'mbasic.facebook.com')
         : `https://mbasic.facebook.com/${encodeURIComponent(username)}/${targetPath}`
       const mobileUrl = isReel
-        ? profile.cleanUrl.replace('www.facebook.com', 'm.facebook.com').replace('facebook.com', 'm.facebook.com')
+        ? rewriteFacebookHost(profile.cleanUrl, 'm.facebook.com')
         : `https://m.facebook.com/${encodeURIComponent(username)}/${targetPath}`
 
       let currentUrl = desktopUrl

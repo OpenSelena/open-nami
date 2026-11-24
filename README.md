@@ -100,11 +100,14 @@ nami -U
 | :--- | :--- |
 | **`[Tab]`** | Paste URL from clipboard |
 | **`[Enter]`** | Submit URL / Start download |
-| **`[↑ / ↓]`** | Navigate format options |
-| **`[^s]`** *(Ctrl+S)* | Settings (cookies & download directory) |
+| **`[↑ / ↓]`** | Navigate menus |
+| **`[^w]`** *(Ctrl+W)* | Clipboard Watcher |
+| **`[^b]`** *(Ctrl+B)* | Batch multi-account queue |
+| **`[^s]`** *(Ctrl+S)* | Settings (cookies, browser bridge, download directory, metadata, limit) |
+| **`[^p]`** *(Ctrl+P)* or **`[p]`** | Pull updates / tracked profiles (`PullView`, `[p]` when input is empty) |
 | **`[^t]`** *(Ctrl+T)* | Cycle theme (`auto` / `light` / `dark`) |
-| **`[o]`** | Open destination folder in file manager |
-| **`[Esc]`** | Back to URL input |
+| **`[o]`** | Open destination folder on completion |
+| **`[Esc]`** | Back / Cancel |
 | **`[^c]`** *(Ctrl+C)* | Quit |
 
 ### Interface Demo

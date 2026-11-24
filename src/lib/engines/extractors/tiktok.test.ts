@@ -300,5 +300,133 @@ test('solveTikTokWafChallenge returns null for non-challenge HTML', () => {
   assert.equal(solveTikTokWafChallenge('<html><body>Hello</body></html>'), null)
 })
 
+test('TikTokExtractor uses count=15 on creator/item_list and falls back to post/item_list on failure', async () => {
+  const {TikTokExtractor} = await import('./tiktok.js')
+  const requestedUrls: string[] = []
 
+  const mockHttpClient: any = {
+    fetchText: async () => `
+      <script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">
+      {"__DEFAULT_SCOPE__":{"webapp.user-detail":{"userInfo":{"user":{"id":"55","secUid":"MS4wLjABAAAA_TEST"}}}}}
+      </script>
+    `,
+    fetchJson: async (url: string) => {
+      requestedUrls.push(url)
+      if (url.includes('/api/creator/item_list/')) {
+        throw new Error('HTTP 400 (Bad Request)')
+      }
+      if (url.includes('/api/post/item_list/')) {
+        return {
+          itemList: [
+            {
+              id: 'post_fallback_1',
+              desc: 'Fallback video',
+              createTime: '1700000100',
+              video: {playAddr: 'https://cdn.tiktok.com/fallback.mp4'},
+            },
+          ],
+          hasMore: false,
+          cursor: '0',
+        }
+      }
+      throw new Error(`Unexpected URL: ${url}`)
+    },
+  }
+
+  const extractor = new TikTokExtractor(mockHttpClient)
+  const items = []
+  for await (const item of extractor.extract(
+    {platform: 'tiktok', username: 'tester', cleanUrl: 'https://www.tiktok.com/@tester', rawInput: 'tester'},
+    {subDir: 'Videos'},
+  )) {
+    items.push(item)
+  }
+
+  assert.equal(requestedUrls.length, 2)
+  assert.ok(requestedUrls[0].includes('/api/creator/item_list/'))
+  assert.equal(new URL(requestedUrls[0]).searchParams.get('count'), '15')
+  assert.ok(requestedUrls[1].includes('/api/post/item_list/'))
+  assert.equal(items.length, 1)
+  assert.equal(items[0].id, 'post_fallback_1')
+})
+
+test('TikTokExtractor logs fallback errors only when DEBUG or OPEN_NAMI_DEBUG is set', async () => {
+  const {TikTokExtractor} = await import('./tiktok.js')
+  const origDebug = process.env.DEBUG
+  const origNamiDebug = process.env.OPEN_NAMI_DEBUG
+  const origConsoleDebug = console.debug
+  const debugLogs: string[] = []
+
+  const a = Buffer.from('waf_seed').toString('base64')
+  const cDigest = crypto.createHash('sha256').update(Buffer.from('waf_seed')).update('1').digest('base64')
+  const cs = Buffer.from(JSON.stringify({v: {a, c: cDigest}})).toString('base64')
+  const challengeHtml = `<p id="wci" class="_waf"></p><p id="cs" class="${cs}"></p>`
+
+  const createMockClient = () => {
+    let textCalls = 0
+    return {
+      setCookie: () => {},
+      fetchText: async () => {
+        textCalls++
+        if (textCalls === 1) return challengeHtml
+        throw new Error('WAF re-fetch timeout')
+      },
+      fetchJson: async (url: string) => {
+        if (url.includes('/api/creator/item_list/')) {
+          throw new Error('creator 400')
+        }
+        throw new Error('post 500')
+      },
+    }
+  }
+
+  const runCase = async () => {
+    const wafClient = createMockClient()
+    for await (const _ of new TikTokExtractor(wafClient as any).extract(
+      {platform: 'tiktok', username: 'tester', cleanUrl: 'https://www.tiktok.com/@tester', rawInput: 'tester'},
+      {subDir: 'Videos'},
+    )) {}
+
+    const apiClient = {
+      fetchText: async () => `
+        <script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application/json">
+        {"__DEFAULT_SCOPE__":{"webapp.user-detail":{"userInfo":{"user":{"id":"55","secUid":"MS4wLjABAAAA_TEST"}}}}}
+        </script>
+      `,
+      fetchJson: async (url: string) => {
+        if (url.includes('/api/creator/item_list/')) {
+          throw new Error('creator 400')
+        }
+        throw new Error('post 500')
+      },
+    }
+    for await (const _ of new TikTokExtractor(apiClient as any).extract(
+      {platform: 'tiktok', username: 'tester', cleanUrl: 'https://www.tiktok.com/@tester', rawInput: 'tester'},
+      {subDir: 'Videos'},
+    )) {}
+  }
+
+  console.debug = (...args: any[]) => {
+    debugLogs.push(args.join(' '))
+  }
+
+  try {
+    delete process.env.DEBUG
+    delete process.env.OPEN_NAMI_DEBUG
+    await runCase()
+    assert.equal(debugLogs.length, 0)
+
+    process.env.OPEN_NAMI_DEBUG = '1'
+    await runCase()
+    assert.ok(debugLogs.some(l => l.includes('WAF re-fetch') && l.includes('WAF re-fetch timeout')))
+    assert.ok(debugLogs.some(l => l.includes('creator/item_list') && l.includes('creator 400')))
+    assert.ok(debugLogs.some(l => l.includes('post/item_list') && l.includes('post 500')))
+  } finally {
+    console.debug = origConsoleDebug
+    if (origDebug !== undefined) process.env.DEBUG = origDebug
+    else delete process.env.DEBUG
+    if (origNamiDebug !== undefined) process.env.OPEN_NAMI_DEBUG = origNamiDebug
+    else delete process.env.OPEN_NAMI_DEBUG
+  }
+})
 

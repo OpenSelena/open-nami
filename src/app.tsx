@@ -69,7 +69,7 @@ export const HINTS: Record<AppPhase['name'], Array<[string, string]>> = {
     ['^w', 'watcher'],
     ['^b', 'batch'],
     ['^s', 'settings'],
-    ['^h', 'history'],
+    ['^p', 'history'],
     ['^c', 'quit'],
   ],
   pull: [
@@ -471,14 +471,10 @@ function InnerApp({
       return
     }
 
-    if ((input === 'p' || input === 'P') && !key.ctrl) {
+    if ((input === 'p' || input === 'P') && !key.ctrl && !key.meta) {
       if (phase.name === 'pull') {
         setPhase({name: 'input'})
         refreshTrackedCount()
-        return
-      }
-      if (phase.name === 'input' && urlInput.trim() === '') {
-        setPhase({name: 'pull'})
         return
       }
     }
@@ -722,6 +718,7 @@ function InnerApp({
           gapComponent={Gap}
           announcement={announcement}
           trackedCount={trackedCount}
+          onPullClick={() => setPhase({name: 'pull'})}
         />
       )}
 

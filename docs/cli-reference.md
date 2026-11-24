@@ -28,11 +28,34 @@ open-nami
 # Open directly with a profile link or username
 open-nami <profile-url-or-handle> [options]
 
+# Manage and sync tracked profiles
+open-nami pull [username] [options]
+open-nami sync [username] [options]
+open-nami list
+open-nami track <profile-url-or-handle>
+open-nami untrack <username>
+open-nami untrack --all
+
+# Watch clipboard or process a batch file
+open-nami -w [options]
+open-nami -b <file> [options]
+
 # Headless / direct download
 open-nami <profile-url-or-handle> --photos [options]
 open-nami <profile-url-or-handle> --videos [options]
 open-nami <profile-url-or-handle> --all [options]
 ```
+
+---
+
+## Subcommands
+
+| Command | Arguments | Description |
+| :--- | :--- | :--- |
+| `pull` / `sync` | `[username]` | Incrementally synchronize all tracked profiles, or a specific profile/URL. Accepts `--photos`, `--videos`, `--stories`, `--highlights`, `--all`, `-o/--output`, `-p/--platform`, and `--early-exit <n>`. |
+| `list` | | Print a table of all tracked profiles in the registry (`Platform`, `Username`, `Target`, `Media`, `Last Synced`, `Directory`). |
+| `track` | `<url-or-user>` | Add a profile to the tracking registry without downloading (bare usernames default to Instagram). |
+| `untrack` | `<username>` or `--all` | Remove a profile (or all profiles with `--all` / `-a`) from the tracking registry without deleting files on disk. |
 
 ---
 
@@ -49,16 +72,36 @@ These flags skip the interactive picker and download the selected media category
 | `--highlights` | Download pinned profile highlights only | Instagram *(requires cookies)* |
 | `--all` | Download all available media categories | All platforms |
 
+### Filtering, Pagination & Metadata
+
+| Flag | Argument | Description |
+| :--- | :--- | :--- |
+| `--since` | `<date>` | Filter posts on or after date (`YYYY-MM-DD` or relative, e.g. `7d`, `30d`) |
+| `--until` | `<date>` | Filter posts on or before date (`YYYY-MM-DD`) |
+| `-l, --limit` | `<n>` | Limit maximum items to download |
+| `--resume` | | Resume download from saved pagination checkpoint |
+| `--write-metadata` | | Save post metadata and captions to sidecar `.json` files |
+| `--no-track` | | Do not add the downloaded profile to the tracked history registry |
+| `-p, --platform` | `<name>` | Specify platform (`instagram`, `tiktok`, `facebook`, `x`) for bare usernames in `--batch` or filtering in `pull`/`sync` |
+
+### Modes & Automation
+
+| Flag | Argument | Description |
+| :--- | :--- | :--- |
+| `-w, --watch` | | Watch clipboard for profile links and auto-download |
+| `-b, --batch` | `<file>` | Download multiple profiles listed in a text file (one URL or username per line; `#` and `//` comments ignored) |
+
 ### Destination & Storage
 
 | Flag | Argument | Description | Default |
 | :--- | :--- | :--- | :--- |
 | `-o, --output` | `<path>` | Custom output directory | `~/Downloads/Open Nami/<platform>/<user>/` |
 
-### Engine Maintenance
+### Diagnostics & Engine Maintenance
 
 | Flag | Description |
 | :--- | :--- |
+| `--doctor` | Check Node.js runtime, SQLite storage, engine binaries (`gallery-dl`, `yt-dlp`, `ffmpeg`), and cookie availability |
 | `-U, --update` | Update bundled download engines (`yt-dlp` and `gallery-dl`) to latest release |
 | `--update-ytdlp` | Update only the bundled `yt-dlp` executable |
 | `--update-gallerydl` | Update only the bundled `gallery-dl` executable |
@@ -122,5 +165,5 @@ nami @creator --photos -o "/data/archives" >> /var/log/nami.log 2>&1
 
 ### Exit Codes
 
-* `0`: Success (media items downloaded or already archived).
-* `1`: Extraction error, invalid profile URL, or network failure.
+* `0`: Success (media items downloaded or already archived, or subcommand completed without errors).
+* `1`: Extraction error, invalid profile URL or arguments, or one or more failed profiles in `batch` / `pull`.
